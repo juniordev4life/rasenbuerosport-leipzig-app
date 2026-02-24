@@ -1,0 +1,69 @@
+{
+	"auth": {
+		"login": {
+			"title": "Welcome to",
+			"brand": "RasenBürosport",
+			"username_label": "Username",
+			"username_placeholder": "Username",
+			"password_label": "Password",
+			"password_placeholder": "Password",
+			"submit": "Sign in",
+			"forgot_password": "Forgot password?",
+			"tab_login": "Sign in",
+			"tab_register": "Register"
+		},
+		"register": {
+			"title": "Create account",
+			"username_placeholder": "Username",
+			"email_placeholder": "Email address",
+			"password_placeholder": "Password",
+			"password_confirm_placeholder": "Confirm password",
+			"submit": "Create account",
+			"has_account": "Already have an account?",
+			"login_link": "Sign in",
+			"tab_login": "Sign in",
+			"tab_register": "Register"
+		},
+		"errors": {
+			"invalid_credentials": "Invalid credentials",
+			"email_taken": "Email address already taken",
+			"username_taken": "Username already taken",
+			"passwords_mismatch": "Passwords do not match",
+			"generic": "An error occurred"
+		}
+	},
+	"dashboard": {
+		"greeting": "Hello, {username}!",
+		"new_game": "Start new game",
+		"recent_games": "Your recent games",
+		"no_games": "No games played yet",
+		"top_players": "Top 3 Players",
+		"points_short": "Pts.",
+		"win": "Win",
+		"loss": "Loss",
+		"draw": "Draw"
+	},
+	"nav": {
+		"dashboard": "Dashboard",
+		"games": "Games",
+		"profile": "Profile"
+	},
+	"common": {
+		"loading": "Loading...",
+		"error": "Error",
+		"vs": "vs."
+	},
+	"footer": {
+		"copyright": "© {year} RasenBürosport Leipzig IT"
+	},
+	"pages": {
+		"games": {
+			"title": "Games",
+			"coming_soon": "Coming soon..."
+		},
+		"profile": {
+			"title": "Profile",
+			"coming_soon": "Coming soon..."
+		}
+	}
+}

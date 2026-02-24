@@ -1,0 +1,69 @@
+{
+	"auth": {
+		"login": {
+			"title": "Willkommen bei",
+			"brand": "RasenBürosport",
+			"username_label": "Benutzername",
+			"username_placeholder": "Benutzername",
+			"password_label": "Passwort",
+			"password_placeholder": "Passwort",
+			"submit": "Anmelden",
+			"forgot_password": "Passwort vergessen?",
+			"tab_login": "Anmelden",
+			"tab_register": "Registrieren"
+		},
+		"register": {
+			"title": "Konto erstellen",
+			"username_placeholder": "Benutzername",
+			"email_placeholder": "E-Mail-Adresse",
+			"password_placeholder": "Passwort",
+			"password_confirm_placeholder": "Passwort wiederholen",
+			"submit": "Konto erstellen",
+			"has_account": "Bereits ein Konto?",
+			"login_link": "Anmelden",
+			"tab_login": "Anmelden",
+			"tab_register": "Registrieren"
+		},
+		"errors": {
+			"invalid_credentials": "Ungültige Anmeldedaten",
+			"email_taken": "E-Mail-Adresse bereits vergeben",
+			"username_taken": "Benutzername bereits vergeben",
+			"passwords_mismatch": "Passwörter stimmen nicht überein",
+			"generic": "Ein Fehler ist aufgetreten"
+		}
+	},
+	"dashboard": {
+		"greeting": "Hallo, {username}!",
+		"new_game": "Neues Spiel starten",
+		"recent_games": "Deine letzten Spiele",
+		"no_games": "Noch keine Spiele gespielt",
+		"top_players": "Top 3 Spieler",
+		"points_short": "Pkt.",
+		"win": "Sieg",
+		"loss": "Niederlage",
+		"draw": "Unentschieden"
+	},
+	"nav": {
+		"dashboard": "Dashboard",
+		"games": "Spiele",
+		"profile": "Profil"
+	},
+	"common": {
+		"loading": "Laden...",
+		"error": "Fehler",
+		"vs": "vs."
+	},
+	"footer": {
+		"copyright": "© {year} RasenBürosport Leipzig IT"
+	},
+	"pages": {
+		"games": {
+			"title": "Spiele",
+			"coming_soon": "Kommt bald..."
+		},
+		"profile": {
+			"title": "Profil",
+			"coming_soon": "Kommt bald..."
+		}
+	}
+}
