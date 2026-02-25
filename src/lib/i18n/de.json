@@ -3,8 +3,8 @@
 		"login": {
 			"title": "Willkommen bei",
 			"brand": "RasenBürosport",
-			"username_label": "Benutzername",
-			"username_placeholder": "Benutzername",
+			"email_label": "E-Mail-Adresse",
+			"email_placeholder": "E-Mail-Adresse",
 			"password_label": "Passwort",
 			"password_placeholder": "Passwort",
 			"submit": "Anmelden",
@@ -56,14 +56,50 @@
 	"footer": {
 		"copyright": "© {year} RasenBürosport Leipzig IT"
 	},
-	"pages": {
-		"games": {
-			"title": "Spiele",
-			"coming_soon": "Kommt bald..."
-		},
-		"profile": {
-			"title": "Profil",
-			"coming_soon": "Kommt bald..."
-		}
+	"profile": {
+		"title": "Profil",
+		"email": "E-Mail",
+		"stats_games": "Spiele",
+		"stats_wins": "Siege",
+		"stats_losses": "Niederlagen",
+		"win_rate": "Siegquote",
+		"bilanz_1v1": "1v1 Bilanz",
+		"bilanz_2v2": "2v2 Bilanz",
+		"wins": "Siege",
+		"losses": "Niederlagen",
+		"favorite_opponent": "Dein Lieblingsgegner",
+		"best_teammate": "Dein bester Mitspieler",
+		"favorite_team": "Dein Lieblingsteam",
+		"games_played": "{count} Spiele",
+		"logout": "Abmelden",
+		"no_data": "Noch keine Daten"
+	},
+	"games": {
+		"title": "Spiele",
+		"load_more": "Lade weitere Spiele...",
+		"no_more": "Keine weiteren Spiele",
+		"no_games": "Noch keine Spiele gespielt"
+	},
+	"new_game": {
+		"title": "Neues Spiel",
+		"step_setup": "Aufstellung",
+		"step_score": "Ergebnis",
+		"step_summary": "Zusammenfassung",
+		"mode_1v1": "1v1",
+		"mode_2v2": "2v2",
+		"home": "Heim",
+		"away": "Auswärts",
+		"select_player": "Spieler auswählen",
+		"select_team": "Team auswählen",
+		"next": "Weiter",
+		"back": "Zurück",
+		"save": "Spiel speichern",
+		"score_title": "Ergebnis eintragen",
+		"summary_title": "Zusammenfassung",
+		"rating_label": "Bewertung",
+		"saving": "Speichere...",
+		"success": "Spiel erfolgreich gespeichert!",
+		"player": "Spieler",
+		"team": "Team"
 	}
 }

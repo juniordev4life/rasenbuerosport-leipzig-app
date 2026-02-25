@@ -1,10 +1,11 @@
 <script>
 	import { getTranslate } from "@tolgee/svelte";
-	import { onMount } from "svelte";
+	import { goto } from "$app/navigation";
 	import Button from "$lib/components/ui/Button.svelte";
 	import RecentGames from "$lib/components/dashboard/RecentGames.svelte";
 	import TopPlayers from "$lib/components/dashboard/TopPlayers.svelte";
 	import { get } from "$lib/services/api.services.js";
+	import { ROUTES } from "$lib/constants/routes.constants.js";
 
 	const { t } = getTranslate();
 
@@ -38,7 +39,7 @@
 
 <div class="flex flex-col gap-6">
 	<!-- New Game Button -->
-	<Button variant="primary">
+	<Button variant="primary" onclick={() => goto(ROUTES.NEW_GAME)}>
 		{$t("dashboard.new_game")} +
 	</Button>
 

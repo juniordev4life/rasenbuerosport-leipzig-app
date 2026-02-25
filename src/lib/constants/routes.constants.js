@@ -3,5 +3,6 @@ export const ROUTES = {
 	REGISTER: "/auth/register",
 	DASHBOARD: "/app/dashboard",
 	GAMES: "/app/games",
+	NEW_GAME: "/app/games/new",
 	PROFILE: "/app/profile",
 };

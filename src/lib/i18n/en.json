@@ -3,8 +3,8 @@
 		"login": {
 			"title": "Welcome to",
 			"brand": "RasenBürosport",
-			"username_label": "Username",
-			"username_placeholder": "Username",
+			"email_label": "Email address",
+			"email_placeholder": "Email address",
 			"password_label": "Password",
 			"password_placeholder": "Password",
 			"submit": "Sign in",
@@ -56,14 +56,50 @@
 	"footer": {
 		"copyright": "© {year} RasenBürosport Leipzig IT"
 	},
-	"pages": {
-		"games": {
-			"title": "Games",
-			"coming_soon": "Coming soon..."
-		},
-		"profile": {
-			"title": "Profile",
-			"coming_soon": "Coming soon..."
-		}
+	"profile": {
+		"title": "Profile",
+		"email": "Email",
+		"stats_games": "Games",
+		"stats_wins": "Wins",
+		"stats_losses": "Losses",
+		"win_rate": "Win rate",
+		"bilanz_1v1": "1v1 Record",
+		"bilanz_2v2": "2v2 Record",
+		"wins": "Wins",
+		"losses": "Losses",
+		"favorite_opponent": "Your favorite opponent",
+		"best_teammate": "Your best teammate",
+		"favorite_team": "Your favorite team",
+		"games_played": "{count} games",
+		"logout": "Log out",
+		"no_data": "No data yet"
+	},
+	"games": {
+		"title": "Games",
+		"load_more": "Load more games...",
+		"no_more": "No more games",
+		"no_games": "No games played yet"
+	},
+	"new_game": {
+		"title": "New Game",
+		"step_setup": "Setup",
+		"step_score": "Score",
+		"step_summary": "Summary",
+		"mode_1v1": "1v1",
+		"mode_2v2": "2v2",
+		"home": "Home",
+		"away": "Away",
+		"select_player": "Select player",
+		"select_team": "Select team",
+		"next": "Next",
+		"back": "Back",
+		"save": "Save game",
+		"score_title": "Enter score",
+		"summary_title": "Summary",
+		"rating_label": "Rating",
+		"saving": "Saving...",
+		"success": "Game saved successfully!",
+		"player": "Player",
+		"team": "Team"
 	}
 }

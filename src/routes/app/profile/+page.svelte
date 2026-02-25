@@ -1,14 +1,87 @@
 <script>
 	import { getTranslate } from "@tolgee/svelte";
+	import { goto } from "$app/navigation";
+	import { user } from "$lib/stores/auth.stores.js";
+	import { get } from "$lib/services/api.services.js";
+	import { logout } from "$lib/services/auth.services.js";
+	import { ROUTES } from "$lib/constants/routes.constants.js";
+	import Button from "$lib/components/ui/Button.svelte";
+	import ProfileHeader from "$lib/components/profile/ProfileHeader.svelte";
+	import StatsOverview from "$lib/components/profile/StatsOverview.svelte";
+	import WinRate from "$lib/components/profile/WinRate.svelte";
+	import ModeBilanz from "$lib/components/profile/ModeBilanz.svelte";
+	import FavoriteStats from "$lib/components/profile/FavoriteStats.svelte";
 
 	const { t } = getTranslate();
+
+	let stats = $state(null);
+	let loading = $state(true);
+
+	const username = $derived($user?.user_metadata?.username || "");
+	const email = $derived($user?.email || "");
+
+	$effect(() => {
+		loadStats();
+	});
+
+	async function loadStats() {
+		try {
+			const res = await get("/v1/stats/me");
+			stats = res.data || null;
+		} catch (err) {
+			console.error("Failed to load stats:", err);
+		} finally {
+			loading = false;
+		}
+	}
+
+	async function handleLogout() {
+		try {
+			await logout();
+			goto(ROUTES.LOGIN);
+		} catch (err) {
+			console.error("Logout failed:", err);
+		}
+	}
 </script>
 
 <svelte:head>
-	<title>RasenBürosport - {$t("pages.profile.title")}</title>
+	<title>RasenBürosport - {$t("profile.title")}</title>
 </svelte:head>
 
-<div class="flex flex-col items-center justify-center py-20">
-	<h1 class="text-2xl font-bold mb-2">{$t("pages.profile.title")}</h1>
-	<p class="text-text-secondary">{$t("pages.profile.coming_soon")}</p>
+<div class="flex flex-col gap-5 pb-4">
+	{#if loading}
+		<div class="flex justify-center py-8">
+			<div
+				class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"
+			></div>
+		</div>
+	{:else}
+		<ProfileHeader {username} {email} />
+
+		{#if stats}
+			<StatsOverview
+				totalGames={stats.total_games}
+				wins={stats.wins}
+				losses={stats.losses}
+			/>
+
+			<WinRate winRate={stats.win_rate} />
+
+			<ModeBilanz
+				bilanz1v1={stats.bilanz_1v1}
+				bilanz2v2={stats.bilanz_2v2}
+			/>
+
+			<FavoriteStats
+				favoriteOpponent={stats.favorite_opponent}
+				bestTeammate={stats.best_teammate}
+				favoriteTeam={stats.favorite_team}
+			/>
+		{/if}
+
+		<Button variant="ghost" onclick={handleLogout}>
+			{$t("profile.logout")}
+		</Button>
+	{/if}
 </div>

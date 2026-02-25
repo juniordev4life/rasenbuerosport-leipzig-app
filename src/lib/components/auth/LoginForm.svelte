@@ -33,8 +33,8 @@
 	<Input
 		id="email"
 		type="email"
-		placeholder={$t("auth.login.username_placeholder")}
-		label={$t("auth.login.username_label")}
+		placeholder={$t("auth.login.email_placeholder")}
+		label={$t("auth.login.email_label")}
 		bind:value={email}
 		required
 		autocomplete="email"
