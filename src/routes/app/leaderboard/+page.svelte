@@ -10,23 +10,105 @@
 	let loading = $state(true);
 	let selectedPlayerId = $state(null);
 	let viewMode = $state("total");
+	let selectedPeriod = $state("all");
 
 	const ONE_MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 	const MIN_GAMES_PPG = 3;
+
+	/** Project start: January 2026 */
+	const PROJECT_START_YEAR = 2026;
+	const PROJECT_START_MONTH = 1;
+
+	/**
+	 * Builds period dropdown options dynamically from project start to current month
+	 * @returns {Array<{value: string, label: string}>}
+	 */
+	const periodOptions = $derived.by(() => {
+		const now = new Date();
+		const currentYear = now.getFullYear();
+		const currentMonth = now.getMonth() + 1;
+		const options = [{ value: "all", label: $t("leaderboard.period_all") }];
+
+		// Add year options (from current year back to start year)
+		for (let y = currentYear; y >= PROJECT_START_YEAR; y--) {
+			options.push({ value: `${y}`, label: `${y}` });
+		}
+
+		// Add month options (from current month back to project start)
+		let y = currentYear;
+		let m = currentMonth;
+		while (y > PROJECT_START_YEAR || (y === PROJECT_START_YEAR && m >= PROJECT_START_MONTH)) {
+			const date = new Date(y, m - 1, 1);
+			const monthName = date.toLocaleDateString("de-DE", { month: "long" });
+			const label = `${monthName.charAt(0).toUpperCase()}${monthName.slice(1)} ${y}`;
+			options.push({ value: `${y}-${String(m).padStart(2, "0")}`, label });
+
+			m--;
+			if (m < 1) {
+				m = 12;
+				y--;
+			}
+		}
+
+		return options;
+	});
+
+	/**
+	 * Derives from/to date params based on selected period
+	 * @returns {{ from?: string, to?: string }}
+	 */
+	const periodDateRange = $derived.by(() => {
+		if (selectedPeriod === "all") return {};
+
+		// Year: "2026"
+		if (/^\d{4}$/.test(selectedPeriod)) {
+			const year = Number.parseInt(selectedPeriod);
+			return {
+				from: `${year}-01-01`,
+				to: `${year}-12-31`,
+			};
+		}
+
+		// Month: "2026-02"
+		if (/^\d{4}-\d{2}$/.test(selectedPeriod)) {
+			const [year, month] = selectedPeriod.split("-").map(Number);
+			const lastDay = new Date(year, month, 0).getDate();
+			return {
+				from: `${year}-${String(month).padStart(2, "0")}-01`,
+				to: `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`,
+			};
+		}
+
+		return {};
+	});
 
 	$effect(() => {
 		loadLeaderboard();
 	});
 
 	async function loadLeaderboard() {
+		loading = true;
 		try {
-			const res = await get("/v1/leaderboard?limit=50");
+			let url = "/v1/leaderboard?limit=50";
+			if (periodDateRange.from) {
+				url += `&from=${periodDateRange.from}`;
+			}
+			if (periodDateRange.to) {
+				url += `&to=${periodDateRange.to}`;
+			}
+			const res = await get(url);
 			players = res.data || [];
 		} catch (err) {
 			console.error("Failed to load leaderboard:", err);
 		} finally {
 			loading = false;
 		}
+	}
+
+	/** Reload leaderboard when period changes */
+	function handlePeriodChange(event) {
+		selectedPeriod = event.target.value;
+		loadLeaderboard();
 	}
 
 	/** Sorted & filtered players based on view mode */
@@ -107,7 +189,18 @@
 </svelte:head>
 
 <div class="flex flex-col gap-4">
-	<h1 class="text-xl font-bold text-text-primary">{$t("leaderboard.title")}</h1>
+	<div class="flex items-center justify-between">
+		<h1 class="text-xl font-bold text-text-primary">{$t("leaderboard.title")}</h1>
+		<select
+			value={selectedPeriod}
+			onchange={handlePeriodChange}
+			class="bg-bg-secondary border border-border text-text-primary text-sm rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-accent-red"
+		>
+			{#each periodOptions as option (option.value)}
+				<option value={option.value}>{option.label}</option>
+			{/each}
+		</select>
+	</div>
 
 	<!-- Tab Navigation -->
 	<div class="flex w-full">

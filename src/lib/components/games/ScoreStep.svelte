@@ -15,6 +15,7 @@
 		scoreAway = $bindable(0),
 		scoreTimeline = $bindable([]),
 		resultType = $bindable("regular"),
+		statsImage = $bindable(null),
 		saving = false,
 		onSave,
 		onBack,
@@ -79,6 +80,30 @@
 	/** Toggle penalty shootout phase */
 	function togglePenalty() {
 		penaltyActive = !penaltyActive;
+	}
+
+	/** Preview URL for selected stats image */
+	let imagePreview = $state(null);
+
+	/** Handle stats image file selection */
+	function handleStatsImageChange(e) {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		if (!file.type.startsWith("image/")) return;
+		if (file.size > 5 * 1024 * 1024) return;
+
+		statsImage = file;
+		imagePreview = URL.createObjectURL(file);
+	}
+
+	/** Remove selected stats image */
+	function removeStatsImage() {
+		statsImage = null;
+		if (imagePreview) {
+			URL.revokeObjectURL(imagePreview);
+			imagePreview = null;
+		}
 	}
 </script>
 
@@ -152,6 +177,47 @@
 			</div>
 		</div>
 	{/if}
+
+	<!-- Stats Photo (optional) -->
+	<div class="bg-bg-secondary border border-border rounded-lg p-3">
+		{#if imagePreview}
+			<div class="flex items-center gap-3">
+				<img
+					src={imagePreview}
+					alt="Stats"
+					class="w-16 h-16 object-cover rounded-md border border-border"
+				/>
+				<div class="flex-1 min-w-0">
+					<p class="text-xs text-text-primary truncate">{$t("match_stats.title")}</p>
+					<p class="text-[10px] text-text-secondary">{$t("match_stats.upload_ready")}</p>
+				</div>
+				<button
+					type="button"
+					onclick={removeStatsImage}
+					class="text-text-secondary hover:text-accent-red text-lg shrink-0"
+					aria-label="Remove"
+				>
+					✕
+				</button>
+			</div>
+		{:else}
+			<label class="flex items-center gap-3 cursor-pointer">
+				<div class="w-10 h-10 rounded-md bg-bg-input border border-border flex items-center justify-center text-lg">
+					📸
+				</div>
+				<div class="flex-1">
+					<p class="text-xs text-text-primary">{$t("match_stats.add_photo")}</p>
+					<p class="text-[10px] text-text-secondary">{$t("match_stats.add_photo_hint")}</p>
+				</div>
+				<input
+					type="file"
+					accept="image/*"
+					onchange={handleStatsImageChange}
+					class="hidden"
+				/>
+			</label>
+		{/if}
+	</div>
 
 	<!-- Navigation -->
 	<div class="flex gap-3">

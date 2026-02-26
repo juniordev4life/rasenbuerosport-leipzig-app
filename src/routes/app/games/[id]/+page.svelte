@@ -5,6 +5,9 @@
 	import { get } from "$lib/services/api.services.js";
 	import { user } from "$lib/stores/auth.stores.js";
 	import { getTeamByName, getCountryFlag } from "$lib/constants/teams.constants.js";
+	import MatchStatsDisplay from "$lib/components/games/MatchStatsDisplay.svelte";
+	import MatchStatsUpload from "$lib/components/games/MatchStatsUpload.svelte";
+	import MatchReport from "$lib/components/games/MatchReport.svelte";
 
 	const { t } = getTranslate();
 
@@ -309,5 +312,19 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- Match Stats (from FC26 screenshot) -->
+		{#if game.match_stats}
+			<MatchStatsDisplay matchStats={game.match_stats} />
+
+			<!-- AI Match Report (only when stats exist) -->
+			<MatchReport
+				{gameId}
+				existingReport={game.match_report}
+				onReportGenerated={(report) => { game = { ...game, match_report: report }; }}
+			/>
+		{:else}
+			<MatchStatsUpload {gameId} onStatsExtracted={() => loadGame()} />
+		{/if}
 	{/if}
 </div>

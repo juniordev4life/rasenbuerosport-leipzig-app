@@ -96,7 +96,8 @@
 		"games_short": "games",
 		"tab_total": "Total",
 		"tab_per_game": "Per Game",
-		"ppg_label": "Pts/Game"
+		"ppg_label": "Pts/Game",
+		"period_all": "All time"
 	},
 	"h2h": {
 		"title": "Head to Head",
@@ -138,6 +139,32 @@
 		"league_stats": "Your Leagues",
 		"league_stats_empty": "No league data yet",
 		"league_win_rate": "{rate}% win rate",
+		"career_stats": {
+			"title": "Career Statistics",
+			"based_on": "from {count} games",
+			"possession": "Avg. Possession",
+			"pass_accuracy": "Avg. Pass Accuracy",
+			"xg_efficiency": "xG Efficiency",
+			"duels_won": "Avg. Duel Win Rate"
+		},
+		"badges": {
+			"title": "Badges",
+			"tiki_taka": "Tiki-Taka",
+			"ball_magnet": "Ball Magnet",
+			"konter_king": "Counter King",
+			"xg_killer": "xG Killer",
+			"duell_monster": "Duel Monster",
+			"perfektionist": "Perfectionist",
+			"schuetzenfest": "Goal Fest",
+			"clean_sheet": "Clean Sheet",
+			"david_vs_goliath": "David vs. Goliath",
+			"fair_play": "Fair Play",
+			"debuetant": "Debutant",
+			"stammspieler": "Regular",
+			"klublegende": "Club Legend",
+			"torjaeger_50": "Top Scorer",
+			"seriensieger": "Streak Master"
+		},
 		"edit": {
 			"title": "Edit profile",
 			"username_label": "Username",
@@ -178,5 +205,42 @@
 		"add_guest": "Add guest",
 		"all_players": "Players",
 		"tap_to_assign": "Tap a player to assign"
+	},
+	"match_report": {
+		"title": "AI Match Report",
+		"generating": "Generating...",
+		"error": "Failed to generate match report"
+	},
+	"prediction": {
+		"title": "Match Prediction",
+		"loading": "Analyzing...",
+		"error": "Failed to generate prediction"
+	},
+	"match_stats": {
+		"title": "Match Statistics",
+		"upload_title": "Upload Stats Screenshot",
+		"upload_hint": "Upload FC26 post-match stats photo",
+		"upload_button": "Extract Stats",
+		"upload_ready": "Ready to analyze",
+		"uploading": "Analyzing...",
+		"add_photo": "Add stats photo",
+		"add_photo_hint": "FC26 screenshot (optional)",
+		"error_file_type": "Please select an image file",
+		"error_file_size": "Image must be less than 5 MB",
+		"error_generic": "Failed to extract stats",
+		"possession": "Possession",
+		"shots": "Shots",
+		"xg": "Expected Goals (xG)",
+		"passes": "Passes",
+		"pass_accuracy": "Pass Accuracy",
+		"duels": "Duels",
+		"duels_won": "Duels Won",
+		"interceptions": "Interceptions",
+		"saves": "Saves",
+		"fouls": "Fouls",
+		"corners": "Corners",
+		"yellow_cards": "Yellow Cards",
+		"dribbling": "Dribbling",
+		"shot_accuracy": "Shot Accuracy"
 	}
 }

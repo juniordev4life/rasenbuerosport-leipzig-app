@@ -98,7 +98,8 @@
 		"games_short": "Spiele",
 		"tab_total": "Gesamt",
 		"tab_per_game": "Pro Spiel",
-		"ppg_label": "Pkt/Spiel"
+		"ppg_label": "Pkt/Spiel",
+		"period_all": "Gesamt"
 	},
 	"h2h": {
 		"title": "Direkter Vergleich",
@@ -140,6 +141,32 @@
 		"league_stats": "Deine Ligen",
 		"league_stats_empty": "Noch keine Ligadaten",
 		"league_win_rate": "{rate}% Siegquote",
+		"career_stats": {
+			"title": "Karriere-Statistiken",
+			"based_on": "aus {count} Spielen",
+			"possession": "Ø Ballbesitz",
+			"pass_accuracy": "Ø Passgenauigkeit",
+			"xg_efficiency": "xG-Effizienz",
+			"duels_won": "Ø Zweikampfquote"
+		},
+		"badges": {
+			"title": "Badges",
+			"tiki_taka": "Tiki-Taka",
+			"ball_magnet": "Ballmagnet",
+			"konter_king": "Konter-König",
+			"xg_killer": "xG-Killer",
+			"duell_monster": "Duell-Monster",
+			"perfektionist": "Perfektionist",
+			"schuetzenfest": "Schützenfest",
+			"clean_sheet": "Weiße Weste",
+			"david_vs_goliath": "David vs. Goliath",
+			"fair_play": "Fair Play",
+			"debuetant": "Debütant",
+			"stammspieler": "Stammspieler",
+			"klublegende": "Klublegende",
+			"torjaeger_50": "Torjäger",
+			"seriensieger": "Seriensieger"
+		},
 		"edit": {
 			"title": "Profil bearbeiten",
 			"username_label": "Benutzername",
@@ -180,5 +207,42 @@
 		"add_guest": "Gast hinzufügen",
 		"all_players": "Spieler",
 		"tap_to_assign": "Tippe auf einen Spieler"
+	},
+	"match_report": {
+		"title": "KI-Spielbericht",
+		"generating": "Wird generiert...",
+		"error": "Spielbericht konnte nicht generiert werden"
+	},
+	"prediction": {
+		"title": "Match-Vorhersage",
+		"loading": "Analysiere...",
+		"error": "Vorhersage konnte nicht generiert werden"
+	},
+	"match_stats": {
+		"title": "Spielstatistiken",
+		"upload_title": "Stats-Screenshot hochladen",
+		"upload_hint": "FC26 Spielstatistik-Foto hochladen",
+		"upload_button": "Stats auslesen",
+		"upload_ready": "Bereit zum Auslesen",
+		"uploading": "Wird analysiert...",
+		"add_photo": "Stats-Foto hinzufügen",
+		"add_photo_hint": "FC26 Screenshot (optional)",
+		"error_file_type": "Bitte ein Bild auswählen",
+		"error_file_size": "Bild darf max. 5 MB groß sein",
+		"error_generic": "Stats konnten nicht ausgelesen werden",
+		"possession": "Ballbesitz",
+		"shots": "Schüsse",
+		"xg": "Expected Goals (xG)",
+		"passes": "Pässe",
+		"pass_accuracy": "Passgenauigkeit",
+		"duels": "Zweikämpfe",
+		"duels_won": "Zweikämpfe gew.",
+		"interceptions": "Abfangaktionen",
+		"saves": "Paraden",
+		"fouls": "Fouls",
+		"corners": "Ecken",
+		"yellow_cards": "Gelbe Karten",
+		"dribbling": "Dribblings",
+		"shot_accuracy": "Schusspräzision"
 	}
 }

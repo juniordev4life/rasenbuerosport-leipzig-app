@@ -8,6 +8,7 @@
 	import PlayerSelectionStep from "$lib/components/games/PlayerSelectionStep.svelte";
 	import TeamSelectionStep from "$lib/components/games/TeamSelectionStep.svelte";
 	import ScoreStep from "$lib/components/games/ScoreStep.svelte";
+	import MatchPrediction from "$lib/components/games/MatchPrediction.svelte";
 
 	const { t } = getTranslate();
 
@@ -24,11 +25,12 @@
 	let homeTeam = $state("");
 	let awayTeam = $state("");
 
-	// Step 3: Score + Timeline
+	// Step 3: Score + Timeline + Stats
 	let scoreHome = $state(0);
 	let scoreAway = $state(0);
 	let scoreTimeline = $state([]);
 	let resultType = $state("regular");
+	let statsImage = $state(null);
 
 	// Save state
 	let saving = $state(false);
@@ -95,7 +97,7 @@
 					})),
 			];
 
-			await post("/v1/games", {
+			const res = await post("/v1/games", {
 				mode,
 				score_home: scoreHome,
 				score_away: scoreAway,
@@ -104,7 +106,38 @@
 				result_type: resultType,
 			});
 
-			goto(ROUTES.DASHBOARD);
+			const gameId = res.data?.id;
+
+			// Upload stats image if selected
+			if (statsImage && gameId) {
+				try {
+					const ext = statsImage.name.split(".").pop();
+					const filePath = `${gameId}/stats.${ext}`;
+
+					const { error: uploadError } = await supabase.storage
+						.from("match-stats")
+						.upload(filePath, statsImage, { upsert: true });
+
+					if (!uploadError) {
+						const { data: urlData } = supabase.storage
+							.from("match-stats")
+							.getPublicUrl(filePath);
+
+						await post(`/v1/games/${gameId}/match-stats`, {
+							imageUrl: urlData.publicUrl,
+						});
+					}
+				} catch (statsErr) {
+					console.error("Stats extraction failed:", statsErr);
+				}
+			}
+
+			// Navigate to game detail if stats were uploaded, otherwise dashboard
+			if (statsImage && gameId) {
+				goto(`/app/games/${gameId}`);
+			} else {
+				goto(ROUTES.DASHBOARD);
+			}
 		} catch (err) {
 			console.error("Failed to save game:", err);
 		} finally {
@@ -148,6 +181,16 @@
 			onBack={goBack}
 		/>
 	{:else if step === 3}
+		<!-- AI Match Prediction (visible when players + teams are set) -->
+		<MatchPrediction
+			{homePlayers}
+			{awayPlayers}
+			{homeTeam}
+			{awayTeam}
+			{mode}
+			{allPlayers}
+		/>
+
 		<ScoreStep
 			{homeTeam}
 			{awayTeam}
@@ -155,6 +198,7 @@
 			bind:scoreAway
 			bind:scoreTimeline
 			bind:resultType
+			bind:statsImage
 			{saving}
 			onSave={saveGame}
 			onBack={goBack}

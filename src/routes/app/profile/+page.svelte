@@ -12,6 +12,8 @@
 	import WinRate from "$lib/components/profile/WinRate.svelte";
 	import ModeBilanz from "$lib/components/profile/ModeBilanz.svelte";
 	import FavoriteStats from "$lib/components/profile/FavoriteStats.svelte";
+	import CareerMatchStats from "$lib/components/profile/CareerMatchStats.svelte";
+	import ProfileBadges from "$lib/components/profile/ProfileBadges.svelte";
 	import LeagueStats from "$lib/components/profile/LeagueStats.svelte";
 
 	const { t } = getTranslate();
@@ -105,6 +107,10 @@
 				bestTeammate={stats.best_teammate}
 				favoriteTeam={stats.favorite_team}
 			/>
+
+			<CareerMatchStats careerStats={stats.career_match_stats} />
+
+			<ProfileBadges badges={stats.badges || []} />
 		{/if}
 
 		<!-- League Stats -->
