@@ -1,63 +1,50 @@
 <script>
 	import { getTranslate } from "@tolgee/svelte";
 	import { goto } from "$app/navigation";
-	import { user } from "$lib/stores/auth.stores.js";
-	import { get, post } from "$lib/services/api.services.js";
+	import { post } from "$lib/services/api.services.js";
+	import { supabase } from "$lib/config/supabase.config.js";
 	import { ROUTES } from "$lib/constants/routes.constants.js";
 	import StepIndicator from "$lib/components/games/StepIndicator.svelte";
-	import GameSetupStep from "$lib/components/games/GameSetupStep.svelte";
-	import ScoreEntryStep from "$lib/components/games/ScoreEntryStep.svelte";
-	import GameSummaryStep from "$lib/components/games/GameSummaryStep.svelte";
+	import PlayerSelectionStep from "$lib/components/games/PlayerSelectionStep.svelte";
+	import TeamSelectionStep from "$lib/components/games/TeamSelectionStep.svelte";
+	import ScoreStep from "$lib/components/games/ScoreStep.svelte";
 
 	const { t } = getTranslate();
+
+	const GUEST_ID = "__guest__";
 
 	// Wizard state
 	let step = $state(1);
 
-	// Step 1: Setup
-	let mode = $state("1v1");
-	let homePlayers = $state([""]);
-	let awayPlayers = $state([""]);
+	// Step 1: Player selection (IDs including guest IDs)
+	let homePlayers = $state([]);
+	let awayPlayers = $state([]);
+
+	// Step 2: Teams
 	let homeTeam = $state("");
 	let awayTeam = $state("");
 
-	// Step 2: Score
+	// Step 3: Score + Timeline
 	let scoreHome = $state(0);
 	let scoreAway = $state(0);
+	let scoreTimeline = $state([]);
+	let resultType = $state("regular");
 
-	// Step 3: Ratings
-	let ratings = $state({});
+	// Save state
 	let saving = $state(false);
 
-	// Data from API
+	// Data from Supabase
 	let allPlayers = $state([]);
-	let allTeams = $state([]);
 	let loading = $state(true);
 
-	// Derived helper values
-	const homePlayerNames = $derived(
-		homePlayers
-			.filter(Boolean)
-			.map((id) => allPlayers.find((p) => p.id === id)?.username || "?"),
-	);
-
-	const awayPlayerNames = $derived(
-		awayPlayers
-			.filter(Boolean)
-			.map((id) => allPlayers.find((p) => p.id === id)?.username || "?"),
-	);
-
-	const homeTeamName = $derived(
-		homeTeam ? allTeams.find((t) => t.id === homeTeam)?.name || "" : "",
-	);
-
-	const awayTeamName = $derived(
-		awayTeam ? allTeams.find((t) => t.id === awayTeam)?.name || "" : "",
-	);
-
-	const allPlayerIds = $derived(
-		[...homePlayers, ...awayPlayers].filter(Boolean),
-	);
+	// Auto-derive game mode from player counts
+	const mode = $derived.by(() => {
+		const h = homePlayers.length;
+		const a = awayPlayers.length;
+		if (h === 1 && a === 1) return "1v1";
+		if (h === 2 && a === 2) return "2v2";
+		return `${h}v${a}`;
+	});
 
 	$effect(() => {
 		loadData();
@@ -65,31 +52,22 @@
 
 	async function loadData() {
 		try {
-			const [playersRes, teamsRes] = await Promise.all([
-				get("/v1/players"),
-				get("/v1/teams"),
-			]);
-			allPlayers = playersRes.data || [];
-			allTeams = teamsRes.data || [];
+			const { data, error } = await supabase
+				.from("profiles")
+				.select("id, username, avatar_url")
+				.order("username", { ascending: true });
+
+			if (error) throw error;
+			allPlayers = data || [];
 		} catch (err) {
-			console.error("Failed to load data:", err);
+			console.error("Failed to load players:", err);
 		} finally {
 			loading = false;
 		}
 	}
 
-	function goToStep2() {
-		step = 2;
-	}
-
-	function goToStep3() {
-		// Initialize ratings for all players
-		for (const id of allPlayerIds) {
-			if (!ratings[id]) {
-				ratings[id] = 0;
-			}
-		}
-		step = 3;
+	function goToStep(n) {
+		step = n;
 	}
 
 	function goBack() {
@@ -99,19 +77,22 @@
 	async function saveGame() {
 		saving = true;
 		try {
+			// Filter out guest players (they don't have real IDs in the DB)
 			const players = [
-				...homePlayers.filter(Boolean).map((id) => ({
-					id,
-					team: "home",
-					team_name: homeTeam || undefined,
-					rating: ratings[id] || undefined,
-				})),
-				...awayPlayers.filter(Boolean).map((id) => ({
-					id,
-					team: "away",
-					team_name: awayTeam || undefined,
-					rating: ratings[id] || undefined,
-				})),
+				...homePlayers
+					.filter((id) => !id.startsWith(GUEST_ID))
+					.map((id) => ({
+						id,
+						team: "home",
+						team_name: homeTeam || undefined,
+					})),
+				...awayPlayers
+					.filter((id) => !id.startsWith(GUEST_ID))
+					.map((id) => ({
+						id,
+						team: "away",
+						team_name: awayTeam || undefined,
+					})),
 			];
 
 			await post("/v1/games", {
@@ -119,6 +100,8 @@
 				score_home: scoreHome,
 				score_away: scoreAway,
 				players,
+				score_timeline: scoreTimeline.length > 0 ? scoreTimeline : undefined,
+				result_type: resultType,
 			});
 
 			goto(ROUTES.DASHBOARD);
@@ -148,38 +131,30 @@
 			></div>
 		</div>
 	{:else if step === 1}
-		<GameSetupStep
-			bind:mode
+		<PlayerSelectionStep
+			{allPlayers}
 			bind:homePlayers
 			bind:awayPlayers
-			bind:homeTeam
-			bind:awayTeam
-			{allPlayers}
-			{allTeams}
-			onNext={goToStep2}
+			onNext={() => goToStep(2)}
 		/>
 	{:else if step === 2}
-		<ScoreEntryStep
-			bind:scoreHome
-			bind:scoreAway
-			{homeTeamName}
-			{awayTeamName}
-			{homePlayerNames}
-			{awayPlayerNames}
-			onNext={goToStep3}
+		<TeamSelectionStep
+			{homePlayers}
+			{awayPlayers}
+			{allPlayers}
+			bind:homeTeam
+			bind:awayTeam
+			onNext={() => goToStep(3)}
 			onBack={goBack}
 		/>
 	{:else if step === 3}
-		<GameSummaryStep
-			{mode}
-			{scoreHome}
-			{scoreAway}
-			{homeTeamName}
-			{awayTeamName}
-			{homePlayerNames}
-			{awayPlayerNames}
-			bind:ratings
-			{allPlayerIds}
+		<ScoreStep
+			{homeTeam}
+			{awayTeam}
+			bind:scoreHome
+			bind:scoreAway
+			bind:scoreTimeline
+			bind:resultType
 			{saving}
 			onSave={saveGame}
 			onBack={goBack}

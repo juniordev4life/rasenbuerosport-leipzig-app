@@ -9,6 +9,8 @@
 			"password_placeholder": "Passwort",
 			"submit": "Anmelden",
 			"forgot_password": "Passwort vergessen?",
+			"no_account": "Noch kein Konto?",
+			"register_link": "Registrieren",
 			"tab_login": "Anmelden",
 			"tab_register": "Registrieren"
 		},
@@ -22,13 +24,22 @@
 			"has_account": "Bereits ein Konto?",
 			"login_link": "Anmelden",
 			"tab_login": "Anmelden",
-			"tab_register": "Registrieren"
+			"tab_register": "Registrieren",
+			"email_hint": "Nur @redbulls.com"
+		},
+		"invite": {
+			"setup_title": "Profil einrichten",
+			"setup_subtitle": "Willkommen! Richte dein Konto ein.",
+			"set_password": "Passwort festlegen",
+			"required": "Einladung erforderlich",
+			"ask_admin": "Du brauchst eine Einladung um dich zu registrieren. Frag einen Kollegen oder Admin."
 		},
 		"errors": {
 			"invalid_credentials": "Ungültige Anmeldedaten",
 			"email_taken": "E-Mail-Adresse bereits vergeben",
 			"username_taken": "Benutzername bereits vergeben",
 			"passwords_mismatch": "Passwörter stimmen nicht überein",
+			"email_domain": "Nur @redbulls.com E-Mail-Adressen sind erlaubt",
 			"generic": "Ein Fehler ist aufgetreten"
 		}
 	},
@@ -41,20 +52,73 @@
 		"points_short": "Pkt.",
 		"win": "Sieg",
 		"loss": "Niederlage",
-		"draw": "Unentschieden"
+		"draw": "Unentschieden",
+		"streak_win": "{count} Siege in Folge",
+		"streak_loss": "{count} Niederlagen in Folge",
+		"streak_sleeping": "Lange nicht gespielt",
+		"streaks_title": "Aktuelle Serien",
+		"streaks_none": "Keine aktiven Serien",
+		"activity_title": "Letzte Spiele",
+		"activity_ago": "vor {time}",
+		"activity_minutes": "{count} Min.",
+		"activity_hours": "{count} Std.",
+		"activity_days": "{count} Tagen",
+		"activity_no_games": "Noch keine Aktivitäten",
+		"streak_hot": "{name} hat eine Siegesserie!",
+		"streak_hot_count": "{count} Siege in Folge",
+		"streak_cold": "{name} steckt in einer Durststrecke...",
+		"streak_cold_count": "{count} Niederlagen in Folge",
+		"badge_wall": "{name} ist eine Mauer!",
+		"badge_wall_count": "{count} Spiele zu Null",
+		"badge_scorer": "{name} ist ein Torjäger!",
+		"badge_scorer_count": "{count} Spiele mit 3+ Toren"
 	},
 	"nav": {
 		"dashboard": "Dashboard",
+		"leaderboard": "Rangliste",
 		"games": "Spiele",
 		"profile": "Profil"
 	},
 	"common": {
 		"loading": "Laden...",
 		"error": "Fehler",
-		"vs": "vs."
+		"vs": "vs.",
+		"back": "Zurück"
 	},
 	"footer": {
 		"copyright": "© {year} RasenBürosport Leipzig IT"
+	},
+	"leaderboard": {
+		"title": "Rangliste",
+		"no_data": "Noch keine Spieler",
+		"you": "Du",
+		"w_short": "S",
+		"d_short": "U",
+		"l_short": "N",
+		"games_short": "Spiele",
+		"tab_total": "Gesamt",
+		"tab_per_game": "Pro Spiel",
+		"ppg_label": "Pkt/Spiel"
+	},
+	"h2h": {
+		"title": "Direkter Vergleich",
+		"your_wins": "S",
+		"their_wins": "V",
+		"draws": "U",
+		"total_games": "Spiele",
+		"recent_games": "Letzte Duelle",
+		"no_games": "Noch keine Duelle",
+		"close": "Schließen"
+	},
+	"game_detail": {
+		"title": "Spieldetails",
+		"played_at": "Gespielt am",
+		"home_team": "Heim",
+		"away_team": "Auswärts",
+		"not_found": "Spiel nicht gefunden",
+		"timeline_title": "Spielverlauf",
+		"extra_time_short": "n.V.",
+		"penalty_short": "n.E."
 	},
 	"profile": {
 		"title": "Profil",
@@ -72,7 +136,22 @@
 		"favorite_team": "Dein Lieblingsteam",
 		"games_played": "{count} Spiele",
 		"logout": "Abmelden",
-		"no_data": "Noch keine Daten"
+		"no_data": "Noch keine Daten",
+		"league_stats": "Deine Ligen",
+		"league_stats_empty": "Noch keine Ligadaten",
+		"league_win_rate": "{rate}% Siegquote",
+		"edit": {
+			"title": "Profil bearbeiten",
+			"username_label": "Benutzername",
+			"avatar_hint": "Tippe auf das Bild um ein Avatar hochzuladen",
+			"save": "Speichern",
+			"saving": "Speichere...",
+			"cancel": "Abbrechen",
+			"error_username_empty": "Benutzername darf nicht leer sein",
+			"error_file_type": "Bitte ein Bild auswählen",
+			"error_file_size": "Bild darf max. 2 MB groß sein",
+			"error_generic": "Fehler beim Speichern"
+		}
 	},
 	"games": {
 		"title": "Spiele",
@@ -82,24 +161,24 @@
 	},
 	"new_game": {
 		"title": "Neues Spiel",
-		"step_setup": "Aufstellung",
+		"step_players": "Spieler",
+		"step_teams": "Teams",
 		"step_score": "Ergebnis",
-		"step_summary": "Zusammenfassung",
-		"mode_1v1": "1v1",
-		"mode_2v2": "2v2",
 		"home": "Heim",
 		"away": "Auswärts",
-		"select_player": "Spieler auswählen",
 		"select_team": "Team auswählen",
 		"next": "Weiter",
 		"back": "Zurück",
-		"save": "Spiel speichern",
+		"start_game": "Spiel speichern",
+		"end_game": "Spiel beenden",
+		"extra_time": "Verlängerung",
+		"penalty": "Elfmeterschießen",
 		"score_title": "Ergebnis eintragen",
-		"summary_title": "Zusammenfassung",
-		"rating_label": "Bewertung",
 		"saving": "Speichere...",
 		"success": "Spiel erfolgreich gespeichert!",
-		"player": "Spieler",
-		"team": "Team"
+		"guest": "Gast",
+		"add_guest": "Gast hinzufügen",
+		"all_players": "Spieler",
+		"tap_to_assign": "Tippe auf einen Spieler"
 	}
 }

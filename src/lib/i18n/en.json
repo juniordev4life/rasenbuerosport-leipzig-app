@@ -22,13 +22,22 @@
 			"has_account": "Already have an account?",
 			"login_link": "Sign in",
 			"tab_login": "Sign in",
-			"tab_register": "Register"
+			"tab_register": "Register",
+			"email_hint": "Only @redbulls.com"
+		},
+		"invite": {
+			"setup_title": "Set up profile",
+			"setup_subtitle": "Welcome! Set up your account.",
+			"set_password": "Set password",
+			"required": "Invitation required",
+			"ask_admin": "You need an invitation to register. Ask a colleague or admin."
 		},
 		"errors": {
 			"invalid_credentials": "Invalid credentials",
 			"email_taken": "Email address already taken",
 			"username_taken": "Username already taken",
 			"passwords_mismatch": "Passwords do not match",
+			"email_domain": "Only @redbulls.com email addresses are allowed",
 			"generic": "An error occurred"
 		}
 	},
@@ -41,20 +50,73 @@
 		"points_short": "Pts.",
 		"win": "Win",
 		"loss": "Loss",
-		"draw": "Draw"
+		"draw": "Draw",
+		"streak_win": "{count} wins in a row",
+		"streak_loss": "{count} losses in a row",
+		"streak_sleeping": "Haven't played in a while",
+		"streaks_title": "Current Streaks",
+		"streaks_none": "No active streaks",
+		"activity_title": "Recent Games",
+		"activity_ago": "{time} ago",
+		"activity_minutes": "{count} min",
+		"activity_hours": "{count} hrs",
+		"activity_days": "{count} days",
+		"activity_no_games": "No activity yet",
+		"streak_hot": "{name} is on fire!",
+		"streak_hot_count": "{count} wins in a row",
+		"streak_cold": "{name} is on a cold streak...",
+		"streak_cold_count": "{count} losses in a row",
+		"badge_wall": "{name} is a wall!",
+		"badge_wall_count": "{count} clean sheet wins",
+		"badge_scorer": "{name} is a goal machine!",
+		"badge_scorer_count": "{count} games with 3+ goals"
 	},
 	"nav": {
 		"dashboard": "Dashboard",
+		"leaderboard": "Ranking",
 		"games": "Games",
 		"profile": "Profile"
 	},
 	"common": {
 		"loading": "Loading...",
 		"error": "Error",
-		"vs": "vs."
+		"vs": "vs.",
+		"back": "Back"
 	},
 	"footer": {
 		"copyright": "© {year} RasenBürosport Leipzig IT"
+	},
+	"leaderboard": {
+		"title": "Leaderboard",
+		"no_data": "No players yet",
+		"you": "You",
+		"w_short": "W",
+		"d_short": "D",
+		"l_short": "L",
+		"games_short": "games",
+		"tab_total": "Total",
+		"tab_per_game": "Per Game",
+		"ppg_label": "Pts/Game"
+	},
+	"h2h": {
+		"title": "Head to Head",
+		"your_wins": "W",
+		"their_wins": "L",
+		"draws": "D",
+		"total_games": "Games",
+		"recent_games": "Recent matchups",
+		"no_games": "No matchups yet",
+		"close": "Close"
+	},
+	"game_detail": {
+		"title": "Game Details",
+		"played_at": "Played on",
+		"home_team": "Home",
+		"away_team": "Away",
+		"not_found": "Game not found",
+		"timeline_title": "Score progression",
+		"extra_time_short": "AET",
+		"penalty_short": "Pen."
 	},
 	"profile": {
 		"title": "Profile",
@@ -72,7 +134,22 @@
 		"favorite_team": "Your favorite team",
 		"games_played": "{count} games",
 		"logout": "Log out",
-		"no_data": "No data yet"
+		"no_data": "No data yet",
+		"league_stats": "Your Leagues",
+		"league_stats_empty": "No league data yet",
+		"league_win_rate": "{rate}% win rate",
+		"edit": {
+			"title": "Edit profile",
+			"username_label": "Username",
+			"avatar_hint": "Tap the image to upload an avatar",
+			"save": "Save",
+			"saving": "Saving...",
+			"cancel": "Cancel",
+			"error_username_empty": "Username cannot be empty",
+			"error_file_type": "Please select an image file",
+			"error_file_size": "Image must be less than 2 MB",
+			"error_generic": "Failed to save"
+		}
 	},
 	"games": {
 		"title": "Games",
@@ -82,24 +159,24 @@
 	},
 	"new_game": {
 		"title": "New Game",
-		"step_setup": "Setup",
+		"step_players": "Players",
+		"step_teams": "Teams",
 		"step_score": "Score",
-		"step_summary": "Summary",
-		"mode_1v1": "1v1",
-		"mode_2v2": "2v2",
 		"home": "Home",
 		"away": "Away",
-		"select_player": "Select player",
 		"select_team": "Select team",
 		"next": "Next",
 		"back": "Back",
-		"save": "Save game",
+		"start_game": "Save game",
+		"end_game": "End game",
+		"extra_time": "Extra time",
+		"penalty": "Penalties",
 		"score_title": "Enter score",
-		"summary_title": "Summary",
-		"rating_label": "Rating",
 		"saving": "Saving...",
 		"success": "Game saved successfully!",
-		"player": "Player",
-		"team": "Team"
+		"guest": "Guest",
+		"add_guest": "Add guest",
+		"all_players": "Players",
+		"tap_to_assign": "Tap a player to assign"
 	}
 }

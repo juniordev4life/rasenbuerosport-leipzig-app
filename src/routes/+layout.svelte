@@ -7,8 +7,18 @@
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	import { ROUTES } from "$lib/constants/routes.constants.js";
+	import { browser } from "$app/environment";
 
 	let { children } = $props();
+
+	// Register service worker for PWA
+	$effect(() => {
+		if (browser && "serviceWorker" in navigator) {
+			navigator.serviceWorker.register("/service-worker.js").catch((err) => {
+				console.error("SW registration failed:", err);
+			});
+		}
+	});
 
 	$effect(() => {
 		supabase.auth
@@ -33,6 +43,15 @@
 
 			if (!s && page.url.pathname.startsWith("/app")) {
 				goto(ROUTES.LOGIN);
+			}
+
+			// Redirect to setup if user has no username yet (invited but not set up)
+			if (
+				s?.user &&
+				!s.user.user_metadata?.username &&
+				!page.url.pathname.startsWith("/auth/setup")
+			) {
+				goto("/auth/setup");
 			}
 		});
 

@@ -1,12 +1,14 @@
 <script>
-	let { value = $bindable(0) } = $props();
+	let { value = $bindable(0), onchange } = $props();
 
 	function increment() {
 		value = Math.min(value + 1, 99);
+		onchange?.();
 	}
 
 	function decrement() {
 		value = Math.max(value - 1, 0);
+		onchange?.();
 	}
 </script>
 

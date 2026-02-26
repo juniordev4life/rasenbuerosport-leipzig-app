@@ -58,10 +58,7 @@
 		{$t("auth.login.submit")}
 	</Button>
 
-	<a
-		href="#forgot"
-		class="text-text-secondary text-sm text-center underline hover:text-text-primary transition-colors"
-	>
-		{$t("auth.login.forgot_password")}
-	</a>
+	<p class="text-text-secondary text-[11px] text-center">
+		{$t("auth.invite.ask_admin")}
+	</p>
 </form>

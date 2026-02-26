@@ -30,7 +30,11 @@
 			await register({ email, password, username });
 			goto(ROUTES.DASHBOARD);
 		} catch (err) {
-			error = err.message || $t("auth.errors.generic");
+			if (err.message === "EMAIL_DOMAIN_NOT_ALLOWED") {
+				error = $t("auth.errors.email_domain");
+			} else {
+				error = err.message || $t("auth.errors.generic");
+			}
 		} finally {
 			loading = false;
 		}
@@ -47,14 +51,17 @@
 		autocomplete="username"
 	/>
 
-	<Input
-		id="email"
-		type="email"
-		placeholder={$t("auth.register.email_placeholder")}
-		bind:value={email}
-		required
-		autocomplete="email"
-	/>
+	<div>
+		<Input
+			id="email"
+			type="email"
+			placeholder={$t("auth.register.email_placeholder")}
+			bind:value={email}
+			required
+			autocomplete="email"
+		/>
+		<p class="text-[11px] text-text-secondary mt-1 ml-1">{$t("auth.register.email_hint")}</p>
+	</div>
 
 	<Input
 		id="password"

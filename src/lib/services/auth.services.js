@@ -1,7 +1,9 @@
 import { supabase } from "$lib/config/supabase.config.js";
 
+const ALLOWED_EMAIL_DOMAIN = "redbulls.com";
+
 /**
- * Registers a new user
+ * Registers a new user (restricted to @redbulls.com emails)
  * @param {object} params
  * @param {string} params.email
  * @param {string} params.password
@@ -9,6 +11,11 @@ import { supabase } from "$lib/config/supabase.config.js";
  * @returns {Promise<{user: object, session: object}>}
  */
 export async function register({ email, password, username }) {
+	const domain = email.split("@")[1]?.toLowerCase();
+	if (domain !== ALLOWED_EMAIL_DOMAIN) {
+		throw new Error("EMAIL_DOMAIN_NOT_ALLOWED");
+	}
+
 	const { data, error } = await supabase.auth.signUp({
 		email,
 		password,
