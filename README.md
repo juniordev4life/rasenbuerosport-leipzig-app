@@ -53,6 +53,7 @@ Das Dashboard ist die Kommandozentrale. Hier siehst du sofort, was in der Liga l
 </div>
 
 **Was du siehst:**
+
 - **Persönliche Serie** — Bist du auf einer Siegesserie oder steckst du in einer Durststrecke?
 - **Deine letzten Spiele** — Ergebnisse mit Team-Avataren, Modus (1v1/2v2) und Datum
 - **Top 3 Spieler** — Wer führt die Rangliste an?
@@ -150,6 +151,7 @@ Das Profil ist das Herzstück deiner Kicker-Karriere — alles was du jemals am 
 **Statistiken**: 50 Spiele, 32 Siege, 64% Siegquote — getrennt nach 1v1 und 2v2.
 
 **Karriere-Statistiken** aus 28 Spielen mit FC26-Daten:
+
 - 54% Ø Ballbesitz
 - 88% Ø Passgenauigkeit
 - 1,08x xG-Effizienz
@@ -174,6 +176,7 @@ Drei KI-Features, angetrieben von **Claude (Anthropic)**, machen RasenBürosport
 </div>
 
 Wird **automatisch generiert** sobald Spieler und Teams ausgewählt sind. Die KI analysiert:
+
 - Aktuelle Form und Siegquoten aller Spieler
 - Head-to-Head-Bilanz der Gegner
 - xG-Effizienz und Karriere-Statistiken
@@ -194,6 +197,7 @@ Lade einfach einen Screenshot der FC26-Nachspielstatistiken hoch. **Claude Visio
 </div>
 
 Wird **automatisch generiert** wenn Statistiken vorliegen. Der Bericht ist unterhaltsam, auf Deutsch, und erkennt besondere Narratives:
+
 - Underdog-Siege trotz wenig Ballbesitz
 - xG-Überperformance ("Chancentod wird zum Vollstrecker")
 - Serienbrüche und historische Meilensteine
@@ -249,7 +253,5 @@ Siege in Grün, Niederlagen in Rot — scrolle durch deine komplette Kicker-Gesc
 **RasenBürosport Leipzig** — Wo Büro-Kicker auf Datenanalyse trifft.
 
 *Entwickelt mit Leidenschaft vom RB Leipzig Data Unit Team*
-
-*Angetrieben von [Claude AI](https://anthropic.com) · Gebaut mit [Svelte](https://svelte.dev) · Gehostet auf [Google Cloud](https://cloud.google.com)*
 
 </div>
