@@ -74,6 +74,7 @@
 	"nav": {
 		"dashboard": "Dashboard",
 		"leaderboard": "Ranking",
+		"new_game": "New Game",
 		"games": "Games",
 		"profile": "Profile"
 	},
