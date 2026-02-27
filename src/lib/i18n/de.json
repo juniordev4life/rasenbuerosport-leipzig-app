@@ -215,6 +215,7 @@
 	},
 	"prediction": {
 		"title": "Match-Vorhersage",
+		"generate": "Match-Vorhersage generieren",
 		"loading": "Analysiere...",
 		"error": "Vorhersage konnte nicht generiert werden"
 	},

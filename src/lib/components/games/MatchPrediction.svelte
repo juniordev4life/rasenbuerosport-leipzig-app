@@ -30,13 +30,6 @@
 		awayTeam,
 	);
 
-	/** Auto-generate prediction when all data is available */
-	$effect(() => {
-		if (canPredict && !prediction && !loading) {
-			fetchPrediction();
-		}
-	});
-
 	/**
 	 * Build the player payload for the prediction API
 	 * @returns {Array<{id: string, team: string, team_name: string}>}
@@ -99,6 +92,15 @@
 				<span class="text-base">🔮</span>
 				<p class="text-xs text-error">{$t("prediction.error")}</p>
 			</div>
+		{:else}
+			<button
+				type="button"
+				onclick={fetchPrediction}
+				class="flex items-center gap-2 w-full text-left cursor-pointer hover:opacity-80 transition-opacity"
+			>
+				<span class="text-base">🔮</span>
+				<span class="text-sm font-medium text-text-primary">{$t("prediction.generate")}</span>
+			</button>
 		{/if}
 	</div>
 {/if}

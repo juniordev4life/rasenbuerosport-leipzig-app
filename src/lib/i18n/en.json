@@ -213,6 +213,7 @@
 	},
 	"prediction": {
 		"title": "Match Prediction",
+		"generate": "Generate Match Prediction",
 		"loading": "Analyzing...",
 		"error": "Failed to generate prediction"
 	},
