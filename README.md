@@ -76,7 +76,7 @@ A new match is recorded in three steps. No overhead, no paperwork.
 | Step | What happens |
 |---------|-------------|
 | **1. Players** | Tap players to assign home/away. 1v1 or 2v2 is detected automatically. |
-| **2. Teams** | Choose from 500+ real clubs worldwide — with country flags and league assignment. |
+| **2. Teams** | Choose from ~400 real clubs from 25 European top leagues — with country flags and league assignment. |
 | **3. Score** | Enter goals one-by-one. Extra time & penalties supported. Optional: FC26 screenshot. |
 
 [Once players and teams are set, the **AI automatically generates a match prediction** — even before the first goal is scored.]
