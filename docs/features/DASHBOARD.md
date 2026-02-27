@@ -1,59 +1,61 @@
-[← Zurück zur Übersicht](../../README.md)
+[← Back to overview](../../README.md)
 
 # 📊 Dashboard
 
-Das Dashboard ist die erste Seite nach dem Login — der Puls der Büro-Liga.
+The dashboard is the first page after login — the pulse of the office league.
 
 ---
 
-## Aufbau
+## Layout
 
 <div align="center">
 <img src="../screenshots/dashboard-1.png" width="320" />
 </div>
 
-### Begrüßung & aktuelle Serie
+### Greeting & current streak
 
-Ganz oben wirst du persönlich begrüßt. Direkt darunter siehst du deine **aktuelle Serie** — bist du auf Feuer oder in einer Durststrecke? Das Badge zeigt es sofort.
+At the top you receive a personal greeting. Directly below you see your **current streak** — are you on fire or in a slump? The badge shows it instantly.
 
-### Deine letzten Spiele
+### Your recent matches
 
-Die letzten 5 Spiele im Schnellüberblick:
-- **Farbcodierung**: Grün = Sieg, Rot = Niederlage
-- **Spieler-Avatare** beider Teams
-- **Modus-Badge**: 1v1 oder 2v2
-- **Sonderkennzeichnung**: n.E. (nach Elfmeterschießen)
-- **Datum** jedes Spiels
+The last 5 matches at a glance:
 
-### Top 3 Spieler
+- **Color coding**: Green = win, Red = loss
+- **Player avatars** for both teams
+- **Mode badge**: 1v1 or 2v2
+- **Special marker**: n.E. (after penalties)
+- **Date** of each match
 
-Die aktuelle Ranglisten-Spitze — mit Punktestand. Ein Tap führt zur vollständigen Rangliste.
+### Top 3 players
+
+The current leaderboard top — with points. Tap to open the full leaderboard.
 
 ---
 
-## Aktuelle Serien & Aktivitätsfeed
+## Current streaks & activity feed
 
 <div align="center">
 <img src="../screenshots/dashboard-2.png" width="320" />
 </div>
 
-### Serien-Feed
+### Streak feed
 
-Alle aktiven Serien aller Spieler auf einen Blick:
-- 🔥 **Siegesserien** — *"LisaKicker hat eine Siegesserie! 2 Siege in Folge"*
-- 😰 **Durststrecken** — *"MaxMustermann steckt in einer Durststrecke..."*
-- ⚽ **Torjäger-Badges** — *"AnnaAbwehr ist ein Torjäger! 4 Spiele mit 3+ Toren"*
+All active streaks for every player at a glance:
 
-### Letzte Spiele (Global)
+- 🔥 **Winning streaks** — *"LisaKicker is on a winning streak! 2 wins in a row"*
+- 😰 **Slumps** — *"MaxMustermann is in a slump..."*
+- ⚽ **Top scorer badges** — *"AnnaAbwehr is a top scorer! 4 matches with 3+ goals"*
 
-Die neuesten Spiele aller Spieler mit relativer Zeitangabe (*"vor 4 Std."*, *"vor 7 Std."*).
+### Recent matches (global)
 
----
-
-## Quick Action
-
-Der rote **+** Button oben links startet sofort ein neues Spiel — mit einem Tap direkt in den Wizard.
+The latest matches from all players with relative time labels ("4h ago", "7h ago").
 
 ---
 
-[← Zurück zur Übersicht](../../README.md) · [Neues Spiel →](NEW_GAME.md)
+## Quick action
+
+The red **+** button top-left immediately starts a new match — a single tap opens the wizard.
+
+---
+
+[← Back to overview](../../README.md) · [New Match →](NEW_GAME.md)

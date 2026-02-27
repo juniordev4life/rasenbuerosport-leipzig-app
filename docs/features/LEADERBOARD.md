@@ -1,41 +1,42 @@
-[← Zurück zur Übersicht](../../README.md)
+[← Back to overview](../../README.md)
 
-# 🏆 Rangliste & Head-to-Head
+# 🏆 Leaderboard & Head-to-Head
 
-Die Rangliste zeigt, wer in der Büro-Liga ganz oben steht — und der Head-to-Head verrät, gegen wen du wirklich gut bist.
+The leaderboard shows who sits at the top of the office league — and the head-to-head reveals who you really perform well against.
 
 ---
 
-## Rangliste
+## Leaderboard
 
 <div align="center">
 <img src="../screenshots/leaderboard.png" width="320" />
 <img src="../screenshots/rangliste-2.png" width="320" />
 </div>
 
-### Zwei Modi
+### Two modes
 
-| Modus | Beschreibung |
+| Mode | Description |
 |-------|-------------|
-| **Gesamt** | Sortiert nach Gesamtpunkten. 3 Punkte pro Sieg, 1 pro Unentschieden, 0 pro Niederlage. |
-| **Pro Spiel** | Punkte geteilt durch Anzahl Spiele. Faire Vergleiche bei unterschiedlicher Spielanzahl. |
+| **Overall** | Sorted by total points. 3 points per win, 1 per draw, 0 per loss. |
+| **Per Match** | Points divided by number of matches. Fair comparisons when players played different amounts. |
 
-### Anzeige pro Spieler
+### Player display
 
-- **Rang** mit Medaillen-Icons (🥇🥈🥉) für die Top 3
-- **Avatar** und **Username**
-- **Bilanz**: Siege · Unentschieden · Niederlagen · Spiele
-- **Punkte** (Gesamt) oder **Pkt/Spiel** (Pro Spiel)
-- **Serien-Badges**: Feuer-Emoji für aktuelle Siegesserien, Torjäger-Badge
-- **"Du"-Markierung** am eigenen Eintrag
+- **Rank** with medal icons (🥇🥈🥉) for the top 3
+- **Avatar** and **username**
+- **Record**: Wins · Draws · Losses · Matches
+- **Points** (total) or **Pts/Match** (per match)
+- **Streak badges**: fire emoji for current winning streaks, top scorer badge
+- **"You" marker** on your own entry
 
-### Zeitraumfilter
+### Time range filter
 
-Oben rechts kann der Zeitraum gefiltert werden:
-- **Gesamt** — Alle Spiele seit Beginn
-- **7 Tage** — Die Wochenform
-- **30 Tage** — Der Monatstrend
-- **90 Tage** — Die Saisonform
+Top-right you can filter the time range:
+
+- **Overall** — all matches since the beginning
+- **7 days** — weekly form
+- **30 days** — monthly trend
+- **90 days** — season form
 
 ---
 
@@ -45,22 +46,22 @@ Oben rechts kann der Zeitraum gefiltert werden:
 <img src="../screenshots/h2h.png" width="320" />
 </div>
 
-Tippe auf einen Spieler in der Rangliste, um den **direkten Vergleich** zu öffnen.
+Tap a player in the leaderboard to open the **direct comparison**.
 
-### Was der H2H zeigt
+### What the H2H shows
 
-- **Visuelle Bilanz-Leiste** — Grün (Siege), Gelb (Unentschieden), Rot (Niederlagen)
-- **Große Zahlen**: Spiele, Siege, Unentschieden, Niederlagen
-- **Letzte Duelle** — Die gemeinsamen Spiele chronologisch
-  - Ergebnis mit Farbcodierung
-  - Spieler-Avatare beider Teams
-  - Modus und Datum
+- **Visual record bar** — Green (wins), Yellow (draws), Red (losses)
+- **Big numbers**: matches, wins, draws, losses
+- **Recent duels** — shared matches in chronological order
+  - result with color coding
+  - player avatars for both teams
+  - mode and date
 
-### Beispiel
+### Example
 
-> MaxMustermann vs. LisaKicker: **31 Spiele**, 19 Siege, 2 Unentschieden, 10 Niederlagen.
-> Die Rivalität ist real.
+> MaxMustermann vs. LisaKicker: **31 matches**, 19 wins, 2 draws, 10 losses.
+> The rivalry is real.
 
 ---
 
-[← Spieldetails](GAME_DETAIL.md) · [Zurück zur Übersicht](../../README.md) · [Profil →](PROFILE.md)
+[← Match Details](GAME_DETAIL.md) · [Back to overview](../../README.md) · [Profile →](PROFILE.md)

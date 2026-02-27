@@ -1,126 +1,129 @@
-[← Zurück zur Übersicht](../../README.md)
+[← Back to overview](../../README.md)
 
-# 👤 Profil — Deine Kicker-Karriere
+# 👤 Profile — Your foosball career
 
-Das Profil vereint alles, was deine Kicker-Karriere ausmacht — von den Basis-Statistiken bis zu den freigeschalteten Badges.
+The profile brings together everything that defines your foosball career — from basic stats to unlocked badges.
 
 ---
 
-## Statistik-Übersicht
+## Statistics overview
 
 <div align="center">
 <img src="../screenshots/profile-stats.png" width="320" />
 </div>
 
 ### Header
-- **Avatar** (hochladbar) mit Initialen-Fallback
-- **Username** und **E-Mail**
-- **Bearbeiten-Button** für Profil-Anpassungen
 
-### Die Zahlen
+- **Avatar** (uploadable) with initials fallback
+- **Username** and **email**
+- **Edit button** for profile adjustments
 
-| Metrik | Beispiel |
+### The numbers
+
+| Metric | Example |
 |--------|----------|
-| **Spiele** | 50 |
-| **Siege** | 32 |
-| **Niederlagen** | 14 |
+| **Matches** | 50 |
+| **Wins** | 32 |
+| **Losses** | 14 |
 
-### Siegquote
+### Win rate
 
-Große Prozentanzeige mit visuellem Fortschrittsbalken:
-- **Rot** = Siegquote
-- **Grauer Rest** = Unentschieden + Niederlagen
+Large percentage display with visual progress bar:
 
-### Modus-Bilanz
+- **Red** = win rate
+- **Gray remainder** = draws + losses
 
-Getrennte Aufschlüsselung:
-- **1v1 Bilanz**: 21 Siege / 7 Niederlagen
-- **2v2 Bilanz**: 11 Siege / 7 Niederlagen
+### Mode record
 
-### Favoriten
+Separate breakdowns:
 
-- **Lieblingsgegner** — Gegen wen spielst du am häufigsten?
-- **Bester Mitspieler** — Mit wem gewinnst du am meisten?
-- **Lieblingsteam** — Welchen Verein wählst du am häufigsten?
+- **1v1 record**: 21 wins / 7 losses
+- **2v2 record**: 11 wins / 7 losses
+
+### Favorites
+
+- **Favorite opponent** — who do you play most often?
+- **Best teammate** — who do you win the most with?
+- **Favorite club** — which club do you pick most often?
 
 ---
 
-## Karriere-Statistiken
+## Career stats
 
 <div align="center">
 <img src="../screenshots/career-stats.png" width="320" />
 </div>
 
-Aggregierte Werte aus allen Spielen mit FC26-Statistiken. Ein 2x2 Grid zeigt die vier wichtigsten Karriere-Metriken:
+Aggregated values from all matches with FC26 statistics. A 2x2 grid shows the four key career metrics:
 
-| Metrik | Wert | Beschreibung |
+| Metric | Value | Description |
 |--------|------|-------------|
-| **Ø Ballbesitz** | 54% | Durchschnittlicher Ballbesitz über alle Spiele |
-| **Ø Passgenauigkeit** | 88% | Wie präzise sind deine Pässe? |
-| **xG-Effizienz** | 1,08x | Tore vs. Expected Goals — >1.0 bedeutet: du triffst mehr als erwartet |
-| **Ø Zweikampfquote** | 59% | Wie viele Zweikämpfe gewinnst du? |
+| **Avg possession** | 54% | Average possession across all matches |
+| **Avg pass accuracy** | 88% | How accurate are your passes? |
+| **xG efficiency** | 1.08x | Goals vs. Expected Goals — >1.0 means you score more than expected |
+| **Avg duels won** | 59% | How many duels do you win? |
 
-> Die Karriere-Statistiken erscheinen erst, wenn mindestens ein Spiel mit FC26-Stats existiert. Oben rechts wird angezeigt, aus wie vielen Spielen die Werte berechnet werden.
+> Career stats appear only once at least one match with FC26 stats exists. Top-right shows how many matches the values are calculated from.
 
 ---
 
 ## Badges
 
-15 einzigartige Badges — sammle sie alle.
+15 unique badges — collect them all.
 
 <div align="center">
 <img src="../screenshots/badges.png" width="320" />
 </div>
 
-### So funktioniert es
+### How it works
 
-- Badges werden **automatisch** freigeschaltet basierend auf deinen Spielen und Statistiken
-- **Freigeschaltete Badges** werden farbig und mit ihrem Emoji angezeigt
-- **Gesperrte Badges** sind ausgegraut
-- Oben rechts: Fortschritt (z.B. *11/15*)
+- Badges are **automatically** unlocked based on your matches and statistics
+- **Unlocked badges** are shown in color with their emoji
+- **Locked badges** are greyed out
+- Top-right: progress (e.g. *11/15*)
 
-### Alle 15 Badges
+### All 15 badges
 
-| Badge | Name | Wie freischalten? |
+| Badge | Name | How to unlock |
 |-------|------|-------------------|
-| 🎯 | **Tiki-Taka** | 65%+ Ballbesitz in einem Spiel |
-| ⚡ | **Konter-König** | Sieg mit unter 40% Ballbesitz |
-| 💎 | **Perfektionist** | 100% Passgenauigkeit in einem Spiel |
-| 🎉 | **Schützenfest** | Sieg mit 5+ Toren Unterschied |
-| 🛡️ | **Weiße Weste** | Sieg ohne Gegentor (Clean Sheet) |
-| 🏹 | **David vs. Goliath** | Sieg mit unter 30% Ballbesitz |
-| 🤝 | **Fair Play** | 10+ Spiele ohne eine einzige Gelbe Karte |
-| 👶 | **Debütant** | Erstes Spiel absolviert |
-| ⭐ | **Stammspieler** | 25+ Spiele absolviert |
-| 👑 | **Klublegende** | 100+ Spiele absolviert |
-| ⚽ | **Torjäger** | 50+ Karrieretore erzielt |
-| 🔥 | **Seriensieger** | 5+ Siege in Folge |
-| 🧲 | **Ballmagnet** | 70%+ Passgenauigkeit in einem Spiel |
-| 🔫 | **xG-Killer** | xG-Effizienz über 1.5 in einem Spiel |
-| 💪 | **Duell-Monster** | 60%+ Zweikampfquote in einem Spiel |
+| 🎯 | **Tiki-Taka** | 65%+ possession in a match |
+| ⚡ | **Counter King** | Win with under 40% possession |
+| 💎 | **Perfectionist** | 100% pass accuracy in a match |
+| 🎉 | **Goal Fest** | Win with 5+ goal difference |
+| 🛡️ | **Clean Sheet** | Win without conceding |
+| 🏹 | **David vs. Goliath** | Win with under 30% possession |
+| 🤝 | **Fair Play** | 10+ matches without a single yellow card |
+| 👶 | **Debutant** | Played your first match |
+| ⭐ | **Regular** | Played 25+ matches |
+| 👑 | **Club Legend** | Played 100+ matches |
+| ⚽ | **Top Scorer** | Scored 50+ career goals |
+| 🔥 | **Streak Winner** | 5+ wins in a row |
+| 🧲 | **Ball Magnet** | 70%+ pass accuracy in a match |
+| 🔫 | **xG Killer** | xG efficiency over 1.5 in a match |
+| 💪 | **Duel Monster** | 60%+ duels won in a match |
 
-> **Tipp**: Manche Badges erfordern FC26-Statistiken (Tiki-Taka, Konter-König, etc.). Je mehr Spiele mit Stats, desto mehr Badges lassen sich freischalten.
-
----
-
-## Liga-Statistiken
-
-Deine Performance aufgeschlüsselt nach den Ligen der gewählten Teams:
-
-- **Flagge** und **Liga-Name**
-- **Siegquote** als Prozent mit Fortschrittsbalken
-- **Bilanz**: Siege · Unentschieden · Niederlagen · Spiele
-
-> Beispiel: 86% Siegquote in La Liga (6S · 0U · 1N · 7 Spiele), 71% in der Bundesliga (15S · 3U · 3N · 21 Spiele).
+> **Tip**: Some badges require FC26 stats (Tiki-Taka, Counter King, etc.). The more matches with stats, the more badges you can unlock.
 
 ---
 
-## Profil bearbeiten
+## League stats
 
-- **Username** ändern
-- **Avatar** hochladen (max. 2 MB)
-- Tippe auf das Stift-Icon neben dem Profilbild
+Your performance broken down by the leagues of chosen clubs:
+
+- **Flag** and **league name**
+- **Win rate** as a percentage with a progress bar
+- **Record**: Wins · Draws · Losses · Matches
+
+> Example: 86% win rate in La Liga (6W · 0D · 1L · 7 matches), 71% in the Bundesliga (15W · 3D · 3L · 21 matches).
 
 ---
 
-[← Rangliste](LEADERBOARD.md) · [Zurück zur Übersicht](../../README.md) · [KI-Features →](AI_FEATURES.md)
+## Edit profile
+
+- Change **username**
+- Upload **avatar** (max. 2 MB)
+- Tap the pencil icon next to the profile picture
+
+---
+
+[← Leaderboard](LEADERBOARD.md) · [Back to overview](../../README.md) · [AI Features →](AI_FEATURES.md)

@@ -1,138 +1,138 @@
-[← Zurück zur Übersicht](../../README.md)
+[← Back to overview](../../README.md)
 
-# 🤖 KI-Features
+# 🤖 AI Features
 
-Drei KI-Features machen RasenBürosport einzigartig — angetrieben von **Claude** (Anthropic).
+Three AI features make RasenBürosport unique — powered by **Claude** (Anthropic).
 
 ---
 
-## 1. FC26-Stats-Extraktion (Claude Vision)
+## 1. FC26 Stats Extraction (Claude Vision)
 
 <div align="center">
 <img src="../screenshots/game-match-stats.jpg" width="450" />
 </div>
 
-### Was passiert
+### What happens
 
-Nach einem FC26-Match kannst du den **Nachspiel-Statistik-Screen** fotografieren und in die App hochladen. **Claude Vision** analysiert das Bild und extrahiert automatisch alle Statistik-Werte.
+After an FC26 match you can photograph the **post-match statistics screen** and upload it to the app. **Claude Vision** analyzes the image and automatically extracts all statistic values.
 
-### Extrahierte Statistiken
+### Extracted statistics
 
-| Kategorie | Werte |
+| Category | Values |
 |-----------|-------|
-| **Ballkontrolle** | Ballbesitz (%), Pässe, Passgenauigkeit (%) |
-| **Offensive** | Schüsse, Expected Goals (xG), Schusspräzision (%), Dribblings (%) |
-| **Defensive** | Zweikämpfe, Gewonnene Zweikämpfe, Abfangaktionen, Paraden |
-| **Disziplin** | Fouls, Ecken, Gelbe Karten |
+| **Possession** | Possession (%), Passes, Pass accuracy (%) |
+| **Offense** | Shots, Expected Goals (xG), Shot accuracy (%), Dribbles (%) |
+| **Defense** | Duels, Duels won, Interceptions, Saves |
+| **Discipline** | Fouls, Corners, Yellow cards |
 
-### Wie es funktioniert
+### How it works
 
-1. **Im Wizard** (Schritt 3): Optionales Foto direkt beim Spielerfassen anhängen
-2. **Nachträglich**: Auf der Spieldetailseite den Upload-Bereich nutzen
-3. Das Bild wird in **Supabase Storage** gespeichert
-4. **Claude Vision** analysiert den Screenshot und gibt strukturierte Daten zurück
-5. Die Statistiken werden als JSONB im Spiel gespeichert
+1. **In the wizard** (step 3): optionally attach a photo while recording players
+2. **Later**: use the upload area on the match detail page
+3. The image is stored in **Supabase Storage**
+4. **Claude Vision** analyzes the screenshot and returns structured data
+5. The statistics are stored as JSONB in the match record
 
-### Technischer Ablauf
+### Technical flow
 
 ```
-Screenshot → Supabase Storage → Claude Vision API → JSON-Extraktion → Datenbank
+Screenshot → Supabase Storage → Claude Vision API → JSON extraction → Database
 ```
 
-> Die Extraktion funktioniert mit FC26-Screenshots auf Deutsch und Englisch. Das KI-Modell erkennt die Tabellen-Struktur automatisch.
+> The extraction works with FC26 screenshots in German and English. The AI model automatically recognizes the table structure.
 
 ---
 
-## 2. KI-Match-Vorhersage
+## 2. AI Match Prediction
 
 <div align="center">
 <img src="../screenshots/match-prediction.png" width="320" />
 </div>
 
-### Was passiert
+### What happens
 
-Sobald im Spielassistenten **Spieler und Teams** feststehen (Schritt 3), wird **automatisch** eine Match-Vorhersage generiert — noch bevor das Spiel beginnt.
+As soon as **players and teams** are set in the match wizard (step 3), a prediction is **automatically** generated — before the match begins.
 
-### Datengrundlage
+### Data basis
 
-Die KI berücksichtigt für jeden Spieler:
+The AI considers for each player:
 
-| Datenquelle | Beispiel |
+| Data source | Example |
 |-------------|---------|
-| **Karriere-Statistiken** | 50 Spiele, 64% Siegquote |
-| **Aktuelle Form** | 2 Niederlagen in Folge |
-| **xG-Effizienz** | 1,08x (trifft mehr als erwartet) |
-| **Head-to-Head** | 19 Siege in 31 Duellen gegen LisaKicker |
-| **Lieblingsteam** | Spielt mit RB Leipzig — extra motiviert? |
-| **Spielmodus** | 1v1 oder 2v2 |
+| **Career stats** | 50 matches, 64% win rate |
+| **Current form** | 2 losses in a row |
+| **xG efficiency** | 1.08x (scores more than expected) |
+| **Head-to-head** | 19 wins in 31 duels vs. LisaKicker |
+| **Favorite team** | Plays with RB Leipzig — extra motivated? |
+| **Match mode** | 1v1 or 2v2 |
 
-### Beispiel-Output
+### Example output
 
-> *"AnnaAbwehr und LisaKicker sind zwar beide in heißer Form mit zwei Siegen am Stück, aber MaxMustermann ist trotz seiner aktuellen Pechsträhne der routinierte Kicker mit 64% Winrate. Besonders pikant: MaxMustermann spielt gegen sein Lieblingsteam RB Leipzig! Tendenz geht knapp an Hamburg — geschätzter Score: 2:1 für den HSV."*
+> *"AnnaAbwehr and LisaKicker are both in form with two wins in a row, but MaxMustermann — despite a recent unlucky streak — is the more experienced player with a 64% win rate. Especially spicy: MaxMustermann plays against his favorite club RB Leipzig! Slight edge to Hamburg — estimated score: 2:1 for HSV."*
 
-### Eigenschaften
+### Characteristics
 
-- **Automatisch** — kein Button, keine Interaktion nötig
-- **Auf Deutsch** — der Ton ist locker und unterhaltsam
-- **Datenbasiert** — echte Karrieredaten fließen ein
-- **Einmalig** — pro Spiel eine Vorhersage, keine Regenerierung
+- **Automatic** — no button, no interaction required
+- **In German** — the tone is casual and entertaining
+- **Data-driven** — real career data is used
+- **One-time** — one prediction per match, no regeneration
 
 ---
 
-## 3. KI-Spielbericht
+## 3. AI Match Report
 
 <div align="center">
 <img src="../screenshots/match-report.png" width="320" />
 </div>
 
-### Was passiert
+### What happens
 
-Nach dem Spiel, sobald **FC26-Statistiken** vorliegen, wird **automatisch** ein Spielbericht generiert. Der Bericht liest sich wie ein Sportkommentar und basiert auf echten Daten.
+After the match, once **FC26 stats** are available, an AI-generated match report is created automatically. The report reads like a sports commentary and is based on real data.
 
-### Datengrundlage
+### Data basis
 
-| Quelle | Verwendung |
+| Source | Use |
 |--------|-----------|
-| **Spielergebnis** | Score, Spielverlauf, Ergebnistyp |
-| **Match-Stats** | Ballbesitz, xG, Pässe, Zweikämpfe |
-| **Karrieredaten** | Siegquote, xG-Effizienz, aktuelle Serie jedes Spielers |
-| **Kontext** | Underdog-Situationen, persönliche Bestleistungen |
+| **Match result** | Score, timeline, result type |
+| **Match stats** | Possession, xG, passes, duels |
+| **Career data** | Win rate, xG efficiency, current streak per player |
+| **Context** | Underdog situations, personal bests |
 
-### Narrative die erkannt werden
+### Narratives detected
 
-Die KI erkennt automatisch besondere Situationen und webt sie in den Bericht ein:
+The AI automatically detects notable situations and weaves them into the report:
 
-- **Aufholjagd** — Team lag zurück und dreht das Spiel
-- **Underdog-Sieg** — Gewonnen trotz deutlich weniger Ballbesitz
-- **xG-Überperformance** — Mehr Tore als statistisch erwartet
-- **Chancentod** — Viele Chancen, wenig Tore
-- **Serienbruch** — Eine Sieges- oder Niederlagenserie endet
-- **Karriere-Meilensteine** — Torjäger-Marke geknackt, Stammspieler-Status erreicht
+- **Comeback** — a team was behind and turned the match around
+- **Underdog win** — won despite significantly less possession
+- **xG overperformance** — more goals than expected
+- **Chance-waster** — many chances, few goals
+- **Streak broken** — a winning or losing streak ends
+- **Career milestones** — scoring milestones, reaching regular starter status
 
-### Beispiel-Output
+### Example output
 
-> *"Was für eine verrückte Aufholjagd von Borussia Dortmund! Atletico Madrid mit MaxMustermann und TestUser dominierte 80 Minuten lang das Spiel mit 80% Ballbesitz und führte bereits 2:0, doch dann schlug das Dortmunder Duo AnnaAbwehr und LisaKicker gnadenlos zurück. Trotz nur 20% Ballbesitz drehten die beiden BVB-Spielerinnen die Partie völlig und gewannen..."*
+> *"What a crazy comeback by Borussia Dortmund! Atletico Madrid with MaxMustermann and TestUser dominated for 80 minutes with 80% possession and were leading 2:0, but then the Dortmund duo AnnaAbwehr and LisaKicker struck back mercilessly. Despite only 20% possession the two BVB players completely turned the match and won..."*
 
-### Eigenschaften
+### Characteristics
 
-- **Automatisch** — wird generiert sobald Match-Stats vorhanden sind
-- **Gespeichert** — der Bericht wird in der Datenbank gespeichert und beim nächsten Besuch direkt angezeigt
-- **Personalisiert** — bezieht die Karrieredaten jedes Spielers mit ein
-- **3-5 Sätze** — kurz, knackig, unterhaltsam
+- **Automatic** — generated once match stats are available
+- **Saved** — the report is stored in the DB and shown on next visit
+- **Personalized** — includes each player's career data
+- **3–5 sentences** — short, punchy, entertaining
 
 ---
 
-## Technologie
+## Technology
 
-| Komponente | Technologie |
+| Component | Technology |
 |------------|------------|
-| **KI-Modell** | Claude (Anthropic) |
-| **Vision** | Claude Vision API für Screenshot-Analyse |
-| **Text** | Claude Text API für Berichte & Vorhersagen |
-| **Prompts** | Im Backend-Code als Konstanten hinterlegt |
-| **Caching** | Generierte Berichte werden in der DB gespeichert |
-| **Sprache** | Alle Outputs auf Deutsch |
+| **AI model** | Claude (Anthropic) |
+| **Vision** | Claude Vision API for screenshot analysis |
+| **Text** | Claude Text API for reports & predictions |
+| **Prompts** | Stored as constants in backend code |
+| **Caching** | Generated reports are cached in the DB |
+| **Language** | All outputs in German |
 
 ---
 
-[← Profil](PROFILE.md) · [Zurück zur Übersicht](../../README.md)
+[← Profile](PROFILE.md) · [Back to overview](../../README.md)

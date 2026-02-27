@@ -4,9 +4,9 @@
 
 # RasenBürosport Leipzig
 
-**Ergebnisse tracken. Statistiken analysieren. Legenden werden geboren.**
+**Track results. Analyze stats. Legends are born.**
 
-Die App, die aus jeder Kicker-Pause im Büro ein echtes Sportereignis macht.
+The app that turns every foosball break at the office into a real sporting event.
 
 ---
 
@@ -16,58 +16,56 @@ Die App, die aus jeder Kicker-Pause im Büro ein echtes Sportereignis macht.
 
 </div>
 
-## Was ist RasenBürosport?
+## What is RasenBürosport?
 
-RasenBürosport Leipzig verwandelt den Kicker-Tisch im Büro in eine professionelle Liga. Jedes 1v1-Duell, jedes 2v2-Teamspiel wird erfasst, analysiert und in eine lebendige Statistik-Welt eingebettet — komplett mit KI-generierten Spielberichten, Vorhersagen und einem Badge-System, das jeden Spieler motiviert.
-
-> Gebaut vom **RB Leipzig Data Unit Team**. Angetrieben von **Claude AI**. Designt als **Progressive Web App** für Smartphone, Tablet und Desktop.
+RasenBürosport Leipzig transforms the office foosball table into a professional league. Every 1v1 duel and every 2v2 team match is recorded, analyzed and embedded into a lively statistics world — complete with AI-generated match reports, predictions and a badge system that motivates every player.
 
 ---
 
-## Die App im Überblick
+## App Overview
 
-### Auf einen Blick
+### At a glance
 
 | | Feature | Beschreibung |
 |---|---------|-------------|
-| 📊 | **Live-Dashboard** | Serien, Aktivitätsfeed, Top-Spieler |
-| 🎮 | **Spiel-Wizard** | 3 Schritte: Spieler, Teams, Ergebnis |
-| 🔮 | **KI-Vorhersage** | Automatische Match-Prediction vor dem Spiel |
-| 📸 | **FC26-Integration** | Screenshot hochladen, KI liest Stats aus |
-| 📝 | **KI-Spielbericht** | Automatischer Spielbericht nach dem Match |
-| 🏆 | **Rangliste** | Punkte-System mit Zeitraumfilter |
-| ⚔️ | **Head-to-Head** | Direkter Vergleich zwischen zwei Spielern |
-| 🏅 | **15 Badges** | Freischaltbare Auszeichnungen |
-| 📈 | **Karriere-Stats** | xG-Effizienz, Ballbesitz, Passquote |
-| ⚽ | **Liga-Statistiken** | Performance pro Liga (Bundesliga, La Liga...) |
+| 📊 | **Live Dashboard** | Streaks, activity feed, top players |
+| 🎮 | **Match Wizard** | 3 steps: players, teams, score |
+| 🔮 | **AI Prediction** | Automatic match prediction before the game |
+| 📸 | **FC26 Integration** | Upload screenshot, AI reads stats |
+| 📝 | **AI Match Report** | Automatic match report after the game |
+| 🏆 | **Leaderboard** | Points system with time-range filters |
+| ⚔️ | **Head-to-Head** | Direct comparison between two players |
+| 🏅 | **15 Badges** | Unlockable achievements |
+| 📈 | **Career Stats** | xG efficiency, possession, pass accuracy |
+| ⚽ | **League Stats** | Performance per league (Bundesliga, La Liga...) |
 
 ---
 
 ## 📊 Dashboard
 
-Das Dashboard ist die Kommandozentrale. Hier siehst du sofort, was in der Liga los ist.
+The dashboard is the control center. Here you instantly see what's happening in the league.
 
 <div align="center">
 <img src="docs/screenshots/dashboard-1.png" width="300" />
 <img src="docs/screenshots/dashboard-2.png" width="300" />
 </div>
 
-**Was du siehst:**
+**What you see:**
 
-- **Persönliche Serie** — Bist du auf einer Siegesserie oder steckst du in einer Durststrecke?
-- **Deine letzten Spiele** — Ergebnisse mit Team-Avataren, Modus (1v1/2v2) und Datum
-- **Top 3 Spieler** — Wer führt die Rangliste an?
-- **Aktuelle Serien** — Alle Spieler im Überblick: Wer brennt, wer nicht
+- **Personal streak** — Are you on a winning streak or in a slump?
+- **Your recent matches** — Results with team avatars, mode (1v1/2v2) and date
+- **Top 3 players** — Who tops the leaderboard?
+- **Current streaks** — Overview of all players: who's hot, who's not
 
 > *"MaxMustermann steckt in einer Durststrecke... LisaKicker hat eine Siegesserie!"* — Das Dashboard erzählt die Geschichten der Liga.
 
-[Mehr zum Dashboard →](docs/features/DASHBOARD.md)
+[More about the dashboard →](docs/features/DASHBOARD.md)
 
 ---
 
-## 🎮 Neues Spiel
+## 🎮 New Match
 
-Ein neues Spiel ist in drei Schritten erfasst. Kein Overhead, kein Papierkram.
+A new match is recorded in three steps. No overhead, no paperwork.
 
 <div align="center">
 <img src="docs/screenshots/wizard-step1-players.png" width="250" />
@@ -75,31 +73,31 @@ Ein neues Spiel ist in drei Schritten erfasst. Kein Overhead, kein Papierkram.
 <img src="docs/screenshots/wizard-step3-score.png" width="250" />
 </div>
 
-| Schritt | Was passiert |
+| Step | What happens |
 |---------|-------------|
-| **1. Spieler** | Tippe auf Spieler um sie Heim/Auswärts zuzuweisen. 1v1 oder 2v2 wird automatisch erkannt. |
-| **2. Teams** | Wähle aus 500+ echten Vereinen weltweit — mit Länderflaggen und Liga-Zuordnung. |
-| **3. Ergebnis** | Tor für Tor eintragen. Verlängerung & Elfmeterschießen inklusive. Optional: FC26-Screenshot. |
+| **1. Players** | Tap players to assign home/away. 1v1 or 2v2 is detected automatically. |
+| **2. Teams** | Choose from 500+ real clubs worldwide — with country flags and league assignment. |
+| **3. Score** | Enter goals one-by-one. Extra time & penalties supported. Optional: FC26 screenshot. |
 
-Sobald Spieler und Teams feststehen, generiert die **KI automatisch eine Match-Vorhersage** — noch bevor das erste Tor fällt.
+[Once players and teams are set, the **AI automatically generates a match prediction** — even before the first goal is scored.]
 
-[Mehr zum Spielassistenten →](docs/features/NEW_GAME.md)
+[More about the match wizard →](docs/features/NEW_GAME.md)
 
 ---
 
-## 🏟️ Spieldetails
+## 🏟️ Match Details
 
-Jedes Spiel wird zu einer eigenen Geschichte — mit Spielverlauf, Statistiken und KI-Analyse.
+Every match becomes its own story — with play-by-play, statistics and AI analysis.
 
 <div align="center">
 <img src="docs/screenshots/game-detail.png" width="300" />
 <img src="docs/screenshots/spiele-details-3.png" width="300" />
 </div>
 
-- **Großes Score-Display** mit Vereinsnamen und Länderflaggen
-- **Vertikale Timeline** — jedes Tor chronologisch dargestellt, von unten nach oben
-- **Verlängerung & Elfmeterschießen** werden visuell getrennt mit n.V. / n.E. Markierungen
-- **Team-Aufstellungen** mit Spieler-Avataren
+- **Large score display** with club names and country flags
+- **Vertical timeline** — each goal shown chronologically, from bottom to top
+- **Extra time & penalties** are visually separated with n.V. / n.E. labels
+- **Team lineups** with player avatars
 
 Wenn FC26-Statistiken vorhanden sind, werden diese als interaktiver Vergleich angezeigt — und ein **KI-Spielbericht** wird automatisch generiert.
 
@@ -107,27 +105,27 @@ Wenn FC26-Statistiken vorhanden sind, werden diese als interaktiver Vergleich an
 <img src="docs/screenshots/match-stats.png" width="300" />
 </div>
 
-[Mehr zu Spieldetails →](docs/features/GAME_DETAIL.md)
+[More about match details →](docs/features/GAME_DETAIL.md)
 
 ---
 
-## 🏆 Rangliste
+## 🏆 Leaderboard
 
-Zwei Perspektiven auf die Liga — für faire Vergleiche.
+Two perspectives on the league — for fair comparisons.
 
 <div align="center">
 <img src="docs/screenshots/leaderboard.png" width="300" />
 <img src="docs/screenshots/rangliste-2.png" width="300" />
 </div>
 
-| Modus | Logik |
+| Mode | Logic |
 |-------|-------|
-| **Gesamt** | 3 Punkte pro Sieg, 1 pro Unentschieden. Die klassische Tabelle. |
-| **Pro Spiel** | Punkte geteilt durch Anzahl Spiele. Fair bei unterschiedlicher Spielanzahl. |
+| **Overall** | 3 points per win, 1 per draw. Classic table. |
+| **Per Match** | Points divided by number of matches. Fair when players have different match counts. |
 
-**Zeitraumfilter**: Gesamt · 7 Tage · 30 Tage · 90 Tage
+**Time range filter**: Overall · 7 days · 30 days · 90 days
 
-Tippe auf einen Spieler für den **direkten Vergleich**:
+Tap a player for the **direct comparison**:
 
 <div align="center">
 <img src="docs/screenshots/h2h.png" width="300" />
@@ -135,114 +133,114 @@ Tippe auf einen Spieler für den **direkten Vergleich**:
 
 > *31 Spiele, 19 Siege, 2 Unentschieden, 10 Niederlagen* — der Head-to-Head zeigt die vollständige Bilanz inkl. der letzten Duelle.
 
-[Mehr zur Rangliste →](docs/features/LEADERBOARD.md)
+[More on the leaderboard →](docs/features/LEADERBOARD.md)
 
 ---
 
-## 👤 Profil
+## 👤 Profile
 
-Das Profil ist das Herzstück deiner Kicker-Karriere — alles was du jemals am Tisch geleistet hast, auf einen Blick.
+The profile is the heart of your foosball career — everything you've ever done at the table, at a glance.
 
 <div align="center">
 <img src="docs/screenshots/profile-stats.png" width="300" />
 <img src="docs/screenshots/career-stats.png" width="300" />
 </div>
 
-**Statistiken**: 50 Spiele, 32 Siege, 64% Siegquote — getrennt nach 1v1 und 2v2.
+**Statistics**: 50 matches, 32 wins, 64% win rate — split between 1v1 and 2v2.
 
-**Karriere-Statistiken** aus 28 Spielen mit FC26-Daten:
+**Career stats** from 28 matches with FC26 data:
 
-- 54% Ø Ballbesitz
-- 88% Ø Passgenauigkeit
-- 1,08x xG-Effizienz
-- 59% Ø Zweikampfquote
+- 54% avg. possession
+- 88% avg. pass accuracy
+- 1.08x xG efficiency
+- 59% avg. duels won
 
 **11 von 15 Badges** freigeschaltet — vom Tiki-Taka-Meister bis zum Seriensieger.
 
 **Liga-Statistiken**: 86% Siegquote in La Liga, 71% in der Bundesliga.
 
-[Mehr zum Profil →](docs/features/PROFILE.md)
+[More about the profile →](docs/features/PROFILE.md)
 
 ---
 
-## 🤖 KI-Features
+## 🤖 AI Features
 
-Drei KI-Features, angetrieben von **Claude (Anthropic)**, machen RasenBürosport einzigartig.
+Three AI features powered by **Claude (Anthropic)** make RasenBürosport unique.
 
-### 1. Match-Vorhersage
+### 1. Match Prediction
 
 <div align="center">
 <img src="docs/screenshots/match-prediction.png" width="300" />
 </div>
 
-Wird **automatisch generiert** sobald Spieler und Teams ausgewählt sind. Die KI analysiert:
+Is **automatically generated** once players and teams are selected. The AI analyzes:
 
-- Aktuelle Form und Siegquoten aller Spieler
-- Head-to-Head-Bilanz der Gegner
-- xG-Effizienz und Karriere-Statistiken
-- Lieblingsteams und deren Einfluss auf die Motivation
+- Current form and win rates of all players
+- Head-to-head records between opponents
+- xG efficiency and career statistics
+- Favorite teams and their motivational impact
 
-### 2. FC26-Stats-Extraktion
+### 2. FC26 Stats Extraction
 
 <div align="center">
 <img src="docs/screenshots/game-match-stats.jpg" width="400" />
 </div>
 
-Lade einfach einen Screenshot der FC26-Nachspielstatistiken hoch. **Claude Vision** erkennt und extrahiert automatisch alle 14 Statistik-Werte — von Ballbesitz über xG bis zu Gelben Karten.
+Simply upload a screenshot of the FC26 post-match statistics. **Claude Vision** recognizes and automatically extracts all 14 statistic values — from possession to xG to yellow cards.
 
-### 3. KI-Spielbericht
+### 3. AI Match Report
 
 <div align="center">
 <img src="docs/screenshots/match-report.png" width="300" />
 </div>
 
-Wird **automatisch generiert** wenn Statistiken vorliegen. Der Bericht ist unterhaltsam, auf Deutsch, und erkennt besondere Narratives:
+Is **automatically generated** when statistics are available. The report is entertaining, written in German, and recognizes special narratives:
 
-- Underdog-Siege trotz wenig Ballbesitz
-- xG-Überperformance ("Chancentod wird zum Vollstrecker")
-- Serienbrüche und historische Meilensteine
-- Karriere-Kontext der einzelnen Spieler
+- Underdog victories despite low possession
+- xG overperformance ("from chance-waster to finisher")
+- Breaking streaks and historical milestones
+- Career context for individual players
 
-[Mehr zu den KI-Features →](docs/features/AI_FEATURES.md)
+[More about the AI features →](docs/features/AI_FEATURES.md)
 
 ---
 
-## Technologie
+## Technology
 
-| Bereich | Stack |
+| Area | Stack |
 |---------|-------|
 | **Frontend** | Svelte 5, SvelteKit, TailwindCSS 4 |
 | **Backend** | Fastify 5, Node.js 24 |
-| **Datenbank** | Supabase (PostgreSQL + Storage) |
-| **KI** | Claude API — Anthropic (Vision + Text) |
+| **Database** | Supabase (PostgreSQL + Storage) |
+| **AI** | Claude API — Anthropic (Vision + Text) |
 | **Auth** | Supabase Auth (Invite-only) |
-| **App-Typ** | Progressive Web App (PWA) |
-| **Sprachen** | Deutsch & Englisch (Tolgee i18n) |
+| **App Type** | Progressive Web App (PWA) |
+| **Languages** | German & English (Tolgee i18n) |
 | **Design** | Mobile-first, Dark Theme |
 
 ---
 
 ## Installation
 
-RasenBürosport ist eine **Progressive Web App** — kein App Store nötig.
+RasenBürosport is a **Progressive Web App** — no app store required.
 
-1. Öffne die App im Browser (Chrome / Safari)
-2. Tippe auf **"Zum Startbildschirm hinzufügen"**
-3. Die App erscheint wie eine native App auf deinem Homescreen
+1. Open the app in your browser (Chrome / Safari)
+2. Tap **"Add to Home Screen"**
+3. The app will appear like a native app on your home screen
 
-Funktioniert auf **iOS**, **Android** und **Desktop**.
+Works on **iOS**, **Android** and **Desktop**.
 
 ---
 
-## Spielhistorie
+## Match History
 
-Alle Spiele auf einen Blick — mit Ergebnis, Modus, Datum und Spieler-Avataren.
+All matches at a glance — with result, mode, date and player avatars.
 
 <div align="center">
 <img src="docs/screenshots/spiele-1.png" width="300" />
 </div>
 
-Siege in Grün, Niederlagen in Rot — scrolle durch deine komplette Kicker-Geschichte. Tippe auf ein Spiel für die Detailansicht.
+Wins in green, losses in red — scroll through your full foosball history. Tap a match for details.
 
 ---
 
@@ -250,8 +248,8 @@ Siege in Grün, Niederlagen in Rot — scrolle durch deine komplette Kicker-Gesc
 
 ---
 
-**RasenBürosport Leipzig** — Wo Büro-Kicker auf Datenanalyse trifft.
+**RasenBürosport Leipzig** — Where office foosball meets data analysis.
 
-*Entwickelt mit Leidenschaft vom RB Leipzig Data Unit Team*
+*Built with passion and AI*
 
 </div>

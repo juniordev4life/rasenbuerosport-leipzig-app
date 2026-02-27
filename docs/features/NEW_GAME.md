@@ -1,76 +1,77 @@
-[← Zurück zur Übersicht](../../README.md)
+[← Back to overview](../../README.md)
 
-# 🎮 Neues Spiel
+# 🎮 New Match
 
-Der Spiel-Wizard führt in drei Schritten von der Spielerauswahl bis zum fertigen Ergebnis.
+The match wizard guides you in three steps from player selection to the final result.
 
 ---
 
-## Schritt 1 — Spieler auswählen
+## Step 1 — select players
 
 <div align="center">
 <img src="../screenshots/wizard-step1-players.png" width="320" />
 </div>
 
-- Alle registrierten Spieler werden angezeigt
-- **Tippe** auf einen Spieler, um ihn einem Team zuzuweisen
-- Das Heim-Team (rot) steht links, das Auswärts-Team (blau) rechts
-- Der **Spielmodus** (1v1 / 2v2) wird automatisch erkannt
-- **Gäste** können für spontane Mitspieler hinzugefügt werden
-- Ausgewählte Spieler werden farblich hervorgehoben
+- All registered players are shown
+- **Tap** a player to assign them to a team
+- The home team (red) appears on the left, the away team (blue) on the right
+- The **match mode** (1v1 / 2v2) is detected automatically
+- **Guests** can be added for spontaneous participants
+- Selected players are highlighted
 
 ---
 
-## Schritt 2 — Teams auswählen
+## Step 2 — choose teams
 
 <div align="center">
 <img src="../screenshots/wizard-step2-teams.png.png" width="320" />
 </div>
 
-- Wähle aus **500+ echten Vereinen** weltweit
-- **Autocomplete-Suche**: Tippe den Vereinsnamen ein
-- Vereine aus allen Top-Ligen: Bundesliga, Premier League, La Liga, Serie A, Ligue 1 und mehr
-- Jeder Verein hat seine **Länderflagge** und **Liga-Zuordnung**
-- Die gewählten Teams fließen in die **Liga-Statistiken** auf dem Profil ein
+- Choose from **500+ real clubs** worldwide
+- **Autocomplete search**: type the club name
+- Clubs from top leagues: Bundesliga, Premier League, La Liga, Serie A, Ligue 1 and more
+- Each club shows a **country flag** and **league assignment**
+- Selected teams are included in the **league stats** on the profile
 
 ---
 
-## Schritt 3 — Ergebnis & KI-Vorhersage
+## Step 3 — score & AI prediction
 
 <div align="center">
 <img src="../screenshots/wizard-step3-score.png" width="320" />
 </div>
 
-Sobald du Schritt 3 erreichst, passieren zwei Dinge gleichzeitig:
+When you reach step 3, two things happen at once:
 
-### KI-Match-Vorhersage
+### AI match prediction
 
-Die KI analysiert **automatisch** alle historischen Daten und liefert eine Vorhersage. Dabei berücksichtigt sie:
-- Aktuelle Form und Siegquoten aller Spieler
-- Head-to-Head-Bilanz zwischen den Gegnern
-- xG-Effizienz und Karrierestatistiken
-- Lieblingsteams und deren motivatorischen Einfluss
-- Geschätztes Endergebnis
+The AI **automatically** analyzes historical data and provides a prediction. It considers:
 
-### Ergebnis eintragen
+- Current form and win rates of all players
+- Head-to-head records between opponents
+- xG efficiency and career stats
+- Favorite teams and their motivational influence
+- Estimated final score
 
-- **Tor für Tor** eintragen — jedes Tor wird einzeln erfasst
-- Vollständiger **Spielverlauf** (Score-Timeline)
-- **Verlängerung** (n.V.) und **Elfmeterschießen** (n.E.) möglich
-- Optional: **FC26-Statistik-Screenshot** direkt anhängen
+### Entering the score
 
-### FC26-Stats (optional)
+- Enter goals **one by one** — each goal is recorded separately
+- Full **match timeline** (score timeline)
+- **Extra time** (n.V.) and **penalties** (n.E.) supported
+- Optional: attach an **FC26 stats screenshot** directly
 
-Am Ende des Wizards kann ein Screenshot der FC26-Nachspielstatistiken hochgeladen werden. Die KI extrahiert automatisch alle Werte — und auf der Spieldetailseite wird dann ein **automatischer Spielbericht** generiert.
+### FC26 stats (optional)
 
----
-
-## Nach dem Speichern
-
-- Das Spiel erscheint sofort im **Dashboard**, in der **Spielhistorie** und in der **Rangliste**
-- Alle Statistiken, Serien und Badges werden automatisch aktualisiert
-- Bei hochgeladenen Stats: Weiterleitung zur Spieldetailseite mit Statistiken und KI-Bericht
+At the end of the wizard you can upload a screenshot of the FC26 post-match stats. The AI automatically extracts all values — and an **automatic match report** is generated on the match detail page.
 
 ---
 
-[← Dashboard](DASHBOARD.md) · [Zurück zur Übersicht](../../README.md) · [Spieldetails →](GAME_DETAIL.md)
+## After saving
+
+- The match appears immediately on the **dashboard**, in **match history** and on the **leaderboard**
+- All stats, streaks and badges are updated automatically
+- If stats were uploaded: the app redirects to the match detail page with stats and the AI report
+
+---
+
+[← Dashboard](DASHBOARD.md) · [Back to overview](../../README.md) · [Match Details →](GAME_DETAIL.md)
