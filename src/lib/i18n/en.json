@@ -97,7 +97,10 @@
 		"tab_total": "Total",
 		"tab_per_game": "Per Game",
 		"ppg_label": "Pts/Game",
-		"period_all": "All time"
+		"period_all": "All time",
+		"mode_all": "All",
+		"mode_1v1": "1v1",
+		"mode_2v2": "2v2"
 	},
 	"h2h": {
 		"title": "Head to Head",

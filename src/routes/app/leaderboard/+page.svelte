@@ -11,6 +11,7 @@
 	let selectedPlayerId = $state(null);
 	let viewMode = $state("total");
 	let selectedPeriod = $state("all");
+	let selectedMode = $state("all");
 
 	const ONE_MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 	const MIN_GAMES_PPG = 3;
@@ -83,6 +84,9 @@
 	});
 
 	$effect(() => {
+		// Track reactive dependencies — re-fetch on period or mode change
+		periodDateRange;
+		selectedMode;
 		loadLeaderboard();
 	});
 
@@ -96,6 +100,9 @@
 			if (periodDateRange.to) {
 				url += `&to=${periodDateRange.to}`;
 			}
+			if (selectedMode !== "all") {
+				url += `&mode=${selectedMode}`;
+			}
 			const res = await get(url);
 			players = res.data || [];
 		} catch (err) {
@@ -108,7 +115,6 @@
 	/** Reload leaderboard when period changes */
 	function handlePeriodChange(event) {
 		selectedPeriod = event.target.value;
-		loadLeaderboard();
 	}
 
 	/** Sorted & filtered players based on view mode */
@@ -200,6 +206,26 @@
 				<option value={option.value}>{option.label}</option>
 			{/each}
 		</select>
+	</div>
+
+	<!-- Game Mode Filter -->
+	<div class="flex bg-bg-secondary border border-border rounded-lg p-1 gap-1">
+		{#each [
+			{ value: "all", label: $t("leaderboard.mode_all") },
+			{ value: "1v1", label: $t("leaderboard.mode_1v1") },
+			{ value: "2v2", label: $t("leaderboard.mode_2v2") }
+		] as option (option.value)}
+			<button
+				type="button"
+				onclick={() => (selectedMode = option.value)}
+				class="flex-1 text-center py-1.5 text-sm rounded-md transition-colors
+					{selectedMode === option.value
+						? 'bg-accent-red text-white font-semibold'
+						: 'text-text-secondary hover:text-text-primary'}"
+			>
+				{option.label}
+			</button>
+		{/each}
 	</div>
 
 	<!-- Tab Navigation -->

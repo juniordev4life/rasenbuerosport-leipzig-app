@@ -99,7 +99,10 @@
 		"tab_total": "Gesamt",
 		"tab_per_game": "Pro Spiel",
 		"ppg_label": "Pkt/Spiel",
-		"period_all": "Gesamt"
+		"period_all": "Gesamt",
+		"mode_all": "Alle",
+		"mode_1v1": "1v1",
+		"mode_2v2": "2v2"
 	},
 	"h2h": {
 		"title": "Direkter Vergleich",
