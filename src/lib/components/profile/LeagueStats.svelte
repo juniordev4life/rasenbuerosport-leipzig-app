@@ -1,7 +1,8 @@
 <script>
 	import { getTranslate } from "@tolgee/svelte";
 	import { user } from "$lib/stores/auth.stores.js";
-	import { getTeamByName, getCountryFlag } from "$lib/constants/teams.constants.js";
+	import { getAllTeams } from "$lib/services/teams.services.js";
+	import { getCountryFlag } from "$lib/constants/teams.constants.js";
 
 	/**
 	 * LeagueStats - Shows win rate per football league
@@ -13,11 +14,23 @@
 
 	const userId = $derived($user?.id);
 
+	/** @type {Map<string, import('$lib/services/teams.services.js').TeamData>} */
+	let teamsMap = $state(new Map());
+
+	// Pre-resolve all teams once
+	$effect(() => {
+		getAllTeams().then((teams) => {
+			teamsMap = new Map(teams.map((t) => [t.name, t]));
+		});
+	});
+
 	/**
 	 * Aggregate W/D/L per league from game data
 	 * @returns {{ league: string, country: string, wins: number, draws: number, losses: number, total: number, winRate: number }[]}
 	 */
 	const leagueData = $derived.by(() => {
+		if (teamsMap.size === 0) return [];
+
 		const leagueMap = {};
 
 		for (const game of games) {
@@ -27,11 +40,12 @@
 			const userEntry = game.game_players.find((p) => p.player_id === userId);
 			if (!userEntry?.team_name) continue;
 
-			const teamInfo = getTeamByName(userEntry.team_name);
+			const teamInfo = teamsMap.get(userEntry.team_name);
 			if (!teamInfo) continue;
 
-			const league = teamInfo.league;
-			const country = teamInfo.country;
+			const league = teamInfo.league_name;
+			const country = teamInfo.country_code;
+			if (!league) continue;
 
 			if (!leagueMap[league]) {
 				leagueMap[league] = { league, country, wins: 0, draws: 0, losses: 0, total: 0 };

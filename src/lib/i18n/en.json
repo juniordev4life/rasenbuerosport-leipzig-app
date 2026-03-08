@@ -221,6 +221,15 @@
 		"loading": "Analyzing...",
 		"error": "Failed to generate prediction"
 	},
+	"teams": {
+		"title": "Teams",
+		"search_placeholder": "Search teams...",
+		"all_leagues": "All Leagues",
+		"sort_name": "Name",
+		"sort_rating": "Rating",
+		"no_results": "No teams found",
+		"team_count": "{count} teams"
+	},
 	"match_stats": {
 		"title": "Match Statistics",
 		"upload_title": "Upload Stats Screenshot",

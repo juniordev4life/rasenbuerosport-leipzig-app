@@ -4,7 +4,11 @@
 	import { getTranslate } from "@tolgee/svelte";
 	import { get } from "$lib/services/api.services.js";
 	import { user } from "$lib/stores/auth.stores.js";
-	import { getTeamByName, getCountryFlag } from "$lib/constants/teams.constants.js";
+	import { getTeamByName } from "$lib/services/teams.services.js";
+	import { getCountryFlag } from "$lib/constants/teams.constants.js";
+	import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
+	import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
+	import StarRating from "$lib/components/ui/StarRating.svelte";
 	import MatchStatsDisplay from "$lib/components/games/MatchStatsDisplay.svelte";
 	import MatchStatsUpload from "$lib/components/games/MatchStatsUpload.svelte";
 	import MatchReport from "$lib/components/games/MatchReport.svelte";
@@ -59,18 +63,6 @@
 		isDraw ? "text-warning" : isWin ? "text-success" : userTeam ? "text-error" : "text-text-secondary",
 	);
 
-	/** Get team info (flag + league) from team name */
-	function getTeamInfo(teamName) {
-		if (!teamName) return null;
-		const team = getTeamByName(teamName);
-		if (!team) return { name: teamName, flag: "", league: "" };
-		return {
-			name: team.name,
-			flag: getCountryFlag(team.country),
-			league: team.league,
-		};
-	}
-
 	/** Get the team name used by a side */
 	function getSideTeamName(players) {
 		for (const p of players) {
@@ -81,8 +73,27 @@
 
 	const homeTeamName = $derived(getSideTeamName(homePlayers));
 	const awayTeamName = $derived(getSideTeamName(awayPlayers));
-	const homeTeamInfo = $derived(getTeamInfo(homeTeamName));
-	const awayTeamInfo = $derived(getTeamInfo(awayTeamName));
+
+	/** @type {import('$lib/services/teams.services.js').TeamData|null} */
+	let homeTeamData = $state(null);
+	/** @type {import('$lib/services/teams.services.js').TeamData|null} */
+	let awayTeamData = $state(null);
+
+	// Resolve team data asynchronously
+	$effect(() => {
+		if (homeTeamName) {
+			getTeamByName(homeTeamName).then((t) => {
+				homeTeamData = t || null;
+			});
+		}
+	});
+	$effect(() => {
+		if (awayTeamName) {
+			getTeamByName(awayTeamName).then((t) => {
+				awayTeamData = t || null;
+			});
+		}
+	});
 
 	const formattedDate = $derived(
 		game
@@ -165,10 +176,17 @@
 			<!-- Big Score -->
 			<div class="flex items-center justify-center gap-6 mt-4">
 				<div class="flex flex-col items-center gap-1">
-					{#if homeTeamInfo}
+					{#if homeTeamData}
+						<TeamLogo logoUrl={homeTeamData.logo_url} teamName={homeTeamData.name} size="lg" />
 						<span class="text-sm text-text-secondary">
-							{homeTeamInfo.flag} {homeTeamInfo.name}
+							{getCountryFlag(homeTeamData.country_code)} {homeTeamData.name}
 						</span>
+						<div class="flex items-center gap-1">
+							<OvrBadge rating={homeTeamData.overall_rating} size="xs" />
+							<StarRating rating={homeTeamData.star_rating} size="xs" />
+						</div>
+					{:else if homeTeamName}
+						<span class="text-sm text-text-secondary">{homeTeamName}</span>
 					{/if}
 					<span class="text-5xl font-bold {resultColor}">{game.score_home}</span>
 				</div>
@@ -176,10 +194,17 @@
 				<span class="text-3xl font-bold text-text-secondary">:</span>
 
 				<div class="flex flex-col items-center gap-1">
-					{#if awayTeamInfo}
+					{#if awayTeamData}
+						<TeamLogo logoUrl={awayTeamData.logo_url} teamName={awayTeamData.name} size="lg" />
 						<span class="text-sm text-text-secondary">
-							{awayTeamInfo.flag} {awayTeamInfo.name}
+							{getCountryFlag(awayTeamData.country_code)} {awayTeamData.name}
 						</span>
+						<div class="flex items-center gap-1">
+							<OvrBadge rating={awayTeamData.overall_rating} size="xs" />
+							<StarRating rating={awayTeamData.star_rating} size="xs" />
+						</div>
+					{:else if awayTeamName}
+						<span class="text-sm text-text-secondary">{awayTeamName}</span>
 					{/if}
 					<span class="text-5xl font-bold {resultColor}">{game.score_away}</span>
 				</div>

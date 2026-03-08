@@ -6,5 +6,6 @@ export const ROUTES = {
 	GAMES: "/app/games",
 	NEW_GAME: "/app/games/new",
 	GAME_DETAIL: "/app/games",
+	TEAMS: "/app/teams",
 	PROFILE: "/app/profile",
 };

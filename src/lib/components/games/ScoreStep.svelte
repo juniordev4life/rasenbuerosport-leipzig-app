@@ -3,6 +3,8 @@
 	import { tick } from "svelte";
 	import ScoreCounter from "./ScoreCounter.svelte";
 	import Button from "$lib/components/ui/Button.svelte";
+	import { getTeamByName } from "$lib/services/teams.services.js";
+	import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
 
 	/**
 	 * ScoreStep - Step 3 of new game wizard
@@ -22,6 +24,18 @@
 	} = $props();
 
 	const { t } = getTranslate();
+
+	/** @type {import('$lib/services/teams.services.js').TeamData|null} */
+	let homeTeamData = $state(null);
+	/** @type {import('$lib/services/teams.services.js').TeamData|null} */
+	let awayTeamData = $state(null);
+
+	$effect(() => {
+		if (homeTeam) getTeamByName(homeTeam).then((t) => { homeTeamData = t || null; });
+	});
+	$effect(() => {
+		if (awayTeam) getTeamByName(awayTeam).then((t) => { awayTeamData = t || null; });
+	});
 
 	/** Track previous total score to detect increment vs decrement */
 	let prevTotal = $state(0);
@@ -115,6 +129,9 @@
 		</h3>
 		<div class="flex items-center justify-center gap-6">
 			<div class="flex flex-col items-center gap-1">
+				{#if homeTeamData?.logo_url}
+					<TeamLogo logoUrl={homeTeamData.logo_url} teamName={homeTeamData.name} size="sm" />
+				{/if}
 				<span class="text-[10px] text-text-secondary">{homeTeam}</span>
 				<ScoreCounter bind:value={scoreHome} onchange={handleScoreChange} />
 			</div>
@@ -122,6 +139,9 @@
 			<span class="text-3xl font-bold text-text-secondary mt-4">:</span>
 
 			<div class="flex flex-col items-center gap-1">
+				{#if awayTeamData?.logo_url}
+					<TeamLogo logoUrl={awayTeamData.logo_url} teamName={awayTeamData.name} size="sm" />
+				{/if}
 				<span class="text-[10px] text-text-secondary">{awayTeam}</span>
 				<ScoreCounter bind:value={scoreAway} onchange={handleScoreChange} />
 			</div>

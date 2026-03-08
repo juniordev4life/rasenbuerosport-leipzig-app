@@ -1,6 +1,8 @@
 <script>
 	import { getTranslate } from "@tolgee/svelte";
 	import { user } from "$lib/stores/auth.stores.js";
+	import { getTeamByName } from "$lib/services/teams.services.js";
+	import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
 
 	let { game } = $props();
 
@@ -12,6 +14,21 @@
 	const awayPlayers = $derived(
 		game.game_players?.filter((p) => p.team === "away") || [],
 	);
+
+	const homeTeamName = $derived(homePlayers.find((p) => p.team_name)?.team_name);
+	const awayTeamName = $derived(awayPlayers.find((p) => p.team_name)?.team_name);
+
+	/** @type {import('$lib/services/teams.services.js').TeamData|null} */
+	let homeTeamData = $state(null);
+	/** @type {import('$lib/services/teams.services.js').TeamData|null} */
+	let awayTeamData = $state(null);
+
+	$effect(() => {
+		if (homeTeamName) getTeamByName(homeTeamName).then((t) => { homeTeamData = t || null; });
+	});
+	$effect(() => {
+		if (awayTeamName) getTeamByName(awayTeamName).then((t) => { awayTeamData = t || null; });
+	});
 
 	const userId = $derived($user?.id);
 
@@ -75,24 +92,29 @@
 
 	<!-- Game content -->
 	<div class="flex-1 flex items-center justify-center gap-2 min-w-0">
-		<!-- Home avatars (fixed width for alignment) -->
-		<div class="w-14 flex items-center justify-end -space-x-1.5 shrink-0">
-			{#each homePlayers as player (player.player_id)}
-				{#if player.profiles?.avatar_url}
-					<img
-						src={player.profiles.avatar_url}
-						alt={player.profiles?.username || "?"}
-						class="w-8 h-8 rounded-full object-cover ring-2 ring-bg-secondary"
-					/>
-				{:else}
-					<div
-						class="w-8 h-8 rounded-full bg-accent-red/20 ring-2 ring-bg-secondary flex items-center justify-center text-[10px] font-bold text-text-primary"
-						title={player.profiles?.username || "?"}
-					>
-						{getInitial(player)}
-					</div>
-				{/if}
-			{/each}
+		<!-- Home side -->
+		<div class="w-16 flex flex-col items-end gap-1 shrink-0">
+			{#if homeTeamData?.logo_url}
+				<TeamLogo logoUrl={homeTeamData.logo_url} teamName={homeTeamData.name} size="sm" />
+			{/if}
+			<div class="flex items-center justify-end -space-x-1.5">
+				{#each homePlayers as player (player.player_id)}
+					{#if player.profiles?.avatar_url}
+						<img
+							src={player.profiles.avatar_url}
+							alt={player.profiles?.username || "?"}
+							class="w-7 h-7 rounded-full object-cover ring-2 ring-bg-secondary"
+						/>
+					{:else}
+						<div
+							class="w-7 h-7 rounded-full bg-accent-red/20 ring-2 ring-bg-secondary flex items-center justify-center text-[10px] font-bold text-text-primary"
+							title={player.profiles?.username || "?"}
+						>
+							{getInitial(player)}
+						</div>
+					{/if}
+				{/each}
+			</div>
 		</div>
 
 		<!-- Score center (fixed width) -->
@@ -106,24 +128,29 @@
 			<span class="text-[10px] text-text-secondary">{game.mode}</span>
 		</div>
 
-		<!-- Away avatars (fixed width for alignment) -->
-		<div class="w-14 flex items-center justify-start -space-x-1.5 shrink-0">
-			{#each awayPlayers as player (player.player_id)}
-				{#if player.profiles?.avatar_url}
-					<img
-						src={player.profiles.avatar_url}
-						alt={player.profiles?.username || "?"}
-						class="w-8 h-8 rounded-full object-cover ring-2 ring-bg-secondary"
-					/>
-				{:else}
-					<div
-						class="w-8 h-8 rounded-full bg-blue-500/20 ring-2 ring-bg-secondary flex items-center justify-center text-[10px] font-bold text-text-primary"
-						title={player.profiles?.username || "?"}
-					>
-						{getInitial(player)}
-					</div>
-				{/if}
-			{/each}
+		<!-- Away side -->
+		<div class="w-16 flex flex-col items-start gap-1 shrink-0">
+			{#if awayTeamData?.logo_url}
+				<TeamLogo logoUrl={awayTeamData.logo_url} teamName={awayTeamData.name} size="sm" />
+			{/if}
+			<div class="flex items-center justify-start -space-x-1.5">
+				{#each awayPlayers as player (player.player_id)}
+					{#if player.profiles?.avatar_url}
+						<img
+							src={player.profiles.avatar_url}
+							alt={player.profiles?.username || "?"}
+							class="w-7 h-7 rounded-full object-cover ring-2 ring-bg-secondary"
+						/>
+					{:else}
+						<div
+							class="w-7 h-7 rounded-full bg-blue-500/20 ring-2 ring-bg-secondary flex items-center justify-center text-[10px] font-bold text-text-primary"
+							title={player.profiles?.username || "?"}
+						>
+							{getInitial(player)}
+						</div>
+					{/if}
+				{/each}
+			</div>
 		</div>
 	</div>
 

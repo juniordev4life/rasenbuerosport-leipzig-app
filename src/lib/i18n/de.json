@@ -223,6 +223,15 @@
 		"loading": "Analysiere...",
 		"error": "Vorhersage konnte nicht generiert werden"
 	},
+	"teams": {
+		"title": "Teams",
+		"search_placeholder": "Teams suchen...",
+		"all_leagues": "Alle Ligen",
+		"sort_name": "Name",
+		"sort_rating": "Bewertung",
+		"no_results": "Keine Teams gefunden",
+		"team_count": "{count} Teams"
+	},
 	"match_stats": {
 		"title": "Spielstatistiken",
 		"upload_title": "Stats-Screenshot hochladen",

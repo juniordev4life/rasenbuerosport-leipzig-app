@@ -1,6 +1,9 @@
 <script>
 	import { getTranslate } from "@tolgee/svelte";
-	import { FOOTBALL_TEAMS, getCountryFlag } from "$lib/constants/teams.constants.js";
+	import { getAllTeams, searchTeams } from "$lib/services/teams.services.js";
+	import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
+	import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
+	import StarRating from "$lib/components/ui/StarRating.svelte";
 
 	let { value = $bindable("") } = $props();
 
@@ -9,15 +12,22 @@
 	let inputValue = $state(value);
 	let showSuggestions = $state(false);
 	let highlightIndex = $state(-1);
+	let suggestions = $state([]);
 
-	const suggestions = $derived.by(() => {
-		if (!inputValue || inputValue.length < 1) return [];
-		const query = inputValue.toLowerCase();
-		return FOOTBALL_TEAMS.filter(
-			(team) =>
-				team.name.toLowerCase().includes(query) ||
-				team.league.toLowerCase().includes(query),
-		).slice(0, 8);
+	// Preload teams cache on mount
+	$effect(() => {
+		getAllTeams();
+	});
+
+	// Search suggestions when input changes
+	$effect(() => {
+		if (!inputValue || inputValue.length < 1) {
+			suggestions = [];
+			return;
+		}
+		searchTeams(inputValue, 8).then((results) => {
+			suggestions = results;
+		});
 	});
 
 	function selectTeam(team) {
@@ -87,7 +97,7 @@
 
 	{#if showSuggestions && suggestions.length > 0}
 		<ul
-			class="absolute z-10 w-full mt-1 bg-bg-secondary border border-border rounded-lg overflow-hidden shadow-lg max-h-48 overflow-y-auto"
+			class="absolute z-10 w-full mt-1 bg-bg-secondary border border-border rounded-lg overflow-hidden shadow-lg max-h-64 overflow-y-auto"
 		>
 			{#each suggestions as team, i (team.name)}
 				<li>
@@ -96,10 +106,14 @@
 						class="w-full text-left px-3 py-2 text-sm transition-colors flex items-center justify-between gap-2 {i === highlightIndex ? 'bg-accent-red text-white' : 'text-text-primary hover:bg-bg-input'}"
 						onmousedown={() => selectTeam(team)}
 					>
-						<span class="truncate">{getCountryFlag(team.country)} {team.name}</span>
-						<span class="text-[10px] shrink-0 {i === highlightIndex ? 'text-white/70' : 'text-text-secondary'}">
-							{team.league}
-						</span>
+						<div class="flex items-center gap-2 min-w-0">
+							<TeamLogo logoUrl={team.logo_url} teamName={team.name} size="sm" />
+							<span class="truncate">{team.name}</span>
+						</div>
+						<div class="flex items-center gap-1.5 shrink-0">
+							<OvrBadge rating={team.overall_rating} size="xs" />
+							<StarRating rating={team.star_rating} size="xs" />
+						</div>
 					</button>
 				</li>
 			{/each}
