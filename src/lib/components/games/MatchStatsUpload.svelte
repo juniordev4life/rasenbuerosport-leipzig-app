@@ -5,9 +5,15 @@
 
 	/**
 	 * MatchStatsUpload - Upload an FC26 stats screenshot for AI extraction
-	 * Used on the game detail page for retroactive stats upload
+	 * Supports overview, passes, and defense screenshot types
 	 */
-	let { gameId, onStatsExtracted } = $props();
+	let {
+		gameId,
+		type = "overview",
+		label = "match_stats.upload_overview_title",
+		hint = "match_stats.upload_overview_hint",
+		onStatsExtracted,
+	} = $props();
 
 	const { t } = getTranslate();
 
@@ -42,9 +48,9 @@
 		error = "";
 
 		try {
-			// 1. Upload to Supabase Storage
+			// 1. Upload to Supabase Storage with type-specific path
 			const ext = selectedFile.name.split(".").pop();
-			const filePath = `${gameId}/stats.${ext}`;
+			const filePath = `${gameId}/${type}.${ext}`;
 
 			const { error: uploadError } = await supabase.storage
 				.from("match-stats")
@@ -59,6 +65,7 @@
 			// 2. Call backend to extract stats via Claude Vision
 			const res = await post(`/v1/games/${gameId}/match-stats`, {
 				imageUrl: urlData.publicUrl,
+				type,
 			});
 
 			onStatsExtracted?.(res.data);
@@ -82,7 +89,7 @@
 </script>
 
 <div class="bg-bg-secondary border border-border rounded-lg p-4">
-	<h3 class="text-sm font-medium text-text-primary mb-3">{$t("match_stats.title")}</h3>
+	<h3 class="text-sm font-medium text-text-primary mb-3">{$t(label)}</h3>
 
 	{#if imagePreview}
 		<!-- Selected image preview -->
@@ -134,8 +141,8 @@
 				📸
 			</div>
 			<div class="flex-1">
-				<p class="text-xs text-text-primary">{$t("match_stats.upload_title")}</p>
-				<p class="text-[10px] text-text-secondary">{$t("match_stats.upload_hint")}</p>
+				<p class="text-xs text-text-primary">{$t(label)}</p>
+				<p class="text-[10px] text-text-secondary">{$t(hint)}</p>
 			</div>
 			<input
 				type="file"

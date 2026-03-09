@@ -138,6 +138,13 @@
 		});
 		return entries.toReversed();
 	});
+
+	/** Lookup scorer profile from game_players by player_id */
+	function getScorerProfile(playerId) {
+		if (!playerId || !game?.game_players) return null;
+		const gp = game.game_players.find((p) => p.player_id === playerId);
+		return gp?.profiles || null;
+	}
 </script>
 
 <svelte:head>
@@ -241,10 +248,17 @@
 						{/if}
 
 						<!-- Goal row -->
+						{@const scorer = getScorerProfile(entry.scored_by)}
 						<div class="relative z-10 flex items-center w-full py-1.5">
 							<!-- Home side (left) -->
 							<div class="flex-1 flex items-center justify-end gap-2 pr-4">
 								{#if entry.side === "home"}
+									{#if scorer}
+										<span class="text-[10px] text-text-secondary">{scorer.username}</span>
+										{#if scorer.avatar_url}
+											<img src={scorer.avatar_url} alt={scorer.username} class="w-4 h-4 rounded-full object-cover" />
+										{/if}
+									{/if}
 									{#if entry.period === "penalty"}
 										<span class="text-xs" title="Elfmeter">🥅</span>
 									{/if}
@@ -267,6 +281,12 @@
 									</span>
 									{#if entry.period === "penalty"}
 										<span class="text-xs" title="Elfmeter">🥅</span>
+									{/if}
+									{#if scorer}
+										{#if scorer.avatar_url}
+											<img src={scorer.avatar_url} alt={scorer.username} class="w-4 h-4 rounded-full object-cover" />
+										{/if}
+										<span class="text-[10px] text-text-secondary">{scorer.username}</span>
 									{/if}
 								{/if}
 							</div>
@@ -338,18 +358,76 @@
 			</div>
 		</div>
 
-		<!-- Match Stats (from FC26 screenshot) -->
+		<!-- Match Stats (from FC26 screenshots) -->
 		{#if game.match_stats}
 			<MatchStatsDisplay matchStats={game.match_stats} />
+		{/if}
 
-			<!-- AI Match Report (only when stats exist) -->
+		<!-- Upload Slots (show remaining upload options) -->
+		{@const hasOverview = !!game.stats_image_url}
+		{@const hasPasses = !!game.passes_image_url}
+		{@const hasDefense = !!game.defense_image_url}
+		{@const allUploaded = hasOverview && hasPasses && hasDefense}
+
+		<!-- AI Match Report (only when all three screenshots are uploaded) -->
+		{#if allUploaded}
 			<MatchReport
 				{gameId}
 				existingReport={game.match_report}
 				onReportGenerated={(report) => { game = { ...game, match_report: report }; }}
 			/>
-		{:else}
-			<MatchStatsUpload {gameId} onStatsExtracted={() => loadGame()} />
+		{/if}
+
+		{#if !hasOverview || !hasPasses || !hasDefense}
+			<div class="flex flex-col gap-3">
+				{#if !hasOverview}
+					<MatchStatsUpload
+						{gameId}
+						type="overview"
+						label="match_stats.upload_overview_title"
+						hint="match_stats.upload_overview_hint"
+						onStatsExtracted={() => loadGame()}
+					/>
+				{:else}
+					<div class="bg-bg-secondary border border-success/30 rounded-lg p-3 flex items-center gap-2">
+						<span class="text-success text-lg">✓</span>
+						<span class="text-xs text-text-secondary">{$t("match_stats.upload_overview_title")}</span>
+						<span class="text-xs text-success ml-auto">{$t("match_stats.uploaded")}</span>
+					</div>
+				{/if}
+
+				{#if !hasPasses}
+					<MatchStatsUpload
+						{gameId}
+						type="passes"
+						label="match_stats.upload_passes_title"
+						hint="match_stats.upload_passes_hint"
+						onStatsExtracted={() => loadGame()}
+					/>
+				{:else}
+					<div class="bg-bg-secondary border border-success/30 rounded-lg p-3 flex items-center gap-2">
+						<span class="text-success text-lg">✓</span>
+						<span class="text-xs text-text-secondary">{$t("match_stats.upload_passes_title")}</span>
+						<span class="text-xs text-success ml-auto">{$t("match_stats.uploaded")}</span>
+					</div>
+				{/if}
+
+				{#if !hasDefense}
+					<MatchStatsUpload
+						{gameId}
+						type="defense"
+						label="match_stats.upload_defense_title"
+						hint="match_stats.upload_defense_hint"
+						onStatsExtracted={() => loadGame()}
+					/>
+				{:else}
+					<div class="bg-bg-secondary border border-success/30 rounded-lg p-3 flex items-center gap-2">
+						<span class="text-success text-lg">✓</span>
+						<span class="text-xs text-text-secondary">{$t("match_stats.upload_defense_title")}</span>
+						<span class="text-xs text-success ml-auto">{$t("match_stats.uploaded")}</span>
+					</div>
+				{/if}
+			</div>
 		{/if}
 	{/if}
 </div>

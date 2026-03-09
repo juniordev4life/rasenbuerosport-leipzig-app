@@ -30,7 +30,9 @@
 	let scoreAway = $state(0);
 	let scoreTimeline = $state([]);
 	let resultType = $state("regular");
-	let statsImage = $state(null);
+	let statsOverview = $state(null);
+	let statsPasses = $state(null);
+	let statsDefense = $state(null);
 
 	// Save state
 	let saving = $state(false);
@@ -108,32 +110,48 @@
 
 			const gameId = res.data?.id;
 
-			// Upload stats image if selected
-			if (statsImage && gameId) {
-				try {
-					const ext = statsImage.name.split(".").pop();
-					const filePath = `${gameId}/stats.${ext}`;
+			// Upload stats images if selected
+			const statsFiles = [
+				{ file: statsOverview, type: "overview" },
+				{ file: statsPasses, type: "passes" },
+				{ file: statsDefense, type: "defense" },
+			].filter((s) => s.file);
 
-					const { error: uploadError } = await supabase.storage
-						.from("match-stats")
-						.upload(filePath, statsImage, { upsert: true });
+			if (statsFiles.length > 0 && gameId) {
+				for (const { file, type } of statsFiles) {
+					try {
+						const ext = file.name.split(".").pop();
+						const filePath = `${gameId}/${type}.${ext}`;
 
-					if (!uploadError) {
-						const { data: urlData } = supabase.storage
+						const { error: uploadError } = await supabase.storage
 							.from("match-stats")
-							.getPublicUrl(filePath);
+							.upload(filePath, file, { upsert: true });
 
-						await post(`/v1/games/${gameId}/match-stats`, {
-							imageUrl: urlData.publicUrl,
-						});
+						if (!uploadError) {
+							const { data: urlData } = supabase.storage
+								.from("match-stats")
+								.getPublicUrl(filePath);
+
+							await post(`/v1/games/${gameId}/match-stats`, {
+								imageUrl: urlData.publicUrl,
+								type,
+							});
+						}
+					} catch (statsErr) {
+						console.error(`Stats extraction failed (${type}):`, statsErr);
 					}
-				} catch (statsErr) {
-					console.error("Stats extraction failed:", statsErr);
+				}
+
+				// Auto-generate match report after all stats are uploaded
+				try {
+					await post(`/v1/games/${gameId}/match-report`);
+				} catch (reportErr) {
+					console.error("Match report generation failed:", reportErr);
 				}
 			}
 
 			// Navigate to game detail if stats were uploaded, otherwise dashboard
-			if (statsImage && gameId) {
+			if (statsFiles.length > 0 && gameId) {
 				goto(`/app/games/${gameId}`);
 			} else {
 				goto(ROUTES.DASHBOARD);
@@ -194,11 +212,16 @@
 		<ScoreStep
 			{homeTeam}
 			{awayTeam}
+			{homePlayers}
+			{awayPlayers}
+			{allPlayers}
 			bind:scoreHome
 			bind:scoreAway
 			bind:scoreTimeline
 			bind:resultType
-			bind:statsImage
+			bind:statsOverview
+			bind:statsPasses
+			bind:statsDefense
 			{saving}
 			onSave={saveGame}
 			onBack={goBack}

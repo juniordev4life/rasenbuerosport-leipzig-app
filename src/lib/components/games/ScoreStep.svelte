@@ -8,16 +8,22 @@
 
 	/**
 	 * ScoreStep - Step 3 of new game wizard
-	 * Shows team names, score entry, phase toggles, and timeline tracking
+	 * Shows team names, score entry, phase toggles, timeline tracking,
+	 * and scorer picker popup for 2v2 games
 	 */
 	let {
 		homeTeam = "",
 		awayTeam = "",
+		homePlayers = [],
+		awayPlayers = [],
+		allPlayers = [],
 		scoreHome = $bindable(0),
 		scoreAway = $bindable(0),
 		scoreTimeline = $bindable([]),
 		resultType = $bindable("regular"),
-		statsImage = $bindable(null),
+		statsOverview = $bindable(null),
+		statsPasses = $bindable(null),
+		statsDefense = $bindable(null),
 		saving = false,
 		onSave,
 		onBack,
@@ -49,6 +55,23 @@
 		penaltyActive ? "penalty" : extraTimeActive ? "extra_time" : "regular",
 	);
 
+	/** Scorer picker state */
+	let showScorerPicker = $state(false);
+	let pendingGoal = $state(null);
+
+	/**
+	 * Resolve player profile objects for a side (excluding guests)
+	 * @param {"home"|"away"} side
+	 * @returns {Array<{id: string, username: string, avatar_url: string|null}>}
+	 */
+	function getPlayersForSide(side) {
+		const ids = side === "home" ? homePlayers : awayPlayers;
+		return ids
+			.filter((id) => !id.startsWith?.("__guest__"))
+			.map((id) => allPlayers.find((p) => p.id === id))
+			.filter(Boolean);
+	}
+
 	/**
 	 * Handle score change after +/- button click
 	 * Uses tick() to ensure bindable values are updated before reading
@@ -58,11 +81,23 @@
 		const newTotal = scoreHome + scoreAway;
 
 		if (newTotal > prevTotal) {
-			// Goal scored — push new timeline entry
-			scoreTimeline = [
-				...scoreTimeline,
-				{ home: scoreHome, away: scoreAway, period: currentPeriod },
-			];
+			// Goal scored — determine which side
+			const lastEntry = scoreTimeline.length > 0 ? scoreTimeline[scoreTimeline.length - 1] : { home: 0, away: 0 };
+			const side = scoreHome > lastEntry.home ? "home" : "away";
+			const sidePlayers = getPlayersForSide(side);
+
+			if (sidePlayers.length > 1) {
+				// Multi-player team: show scorer picker popup
+				pendingGoal = { home: scoreHome, away: scoreAway, period: currentPeriod, side };
+				showScorerPicker = true;
+			} else {
+				// Single player: auto-assign scorer
+				const scoredBy = sidePlayers.length === 1 ? sidePlayers[0].id : undefined;
+				scoreTimeline = [
+					...scoreTimeline,
+					{ home: scoreHome, away: scoreAway, period: currentPeriod, scored_by: scoredBy },
+				];
+			}
 		} else if (newTotal < prevTotal && scoreTimeline.length > 0) {
 			// Correction (minus) — pop last entry
 			scoreTimeline = scoreTimeline.slice(0, -1);
@@ -70,6 +105,44 @@
 
 		prevTotal = newTotal;
 		updateResultType();
+	}
+
+	/**
+	 * Handle scorer selection from picker popup
+	 * @param {string} playerId
+	 */
+	function selectScorer(playerId) {
+		if (!pendingGoal) return;
+		scoreTimeline = [
+			...scoreTimeline,
+			{ home: pendingGoal.home, away: pendingGoal.away, period: pendingGoal.period, scored_by: playerId },
+		];
+		prevTotal = pendingGoal.home + pendingGoal.away;
+		showScorerPicker = false;
+		pendingGoal = null;
+		updateResultType();
+	}
+
+	/** Cancel scorer picker — revert the score increment */
+	function cancelScorerPicker() {
+		if (!pendingGoal) return;
+		if (pendingGoal.side === "home") {
+			scoreHome = Math.max(0, scoreHome - 1);
+		} else {
+			scoreAway = Math.max(0, scoreAway - 1);
+		}
+		prevTotal = scoreHome + scoreAway;
+		showScorerPicker = false;
+		pendingGoal = null;
+	}
+
+	/**
+	 * Lookup player profile by ID for timeline display
+	 * @param {string} playerId
+	 * @returns {{username: string, avatar_url: string|null}|null}
+	 */
+	function getPlayerProfile(playerId) {
+		return allPlayers.find((p) => p.id === playerId) || null;
 	}
 
 	/** Set result_type to the highest active phase in the timeline */
@@ -96,27 +169,81 @@
 		penaltyActive = !penaltyActive;
 	}
 
-	/** Preview URL for selected stats image */
-	let imagePreview = $state(null);
+	/** Preview URLs for stats images */
+	let overviewPreview = $state(null);
+	let passesPreview = $state(null);
+	let defensePreview = $state(null);
 
-	/** Handle stats image file selection */
-	function handleStatsImageChange(e) {
+	/** @type {Array<{type: string, labelKey: string, hintKey: string, get: () => any, set: (f: File) => void, preview: () => string|null, setPreview: (url: string|null) => void}>} */
+	const statsSlots = [
+		{
+			type: "overview",
+			labelKey: "match_stats.upload_overview_title",
+			hintKey: "match_stats.upload_overview_hint",
+		},
+		{
+			type: "passes",
+			labelKey: "match_stats.upload_passes_title",
+			hintKey: "match_stats.upload_passes_hint",
+		},
+		{
+			type: "defense",
+			labelKey: "match_stats.upload_defense_title",
+			hintKey: "match_stats.upload_defense_hint",
+		},
+	];
+
+	/**
+	 * Get the file for a stats slot type
+	 * @param {string} type
+	 */
+	function getStatsFile(type) {
+		if (type === "overview") return statsOverview;
+		if (type === "passes") return statsPasses;
+		return statsDefense;
+	}
+
+	/**
+	 * Get the preview URL for a stats slot type
+	 * @param {string} type
+	 */
+	function getPreview(type) {
+		if (type === "overview") return overviewPreview;
+		if (type === "passes") return passesPreview;
+		return defensePreview;
+	}
+
+	/**
+	 * Handle stats image file selection for a given type
+	 * @param {string} type
+	 * @param {Event} e
+	 */
+	function handleStatsImageChange(type, e) {
 		const file = e.target.files?.[0];
 		if (!file) return;
-
 		if (!file.type.startsWith("image/")) return;
 		if (file.size > 5 * 1024 * 1024) return;
 
-		statsImage = file;
-		imagePreview = URL.createObjectURL(file);
+		const url = URL.createObjectURL(file);
+		if (type === "overview") { statsOverview = file; overviewPreview = url; }
+		else if (type === "passes") { statsPasses = file; passesPreview = url; }
+		else { statsDefense = file; defensePreview = url; }
 	}
 
-	/** Remove selected stats image */
-	function removeStatsImage() {
-		statsImage = null;
-		if (imagePreview) {
-			URL.revokeObjectURL(imagePreview);
-			imagePreview = null;
+	/**
+	 * Remove selected stats image for a given type
+	 * @param {string} type
+	 */
+	function removeStatsImage(type) {
+		if (type === "overview") {
+			statsOverview = null;
+			if (overviewPreview) { URL.revokeObjectURL(overviewPreview); overviewPreview = null; }
+		} else if (type === "passes") {
+			statsPasses = null;
+			if (passesPreview) { URL.revokeObjectURL(passesPreview); passesPreview = null; }
+		} else {
+			statsDefense = null;
+			if (defensePreview) { URL.revokeObjectURL(defensePreview); defensePreview = null; }
 		}
 	}
 </script>
@@ -179,6 +306,7 @@
 			<p class="text-[10px] text-text-secondary mb-2">{$t("game_detail.timeline_title")}</p>
 			<div class="flex flex-wrap gap-1.5">
 				{#each scoreTimeline as entry, i (i)}
+					{@const scorer = entry.scored_by ? getPlayerProfile(entry.scored_by) : null}
 					<span
 						class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium {entry.period === 'penalty'
 							? 'bg-warning/20 text-warning'
@@ -186,6 +314,9 @@
 								? 'bg-accent-red/20 text-accent-red'
 								: 'bg-bg-input text-text-primary'}"
 					>
+						{#if scorer?.avatar_url}
+							<img src={scorer.avatar_url} alt={scorer.username} class="w-3.5 h-3.5 rounded-full object-cover" />
+						{/if}
 						{entry.home}:{entry.away}
 						{#if entry.period === "extra_time"}
 							<span class="text-[8px] opacity-70">{$t("game_detail.extra_time_short")}</span>
@@ -198,45 +329,48 @@
 		</div>
 	{/if}
 
-	<!-- Stats Photo (optional) -->
-	<div class="bg-bg-secondary border border-border rounded-lg p-3">
-		{#if imagePreview}
-			<div class="flex items-center gap-3">
-				<img
-					src={imagePreview}
-					alt="Stats"
-					class="w-16 h-16 object-cover rounded-md border border-border"
-				/>
-				<div class="flex-1 min-w-0">
-					<p class="text-xs text-text-primary truncate">{$t("match_stats.title")}</p>
-					<p class="text-[10px] text-text-secondary">{$t("match_stats.upload_ready")}</p>
+	<!-- Stats Photos (optional) -->
+	<div class="bg-bg-secondary border border-border rounded-lg p-3 flex flex-col gap-2">
+		{#each statsSlots as slot (slot.type)}
+			{@const preview = getPreview(slot.type)}
+			{#if preview}
+				<div class="flex items-center gap-3">
+					<img
+						src={preview}
+						alt="Stats"
+						class="w-12 h-12 object-cover rounded-md border border-border"
+					/>
+					<div class="flex-1 min-w-0">
+						<p class="text-xs text-text-primary truncate">{$t(slot.labelKey)}</p>
+						<p class="text-[10px] text-text-secondary">{$t("match_stats.upload_ready")}</p>
+					</div>
+					<button
+						type="button"
+						onclick={() => removeStatsImage(slot.type)}
+						class="text-text-secondary hover:text-accent-red text-lg shrink-0"
+						aria-label="Remove"
+					>
+						✕
+					</button>
 				</div>
-				<button
-					type="button"
-					onclick={removeStatsImage}
-					class="text-text-secondary hover:text-accent-red text-lg shrink-0"
-					aria-label="Remove"
-				>
-					✕
-				</button>
-			</div>
-		{:else}
-			<label class="flex items-center gap-3 cursor-pointer">
-				<div class="w-10 h-10 rounded-md bg-bg-input border border-border flex items-center justify-center text-lg">
-					📸
-				</div>
-				<div class="flex-1">
-					<p class="text-xs text-text-primary">{$t("match_stats.add_photo")}</p>
-					<p class="text-[10px] text-text-secondary">{$t("match_stats.add_photo_hint")}</p>
-				</div>
-				<input
-					type="file"
-					accept="image/*"
-					onchange={handleStatsImageChange}
-					class="hidden"
-				/>
-			</label>
-		{/if}
+			{:else}
+				<label class="flex items-center gap-3 cursor-pointer">
+					<div class="w-10 h-10 rounded-md bg-bg-input border border-border flex items-center justify-center text-lg">
+						📸
+					</div>
+					<div class="flex-1">
+						<p class="text-xs text-text-primary">{$t(slot.labelKey)}</p>
+						<p class="text-[10px] text-text-secondary">{$t(slot.hintKey)}</p>
+					</div>
+					<input
+						type="file"
+						accept="image/*"
+						onchange={(e) => handleStatsImageChange(slot.type, e)}
+						class="hidden"
+					/>
+				</label>
+			{/if}
+		{/each}
 	</div>
 
 	<!-- Navigation -->
@@ -249,3 +383,50 @@
 		</Button>
 	</div>
 </div>
+
+<!-- Scorer Picker Popup -->
+{#if showScorerPicker && pendingGoal}
+	{@const scoringPlayers = getPlayersForSide(pendingGoal.side)}
+	<div
+		class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6"
+		role="dialog"
+		aria-label={$t("new_game.who_scored")}
+	>
+		<div class="bg-bg-secondary border border-border rounded-xl p-6 w-full max-w-xs">
+			<h3 class="text-sm font-medium text-text-primary text-center mb-4">
+				{$t("new_game.who_scored")}
+			</h3>
+
+			<div class="flex flex-col gap-3">
+				{#each scoringPlayers as player (player.id)}
+					<button
+						type="button"
+						onclick={() => selectScorer(player.id)}
+						class="flex items-center gap-3 p-3 rounded-lg bg-bg-input border border-border hover:border-accent-red hover:bg-accent-red/10 transition-colors"
+					>
+						{#if player.avatar_url}
+							<img
+								src={player.avatar_url}
+								alt={player.username}
+								class="w-10 h-10 rounded-full object-cover ring-2 ring-border"
+							/>
+						{:else}
+							<div class="w-10 h-10 rounded-full bg-accent-red/20 ring-2 ring-border flex items-center justify-center text-sm font-bold text-text-primary">
+								{(player.username || "?").charAt(0).toUpperCase()}
+							</div>
+						{/if}
+						<span class="text-sm font-medium text-text-primary">{player.username}</span>
+					</button>
+				{/each}
+			</div>
+
+			<button
+				type="button"
+				onclick={cancelScorerPicker}
+				class="w-full mt-4 py-2 text-xs text-text-secondary hover:text-text-primary transition-colors"
+			>
+				{$t("common.back")}
+			</button>
+		</div>
+	</div>
+{/if}

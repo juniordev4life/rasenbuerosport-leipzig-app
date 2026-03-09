@@ -84,6 +84,7 @@
 				{username}
 				{email}
 				{avatarUrl}
+				goalTier={stats?.goal_tier || null}
 				onEdit={() => (editing = true)}
 			/>
 		{/if}
