@@ -202,6 +202,12 @@
 			"condition_klublegende": "100+ Spiele gespielt",
 			"condition_seriensieger": "5+ Siege in Folge"
 		},
+		"theme": {
+			"title": "Erscheinungsbild",
+			"light": "Hell",
+			"dark": "Dunkel",
+			"system": "System"
+		},
 		"edit": {
 			"title": "Profil bearbeiten",
 			"username_label": "Benutzername",

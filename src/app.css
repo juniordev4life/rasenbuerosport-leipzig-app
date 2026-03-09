@@ -1,11 +1,13 @@
 @import "tailwindcss";
 
 @theme {
+	/* Light theme defaults (registered as Tailwind utilities) */
+
 	/* Background colors */
-	--color-bg-primary: #0a1628;
-	--color-bg-secondary: #131f35;
-	--color-bg-input: #1a2a45;
-	--color-bg-card: #162033;
+	--color-bg-primary: #f5f7fa;
+	--color-bg-secondary: #ffffff;
+	--color-bg-input: #edf0f5;
+	--color-bg-card: #ffffff;
 
 	/* Accent colors */
 	--color-accent-red: #c41e3a;
@@ -13,15 +15,39 @@
 	--color-accent-red-light: #e8354f;
 
 	/* Text colors */
-	--color-text-primary: #ffffff;
-	--color-text-secondary: #8899aa;
-	--color-text-muted: #556677;
+	--color-text-primary: #1a1d26;
+	--color-text-secondary: #5a6578;
+	--color-text-muted: #8c95a4;
 
 	/* Border colors */
-	--color-border: #2a3a55;
-	--color-border-light: #3a4a65;
+	--color-border: #d8dde6;
+	--color-border-light: #e5e9f0;
 
 	/* Misc */
+	--color-silver: #94a3b8;
+	--color-success: #16a34a;
+	--color-warning: #ca8a04;
+	--color-error: #dc2626;
+}
+
+/* Dark theme overrides */
+.dark {
+	--color-bg-primary: #0f1219;
+	--color-bg-secondary: #1a1f2e;
+	--color-bg-input: #242b3d;
+	--color-bg-card: #1e2433;
+
+	--color-accent-red: #e63950;
+	--color-accent-red-hover: #c41e3a;
+	--color-accent-red-light: #ff5068;
+
+	--color-text-primary: #f0f2f5;
+	--color-text-secondary: #9ba8bc;
+	--color-text-muted: #6b7a8d;
+
+	--color-border: #2e3a50;
+	--color-border-light: #3d4a60;
+
 	--color-silver: #c0c0c0;
 	--color-success: #22c55e;
 	--color-warning: #eab308;

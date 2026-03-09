@@ -15,6 +15,7 @@
 	import CareerMatchStats from "$lib/components/profile/CareerMatchStats.svelte";
 	import ProfileBadges from "$lib/components/profile/ProfileBadges.svelte";
 	import LeagueStats from "$lib/components/profile/LeagueStats.svelte";
+	import ThemeSelector from "$lib/components/profile/ThemeSelector.svelte";
 
 	const { t } = getTranslate();
 
@@ -116,6 +117,8 @@
 
 		<!-- League Stats -->
 		<LeagueStats games={userGames} />
+
+		<ThemeSelector />
 
 		<Button variant="ghost" onclick={handleLogout}>
 			{$t("profile.logout")}

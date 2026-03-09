@@ -200,6 +200,12 @@
 			"condition_klublegende": "Play 100+ games",
 			"condition_seriensieger": "5+ wins in a row"
 		},
+		"theme": {
+			"title": "Appearance",
+			"light": "Light",
+			"dark": "Dark",
+			"system": "System"
+		},
 		"edit": {
 			"title": "Edit profile",
 			"username_label": "Username",

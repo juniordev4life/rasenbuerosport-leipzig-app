@@ -4,6 +4,7 @@
 	import { tolgee } from "$lib/config/i18n.config.js";
 	import { supabase } from "$lib/config/supabase.config.js";
 	import { user, session, isLoading } from "$lib/stores/auth.stores.js";
+	import { theme } from "$lib/stores/theme.stores.js";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	import { ROUTES } from "$lib/constants/routes.constants.js";
@@ -18,6 +19,51 @@
 				console.error("SW registration failed:", err);
 			});
 		}
+	});
+
+	// Theme: initialize from localStorage
+	$effect(() => {
+		if (!browser) return;
+		const stored = localStorage.getItem("theme");
+		if (stored === "light" || stored === "dark" || stored === "system") {
+			theme.set(stored);
+		}
+	});
+
+	// Theme: apply .dark class and update meta theme-color
+	$effect(() => {
+		if (!browser) return;
+
+		const unsubscribe = theme.subscribe((value) => {
+			localStorage.setItem("theme", value);
+
+			const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+			const shouldBeDark = value === "dark" || (value === "system" && prefersDark.matches);
+
+			document.documentElement.classList.toggle("dark", shouldBeDark);
+
+			const meta = document.querySelector('meta[name="theme-color"]');
+			if (meta) meta.setAttribute("content", shouldBeDark ? "#0f1219" : "#f5f7fa");
+		});
+
+		// Listen for OS theme changes when in "system" mode
+		const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+		const handleChange = () => {
+			let current;
+			theme.subscribe((v) => (current = v))();
+			if (current === "system") {
+				const shouldBeDark = mediaQuery.matches;
+				document.documentElement.classList.toggle("dark", shouldBeDark);
+				const meta = document.querySelector('meta[name="theme-color"]');
+				if (meta) meta.setAttribute("content", shouldBeDark ? "#0f1219" : "#f5f7fa");
+			}
+		};
+		mediaQuery.addEventListener("change", handleChange);
+
+		return () => {
+			unsubscribe();
+			mediaQuery.removeEventListener("change", handleChange);
+		};
 	});
 
 	$effect(() => {
