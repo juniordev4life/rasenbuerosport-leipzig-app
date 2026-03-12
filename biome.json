@@ -24,7 +24,6 @@
 		"indentStyle": "tab"
 	},
 	"files": {
-		"includes": ["**"],
-		"experimentalScannerIgnores": [".svelte-kit", "build", "node_modules"]
+		"includes": ["src/**", "*.json", "*.js"]
 	}
 }
