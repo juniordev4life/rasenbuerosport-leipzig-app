@@ -106,7 +106,7 @@
 			<p class="text-text-secondary">{$t("teams.no_results")}</p>
 		</div>
 	{:else}
-		<div class="flex flex-col gap-1">
+		<div class="flex flex-col gap-1 lg:grid lg:grid-cols-2 lg:gap-3">
 			{#each filteredTeams as team (team.id)}
 				<div class="flex items-center gap-3 bg-bg-secondary border border-border rounded-lg px-3 py-2.5 hover:bg-bg-input transition-colors">
 					<!-- Logo -->

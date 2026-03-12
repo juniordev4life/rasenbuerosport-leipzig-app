@@ -1,8 +1,9 @@
 <script>
 	import { getTranslate } from "@tolgee/svelte";
 	import { goto } from "$app/navigation";
-	import { post } from "$lib/services/api.services.js";
-	import { supabase } from "$lib/config/supabase.config.js";
+	import { get, post } from "$lib/services/api.services.js";
+	import { storage } from "$lib/config/firebase.config.js";
+	import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 	import { ROUTES } from "$lib/constants/routes.constants.js";
 	import StepIndicator from "$lib/components/games/StepIndicator.svelte";
 	import PlayerSelectionStep from "$lib/components/games/PlayerSelectionStep.svelte";
@@ -37,7 +38,7 @@
 	// Save state
 	let saving = $state(false);
 
-	// Data from Supabase
+	// Data from API
 	let allPlayers = $state([]);
 	let loading = $state(true);
 
@@ -56,13 +57,8 @@
 
 	async function loadData() {
 		try {
-			const { data, error } = await supabase
-				.from("profiles")
-				.select("id, username, avatar_url")
-				.order("username", { ascending: true });
-
-			if (error) throw error;
-			allPlayers = data || [];
+			const res = await get("/v1/players");
+			allPlayers = res.data || [];
 		} catch (err) {
 			console.error("Failed to load players:", err);
 		} finally {
@@ -121,22 +117,15 @@
 				for (const { file, type } of statsFiles) {
 					try {
 						const ext = file.name.split(".").pop();
-						const filePath = `${gameId}/${type}.${ext}`;
+						const storageRef = ref(storage, `match-stats/${gameId}/${type}.${ext}`);
 
-						const { error: uploadError } = await supabase.storage
-							.from("match-stats")
-							.upload(filePath, file, { upsert: true });
+						await uploadBytes(storageRef, file);
+						const imageUrl = await getDownloadURL(storageRef);
 
-						if (!uploadError) {
-							const { data: urlData } = supabase.storage
-								.from("match-stats")
-								.getPublicUrl(filePath);
-
-							await post(`/v1/games/${gameId}/match-stats`, {
-								imageUrl: urlData.publicUrl,
-								type,
-							});
-						}
+						await post(`/v1/games/${gameId}/match-stats`, {
+							imageUrl,
+							type,
+						});
 					} catch (statsErr) {
 						console.error(`Stats extraction failed (${type}):`, statsErr);
 					}

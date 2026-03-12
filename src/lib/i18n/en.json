@@ -10,7 +10,8 @@
 			"submit": "Sign in",
 			"forgot_password": "Forgot password?",
 			"tab_login": "Sign in",
-			"tab_register": "Register"
+			"tab_register": "Register",
+			"google_button": "Sign in with Google"
 		},
 		"register": {
 			"title": "Create account",
@@ -76,6 +77,7 @@
 		"leaderboard": "Ranking",
 		"new_game": "New Game",
 		"games": "Games",
+		"teams": "Teams",
 		"profile": "Profile"
 	},
 	"common": {

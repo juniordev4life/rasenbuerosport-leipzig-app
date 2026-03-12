@@ -1,6 +1,9 @@
 <script>
 	import { getTranslate } from "@tolgee/svelte";
-	import { supabase } from "$lib/config/supabase.config.js";
+	import { auth, storage } from "$lib/config/firebase.config.js";
+	import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+	import { updateProfile } from "firebase/auth";
+	import { patch } from "$lib/services/api.services.js";
 	import { user } from "$lib/stores/auth.stores.js";
 	import Button from "$lib/components/ui/Button.svelte";
 
@@ -54,49 +57,30 @@
 		try {
 			let avatarUrl = currentAvatarUrl;
 
-			// Upload avatar if changed
+			// Upload avatar to Cloud Storage if changed
 			if (avatarFile) {
-				const userId = $user?.id;
+				const userId = auth.currentUser?.uid;
 				const ext = avatarFile.name.split(".").pop();
-				const filePath = `${userId}/avatar.${ext}`;
+				const storageRef = ref(storage, `avatars/${userId}/avatar.${ext}`);
 
-				const { error: uploadError } = await supabase.storage
-					.from("avatars")
-					.upload(filePath, avatarFile, { upsert: true });
-
-				if (uploadError) throw uploadError;
-
-				const { data: urlData } = supabase.storage
-					.from("avatars")
-					.getPublicUrl(filePath);
-
-				// Append cache-buster to force refresh
-				avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+				await uploadBytes(storageRef, avatarFile);
+				avatarUrl = await getDownloadURL(storageRef);
 			}
 
-			// Update auth metadata (username)
-			const { error: authError } = await supabase.auth.updateUser({
-				data: { username: username.trim(), avatar_url: avatarUrl },
+			// Update Firebase Auth profile
+			await updateProfile(auth.currentUser, {
+				displayName: username.trim(),
+				photoURL: avatarUrl,
 			});
 
-			if (authError) throw authError;
+			// Update profile in backend via API
+			await patch("/v1/auth/profile", {
+				username: username.trim(),
+				avatar_url: avatarUrl,
+			});
 
-			// Update profiles table directly
-			const { error: profileError } = await supabase
-				.from("profiles")
-				.update({
-					username: username.trim(),
-					avatar_url: avatarUrl,
-				})
-				.eq("id", $user?.id);
-
-			if (profileError) throw profileError;
-
-			// Refresh local user store
-			const { data: refreshData } = await supabase.auth.getUser();
-			if (refreshData?.user) {
-				user.set(refreshData.user);
-			}
+			// Refresh local user store with updated Firebase user
+			user.set(auth.currentUser);
 
 			onSaved?.();
 		} catch (err) {

@@ -1,7 +1,7 @@
 <script>
 	import { goto } from "$app/navigation";
-	import { page } from "$app/state";
-	import { supabase } from "$lib/config/supabase.config.js";
+	import { auth } from "$lib/config/firebase.config.js";
+	import { getRedirectResult } from "firebase/auth";
 	import { ROUTES } from "$lib/constants/routes.constants.js";
 	import { browser } from "$app/environment";
 
@@ -13,61 +13,25 @@
 	});
 
 	async function handleCallback() {
-		const code = page.url.searchParams.get("code");
+		try {
+			// Handle redirect result (if signInWithRedirect was used)
+			const result = await getRedirectResult(auth);
 
-		if (code) {
-			// PKCE flow — exchange code for session
-			const { error: exchangeError } =
-				await supabase.auth.exchangeCodeForSession(code);
-
-			if (exchangeError) {
-				console.error("Token exchange failed:", exchangeError.message);
-				error = exchangeError.message;
-				setTimeout(() => goto(ROUTES.LOGIN), 3000);
+			if (result?.user) {
+				goto(ROUTES.DASHBOARD);
 				return;
 			}
-		}
 
-		// Implicit flow — hash fragment tokens (#access_token=...)
-		// Supabase client processes these automatically during init,
-		// but we may need to wait for onAuthStateChange to fire
-		const hasHashTokens = window.location.hash.includes("access_token");
-
-		if (hasHashTokens) {
-			// Wait for Supabase to process the hash fragment
-			const session = await new Promise((resolve) => {
-				const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
-					subscription.unsubscribe();
-					resolve(s);
-				});
-				// Timeout fallback in case the event already fired
-				setTimeout(() => resolve(null), 3000);
-			});
-
-			if (session?.user) {
-				redirectByUsername(session.user);
-				return;
+			// If no redirect result, check if user is already signed in
+			if (auth.currentUser) {
+				goto(ROUTES.DASHBOARD);
+			} else {
+				goto(ROUTES.LOGIN);
 			}
-		}
-
-		// Check if user has a session now
-		const {
-			data: { session },
-		} = await supabase.auth.getSession();
-
-		if (session?.user) {
-			redirectByUsername(session.user);
-		} else {
-			// No session — redirect to login
-			goto(ROUTES.LOGIN);
-		}
-	}
-
-	function redirectByUsername(authUser) {
-		if (authUser.user_metadata?.username) {
-			goto(ROUTES.DASHBOARD);
-		} else {
-			goto("/auth/setup");
+		} catch (err) {
+			console.error("Auth callback failed:", err);
+			error = err.message;
+			setTimeout(() => goto(ROUTES.LOGIN), 3000);
 		}
 	}
 </script>

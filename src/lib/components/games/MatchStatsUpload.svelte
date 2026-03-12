@@ -1,6 +1,7 @@
 <script>
 	import { getTranslate } from "@tolgee/svelte";
-	import { supabase } from "$lib/config/supabase.config.js";
+	import { storage } from "$lib/config/firebase.config.js";
+	import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 	import { post } from "$lib/services/api.services.js";
 
 	/**
@@ -48,23 +49,16 @@
 		error = "";
 
 		try {
-			// 1. Upload to Supabase Storage with type-specific path
+			// 1. Upload to Cloud Storage
 			const ext = selectedFile.name.split(".").pop();
-			const filePath = `${gameId}/${type}.${ext}`;
+			const storageRef = ref(storage, `match-stats/${gameId}/${type}.${ext}`);
 
-			const { error: uploadError } = await supabase.storage
-				.from("match-stats")
-				.upload(filePath, selectedFile, { upsert: true });
-
-			if (uploadError) throw uploadError;
-
-			const { data: urlData } = supabase.storage
-				.from("match-stats")
-				.getPublicUrl(filePath);
+			await uploadBytes(storageRef, selectedFile);
+			const imageUrl = await getDownloadURL(storageRef);
 
 			// 2. Call backend to extract stats via Claude Vision
 			const res = await post(`/v1/games/${gameId}/match-stats`, {
-				imageUrl: urlData.publicUrl,
+				imageUrl,
 				type,
 			});
 

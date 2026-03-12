@@ -2,8 +2,9 @@
 	import "../app.css";
 	import { TolgeeProvider } from "@tolgee/svelte";
 	import { tolgee } from "$lib/config/i18n.config.js";
-	import { supabase } from "$lib/config/supabase.config.js";
-	import { user, session, isLoading } from "$lib/stores/auth.stores.js";
+	import { auth } from "$lib/config/firebase.config.js";
+	import { onAuthStateChanged } from "firebase/auth";
+	import { user, isLoading } from "$lib/stores/auth.stores.js";
 	import { theme } from "$lib/stores/theme.stores.js";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
@@ -66,42 +67,20 @@
 		};
 	});
 
+	// Firebase Auth state listener
 	$effect(() => {
-		supabase.auth
-			.getSession()
-			.then(({ data: { session: s } }) => {
-				session.set(s);
-				user.set(s?.user ?? null);
-			})
-			.catch(() => {
-				session.set(null);
-				user.set(null);
-			})
-			.finally(() => {
-				isLoading.set(false);
-			});
+		if (!browser) return;
 
-		const {
-			data: { subscription },
-		} = supabase.auth.onAuthStateChange((_event, s) => {
-			session.set(s);
-			user.set(s?.user ?? null);
+		const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+			user.set(firebaseUser);
+			isLoading.set(false);
 
-			if (!s && page.url.pathname.startsWith("/app")) {
+			if (!firebaseUser && page.url.pathname.startsWith("/app")) {
 				goto(ROUTES.LOGIN);
-			}
-
-			// Redirect to setup if user has no username yet (invited but not set up)
-			if (
-				s?.user &&
-				!s.user.user_metadata?.username &&
-				!page.url.pathname.startsWith("/auth/setup")
-			) {
-				goto("/auth/setup");
 			}
 		});
 
-		return () => subscription.unsubscribe();
+		return () => unsubscribe();
 	});
 </script>
 

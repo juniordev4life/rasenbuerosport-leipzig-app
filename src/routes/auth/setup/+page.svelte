@@ -1,7 +1,9 @@
 <script>
 	import { getTranslate } from "@tolgee/svelte";
 	import { goto } from "$app/navigation";
-	import { supabase } from "$lib/config/supabase.config.js";
+	import { auth } from "$lib/config/firebase.config.js";
+	import { updateProfile } from "firebase/auth";
+	import { patch } from "$lib/services/api.services.js";
 	import { user } from "$lib/stores/auth.stores.js";
 	import { ROUTES } from "$lib/constants/routes.constants.js";
 	import Button from "$lib/components/ui/Button.svelte";
@@ -11,18 +13,16 @@
 	const { t } = getTranslate();
 
 	let username = $state("");
-	let password = $state("");
-	let passwordConfirm = $state("");
 	let loading = $state(false);
 	let error = $state("");
 
-	// Guard: redirect if not logged in or already set up
+	// Pre-fill username from Google displayName
 	$effect(() => {
 		if (!browser) return;
 		if (!$user) {
 			goto(ROUTES.LOGIN);
-		} else if ($user.user_metadata?.username) {
-			goto(ROUTES.DASHBOARD);
+		} else if ($user.displayName && !username) {
+			username = $user.displayName;
 		}
 	});
 
@@ -30,35 +30,21 @@
 		e.preventDefault();
 		error = "";
 
-		if (password !== passwordConfirm) {
-			error = $t("auth.errors.passwords_mismatch");
+		if (!username.trim()) {
+			error = $t("auth.errors.generic");
 			return;
 		}
 
 		loading = true;
 
 		try {
-			const { error: updateError } = await supabase.auth.updateUser({
-				password,
-				data: { username },
+			// Update Firebase Auth displayName
+			await updateProfile(auth.currentUser, {
+				displayName: username.trim(),
 			});
 
-			if (updateError) throw updateError;
-
-			// Ensure profile exists with correct username
-			const {
-				data: { user: currentUser },
-			} = await supabase.auth.getUser();
-
-			if (currentUser) {
-				await supabase.from("profiles").upsert(
-					{
-						id: currentUser.id,
-						username,
-					},
-					{ onConflict: "id" },
-				);
-			}
+			// Create/update profile in backend
+			await patch("/v1/auth/profile", { username: username.trim() });
 
 			goto(ROUTES.DASHBOARD);
 		} catch (err) {
@@ -90,24 +76,6 @@
 		bind:value={username}
 		required
 		autocomplete="username"
-	/>
-
-	<Input
-		id="password"
-		type="password"
-		placeholder={$t("auth.invite.set_password")}
-		bind:value={password}
-		required
-		autocomplete="new-password"
-	/>
-
-	<Input
-		id="password-confirm"
-		type="password"
-		placeholder={$t("auth.register.password_confirm_placeholder")}
-		bind:value={passwordConfirm}
-		required
-		autocomplete="new-password"
 	/>
 
 	{#if error}
