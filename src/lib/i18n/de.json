@@ -12,7 +12,8 @@
 			"no_account": "Noch kein Konto?",
 			"register_link": "Registrieren",
 			"tab_login": "Anmelden",
-			"tab_register": "Registrieren"
+			"tab_register": "Registrieren",
+			"google_button": "Mit Google anmelden"
 		},
 		"register": {
 			"title": "Konto erstellen",
@@ -78,6 +79,7 @@
 		"leaderboard": "Rangliste",
 		"new_game": "Neues Spiel",
 		"games": "Spiele",
+		"teams": "Teams",
 		"profile": "Profil"
 	},
 	"common": {

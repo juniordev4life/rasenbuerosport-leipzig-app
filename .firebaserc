@@ -1,0 +1,5 @@
+{
+	"projects": {
+		"default": "DEIN_FIREBASE_PROJECT_ID"
+	}
+}

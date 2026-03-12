@@ -51,14 +51,16 @@
 	<title>RasenBürosport - Dashboard</title>
 </svelte:head>
 
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-6 lg:grid lg:grid-cols-2">
 	<!-- Streak Badge -->
 	{#if stats}
-		<StreakBadge streak={stats.current_streak} lastPlayedAt={stats.last_played_at} />
+		<div class="lg:col-span-2">
+			<StreakBadge streak={stats.current_streak} lastPlayedAt={stats.last_played_at} />
+		</div>
 	{/if}
 
 	{#if loading}
-		<div class="flex justify-center py-8">
+		<div class="flex justify-center py-8 lg:col-span-2">
 			<div
 				class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"
 			></div>

@@ -6,7 +6,7 @@
 	const { t } = getTranslate();
 </script>
 
-<header class="flex items-center justify-end px-4 py-3" style="padding-top: calc(env(safe-area-inset-top) + 0.75rem);">
+<header class="flex items-center justify-end px-4 py-3 lg:hidden" style="padding-top: calc(env(safe-area-inset-top) + 0.75rem);">
 	<div class="flex items-center gap-3">
 		<span class="text-sm text-text-primary">
 			{$t("dashboard.greeting", { username: $user?.user_metadata?.username || "User" })}

@@ -1,5 +1,5 @@
 import { PUBLIC_API_URL } from "$env/static/public";
-import { supabase } from "$lib/config/supabase.config.js";
+import { auth } from "$lib/config/firebase.config.js";
 
 /**
  * Makes an authenticated API request to the backend
@@ -8,14 +8,17 @@ import { supabase } from "$lib/config/supabase.config.js";
  * @returns {Promise<object>}
  */
 export async function apiRequest(endpoint, options = {}) {
-	const {
-		data: { session },
-	} = await supabase.auth.getSession();
+	const currentUser = auth.currentUser;
+	let token = null;
+
+	if (currentUser) {
+		token = await currentUser.getIdToken();
+	}
 
 	const headers = {
 		"Content-Type": "application/json",
-		...(session?.access_token && {
-			Authorization: `Bearer ${session.access_token}`,
+		...(token && {
+			Authorization: `Bearer ${token}`,
 		}),
 		...options.headers,
 	};
@@ -52,6 +55,19 @@ export function get(endpoint) {
 export function post(endpoint, body) {
 	return apiRequest(endpoint, {
 		method: "POST",
+		body: JSON.stringify(body),
+	});
+}
+
+/**
+ * PATCH request helper
+ * @param {string} endpoint
+ * @param {object} body
+ * @returns {Promise<object>}
+ */
+export function patch(endpoint, body) {
+	return apiRequest(endpoint, {
+		method: "PATCH",
 		body: JSON.stringify(body),
 	});
 }

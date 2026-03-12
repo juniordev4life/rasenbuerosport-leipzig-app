@@ -65,7 +65,7 @@
 			{$t("games.no_games")}
 		</p>
 	{:else}
-		<div class="flex flex-col gap-3">
+		<div class="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-4">
 			{#each games as game (game.id)}
 				<GameCard {game} />
 			{/each}

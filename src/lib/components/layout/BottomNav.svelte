@@ -38,7 +38,7 @@
 </script>
 
 <nav
-	class="fixed bottom-0 left-0 right-0 bg-bg-secondary border-t border-border px-2 py-1 z-50"
+	class="fixed bottom-0 left-0 right-0 bg-bg-secondary border-t border-border px-2 py-1 z-50 lg:hidden"
 	style="padding-bottom: env(safe-area-inset-bottom);"
 >
 	<div class="flex justify-around items-center max-w-lg mx-auto">

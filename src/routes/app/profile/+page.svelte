@@ -91,28 +91,30 @@
 		{/if}
 
 		{#if stats}
-			<StatsOverview
-				totalGames={stats.total_games}
-				wins={stats.wins}
-				losses={stats.losses}
-			/>
+			<div class="flex flex-col gap-5 lg:grid lg:grid-cols-2 lg:gap-4">
+				<StatsOverview
+					totalGames={stats.total_games}
+					wins={stats.wins}
+					losses={stats.losses}
+				/>
 
-			<WinRate winRate={stats.win_rate} />
+				<WinRate winRate={stats.win_rate} />
 
-			<ModeBilanz
-				bilanz1v1={stats.bilanz_1v1}
-				bilanz2v2={stats.bilanz_2v2}
-			/>
+				<ModeBilanz
+					bilanz1v1={stats.bilanz_1v1}
+					bilanz2v2={stats.bilanz_2v2}
+				/>
 
-			<FavoriteStats
-				favoriteOpponent={stats.favorite_opponent}
-				bestTeammate={stats.best_teammate}
-				favoriteTeam={stats.favorite_team}
-			/>
+				<FavoriteStats
+					favoriteOpponent={stats.favorite_opponent}
+					bestTeammate={stats.best_teammate}
+					favoriteTeam={stats.favorite_team}
+				/>
 
-			<CareerMatchStats careerStats={stats.career_match_stats} />
+				<CareerMatchStats careerStats={stats.career_match_stats} />
 
-			<ProfileBadges badges={stats.badges || []} />
+				<ProfileBadges badges={stats.badges || []} />
+			</div>
 		{/if}
 
 		<!-- League Stats -->
