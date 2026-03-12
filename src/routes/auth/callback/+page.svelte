@@ -28,23 +28,46 @@
 			}
 		}
 
+		// Implicit flow — hash fragment tokens (#access_token=...)
+		// Supabase client processes these automatically during init,
+		// but we may need to wait for onAuthStateChange to fire
+		const hasHashTokens = window.location.hash.includes("access_token");
+
+		if (hasHashTokens) {
+			// Wait for Supabase to process the hash fragment
+			const session = await new Promise((resolve) => {
+				const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+					subscription.unsubscribe();
+					resolve(s);
+				});
+				// Timeout fallback in case the event already fired
+				setTimeout(() => resolve(null), 3000);
+			});
+
+			if (session?.user) {
+				redirectByUsername(session.user);
+				return;
+			}
+		}
+
 		// Check if user has a session now
 		const {
 			data: { session },
 		} = await supabase.auth.getSession();
 
 		if (session?.user) {
-			const username = session.user.user_metadata?.username;
-			if (username) {
-				// Already set up — go to dashboard
-				goto(ROUTES.DASHBOARD);
-			} else {
-				// Needs to set username + password
-				goto("/auth/setup");
-			}
+			redirectByUsername(session.user);
 		} else {
 			// No session — redirect to login
 			goto(ROUTES.LOGIN);
+		}
+	}
+
+	function redirectByUsername(authUser) {
+		if (authUser.user_metadata?.username) {
+			goto(ROUTES.DASHBOARD);
+		} else {
+			goto("/auth/setup");
 		}
 	}
 </script>
