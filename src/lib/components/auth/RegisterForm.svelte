@@ -1,44 +1,44 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { goto } from "$app/navigation";
-	import Button from "$lib/components/ui/Button.svelte";
-	import Input from "$lib/components/ui/Input.svelte";
-	import { register } from "$lib/services/auth.services.js";
-	import { ROUTES } from "$lib/constants/routes.constants.js";
+import { getTranslate } from "@tolgee/svelte";
+import { goto } from "$app/navigation";
+import Button from "$lib/components/ui/Button.svelte";
+import Input from "$lib/components/ui/Input.svelte";
+import { register } from "$lib/services/auth.services.js";
+import { ROUTES } from "$lib/constants/routes.constants.js";
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	let username = $state("");
-	let email = $state("");
-	let password = $state("");
-	let passwordConfirm = $state("");
-	let loading = $state(false);
-	let error = $state("");
+let username = $state("");
+let email = $state("");
+let password = $state("");
+let passwordConfirm = $state("");
+let loading = $state(false);
+let error = $state("");
 
-	async function handleSubmit(e) {
-		e.preventDefault();
-		error = "";
+async function handleSubmit(e) {
+	e.preventDefault();
+	error = "";
 
-		if (password !== passwordConfirm) {
-			error = $t("auth.errors.passwords_mismatch");
-			return;
-		}
-
-		loading = true;
-
-		try {
-			await register({ email, password, username });
-			goto(ROUTES.DASHBOARD);
-		} catch (err) {
-			if (err.message === "EMAIL_DOMAIN_NOT_ALLOWED") {
-				error = $t("auth.errors.email_domain");
-			} else {
-				error = err.message || $t("auth.errors.generic");
-			}
-		} finally {
-			loading = false;
-		}
+	if (password !== passwordConfirm) {
+		error = $t("auth.errors.passwords_mismatch");
+		return;
 	}
+
+	loading = true;
+
+	try {
+		await register({ email, password, username });
+		goto(ROUTES.DASHBOARD);
+	} catch (err) {
+		if (err.message === "EMAIL_DOMAIN_NOT_ALLOWED") {
+			error = $t("auth.errors.email_domain");
+		} else {
+			error = err.message || $t("auth.errors.generic");
+		}
+	} finally {
+		loading = false;
+	}
+}
 </script>
 
 <form onsubmit={handleSubmit} class="flex flex-col gap-4 w-full">

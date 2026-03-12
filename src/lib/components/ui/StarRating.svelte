@@ -1,19 +1,19 @@
 <script>
-	/**
-	 * StarRating - Renders filled/half/empty star icons (sofifa-style)
-	 * @param {number} rating - Rating from 0 to 5 (supports .5 increments)
-	 * @param {"xs"|"sm"|"md"} [size="sm"] - Display size
-	 */
-	let { rating = 0, size = "sm" } = $props();
+/**
+ * StarRating - Renders filled/half/empty star icons (sofifa-style)
+ * @param {number} rating - Rating from 0 to 5 (supports .5 increments)
+ * @param {"xs"|"sm"|"md"} [size="sm"] - Display size
+ */
+let { rating = 0, size = "sm" } = $props();
 
-	const sizes = { xs: "w-3 h-3", sm: "w-4 h-4", md: "w-5 h-5" };
-	const sizeClass = $derived(sizes[size] || sizes.sm);
+const sizes = { xs: "w-3 h-3", sm: "w-4 h-4", md: "w-5 h-5" };
+const sizeClass = $derived(sizes[size] || sizes.sm);
 
-	const stars = $derived(
-		Array.from({ length: 5 }, (_, i) =>
-			rating >= i + 1 ? "full" : rating >= i + 0.5 ? "half" : "empty",
-		),
-	);
+const stars = $derived(
+	Array.from({ length: 5 }, (_, i) =>
+		rating >= i + 1 ? "full" : rating >= i + 0.5 ? "half" : "empty",
+	),
+);
 </script>
 
 <div

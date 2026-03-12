@@ -1,46 +1,50 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { getAllTeams, getLeagues } from "$lib/services/teams.services.js";
-	import { getCountryFlag } from "$lib/constants/teams.constants.js";
-	import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
-	import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
-	import StarRating from "$lib/components/ui/StarRating.svelte";
+import { getTranslate } from "@tolgee/svelte";
+import { getAllTeams, getLeagues } from "$lib/services/teams.services.js";
+import { getCountryFlag } from "$lib/constants/teams.constants.js";
+import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
+import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
+import StarRating from "$lib/components/ui/StarRating.svelte";
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	let teams = $state([]);
-	let leagues = $state([]);
-	let loading = $state(true);
-	let searchQuery = $state("");
-	let selectedLeague = $state("");
-	let sortBy = $state("name");
+let teams = $state([]);
+let leagues = $state([]);
+let loading = $state(true);
+let searchQuery = $state("");
+let selectedLeague = $state("");
+let sortBy = $state("name");
 
-	$effect(() => {
-		Promise.all([getAllTeams(), getLeagues()]).then(([teamsData, leaguesData]) => {
+$effect(() => {
+	Promise.all([getAllTeams(), getLeagues()]).then(
+		([teamsData, leaguesData]) => {
 			teams = teamsData;
 			leagues = leaguesData;
 			loading = false;
-		});
-	});
+		},
+	);
+});
 
-	const filteredTeams = $derived.by(() => {
-		let result = teams;
+const filteredTeams = $derived.by(() => {
+	let result = teams;
 
-		if (searchQuery) {
-			const q = searchQuery.toLowerCase();
-			result = result.filter((t) => t.name.toLowerCase().includes(q));
-		}
+	if (searchQuery) {
+		const q = searchQuery.toLowerCase();
+		result = result.filter((t) => t.name.toLowerCase().includes(q));
+	}
 
-		if (selectedLeague) {
-			result = result.filter((t) => t.league_name === selectedLeague);
-		}
+	if (selectedLeague) {
+		result = result.filter((t) => t.league_name === selectedLeague);
+	}
 
-		if (sortBy === "overall_rating") {
-			result = [...result].sort((a, b) => (b.overall_rating || 0) - (a.overall_rating || 0));
-		}
+	if (sortBy === "overall_rating") {
+		result = [...result].sort(
+			(a, b) => (b.overall_rating || 0) - (a.overall_rating || 0),
+		);
+	}
 
-		return result;
-	});
+	return result;
+});
 </script>
 
 <svelte:head>

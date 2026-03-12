@@ -1,28 +1,28 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { goto } from "$app/navigation";
-	import { loginWithGoogle } from "$lib/services/auth.services.js";
-	import { ROUTES } from "$lib/constants/routes.constants.js";
+import { getTranslate } from "@tolgee/svelte";
+import { goto } from "$app/navigation";
+import { loginWithGoogle } from "$lib/services/auth.services.js";
+import { ROUTES } from "$lib/constants/routes.constants.js";
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	let loading = $state(false);
-	let error = $state("");
+let loading = $state(false);
+let error = $state("");
 
-	async function handleGoogleLogin() {
-		error = "";
-		loading = true;
+async function handleGoogleLogin() {
+	error = "";
+	loading = true;
 
-		try {
-			await loginWithGoogle();
-			goto(ROUTES.DASHBOARD);
-		} catch (err) {
-			if (err.code === "auth/popup-closed-by-user") return;
-			error = err.message || $t("auth.errors.generic");
-		} finally {
-			loading = false;
-		}
+	try {
+		await loginWithGoogle();
+		goto(ROUTES.DASHBOARD);
+	} catch (err) {
+		if (err.code === "auth/popup-closed-by-user") return;
+		error = err.message || $t("auth.errors.generic");
+	} finally {
+		loading = false;
 	}
+}
 </script>
 
 <div class="flex flex-col gap-4 w-full">

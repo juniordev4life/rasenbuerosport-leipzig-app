@@ -1,50 +1,50 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { get } from "$lib/services/api.services.js";
-	import GameCard from "$lib/components/dashboard/GameCard.svelte";
-	import Button from "$lib/components/ui/Button.svelte";
+import { getTranslate } from "@tolgee/svelte";
+import { get } from "$lib/services/api.services.js";
+import GameCard from "$lib/components/dashboard/GameCard.svelte";
+import Button from "$lib/components/ui/Button.svelte";
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	const PAGE_SIZE = 10;
+const PAGE_SIZE = 10;
 
-	let games = $state([]);
-	let loading = $state(true);
-	let loadingMore = $state(false);
-	let hasMore = $state(true);
-	let offset = $state(0);
+let games = $state([]);
+let loading = $state(true);
+let loadingMore = $state(false);
+let hasMore = $state(true);
+let offset = $state(0);
 
-	$effect(() => {
-		loadGames();
-	});
+$effect(() => {
+	loadGames();
+});
 
-	async function loadGames() {
-		try {
-			const res = await get(`/v1/games?limit=${PAGE_SIZE}&offset=0`);
-			games = res.data || [];
-			offset = games.length;
-			hasMore = games.length >= PAGE_SIZE;
-		} catch (err) {
-			console.error("Failed to load games:", err);
-		} finally {
-			loading = false;
-		}
+async function loadGames() {
+	try {
+		const res = await get(`/v1/games?limit=${PAGE_SIZE}&offset=0`);
+		games = res.data || [];
+		offset = games.length;
+		hasMore = games.length >= PAGE_SIZE;
+	} catch (err) {
+		console.error("Failed to load games:", err);
+	} finally {
+		loading = false;
 	}
+}
 
-	async function loadMore() {
-		loadingMore = true;
-		try {
-			const res = await get(`/v1/games?limit=${PAGE_SIZE}&offset=${offset}`);
-			const newGames = res.data || [];
-			games = [...games, ...newGames];
-			offset += newGames.length;
-			hasMore = newGames.length >= PAGE_SIZE;
-		} catch (err) {
-			console.error("Failed to load more games:", err);
-		} finally {
-			loadingMore = false;
-		}
+async function loadMore() {
+	loadingMore = true;
+	try {
+		const res = await get(`/v1/games?limit=${PAGE_SIZE}&offset=${offset}`);
+		const newGames = res.data || [];
+		games = [...games, ...newGames];
+		offset += newGames.length;
+		hasMore = newGames.length >= PAGE_SIZE;
+	} catch (err) {
+		console.error("Failed to load more games:", err);
+	} finally {
+		loadingMore = false;
 	}
+}
 </script>
 
 <svelte:head>

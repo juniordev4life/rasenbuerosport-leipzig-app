@@ -1,9 +1,9 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
+import { getTranslate } from "@tolgee/svelte";
 
-	let { teams = [], selectedId = $bindable("") } = $props();
+let { teams = [], selectedId = $bindable("") } = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 </script>
 
 <select

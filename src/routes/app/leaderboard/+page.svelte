@@ -1,193 +1,208 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { get } from "$lib/services/api.services.js";
-	import { user } from "$lib/stores/auth.stores.js";
-	import H2HModal from "$lib/components/leaderboard/H2HModal.svelte";
+import { getTranslate } from "@tolgee/svelte";
+import { get } from "$lib/services/api.services.js";
+import { user } from "$lib/stores/auth.stores.js";
+import H2HModal from "$lib/components/leaderboard/H2HModal.svelte";
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	let players = $state([]);
-	let loading = $state(true);
-	let selectedPlayerId = $state(null);
-	let viewMode = $state("total");
-	let selectedPeriod = $state("all");
-	let selectedMode = $state("all");
+let players = $state([]);
+let loading = $state(true);
+let selectedPlayerId = $state(null);
+let viewMode = $state("total");
+let selectedPeriod = $state("all");
+let selectedMode = $state("all");
 
-	const ONE_MONTH_MS = 30 * 24 * 60 * 60 * 1000;
-	const MIN_GAMES_PPG = 3;
+const ONE_MONTH_MS = 30 * 24 * 60 * 60 * 1000;
+const MIN_GAMES_PPG = 3;
 
-	/** Project start: January 2026 */
-	const PROJECT_START_YEAR = 2026;
-	const PROJECT_START_MONTH = 1;
+/** Project start: January 2026 */
+const PROJECT_START_YEAR = 2026;
+const PROJECT_START_MONTH = 1;
 
-	/**
-	 * Builds period dropdown options dynamically from project start to current month
-	 * @returns {Array<{value: string, label: string}>}
-	 */
-	const periodOptions = $derived.by(() => {
-		const now = new Date();
-		const currentYear = now.getFullYear();
-		const currentMonth = now.getMonth() + 1;
-		const options = [{ value: "all", label: $t("leaderboard.period_all") }];
+/**
+ * Builds period dropdown options dynamically from project start to current month
+ * @returns {Array<{value: string, label: string}>}
+ */
+const periodOptions = $derived.by(() => {
+	const now = new Date();
+	const currentYear = now.getFullYear();
+	const currentMonth = now.getMonth() + 1;
+	const options = [{ value: "all", label: $t("leaderboard.period_all") }];
 
-		// Add year options (from current year back to start year)
-		for (let y = currentYear; y >= PROJECT_START_YEAR; y--) {
-			options.push({ value: `${y}`, label: `${y}` });
-		}
+	// Add year options (from current year back to start year)
+	for (let y = currentYear; y >= PROJECT_START_YEAR; y--) {
+		options.push({ value: `${y}`, label: `${y}` });
+	}
 
-		// Add month options (from current month back to project start)
-		let y = currentYear;
-		let m = currentMonth;
-		while (y > PROJECT_START_YEAR || (y === PROJECT_START_YEAR && m >= PROJECT_START_MONTH)) {
-			const date = new Date(y, m - 1, 1);
-			const monthName = date.toLocaleDateString("de-DE", { month: "long" });
-			const label = `${monthName.charAt(0).toUpperCase()}${monthName.slice(1)} ${y}`;
-			options.push({ value: `${y}-${String(m).padStart(2, "0")}`, label });
+	// Add month options (from current month back to project start)
+	let y = currentYear;
+	let m = currentMonth;
+	while (
+		y > PROJECT_START_YEAR ||
+		(y === PROJECT_START_YEAR && m >= PROJECT_START_MONTH)
+	) {
+		const date = new Date(y, m - 1, 1);
+		const monthName = date.toLocaleDateString("de-DE", { month: "long" });
+		const label = `${monthName.charAt(0).toUpperCase()}${monthName.slice(1)} ${y}`;
+		options.push({ value: `${y}-${String(m).padStart(2, "0")}`, label });
 
-			m--;
-			if (m < 1) {
-				m = 12;
-				y--;
-			}
-		}
-
-		return options;
-	});
-
-	/**
-	 * Derives from/to date params based on selected period
-	 * @returns {{ from?: string, to?: string }}
-	 */
-	const periodDateRange = $derived.by(() => {
-		if (selectedPeriod === "all") return {};
-
-		// Year: "2026"
-		if (/^\d{4}$/.test(selectedPeriod)) {
-			const year = Number.parseInt(selectedPeriod);
-			return {
-				from: `${year}-01-01`,
-				to: `${year}-12-31`,
-			};
-		}
-
-		// Month: "2026-02"
-		if (/^\d{4}-\d{2}$/.test(selectedPeriod)) {
-			const [year, month] = selectedPeriod.split("-").map(Number);
-			const lastDay = new Date(year, month, 0).getDate();
-			return {
-				from: `${year}-${String(month).padStart(2, "0")}-01`,
-				to: `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`,
-			};
-		}
-
-		return {};
-	});
-
-	$effect(() => {
-		// Track reactive dependencies — re-fetch on period or mode change
-		periodDateRange;
-		selectedMode;
-		loadLeaderboard();
-	});
-
-	async function loadLeaderboard() {
-		loading = true;
-		try {
-			let url = "/v1/leaderboard?limit=50";
-			if (periodDateRange.from) {
-				url += `&from=${periodDateRange.from}`;
-			}
-			if (periodDateRange.to) {
-				url += `&to=${periodDateRange.to}`;
-			}
-			if (selectedMode !== "all") {
-				url += `&mode=${selectedMode}`;
-			}
-			const res = await get(url);
-			players = res.data || [];
-		} catch (err) {
-			console.error("Failed to load leaderboard:", err);
-		} finally {
-			loading = false;
+		m--;
+		if (m < 1) {
+			m = 12;
+			y--;
 		}
 	}
 
-	/** Reload leaderboard when period changes */
-	function handlePeriodChange(event) {
-		selectedPeriod = event.target.value;
+	return options;
+});
+
+/**
+ * Derives from/to date params based on selected period
+ * @returns {{ from?: string, to?: string }}
+ */
+const periodDateRange = $derived.by(() => {
+	if (selectedPeriod === "all") return {};
+
+	// Year: "2026"
+	if (/^\d{4}$/.test(selectedPeriod)) {
+		const year = Number.parseInt(selectedPeriod);
+		return {
+			from: `${year}-01-01`,
+			to: `${year}-12-31`,
+		};
 	}
 
-	/** Sorted & filtered players based on view mode */
-	const rankedPlayers = $derived.by(() => {
-		if (viewMode === "ppg") {
-			return players
-				.filter((p) => p.games >= MIN_GAMES_PPG)
-				.map((p) => ({ ...p, ppg: p.points / p.games }))
-				.sort((a, b) => b.ppg - a.ppg);
+	// Month: "2026-02"
+	if (/^\d{4}-\d{2}$/.test(selectedPeriod)) {
+		const [year, month] = selectedPeriod.split("-").map(Number);
+		const lastDay = new Date(year, month, 0).getDate();
+		return {
+			from: `${year}-${String(month).padStart(2, "0")}-01`,
+			to: `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`,
+		};
+	}
+
+	return {};
+});
+
+$effect(() => {
+	// Track reactive dependencies — re-fetch on period or mode change
+	periodDateRange;
+	selectedMode;
+	loadLeaderboard();
+});
+
+async function loadLeaderboard() {
+	loading = true;
+	try {
+		let url = "/v1/leaderboard?limit=50";
+		if (periodDateRange.from) {
+			url += `&from=${periodDateRange.from}`;
 		}
-		return players;
-	});
-
-	/** Get medal emoji for top 3 */
-	function getMedal(index) {
-		if (index === 0) return "\u{1F947}";
-		if (index === 1) return "\u{1F948}";
-		if (index === 2) return "\u{1F949}";
-		return null;
-	}
-
-	/** Get rank text style */
-	function getRankStyle(index) {
-		if (index === 0) return "text-yellow-400";
-		if (index === 1) return "text-gray-400";
-		if (index === 2) return "text-amber-600";
-		return "text-text-secondary";
-	}
-
-	/** Check if player is sleeping (last game > 1 month ago) */
-	function isSleeping(lastPlayedAt) {
-		if (!lastPlayedAt) return false;
-		return Date.now() - new Date(lastPlayedAt).getTime() > ONE_MONTH_MS;
-	}
-
-	/** Handle player row click - open H2H modal (not for current user) */
-	function handlePlayerClick(playerId) {
-		if (playerId === userId) return;
-		selectedPlayerId = playerId;
-	}
-
-	/** Format PPG with locale-aware decimal separator */
-	function formatPpg(value) {
-		return value.toFixed(2).replace(".", ",");
-	}
-
-	const userId = $derived($user?.id);
-
-	/**
-	 * Collects all badge emojis for a player (streak + wall + scorer)
-	 * @param {object} player
-	 * @returns {Array<{emoji: string, title: string, position: string}>}
-	 */
-	function getPlayerBadges(player) {
-		const badges = [];
-
-		if (player.current_streak?.type === "win") {
-			badges.push({ emoji: "\u{1F525}", title: `${player.current_streak.count} Siege in Folge` });
-		} else if (player.current_streak?.type === "loss") {
-			badges.push({ emoji: "\u{1F976}", title: `${player.current_streak.count} Niederlagen in Folge` });
+		if (periodDateRange.to) {
+			url += `&to=${periodDateRange.to}`;
 		}
-
-		for (const badge of player.badges || []) {
-			if (badge.type === "wall") {
-				badges.push({ emoji: "\u{1F9F1}", title: `${badge.count} Spiele zu Null` });
-			}
-			if (badge.type === "scorer") {
-				badges.push({ emoji: "\u26BD", title: `${badge.count} Spiele mit 3+ Toren` });
-			}
+		if (selectedMode !== "all") {
+			url += `&mode=${selectedMode}`;
 		}
-
-		return badges;
+		const res = await get(url);
+		players = res.data || [];
+	} catch (err) {
+		console.error("Failed to load leaderboard:", err);
+	} finally {
+		loading = false;
 	}
+}
+
+/** Reload leaderboard when period changes */
+function handlePeriodChange(event) {
+	selectedPeriod = event.target.value;
+}
+
+/** Sorted & filtered players based on view mode */
+const rankedPlayers = $derived.by(() => {
+	if (viewMode === "ppg") {
+		return players
+			.filter((p) => p.games >= MIN_GAMES_PPG)
+			.map((p) => ({ ...p, ppg: p.points / p.games }))
+			.sort((a, b) => b.ppg - a.ppg);
+	}
+	return players;
+});
+
+/** Get medal emoji for top 3 */
+function getMedal(index) {
+	if (index === 0) return "\u{1F947}";
+	if (index === 1) return "\u{1F948}";
+	if (index === 2) return "\u{1F949}";
+	return null;
+}
+
+/** Get rank text style */
+function getRankStyle(index) {
+	if (index === 0) return "text-yellow-400";
+	if (index === 1) return "text-gray-400";
+	if (index === 2) return "text-amber-600";
+	return "text-text-secondary";
+}
+
+/** Check if player is sleeping (last game > 1 month ago) */
+function isSleeping(lastPlayedAt) {
+	if (!lastPlayedAt) return false;
+	return Date.now() - new Date(lastPlayedAt).getTime() > ONE_MONTH_MS;
+}
+
+/** Handle player row click - open H2H modal (not for current user) */
+function handlePlayerClick(playerId) {
+	if (playerId === userId) return;
+	selectedPlayerId = playerId;
+}
+
+/** Format PPG with locale-aware decimal separator */
+function formatPpg(value) {
+	return value.toFixed(2).replace(".", ",");
+}
+
+const userId = $derived($user?.id);
+
+/**
+ * Collects all badge emojis for a player (streak + wall + scorer)
+ * @param {object} player
+ * @returns {Array<{emoji: string, title: string, position: string}>}
+ */
+function getPlayerBadges(player) {
+	const badges = [];
+
+	if (player.current_streak?.type === "win") {
+		badges.push({
+			emoji: "\u{1F525}",
+			title: `${player.current_streak.count} Siege in Folge`,
+		});
+	} else if (player.current_streak?.type === "loss") {
+		badges.push({
+			emoji: "\u{1F976}",
+			title: `${player.current_streak.count} Niederlagen in Folge`,
+		});
+	}
+
+	for (const badge of player.badges || []) {
+		if (badge.type === "wall") {
+			badges.push({
+				emoji: "\u{1F9F1}",
+				title: `${badge.count} Spiele zu Null`,
+			});
+		}
+		if (badge.type === "scorer") {
+			badges.push({
+				emoji: "\u26BD",
+				title: `${badge.count} Spiele mit 3+ Toren`,
+			});
+		}
+	}
+
+	return badges;
+}
 </script>
 
 <svelte:head>

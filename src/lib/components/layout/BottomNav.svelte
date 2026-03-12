@@ -1,40 +1,40 @@
 <script>
-	import { page } from "$app/state";
-	import { getTranslate } from "@tolgee/svelte";
-	import { ROUTES } from "$lib/constants/routes.constants.js";
+import { page } from "$app/state";
+import { getTranslate } from "@tolgee/svelte";
+import { ROUTES } from "$lib/constants/routes.constants.js";
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	const navItems = [
-		{
-			href: ROUTES.DASHBOARD,
-			labelKey: "nav.dashboard",
-			icon: "dashboard",
-		},
-		{
-			href: ROUTES.LEADERBOARD,
-			labelKey: "nav.leaderboard",
-			icon: "leaderboard",
-		},
-		{
-			href: ROUTES.NEW_GAME,
-			labelKey: "nav.new_game",
-			icon: "new_game",
-			isCenter: true,
-		},
-		{
-			href: ROUTES.GAMES,
-			labelKey: "nav.games",
-			icon: "games",
-		},
-		{
-			href: ROUTES.PROFILE,
-			labelKey: "nav.profile",
-			icon: "profile",
-		},
-	];
+const navItems = [
+	{
+		href: ROUTES.DASHBOARD,
+		labelKey: "nav.dashboard",
+		icon: "dashboard",
+	},
+	{
+		href: ROUTES.LEADERBOARD,
+		labelKey: "nav.leaderboard",
+		icon: "leaderboard",
+	},
+	{
+		href: ROUTES.NEW_GAME,
+		labelKey: "nav.new_game",
+		icon: "new_game",
+		isCenter: true,
+	},
+	{
+		href: ROUTES.GAMES,
+		labelKey: "nav.games",
+		icon: "games",
+	},
+	{
+		href: ROUTES.PROFILE,
+		labelKey: "nav.profile",
+		icon: "profile",
+	},
+];
 
-	const isActive = (href) => page.url.pathname === href;
+const isActive = (href) => page.url.pathname === href;
 </script>
 
 <nav

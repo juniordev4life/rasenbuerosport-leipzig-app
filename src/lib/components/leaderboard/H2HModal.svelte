@@ -1,48 +1,48 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { get } from "$lib/services/api.services.js";
-	import GameCard from "$lib/components/dashboard/GameCard.svelte";
+import { getTranslate } from "@tolgee/svelte";
+import { get } from "$lib/services/api.services.js";
+import GameCard from "$lib/components/dashboard/GameCard.svelte";
 
-	/**
-	 * H2HModal - Bottom-sheet overlay showing head-to-head stats
-	 * @param {string} playerId - Opponent player ID
-	 * @param {Function} onClose - Close handler
-	 */
-	let { playerId, onClose } = $props();
+/**
+ * H2HModal - Bottom-sheet overlay showing head-to-head stats
+ * @param {string} playerId - Opponent player ID
+ * @param {Function} onClose - Close handler
+ */
+let { playerId, onClose } = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	let data = $state(null);
-	let loading = $state(true);
+let data = $state(null);
+let loading = $state(true);
 
-	$effect(() => {
-		if (playerId) loadH2H();
-	});
+$effect(() => {
+	if (playerId) loadH2H();
+});
 
-	async function loadH2H() {
-		loading = true;
-		try {
-			const res = await get(`/v1/stats/${playerId}`);
-			data = res.data;
-		} catch (err) {
-			console.error("Failed to load H2H:", err);
-		} finally {
-			loading = false;
-		}
+async function loadH2H() {
+	loading = true;
+	try {
+		const res = await get(`/v1/stats/${playerId}`);
+		data = res.data;
+	} catch (err) {
+		console.error("Failed to load H2H:", err);
+	} finally {
+		loading = false;
 	}
+}
 
-	/** Calculate visual bar percentages */
-	const userPct = $derived(
-		data?.total_games > 0
-			? Math.round((data.user_wins / data.total_games) * 100)
-			: 0,
-	);
-	const opponentPct = $derived(
-		data?.total_games > 0
-			? Math.round((data.opponent_wins / data.total_games) * 100)
-			: 0,
-	);
-	const drawPct = $derived(100 - userPct - opponentPct);
+/** Calculate visual bar percentages */
+const userPct = $derived(
+	data?.total_games > 0
+		? Math.round((data.user_wins / data.total_games) * 100)
+		: 0,
+);
+const opponentPct = $derived(
+	data?.total_games > 0
+		? Math.round((data.opponent_wins / data.total_games) * 100)
+		: 0,
+);
+const drawPct = $derived(100 - userPct - opponentPct);
 </script>
 
 <!-- Backdrop -->

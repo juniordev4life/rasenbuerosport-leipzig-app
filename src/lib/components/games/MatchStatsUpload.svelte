@@ -1,85 +1,85 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { storage } from "$lib/config/firebase.config.js";
-	import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-	import { post } from "$lib/services/api.services.js";
+import { getTranslate } from "@tolgee/svelte";
+import { storage } from "$lib/config/firebase.config.js";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { post } from "$lib/services/api.services.js";
 
-	/**
-	 * MatchStatsUpload - Upload an FC26 stats screenshot for AI extraction
-	 * Supports overview, passes, and defense screenshot types
-	 */
-	let {
-		gameId,
-		type = "overview",
-		label = "match_stats.upload_overview_title",
-		hint = "match_stats.upload_overview_hint",
-		onStatsExtracted,
-	} = $props();
+/**
+ * MatchStatsUpload - Upload an FC26 stats screenshot for AI extraction
+ * Supports overview, passes, and defense screenshot types
+ */
+let {
+	gameId,
+	type = "overview",
+	label = "match_stats.upload_overview_title",
+	hint = "match_stats.upload_overview_hint",
+	onStatsExtracted,
+} = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	let uploading = $state(false);
-	let error = $state("");
-	let imagePreview = $state(null);
-	let selectedFile = $state(null);
+let uploading = $state(false);
+let error = $state("");
+let imagePreview = $state(null);
+let selectedFile = $state(null);
 
-	/** Handle file selection */
-	function handleFileChange(e) {
-		const file = e.target.files?.[0];
-		if (!file) return;
+/** Handle file selection */
+function handleFileChange(e) {
+	const file = e.target.files?.[0];
+	if (!file) return;
 
-		if (!file.type.startsWith("image/")) {
-			error = $t("match_stats.error_file_type");
-			return;
-		}
-		if (file.size > 5 * 1024 * 1024) {
-			error = $t("match_stats.error_file_size");
-			return;
-		}
-
-		selectedFile = file;
-		imagePreview = URL.createObjectURL(file);
-		error = "";
+	if (!file.type.startsWith("image/")) {
+		error = $t("match_stats.error_file_type");
+		return;
+	}
+	if (file.size > 5 * 1024 * 1024) {
+		error = $t("match_stats.error_file_size");
+		return;
 	}
 
-	/** Upload image and extract stats */
-	async function handleUpload() {
-		if (!selectedFile) return;
-		uploading = true;
-		error = "";
+	selectedFile = file;
+	imagePreview = URL.createObjectURL(file);
+	error = "";
+}
 
-		try {
-			// 1. Upload to Cloud Storage
-			const ext = selectedFile.name.split(".").pop();
-			const storageRef = ref(storage, `match-stats/${gameId}/${type}.${ext}`);
+/** Upload image and extract stats */
+async function handleUpload() {
+	if (!selectedFile) return;
+	uploading = true;
+	error = "";
 
-			await uploadBytes(storageRef, selectedFile);
-			const imageUrl = await getDownloadURL(storageRef);
+	try {
+		// 1. Upload to Cloud Storage
+		const ext = selectedFile.name.split(".").pop();
+		const storageRef = ref(storage, `match-stats/${gameId}/${type}.${ext}`);
 
-			// 2. Call backend to extract stats via Claude Vision
-			const res = await post(`/v1/games/${gameId}/match-stats`, {
-				imageUrl,
-				type,
-			});
+		await uploadBytes(storageRef, selectedFile);
+		const imageUrl = await getDownloadURL(storageRef);
 
-			onStatsExtracted?.(res.data);
-		} catch (err) {
-			console.error("Stats upload failed:", err);
-			error = err.message || $t("match_stats.error_generic");
-		} finally {
-			uploading = false;
-		}
+		// 2. Call backend to extract stats via Claude Vision
+		const res = await post(`/v1/games/${gameId}/match-stats`, {
+			imageUrl,
+			type,
+		});
+
+		onStatsExtracted?.(res.data);
+	} catch (err) {
+		console.error("Stats upload failed:", err);
+		error = err.message || $t("match_stats.error_generic");
+	} finally {
+		uploading = false;
 	}
+}
 
-	/** Remove selected file */
-	function removeFile() {
-		selectedFile = null;
-		if (imagePreview) {
-			URL.revokeObjectURL(imagePreview);
-			imagePreview = null;
-		}
-		error = "";
+/** Remove selected file */
+function removeFile() {
+	selectedFile = null;
+	if (imagePreview) {
+		URL.revokeObjectURL(imagePreview);
+		imagePreview = null;
 	}
+	error = "";
+}
 </script>
 
 <div class="bg-bg-secondary border border-border rounded-lg p-4">

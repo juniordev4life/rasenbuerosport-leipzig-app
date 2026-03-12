@@ -1,9 +1,10 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
+import { getTranslate } from "@tolgee/svelte";
 
-	let { bilanz1v1 = { wins: 0, losses: 0 }, bilanz2v2 = { wins: 0, losses: 0 } } = $props();
+let { bilanz1v1 = { wins: 0, losses: 0 }, bilanz2v2 = { wins: 0, losses: 0 } } =
+	$props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 </script>
 
 <div class="grid grid-cols-2 gap-3">

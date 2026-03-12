@@ -1,53 +1,56 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
+import { getTranslate } from "@tolgee/svelte";
 
-	let { games = [] } = $props();
+let { games = [] } = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	/**
-	 * Formats a timestamp as relative time (e.g. "vor 2 Std.")
-	 * @param {string} isoDate
-	 * @returns {string}
-	 */
-	function getRelativeTime(isoDate) {
-		const diffMs = Date.now() - new Date(isoDate).getTime();
-		const diffMinutes = Math.floor(diffMs / 60000);
-		const diffHours = Math.floor(diffMs / 3600000);
-		const diffDays = Math.floor(diffMs / 86400000);
+/**
+ * Formats a timestamp as relative time (e.g. "vor 2 Std.")
+ * @param {string} isoDate
+ * @returns {string}
+ */
+function getRelativeTime(isoDate) {
+	const diffMs = Date.now() - new Date(isoDate).getTime();
+	const diffMinutes = Math.floor(diffMs / 60000);
+	const diffHours = Math.floor(diffMs / 3600000);
+	const diffDays = Math.floor(diffMs / 86400000);
 
-		if (diffMinutes < 60) {
-			return $t("dashboard.activity_ago", {
-				time: $t("dashboard.activity_minutes", { count: Math.max(1, diffMinutes) }),
-			});
-		}
-		if (diffHours < 24) {
-			return $t("dashboard.activity_ago", {
-				time: $t("dashboard.activity_hours", { count: diffHours }),
-			});
-		}
+	if (diffMinutes < 60) {
 		return $t("dashboard.activity_ago", {
-			time: $t("dashboard.activity_days", { count: diffDays }),
+			time: $t("dashboard.activity_minutes", {
+				count: Math.max(1, diffMinutes),
+			}),
 		});
 	}
-
-	/** Get player initial from profile */
-	function getInitial(player) {
-		const name = player.profiles?.username;
-		return name?.charAt(0)?.toUpperCase() || "?";
+	if (diffHours < 24) {
+		return $t("dashboard.activity_ago", {
+			time: $t("dashboard.activity_hours", { count: diffHours }),
+		});
 	}
+	return $t("dashboard.activity_ago", {
+		time: $t("dashboard.activity_days", { count: diffDays }),
+	});
+}
 
-	/** Get players for a given side */
-	function getSidePlayers(game, side) {
-		return (game.game_players || []).filter((p) => p.team === side);
-	}
+/** Get player initial from profile */
+function getInitial(player) {
+	const name = player.profiles?.username;
+	return name?.charAt(0)?.toUpperCase() || "?";
+}
 
-	/** Get result type suffix (n.V. / n.E.) */
-	function getResultSuffix(game) {
-		if (game.result_type === "penalty") return $t("game_detail.penalty_short");
-		if (game.result_type === "extra_time") return $t("game_detail.extra_time_short");
-		return "";
-	}
+/** Get players for a given side */
+function getSidePlayers(game, side) {
+	return (game.game_players || []).filter((p) => p.team === side);
+}
+
+/** Get result type suffix (n.V. / n.E.) */
+function getResultSuffix(game) {
+	if (game.result_type === "penalty") return $t("game_detail.penalty_short");
+	if (game.result_type === "extra_time")
+		return $t("game_detail.extra_time_short");
+	return "";
+}
 </script>
 
 <section>

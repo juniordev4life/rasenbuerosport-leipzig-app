@@ -1,9 +1,9 @@
 <script>
-	import Header from "$lib/components/layout/Header.svelte";
-	import BottomNav from "$lib/components/layout/BottomNav.svelte";
-	import Sidebar from "$lib/components/layout/Sidebar.svelte";
+import Header from "$lib/components/layout/Header.svelte";
+import BottomNav from "$lib/components/layout/BottomNav.svelte";
+import Sidebar from "$lib/components/layout/Sidebar.svelte";
 
-	let { children } = $props();
+let { children } = $props();
 </script>
 
 <div class="min-h-screen bg-bg-primary flex flex-col lg:flex-row">

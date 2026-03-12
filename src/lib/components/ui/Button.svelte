@@ -1,26 +1,26 @@
 <script>
-	let {
-		type = "button",
-		variant = "primary",
-		disabled = false,
-		loading = false,
-		class: className = "",
-		onclick,
-		children,
-	} = $props();
+let {
+	type = "button",
+	variant = "primary",
+	disabled = false,
+	loading = false,
+	class: className = "",
+	onclick,
+	children,
+} = $props();
 
-	const baseClasses =
-		"w-full py-3.5 px-6 rounded-lg font-semibold text-lg transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+const baseClasses =
+	"w-full py-3.5 px-6 rounded-lg font-semibold text-lg transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
 
-	const variants = {
-		primary:
-			"bg-accent-red text-text-primary hover:bg-accent-red-hover active:scale-[0.98] shadow-lg shadow-accent-red/20",
-		secondary:
-			"bg-bg-secondary text-text-primary border border-border hover:border-border-light",
-		ghost: "bg-transparent text-text-secondary hover:text-text-primary",
-	};
+const variants = {
+	primary:
+		"bg-accent-red text-text-primary hover:bg-accent-red-hover active:scale-[0.98] shadow-lg shadow-accent-red/20",
+	secondary:
+		"bg-bg-secondary text-text-primary border border-border hover:border-border-light",
+	ghost: "bg-transparent text-text-secondary hover:text-text-primary",
+};
 
-	const classes = $derived(`${baseClasses} ${variants[variant]} ${className}`);
+const classes = $derived(`${baseClasses} ${variants[variant]} ${className}`);
 </script>
 
 <button {type} disabled={disabled || loading} class={classes} {onclick}>

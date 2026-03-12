@@ -1,7 +1,11 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
-	"organizeImports": {
-		"enabled": true
+	"$schema": "https://biomejs.dev/schemas/2.4.4/schema.json",
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
 	},
 	"linter": {
 		"enabled": true,
@@ -9,11 +13,18 @@
 			"recommended": true
 		}
 	},
+	"css": {
+		"parser": {
+			"cssModules": true,
+			"tailwindDirectives": true
+		}
+	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab"
 	},
 	"files": {
-		"ignore": [".svelte-kit", "build", "node_modules"]
+		"includes": ["**"],
+		"experimentalScannerIgnores": [".svelte-kit", "build", "node_modules"]
 	}
 }

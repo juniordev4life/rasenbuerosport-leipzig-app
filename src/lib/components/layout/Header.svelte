@@ -1,9 +1,9 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { user } from "$lib/stores/auth.stores.js";
-	import { ROUTES } from "$lib/constants/routes.constants.js";
+import { getTranslate } from "@tolgee/svelte";
+import { user } from "$lib/stores/auth.stores.js";
+import { ROUTES } from "$lib/constants/routes.constants.js";
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 </script>
 
 <header class="flex items-center justify-end px-4 py-3 lg:hidden" style="padding-top: calc(env(safe-area-inset-top) + 0.75rem);">

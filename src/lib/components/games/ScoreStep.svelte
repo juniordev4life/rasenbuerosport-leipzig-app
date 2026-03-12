@@ -1,251 +1,291 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { tick } from "svelte";
-	import ScoreCounter from "./ScoreCounter.svelte";
-	import Button from "$lib/components/ui/Button.svelte";
-	import { getTeamByName } from "$lib/services/teams.services.js";
-	import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
+import { getTranslate } from "@tolgee/svelte";
+import { tick } from "svelte";
+import ScoreCounter from "./ScoreCounter.svelte";
+import Button from "$lib/components/ui/Button.svelte";
+import { getTeamByName } from "$lib/services/teams.services.js";
+import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
 
-	/**
-	 * ScoreStep - Step 3 of new game wizard
-	 * Shows team names, score entry, phase toggles, timeline tracking,
-	 * and scorer picker popup for 2v2 games
-	 */
-	let {
-		homeTeam = "",
-		awayTeam = "",
-		homePlayers = [],
-		awayPlayers = [],
-		allPlayers = [],
-		scoreHome = $bindable(0),
-		scoreAway = $bindable(0),
-		scoreTimeline = $bindable([]),
-		resultType = $bindable("regular"),
-		statsOverview = $bindable(null),
-		statsPasses = $bindable(null),
-		statsDefense = $bindable(null),
-		saving = false,
-		onSave,
-		onBack,
-	} = $props();
+/**
+ * ScoreStep - Step 3 of new game wizard
+ * Shows team names, score entry, phase toggles, timeline tracking,
+ * and scorer picker popup for 2v2 games
+ */
+let {
+	homeTeam = "",
+	awayTeam = "",
+	homePlayers = [],
+	awayPlayers = [],
+	allPlayers = [],
+	scoreHome = $bindable(0),
+	scoreAway = $bindable(0),
+	scoreTimeline = $bindable([]),
+	resultType = $bindable("regular"),
+	statsOverview = $bindable(null),
+	statsPasses = $bindable(null),
+	statsDefense = $bindable(null),
+	saving = false,
+	onSave,
+	onBack,
+} = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	/** @type {import('$lib/services/teams.services.js').TeamData|null} */
-	let homeTeamData = $state(null);
-	/** @type {import('$lib/services/teams.services.js').TeamData|null} */
-	let awayTeamData = $state(null);
+/** @type {import('$lib/services/teams.services.js').TeamData|null} */
+let homeTeamData = $state(null);
+/** @type {import('$lib/services/teams.services.js').TeamData|null} */
+let awayTeamData = $state(null);
 
-	$effect(() => {
-		if (homeTeam) getTeamByName(homeTeam).then((t) => { homeTeamData = t || null; });
-	});
-	$effect(() => {
-		if (awayTeam) getTeamByName(awayTeam).then((t) => { awayTeamData = t || null; });
-	});
+$effect(() => {
+	if (homeTeam)
+		getTeamByName(homeTeam).then((t) => {
+			homeTeamData = t || null;
+		});
+});
+$effect(() => {
+	if (awayTeam)
+		getTeamByName(awayTeam).then((t) => {
+			awayTeamData = t || null;
+		});
+});
 
-	/** Track previous total score to detect increment vs decrement */
-	let prevTotal = $state(0);
+/** Track previous total score to detect increment vs decrement */
+let prevTotal = $state(0);
 
-	/** Phase toggles */
-	let extraTimeActive = $state(false);
-	let penaltyActive = $state(false);
+/** Phase toggles */
+let extraTimeActive = $state(false);
+let penaltyActive = $state(false);
 
-	/** Current period based on active toggles */
-	const currentPeriod = $derived(
-		penaltyActive ? "penalty" : extraTimeActive ? "extra_time" : "regular",
-	);
+/** Current period based on active toggles */
+const currentPeriod = $derived(
+	penaltyActive ? "penalty" : extraTimeActive ? "extra_time" : "regular",
+);
 
-	/** Scorer picker state */
-	let showScorerPicker = $state(false);
-	let pendingGoal = $state(null);
+/** Scorer picker state */
+let showScorerPicker = $state(false);
+let pendingGoal = $state(null);
 
-	/**
-	 * Resolve player profile objects for a side (excluding guests)
-	 * @param {"home"|"away"} side
-	 * @returns {Array<{id: string, username: string, avatar_url: string|null}>}
-	 */
-	function getPlayersForSide(side) {
-		const ids = side === "home" ? homePlayers : awayPlayers;
-		return ids
-			.filter((id) => !id.startsWith?.("__guest__"))
-			.map((id) => allPlayers.find((p) => p.id === id))
-			.filter(Boolean);
-	}
+/**
+ * Resolve player profile objects for a side (excluding guests)
+ * @param {"home"|"away"} side
+ * @returns {Array<{id: string, username: string, avatar_url: string|null}>}
+ */
+function getPlayersForSide(side) {
+	const ids = side === "home" ? homePlayers : awayPlayers;
+	return ids
+		.filter((id) => !id.startsWith?.("__guest__"))
+		.map((id) => allPlayers.find((p) => p.id === id))
+		.filter(Boolean);
+}
 
-	/**
-	 * Handle score change after +/- button click
-	 * Uses tick() to ensure bindable values are updated before reading
-	 */
-	async function handleScoreChange() {
-		await tick();
-		const newTotal = scoreHome + scoreAway;
+/**
+ * Handle score change after +/- button click
+ * Uses tick() to ensure bindable values are updated before reading
+ */
+async function handleScoreChange() {
+	await tick();
+	const newTotal = scoreHome + scoreAway;
 
-		if (newTotal > prevTotal) {
-			// Goal scored — determine which side
-			const lastEntry = scoreTimeline.length > 0 ? scoreTimeline[scoreTimeline.length - 1] : { home: 0, away: 0 };
-			const side = scoreHome > lastEntry.home ? "home" : "away";
-			const sidePlayers = getPlayersForSide(side);
+	if (newTotal > prevTotal) {
+		// Goal scored — determine which side
+		const lastEntry =
+			scoreTimeline.length > 0
+				? scoreTimeline[scoreTimeline.length - 1]
+				: { home: 0, away: 0 };
+		const side = scoreHome > lastEntry.home ? "home" : "away";
+		const sidePlayers = getPlayersForSide(side);
 
-			if (sidePlayers.length > 1) {
-				// Multi-player team: show scorer picker popup
-				pendingGoal = { home: scoreHome, away: scoreAway, period: currentPeriod, side };
-				showScorerPicker = true;
-			} else {
-				// Single player: auto-assign scorer
-				const scoredBy = sidePlayers.length === 1 ? sidePlayers[0].id : undefined;
-				scoreTimeline = [
-					...scoreTimeline,
-					{ home: scoreHome, away: scoreAway, period: currentPeriod, scored_by: scoredBy },
-				];
-			}
-		} else if (newTotal < prevTotal && scoreTimeline.length > 0) {
-			// Correction (minus) — pop last entry
-			scoreTimeline = scoreTimeline.slice(0, -1);
-		}
-
-		prevTotal = newTotal;
-		updateResultType();
-	}
-
-	/**
-	 * Handle scorer selection from picker popup
-	 * @param {string} playerId
-	 */
-	function selectScorer(playerId) {
-		if (!pendingGoal) return;
-		scoreTimeline = [
-			...scoreTimeline,
-			{ home: pendingGoal.home, away: pendingGoal.away, period: pendingGoal.period, scored_by: playerId },
-		];
-		prevTotal = pendingGoal.home + pendingGoal.away;
-		showScorerPicker = false;
-		pendingGoal = null;
-		updateResultType();
-	}
-
-	/** Cancel scorer picker — revert the score increment */
-	function cancelScorerPicker() {
-		if (!pendingGoal) return;
-		if (pendingGoal.side === "home") {
-			scoreHome = Math.max(0, scoreHome - 1);
+		if (sidePlayers.length > 1) {
+			// Multi-player team: show scorer picker popup
+			pendingGoal = {
+				home: scoreHome,
+				away: scoreAway,
+				period: currentPeriod,
+				side,
+			};
+			showScorerPicker = true;
 		} else {
-			scoreAway = Math.max(0, scoreAway - 1);
+			// Single player: auto-assign scorer
+			const scoredBy = sidePlayers.length === 1 ? sidePlayers[0].id : undefined;
+			scoreTimeline = [
+				...scoreTimeline,
+				{
+					home: scoreHome,
+					away: scoreAway,
+					period: currentPeriod,
+					scored_by: scoredBy,
+				},
+			];
 		}
-		prevTotal = scoreHome + scoreAway;
-		showScorerPicker = false;
-		pendingGoal = null;
+	} else if (newTotal < prevTotal && scoreTimeline.length > 0) {
+		// Correction (minus) — pop last entry
+		scoreTimeline = scoreTimeline.slice(0, -1);
 	}
 
-	/**
-	 * Lookup player profile by ID for timeline display
-	 * @param {string} playerId
-	 * @returns {{username: string, avatar_url: string|null}|null}
-	 */
-	function getPlayerProfile(playerId) {
-		return allPlayers.find((p) => p.id === playerId) || null;
-	}
+	prevTotal = newTotal;
+	updateResultType();
+}
 
-	/** Set result_type to the highest active phase in the timeline */
-	function updateResultType() {
-		if (scoreTimeline.some((e) => e.period === "penalty")) {
-			resultType = "penalty";
-		} else if (scoreTimeline.some((e) => e.period === "extra_time")) {
-			resultType = "extra_time";
-		} else {
-			resultType = "regular";
-		}
-	}
-
-	/** Toggle extra time phase */
-	function toggleExtraTime() {
-		extraTimeActive = !extraTimeActive;
-		if (!extraTimeActive) {
-			penaltyActive = false;
-		}
-	}
-
-	/** Toggle penalty shootout phase */
-	function togglePenalty() {
-		penaltyActive = !penaltyActive;
-	}
-
-	/** Preview URLs for stats images */
-	let overviewPreview = $state(null);
-	let passesPreview = $state(null);
-	let defensePreview = $state(null);
-
-	/** @type {Array<{type: string, labelKey: string, hintKey: string, get: () => any, set: (f: File) => void, preview: () => string|null, setPreview: (url: string|null) => void}>} */
-	const statsSlots = [
+/**
+ * Handle scorer selection from picker popup
+ * @param {string} playerId
+ */
+function selectScorer(playerId) {
+	if (!pendingGoal) return;
+	scoreTimeline = [
+		...scoreTimeline,
 		{
-			type: "overview",
-			labelKey: "match_stats.upload_overview_title",
-			hintKey: "match_stats.upload_overview_hint",
-		},
-		{
-			type: "passes",
-			labelKey: "match_stats.upload_passes_title",
-			hintKey: "match_stats.upload_passes_hint",
-		},
-		{
-			type: "defense",
-			labelKey: "match_stats.upload_defense_title",
-			hintKey: "match_stats.upload_defense_hint",
+			home: pendingGoal.home,
+			away: pendingGoal.away,
+			period: pendingGoal.period,
+			scored_by: playerId,
 		},
 	];
+	prevTotal = pendingGoal.home + pendingGoal.away;
+	showScorerPicker = false;
+	pendingGoal = null;
+	updateResultType();
+}
 
-	/**
-	 * Get the file for a stats slot type
-	 * @param {string} type
-	 */
-	function getStatsFile(type) {
-		if (type === "overview") return statsOverview;
-		if (type === "passes") return statsPasses;
-		return statsDefense;
+/** Cancel scorer picker — revert the score increment */
+function cancelScorerPicker() {
+	if (!pendingGoal) return;
+	if (pendingGoal.side === "home") {
+		scoreHome = Math.max(0, scoreHome - 1);
+	} else {
+		scoreAway = Math.max(0, scoreAway - 1);
 	}
+	prevTotal = scoreHome + scoreAway;
+	showScorerPicker = false;
+	pendingGoal = null;
+}
 
-	/**
-	 * Get the preview URL for a stats slot type
-	 * @param {string} type
-	 */
-	function getPreview(type) {
-		if (type === "overview") return overviewPreview;
-		if (type === "passes") return passesPreview;
-		return defensePreview;
+/**
+ * Lookup player profile by ID for timeline display
+ * @param {string} playerId
+ * @returns {{username: string, avatar_url: string|null}|null}
+ */
+function getPlayerProfile(playerId) {
+	return allPlayers.find((p) => p.id === playerId) || null;
+}
+
+/** Set result_type to the highest active phase in the timeline */
+function updateResultType() {
+	if (scoreTimeline.some((e) => e.period === "penalty")) {
+		resultType = "penalty";
+	} else if (scoreTimeline.some((e) => e.period === "extra_time")) {
+		resultType = "extra_time";
+	} else {
+		resultType = "regular";
 	}
+}
 
-	/**
-	 * Handle stats image file selection for a given type
-	 * @param {string} type
-	 * @param {Event} e
-	 */
-	function handleStatsImageChange(type, e) {
-		const file = e.target.files?.[0];
-		if (!file) return;
-		if (!file.type.startsWith("image/")) return;
-		if (file.size > 5 * 1024 * 1024) return;
-
-		const url = URL.createObjectURL(file);
-		if (type === "overview") { statsOverview = file; overviewPreview = url; }
-		else if (type === "passes") { statsPasses = file; passesPreview = url; }
-		else { statsDefense = file; defensePreview = url; }
+/** Toggle extra time phase */
+function toggleExtraTime() {
+	extraTimeActive = !extraTimeActive;
+	if (!extraTimeActive) {
+		penaltyActive = false;
 	}
+}
 
-	/**
-	 * Remove selected stats image for a given type
-	 * @param {string} type
-	 */
-	function removeStatsImage(type) {
-		if (type === "overview") {
-			statsOverview = null;
-			if (overviewPreview) { URL.revokeObjectURL(overviewPreview); overviewPreview = null; }
-		} else if (type === "passes") {
-			statsPasses = null;
-			if (passesPreview) { URL.revokeObjectURL(passesPreview); passesPreview = null; }
-		} else {
-			statsDefense = null;
-			if (defensePreview) { URL.revokeObjectURL(defensePreview); defensePreview = null; }
+/** Toggle penalty shootout phase */
+function togglePenalty() {
+	penaltyActive = !penaltyActive;
+}
+
+/** Preview URLs for stats images */
+let overviewPreview = $state(null);
+let passesPreview = $state(null);
+let defensePreview = $state(null);
+
+/** @type {Array<{type: string, labelKey: string, hintKey: string, get: () => any, set: (f: File) => void, preview: () => string|null, setPreview: (url: string|null) => void}>} */
+const statsSlots = [
+	{
+		type: "overview",
+		labelKey: "match_stats.upload_overview_title",
+		hintKey: "match_stats.upload_overview_hint",
+	},
+	{
+		type: "passes",
+		labelKey: "match_stats.upload_passes_title",
+		hintKey: "match_stats.upload_passes_hint",
+	},
+	{
+		type: "defense",
+		labelKey: "match_stats.upload_defense_title",
+		hintKey: "match_stats.upload_defense_hint",
+	},
+];
+
+/**
+ * Get the file for a stats slot type
+ * @param {string} type
+ */
+function getStatsFile(type) {
+	if (type === "overview") return statsOverview;
+	if (type === "passes") return statsPasses;
+	return statsDefense;
+}
+
+/**
+ * Get the preview URL for a stats slot type
+ * @param {string} type
+ */
+function getPreview(type) {
+	if (type === "overview") return overviewPreview;
+	if (type === "passes") return passesPreview;
+	return defensePreview;
+}
+
+/**
+ * Handle stats image file selection for a given type
+ * @param {string} type
+ * @param {Event} e
+ */
+function handleStatsImageChange(type, e) {
+	const file = e.target.files?.[0];
+	if (!file) return;
+	if (!file.type.startsWith("image/")) return;
+	if (file.size > 5 * 1024 * 1024) return;
+
+	const url = URL.createObjectURL(file);
+	if (type === "overview") {
+		statsOverview = file;
+		overviewPreview = url;
+	} else if (type === "passes") {
+		statsPasses = file;
+		passesPreview = url;
+	} else {
+		statsDefense = file;
+		defensePreview = url;
+	}
+}
+
+/**
+ * Remove selected stats image for a given type
+ * @param {string} type
+ */
+function removeStatsImage(type) {
+	if (type === "overview") {
+		statsOverview = null;
+		if (overviewPreview) {
+			URL.revokeObjectURL(overviewPreview);
+			overviewPreview = null;
+		}
+	} else if (type === "passes") {
+		statsPasses = null;
+		if (passesPreview) {
+			URL.revokeObjectURL(passesPreview);
+			passesPreview = null;
+		}
+	} else {
+		statsDefense = null;
+		if (defensePreview) {
+			URL.revokeObjectURL(defensePreview);
+			defensePreview = null;
 		}
 	}
+}
 </script>
 
 <div class="flex flex-col gap-5">

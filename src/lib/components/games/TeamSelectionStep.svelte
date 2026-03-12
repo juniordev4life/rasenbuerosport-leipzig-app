@@ -1,50 +1,52 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import TeamAutocomplete from "./TeamAutocomplete.svelte";
-	import Button from "$lib/components/ui/Button.svelte";
+import { getTranslate } from "@tolgee/svelte";
+import TeamAutocomplete from "./TeamAutocomplete.svelte";
+import Button from "$lib/components/ui/Button.svelte";
 
-	/**
-	 * TeamSelectionStep - Step 2 of new game wizard
-	 * Shows assigned players and team autocomplete fields
-	 */
-	let {
-		homePlayers = [],
-		awayPlayers = [],
-		allPlayers = [],
-		homeTeam = $bindable(""),
-		awayTeam = $bindable(""),
-		onNext,
-		onBack,
-	} = $props();
+/**
+ * TeamSelectionStep - Step 2 of new game wizard
+ * Shows assigned players and team autocomplete fields
+ */
+let {
+	homePlayers = [],
+	awayPlayers = [],
+	allPlayers = [],
+	homeTeam = $bindable(""),
+	awayTeam = $bindable(""),
+	onNext,
+	onBack,
+} = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	const GUEST_ID = "__guest__";
+const GUEST_ID = "__guest__";
 
-	/** Get player display name from ID */
-	function getPlayerName(playerId) {
-		if (playerId.startsWith(GUEST_ID)) return $t("new_game.guest");
-		return allPlayers.find((p) => p.id === playerId)?.username || "?";
-	}
+/** Get player display name from ID */
+function getPlayerName(playerId) {
+	if (playerId.startsWith(GUEST_ID)) return $t("new_game.guest");
+	return allPlayers.find((p) => p.id === playerId)?.username || "?";
+}
 
-	/** Get player initial from ID */
-	function getPlayerInitial(playerId) {
-		if (playerId.startsWith(GUEST_ID)) return "?";
-		const name = allPlayers.find((p) => p.id === playerId)?.username;
-		return name?.charAt(0)?.toUpperCase() || "?";
-	}
+/** Get player initial from ID */
+function getPlayerInitial(playerId) {
+	if (playerId.startsWith(GUEST_ID)) return "?";
+	const name = allPlayers.find((p) => p.id === playerId)?.username;
+	return name?.charAt(0)?.toUpperCase() || "?";
+}
 
-	/** Get player avatar URL from ID */
-	function getPlayerAvatar(playerId) {
-		if (playerId.startsWith(GUEST_ID)) return null;
-		return allPlayers.find((p) => p.id === playerId)?.avatar_url || null;
-	}
+/** Get player avatar URL from ID */
+function getPlayerAvatar(playerId) {
+	if (playerId.startsWith(GUEST_ID)) return null;
+	return allPlayers.find((p) => p.id === playerId)?.avatar_url || null;
+}
 
-	/** Auto-derived game mode label */
-	const modeLabel = $derived(`${homePlayers.length}v${awayPlayers.length}`);
+/** Auto-derived game mode label */
+const modeLabel = $derived(`${homePlayers.length}v${awayPlayers.length}`);
 
-	/** Both teams must be selected to proceed */
-	const canProceed = $derived(homeTeam.trim().length > 0 && awayTeam.trim().length > 0);
+/** Both teams must be selected to proceed */
+const canProceed = $derived(
+	homeTeam.trim().length > 0 && awayTeam.trim().length > 0,
+);
 </script>
 
 <div class="flex flex-col gap-5">

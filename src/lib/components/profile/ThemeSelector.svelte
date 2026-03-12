@@ -1,14 +1,14 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { theme } from "$lib/stores/theme.stores.js";
+import { getTranslate } from "@tolgee/svelte";
+import { theme } from "$lib/stores/theme.stores.js";
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	const options = [
-		{ value: "light", labelKey: "profile.theme.light", icon: "sun" },
-		{ value: "dark", labelKey: "profile.theme.dark", icon: "moon" },
-		{ value: "system", labelKey: "profile.theme.system", icon: "device" },
-	];
+const options = [
+	{ value: "light", labelKey: "profile.theme.light", icon: "sun" },
+	{ value: "dark", labelKey: "profile.theme.dark", icon: "moon" },
+	{ value: "system", labelKey: "profile.theme.system", icon: "device" },
+];
 </script>
 
 <div class="bg-bg-secondary border border-border rounded-lg p-4">

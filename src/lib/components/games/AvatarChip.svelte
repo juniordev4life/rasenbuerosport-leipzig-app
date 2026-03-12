@@ -1,42 +1,42 @@
 <script>
-	/**
-	 * AvatarChip - Clickable avatar component for player selection
-	 * Shows avatar image or initials in a colored circle with username below
-	 * @param {string} label - Display name
-	 * @param {string|null} avatarUrl - Avatar image URL
-	 * @param {"home"|"away"|null} side - Current assignment (null = unassigned)
-	 * @param {boolean} isGuest - Whether this is a guest avatar
-	 * @param {boolean} dimmed - Whether player is assigned to the OTHER side (greyed out)
-	 * @param {Function} onclick - Click handler
-	 */
-	let {
-		label = "",
-		avatarUrl = null,
-		side = null,
-		isGuest = false,
-		dimmed = false,
-		onclick,
-	} = $props();
+/**
+ * AvatarChip - Clickable avatar component for player selection
+ * Shows avatar image or initials in a colored circle with username below
+ * @param {string} label - Display name
+ * @param {string|null} avatarUrl - Avatar image URL
+ * @param {"home"|"away"|null} side - Current assignment (null = unassigned)
+ * @param {boolean} isGuest - Whether this is a guest avatar
+ * @param {boolean} dimmed - Whether player is assigned to the OTHER side (greyed out)
+ * @param {Function} onclick - Click handler
+ */
+let {
+	label = "",
+	avatarUrl = null,
+	side = null,
+	isGuest = false,
+	dimmed = false,
+	onclick,
+} = $props();
 
-	const initial = $derived(
-		isGuest ? "?" : (label?.charAt(0)?.toUpperCase() || "?"),
-	);
+const initial = $derived(
+	isGuest ? "?" : label?.charAt(0)?.toUpperCase() || "?",
+);
 
-	const ringClass = $derived.by(() => {
-		if (dimmed) return "ring-1 ring-border/40";
-		if (side === "home") return "ring-2 ring-accent-red";
-		if (side === "away") return "ring-2 ring-blue-500";
-		return "ring-1 ring-border";
-	});
+const ringClass = $derived.by(() => {
+	if (dimmed) return "ring-1 ring-border/40";
+	if (side === "home") return "ring-2 ring-accent-red";
+	if (side === "away") return "ring-2 ring-blue-500";
+	return "ring-1 ring-border";
+});
 
-	const bgClass = $derived.by(() => {
-		if (avatarUrl) return "";
-		if (dimmed) return "bg-bg-input/40";
-		if (isGuest && !side) return "bg-bg-input";
-		if (side === "home") return "bg-accent-red/20";
-		if (side === "away") return "bg-blue-500/20";
-		return "bg-bg-secondary";
-	});
+const bgClass = $derived.by(() => {
+	if (avatarUrl) return "";
+	if (dimmed) return "bg-bg-input/40";
+	if (isGuest && !side) return "bg-bg-input";
+	if (side === "home") return "bg-accent-red/20";
+	if (side === "away") return "bg-blue-500/20";
+	return "bg-bg-secondary";
+});
 </script>
 
 <button

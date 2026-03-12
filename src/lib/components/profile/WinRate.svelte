@@ -1,9 +1,9 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
+import { getTranslate } from "@tolgee/svelte";
 
-	let { winRate = 0 } = $props();
+let { winRate = 0 } = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 </script>
 
 <div class="bg-bg-secondary border border-border rounded-lg p-4">

@@ -1,112 +1,110 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import AvatarChip from "./AvatarChip.svelte";
-	import Button from "$lib/components/ui/Button.svelte";
+import { getTranslate } from "@tolgee/svelte";
+import AvatarChip from "./AvatarChip.svelte";
+import Button from "$lib/components/ui/Button.svelte";
 
-	/**
-	 * PlayerSelectionStep - Step 1 of new game wizard
-	 * Each player avatar appears in both Home and Away columns.
-	 * Tap in Home column → assign home. Tap in Away → assign away.
-	 * Tap again on same side → remove. Tap other side → switch.
-	 * Max 2 per side. A player cannot be on both sides.
-	 */
-	let {
-		allPlayers = [],
-		homePlayers = $bindable([]),
-		awayPlayers = $bindable([]),
-		onNext,
-	} = $props();
+/**
+ * PlayerSelectionStep - Step 1 of new game wizard
+ * Each player avatar appears in both Home and Away columns.
+ * Tap in Home column → assign home. Tap in Away → assign away.
+ * Tap again on same side → remove. Tap other side → switch.
+ * Max 2 per side. A player cannot be on both sides.
+ */
+let {
+	allPlayers = [],
+	homePlayers = $bindable([]),
+	awayPlayers = $bindable([]),
+	onNext,
+} = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	const MAX_PER_SIDE = 2;
-	const GUEST_ID = "__guest__";
+const MAX_PER_SIDE = 2;
+const GUEST_ID = "__guest__";
 
-	/** Determine which side a player is on */
-	function getPlayerSide(playerId) {
-		if (homePlayers.includes(playerId)) return "home";
-		if (awayPlayers.includes(playerId)) return "away";
-		return null;
-	}
+/** Determine which side a player is on */
+function getPlayerSide(playerId) {
+	if (homePlayers.includes(playerId)) return "home";
+	if (awayPlayers.includes(playerId)) return "away";
+	return null;
+}
 
-	/** Auto-derived game mode label */
-	const modeLabel = $derived.by(() => {
-		const h = homePlayers.length;
-		const a = awayPlayers.length;
-		if (h === 0 && a === 0) return null;
-		return `${h}v${a}`;
-	});
+/** Auto-derived game mode label */
+const modeLabel = $derived.by(() => {
+	const h = homePlayers.length;
+	const a = awayPlayers.length;
+	if (h === 0 && a === 0) return null;
+	return `${h}v${a}`;
+});
 
-	/** Validation: at least 1 player on each side */
-	const isValid = $derived(
-		homePlayers.length >= 1 && awayPlayers.length >= 1,
-	);
+/** Validation: at least 1 player on each side */
+const isValid = $derived(homePlayers.length >= 1 && awayPlayers.length >= 1);
 
-	/**
-	 * Handle tapping a player avatar in a specific column
-	 * @param {string} playerId
-	 * @param {"home"|"away"} targetSide - The column that was tapped
-	 */
-	function handleTap(playerId, targetSide) {
-		const currentSide = getPlayerSide(playerId);
+/**
+ * Handle tapping a player avatar in a specific column
+ * @param {string} playerId
+ * @param {"home"|"away"} targetSide - The column that was tapped
+ */
+function handleTap(playerId, targetSide) {
+	const currentSide = getPlayerSide(playerId);
 
-		if (currentSide === targetSide) {
-			// Already on this side → remove
-			if (targetSide === "home") {
-				homePlayers = homePlayers.filter((id) => id !== playerId);
-			} else {
-				awayPlayers = awayPlayers.filter((id) => id !== playerId);
-			}
-		} else if (currentSide === null) {
-			// Unassigned → assign to target side if not full
-			if (targetSide === "home" && homePlayers.length < MAX_PER_SIDE) {
-				homePlayers = [...homePlayers, playerId];
-			} else if (targetSide === "away" && awayPlayers.length < MAX_PER_SIDE) {
-				awayPlayers = [...awayPlayers, playerId];
-			}
+	if (currentSide === targetSide) {
+		// Already on this side → remove
+		if (targetSide === "home") {
+			homePlayers = homePlayers.filter((id) => id !== playerId);
 		} else {
-			// On the OTHER side → switch if target side has room
-			if (targetSide === "home" && homePlayers.length < MAX_PER_SIDE) {
-				awayPlayers = awayPlayers.filter((id) => id !== playerId);
-				homePlayers = [...homePlayers, playerId];
-			} else if (targetSide === "away" && awayPlayers.length < MAX_PER_SIDE) {
-				homePlayers = homePlayers.filter((id) => id !== playerId);
-				awayPlayers = [...awayPlayers, playerId];
-			}
+			awayPlayers = awayPlayers.filter((id) => id !== playerId);
+		}
+	} else if (currentSide === null) {
+		// Unassigned → assign to target side if not full
+		if (targetSide === "home" && homePlayers.length < MAX_PER_SIDE) {
+			homePlayers = [...homePlayers, playerId];
+		} else if (targetSide === "away" && awayPlayers.length < MAX_PER_SIDE) {
+			awayPlayers = [...awayPlayers, playerId];
+		}
+	} else {
+		// On the OTHER side → switch if target side has room
+		if (targetSide === "home" && homePlayers.length < MAX_PER_SIDE) {
+			awayPlayers = awayPlayers.filter((id) => id !== playerId);
+			homePlayers = [...homePlayers, playerId];
+		} else if (targetSide === "away" && awayPlayers.length < MAX_PER_SIDE) {
+			homePlayers = homePlayers.filter((id) => id !== playerId);
+			awayPlayers = [...awayPlayers, playerId];
 		}
 	}
+}
 
-	/** Add a guest player to a specific side */
-	function addGuest(side) {
-		const guestCount = [...homePlayers, ...awayPlayers].filter((id) =>
-			id.startsWith(GUEST_ID),
-		).length;
-		const guestId = `${GUEST_ID}${guestCount + 1}`;
+/** Add a guest player to a specific side */
+function addGuest(side) {
+	const guestCount = [...homePlayers, ...awayPlayers].filter((id) =>
+		id.startsWith(GUEST_ID),
+	).length;
+	const guestId = `${GUEST_ID}${guestCount + 1}`;
 
-		if (side === "home" && homePlayers.length < MAX_PER_SIDE) {
-			homePlayers = [...homePlayers, guestId];
-		} else if (side === "away" && awayPlayers.length < MAX_PER_SIDE) {
-			awayPlayers = [...awayPlayers, guestId];
-		}
+	if (side === "home" && homePlayers.length < MAX_PER_SIDE) {
+		homePlayers = [...homePlayers, guestId];
+	} else if (side === "away" && awayPlayers.length < MAX_PER_SIDE) {
+		awayPlayers = [...awayPlayers, guestId];
 	}
+}
 
-	/** Remove a guest from a side */
-	function removeGuest(guestId, side) {
-		if (side === "home") {
-			homePlayers = homePlayers.filter((id) => id !== guestId);
-		} else {
-			awayPlayers = awayPlayers.filter((id) => id !== guestId);
-		}
+/** Remove a guest from a side */
+function removeGuest(guestId, side) {
+	if (side === "home") {
+		homePlayers = homePlayers.filter((id) => id !== guestId);
+	} else {
+		awayPlayers = awayPlayers.filter((id) => id !== guestId);
 	}
+}
 
-	/** Get guest players assigned to a side */
-	function getGuests(side) {
-		const list = side === "home" ? homePlayers : awayPlayers;
-		return list.filter((id) => id.startsWith(GUEST_ID));
-	}
+/** Get guest players assigned to a side */
+function getGuests(side) {
+	const list = side === "home" ? homePlayers : awayPlayers;
+	return list.filter((id) => id.startsWith(GUEST_ID));
+}
 
-	const homeGuests = $derived(getGuests("home"));
-	const awayGuests = $derived(getGuests("away"));
+const homeGuests = $derived(getGuests("home"));
+const awayGuests = $derived(getGuests("away"));
 </script>
 
 <div class="flex flex-col gap-4">

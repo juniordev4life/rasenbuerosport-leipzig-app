@@ -1,150 +1,155 @@
 <script>
-	import { page } from "$app/state";
-	import { goto } from "$app/navigation";
-	import { getTranslate } from "@tolgee/svelte";
-	import { get } from "$lib/services/api.services.js";
-	import { user } from "$lib/stores/auth.stores.js";
-	import { getTeamByName } from "$lib/services/teams.services.js";
-	import { getCountryFlag } from "$lib/constants/teams.constants.js";
-	import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
-	import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
-	import StarRating from "$lib/components/ui/StarRating.svelte";
-	import MatchStatsDisplay from "$lib/components/games/MatchStatsDisplay.svelte";
-	import MatchStatsUpload from "$lib/components/games/MatchStatsUpload.svelte";
-	import MatchReport from "$lib/components/games/MatchReport.svelte";
+import { page } from "$app/state";
+import { goto } from "$app/navigation";
+import { getTranslate } from "@tolgee/svelte";
+import { get } from "$lib/services/api.services.js";
+import { user } from "$lib/stores/auth.stores.js";
+import { getTeamByName } from "$lib/services/teams.services.js";
+import { getCountryFlag } from "$lib/constants/teams.constants.js";
+import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
+import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
+import StarRating from "$lib/components/ui/StarRating.svelte";
+import MatchStatsDisplay from "$lib/components/games/MatchStatsDisplay.svelte";
+import MatchStatsUpload from "$lib/components/games/MatchStatsUpload.svelte";
+import MatchReport from "$lib/components/games/MatchReport.svelte";
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	let game = $state(null);
-	let loading = $state(true);
-	let error = $state(false);
+let game = $state(null);
+let loading = $state(true);
+let error = $state(false);
 
-	const gameId = $derived(page.params.id);
+const gameId = $derived(page.params.id);
 
-	$effect(() => {
-		if (gameId) loadGame();
-	});
+$effect(() => {
+	if (gameId) loadGame();
+});
 
-	async function loadGame() {
-		try {
-			const res = await get(`/v1/games/${gameId}`);
-			game = res.data;
-		} catch (err) {
-			console.error("Failed to load game:", err);
-			error = true;
-		} finally {
-			loading = false;
-		}
+async function loadGame() {
+	try {
+		const res = await get(`/v1/games/${gameId}`);
+		game = res.data;
+	} catch (err) {
+		console.error("Failed to load game:", err);
+		error = true;
+	} finally {
+		loading = false;
 	}
+}
 
-	const homePlayers = $derived(
-		game?.game_players?.filter((p) => p.team === "home") || [],
-	);
-	const awayPlayers = $derived(
-		game?.game_players?.filter((p) => p.team === "away") || [],
-	);
+const homePlayers = $derived(
+	game?.game_players?.filter((p) => p.team === "home") || [],
+);
+const awayPlayers = $derived(
+	game?.game_players?.filter((p) => p.team === "away") || [],
+);
 
-	const userId = $derived($user?.id);
+const userId = $derived($user?.id);
 
-	const userTeam = $derived(
-		game?.game_players?.find((p) => p.player_id === userId)?.team || null,
-	);
+const userTeam = $derived(
+	game?.game_players?.find((p) => p.player_id === userId)?.team || null,
+);
 
-	const isWin = $derived(
-		userTeam === "home"
-			? game?.score_home > game?.score_away
-			: userTeam === "away"
-				? game?.score_away > game?.score_home
-				: false,
-	);
-	const isDraw = $derived(game?.score_home === game?.score_away);
+const isWin = $derived(
+	userTeam === "home"
+		? game?.score_home > game?.score_away
+		: userTeam === "away"
+			? game?.score_away > game?.score_home
+			: false,
+);
+const isDraw = $derived(game?.score_home === game?.score_away);
 
-	const resultColor = $derived(
-		isDraw ? "text-warning" : isWin ? "text-success" : userTeam ? "text-error" : "text-text-secondary",
-	);
+const resultColor = $derived(
+	isDraw
+		? "text-warning"
+		: isWin
+			? "text-success"
+			: userTeam
+				? "text-error"
+				: "text-text-secondary",
+);
 
-	/** Get the team name used by a side */
-	function getSideTeamName(players) {
-		for (const p of players) {
-			if (p.team_name) return p.team_name;
-		}
-		return null;
+/** Get the team name used by a side */
+function getSideTeamName(players) {
+	for (const p of players) {
+		if (p.team_name) return p.team_name;
 	}
+	return null;
+}
 
-	const homeTeamName = $derived(getSideTeamName(homePlayers));
-	const awayTeamName = $derived(getSideTeamName(awayPlayers));
+const homeTeamName = $derived(getSideTeamName(homePlayers));
+const awayTeamName = $derived(getSideTeamName(awayPlayers));
 
-	/** @type {import('$lib/services/teams.services.js').TeamData|null} */
-	let homeTeamData = $state(null);
-	/** @type {import('$lib/services/teams.services.js').TeamData|null} */
-	let awayTeamData = $state(null);
+/** @type {import('$lib/services/teams.services.js').TeamData|null} */
+let homeTeamData = $state(null);
+/** @type {import('$lib/services/teams.services.js').TeamData|null} */
+let awayTeamData = $state(null);
 
-	// Resolve team data asynchronously
-	$effect(() => {
-		if (homeTeamName) {
-			getTeamByName(homeTeamName).then((t) => {
-				homeTeamData = t || null;
-			});
-		}
-	});
-	$effect(() => {
-		if (awayTeamName) {
-			getTeamByName(awayTeamName).then((t) => {
-				awayTeamData = t || null;
-			});
-		}
-	});
-
-	const formattedDate = $derived(
-		game
-			? new Date(game.played_at).toLocaleDateString("de-DE", {
-					weekday: "long",
-					day: "2-digit",
-					month: "long",
-					year: "numeric",
-				})
-			: "",
-	);
-
-	/** Result type suffix (n.V. / n.E.) */
-	const resultSuffix = $derived(
-		game?.result_type === "penalty"
-			? $t("game_detail.penalty_short")
-			: game?.result_type === "extra_time"
-				? $t("game_detail.extra_time_short")
-				: "",
-	);
-
-	/** Score timeline data */
-	const timeline = $derived(game?.score_timeline || []);
-
-	/**
-	 * Build enriched timeline entries with goal side info
-	 * Reversed so newest goal is at top
-	 * @returns {object[]}
-	 */
-	const timelineEntries = $derived.by(() => {
-		if (!timeline.length) return [];
-		const entries = timeline.map((entry, i) => {
-			const prev = i > 0 ? timeline[i - 1] : { home: 0, away: 0 };
-			const isHomeGoal = entry.home > prev.home;
-			const periodChanged =
-				i > 0 && timeline[i - 1].period !== entry.period;
-			return {
-				...entry,
-				side: isHomeGoal ? "home" : "away",
-				periodChanged,
-			};
+// Resolve team data asynchronously
+$effect(() => {
+	if (homeTeamName) {
+		getTeamByName(homeTeamName).then((t) => {
+			homeTeamData = t || null;
 		});
-		return entries.toReversed();
-	});
-
-	/** Lookup scorer profile from game_players by player_id */
-	function getScorerProfile(playerId) {
-		if (!playerId || !game?.game_players) return null;
-		const gp = game.game_players.find((p) => p.player_id === playerId);
-		return gp?.profiles || null;
 	}
+});
+$effect(() => {
+	if (awayTeamName) {
+		getTeamByName(awayTeamName).then((t) => {
+			awayTeamData = t || null;
+		});
+	}
+});
+
+const formattedDate = $derived(
+	game
+		? new Date(game.played_at).toLocaleDateString("de-DE", {
+				weekday: "long",
+				day: "2-digit",
+				month: "long",
+				year: "numeric",
+			})
+		: "",
+);
+
+/** Result type suffix (n.V. / n.E.) */
+const resultSuffix = $derived(
+	game?.result_type === "penalty"
+		? $t("game_detail.penalty_short")
+		: game?.result_type === "extra_time"
+			? $t("game_detail.extra_time_short")
+			: "",
+);
+
+/** Score timeline data */
+const timeline = $derived(game?.score_timeline || []);
+
+/**
+ * Build enriched timeline entries with goal side info
+ * Reversed so newest goal is at top
+ * @returns {object[]}
+ */
+const timelineEntries = $derived.by(() => {
+	if (!timeline.length) return [];
+	const entries = timeline.map((entry, i) => {
+		const prev = i > 0 ? timeline[i - 1] : { home: 0, away: 0 };
+		const isHomeGoal = entry.home > prev.home;
+		const periodChanged = i > 0 && timeline[i - 1].period !== entry.period;
+		return {
+			...entry,
+			side: isHomeGoal ? "home" : "away",
+			periodChanged,
+		};
+	});
+	return entries.toReversed();
+});
+
+/** Lookup scorer profile from game_players by player_id */
+function getScorerProfile(playerId) {
+	if (!playerId || !game?.game_players) return null;
+	const gp = game.game_players.find((p) => p.player_id === playerId);
+	return gp?.profiles || null;
+}
 </script>
 
 <svelte:head>

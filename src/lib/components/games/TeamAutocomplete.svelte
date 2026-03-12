@@ -1,85 +1,85 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { getAllTeams, searchTeams } from "$lib/services/teams.services.js";
-	import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
-	import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
-	import StarRating from "$lib/components/ui/StarRating.svelte";
+import { getTranslate } from "@tolgee/svelte";
+import { getAllTeams, searchTeams } from "$lib/services/teams.services.js";
+import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
+import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
+import StarRating from "$lib/components/ui/StarRating.svelte";
 
-	let { value = $bindable("") } = $props();
+let { value = $bindable("") } = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	let inputValue = $state(value);
-	let showSuggestions = $state(false);
-	let highlightIndex = $state(-1);
-	let suggestions = $state([]);
+let inputValue = $state(value);
+let showSuggestions = $state(false);
+let highlightIndex = $state(-1);
+let suggestions = $state([]);
 
-	// Preload teams cache on mount
-	$effect(() => {
-		getAllTeams();
-	});
+// Preload teams cache on mount
+$effect(() => {
+	getAllTeams();
+});
 
-	// Search suggestions when input changes
-	$effect(() => {
-		if (!inputValue || inputValue.length < 1) {
-			suggestions = [];
-			return;
-		}
-		searchTeams(inputValue, 8).then((results) => {
-			suggestions = results;
-		});
-	});
-
-	function selectTeam(team) {
-		inputValue = team.name;
-		value = team.name;
-		showSuggestions = false;
-		highlightIndex = -1;
+// Search suggestions when input changes
+$effect(() => {
+	if (!inputValue || inputValue.length < 1) {
+		suggestions = [];
+		return;
 	}
+	searchTeams(inputValue, 8).then((results) => {
+		suggestions = results;
+	});
+});
 
-	function handleInput(e) {
-		inputValue = e.target.value;
-		value = e.target.value;
+function selectTeam(team) {
+	inputValue = team.name;
+	value = team.name;
+	showSuggestions = false;
+	highlightIndex = -1;
+}
+
+function handleInput(e) {
+	inputValue = e.target.value;
+	value = e.target.value;
+	showSuggestions = true;
+	highlightIndex = -1;
+}
+
+function handleFocus() {
+	if (inputValue) {
 		showSuggestions = true;
-		highlightIndex = -1;
 	}
+}
 
-	function handleFocus() {
-		if (inputValue) {
-			showSuggestions = true;
-		}
+function handleBlur() {
+	// Delay to allow click on suggestion
+	setTimeout(() => {
+		showSuggestions = false;
+	}, 200);
+}
+
+function handleKeydown(e) {
+	if (!showSuggestions || suggestions.length === 0) return;
+
+	if (e.key === "ArrowDown") {
+		e.preventDefault();
+		highlightIndex = Math.min(highlightIndex + 1, suggestions.length - 1);
+	} else if (e.key === "ArrowUp") {
+		e.preventDefault();
+		highlightIndex = Math.max(highlightIndex - 1, 0);
+	} else if (e.key === "Enter" && highlightIndex >= 0) {
+		e.preventDefault();
+		selectTeam(suggestions[highlightIndex]);
+	} else if (e.key === "Escape") {
+		showSuggestions = false;
 	}
+}
 
-	function handleBlur() {
-		// Delay to allow click on suggestion
-		setTimeout(() => {
-			showSuggestions = false;
-		}, 200);
+// Sync external value changes
+$effect(() => {
+	if (value !== inputValue) {
+		inputValue = value;
 	}
-
-	function handleKeydown(e) {
-		if (!showSuggestions || suggestions.length === 0) return;
-
-		if (e.key === "ArrowDown") {
-			e.preventDefault();
-			highlightIndex = Math.min(highlightIndex + 1, suggestions.length - 1);
-		} else if (e.key === "ArrowUp") {
-			e.preventDefault();
-			highlightIndex = Math.max(highlightIndex - 1, 0);
-		} else if (e.key === "Enter" && highlightIndex >= 0) {
-			e.preventDefault();
-			selectTeam(suggestions[highlightIndex]);
-		} else if (e.key === "Escape") {
-			showSuggestions = false;
-		}
-	}
-
-	// Sync external value changes
-	$effect(() => {
-		if (value !== inputValue) {
-			inputValue = value;
-		}
-	});
+});
 </script>
 
 <div class="relative">

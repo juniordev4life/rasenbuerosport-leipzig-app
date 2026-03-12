@@ -1,35 +1,55 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
+import { getTranslate } from "@tolgee/svelte";
 
-	/** @type {{ careerStats: object | null }} */
-	let { careerStats = null } = $props();
+/** @type {{ careerStats: object | null }} */
+let { careerStats = null } = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	/**
-	 * Stat display definitions for the 2x2 grid
-	 * @type {Array<{key: string, labelKey: string, unit: string, emoji: string, decimals?: number}>}
-	 */
-	const STATS = [
-		{ key: "avg_possession", labelKey: "profile.career_stats.possession", unit: "%", emoji: "🎯" },
-		{ key: "avg_pass_accuracy", labelKey: "profile.career_stats.pass_accuracy", unit: "%", emoji: "🎯" },
-		{ key: "xg_efficiency", labelKey: "profile.career_stats.xg_efficiency", unit: "x", emoji: "🔫" },
-		{ key: "avg_duels_won_rate", labelKey: "profile.career_stats.duels_won", unit: "%", emoji: "💪" },
-	];
+/**
+ * Stat display definitions for the 2x2 grid
+ * @type {Array<{key: string, labelKey: string, unit: string, emoji: string, decimals?: number}>}
+ */
+const STATS = [
+	{
+		key: "avg_possession",
+		labelKey: "profile.career_stats.possession",
+		unit: "%",
+		emoji: "🎯",
+	},
+	{
+		key: "avg_pass_accuracy",
+		labelKey: "profile.career_stats.pass_accuracy",
+		unit: "%",
+		emoji: "🎯",
+	},
+	{
+		key: "xg_efficiency",
+		labelKey: "profile.career_stats.xg_efficiency",
+		unit: "x",
+		emoji: "🔫",
+	},
+	{
+		key: "avg_duels_won_rate",
+		labelKey: "profile.career_stats.duels_won",
+		unit: "%",
+		emoji: "💪",
+	},
+];
 
-	/**
-	 * Format stat value for display
-	 * @param {number | null} value
-	 * @param {object} stat
-	 * @returns {string}
-	 */
-	function formatValue(value, stat) {
-		if (value == null) return "-";
-		if (stat.key === "xg_efficiency") {
-			return value.toFixed(2).replace(".", ",");
-		}
-		return String(Math.round(value));
+/**
+ * Format stat value for display
+ * @param {number | null} value
+ * @param {object} stat
+ * @returns {string}
+ */
+function formatValue(value, stat) {
+	if (value == null) return "-";
+	if (stat.key === "xg_efficiency") {
+		return value.toFixed(2).replace(".", ",");
 	}
+	return String(Math.round(value));
+}
 </script>
 
 {#if careerStats && careerStats.games_with_stats > 0}

@@ -1,97 +1,102 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { auth, storage } from "$lib/config/firebase.config.js";
-	import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-	import { updateProfile } from "firebase/auth";
-	import { patch } from "$lib/services/api.services.js";
-	import { user } from "$lib/stores/auth.stores.js";
-	import Button from "$lib/components/ui/Button.svelte";
+import { getTranslate } from "@tolgee/svelte";
+import { auth, storage } from "$lib/config/firebase.config.js";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { updateProfile } from "firebase/auth";
+import { patch } from "$lib/services/api.services.js";
+import { user } from "$lib/stores/auth.stores.js";
+import Button from "$lib/components/ui/Button.svelte";
 
-	/**
-	 * ProfileEditor - Inline edit form for username and avatar
-	 * @param {string} currentUsername - Current username
-	 * @param {string|null} currentAvatarUrl - Current avatar URL
-	 * @param {Function} onClose - Close editor callback
-	 * @param {Function} onSaved - Called after successful save
-	 */
-	let { currentUsername = "", currentAvatarUrl = null, onClose, onSaved } = $props();
+/**
+ * ProfileEditor - Inline edit form for username and avatar
+ * @param {string} currentUsername - Current username
+ * @param {string|null} currentAvatarUrl - Current avatar URL
+ * @param {Function} onClose - Close editor callback
+ * @param {Function} onSaved - Called after successful save
+ */
+let {
+	currentUsername = "",
+	currentAvatarUrl = null,
+	onClose,
+	onSaved,
+} = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	let username = $state(currentUsername);
-	let saving = $state(false);
-	let error = $state("");
-	let avatarFile = $state(null);
-	let avatarPreview = $state(currentAvatarUrl);
+let username = $state(currentUsername);
+let saving = $state(false);
+let error = $state("");
+let avatarFile = $state(null);
+let avatarPreview = $state(currentAvatarUrl);
 
-	/** Handle file selection for avatar */
-	function handleFileChange(e) {
-		const file = e.target.files?.[0];
-		if (!file) return;
+/** Handle file selection for avatar */
+function handleFileChange(e) {
+	const file = e.target.files?.[0];
+	if (!file) return;
 
-		// Validate file type and size
-		if (!file.type.startsWith("image/")) {
-			error = $t("profile.edit.error_file_type");
-			return;
-		}
-		if (file.size > 2 * 1024 * 1024) {
-			error = $t("profile.edit.error_file_size");
-			return;
-		}
-
-		avatarFile = file;
-		avatarPreview = URL.createObjectURL(file);
-		error = "";
+	// Validate file type and size
+	if (!file.type.startsWith("image/")) {
+		error = $t("profile.edit.error_file_type");
+		return;
+	}
+	if (file.size > 2 * 1024 * 1024) {
+		error = $t("profile.edit.error_file_size");
+		return;
 	}
 
-	/** Save profile changes */
-	async function handleSave() {
-		if (!username.trim()) {
-			error = $t("profile.edit.error_username_empty");
-			return;
-		}
+	avatarFile = file;
+	avatarPreview = URL.createObjectURL(file);
+	error = "";
+}
 
-		saving = true;
-		error = "";
-
-		try {
-			let avatarUrl = currentAvatarUrl;
-
-			// Upload avatar to Cloud Storage if changed
-			if (avatarFile) {
-				const userId = auth.currentUser?.uid;
-				const ext = avatarFile.name.split(".").pop();
-				const storageRef = ref(storage, `avatars/${userId}/avatar.${ext}`);
-
-				await uploadBytes(storageRef, avatarFile);
-				avatarUrl = await getDownloadURL(storageRef);
-			}
-
-			// Update Firebase Auth profile
-			await updateProfile(auth.currentUser, {
-				displayName: username.trim(),
-				photoURL: avatarUrl,
-			});
-
-			// Update profile in backend via API
-			await patch("/v1/auth/profile", {
-				username: username.trim(),
-				avatar_url: avatarUrl,
-			});
-
-			// Refresh local user store with updated Firebase user
-			user.set(auth.currentUser);
-
-			onSaved?.();
-		} catch (err) {
-			console.error("Profile update failed:", err);
-			error = err.message || $t("profile.edit.error_generic");
-		} finally {
-			saving = false;
-		}
+/** Save profile changes */
+async function handleSave() {
+	if (!username.trim()) {
+		error = $t("profile.edit.error_username_empty");
+		return;
 	}
 
-	const initial = $derived(username?.charAt(0)?.toUpperCase() || "?");
+	saving = true;
+	error = "";
+
+	try {
+		let avatarUrl = currentAvatarUrl;
+
+		// Upload avatar to Cloud Storage if changed
+		if (avatarFile) {
+			const userId = auth.currentUser?.uid;
+			const ext = avatarFile.name.split(".").pop();
+			const storageRef = ref(storage, `avatars/${userId}/avatar.${ext}`);
+
+			await uploadBytes(storageRef, avatarFile);
+			avatarUrl = await getDownloadURL(storageRef);
+		}
+
+		// Update Firebase Auth profile
+		await updateProfile(auth.currentUser, {
+			displayName: username.trim(),
+			photoURL: avatarUrl,
+		});
+
+		// Update profile in backend via API
+		await patch("/v1/auth/profile", {
+			username: username.trim(),
+			avatar_url: avatarUrl,
+		});
+
+		// Refresh local user store with updated Firebase user
+		user.set(auth.currentUser);
+
+		onSaved?.();
+	} catch (err) {
+		console.error("Profile update failed:", err);
+		error = err.message || $t("profile.edit.error_generic");
+	} finally {
+		saving = false;
+	}
+}
+
+const initial = $derived(username?.charAt(0)?.toUpperCase() || "?");
 </script>
 
 <div class="bg-bg-secondary border border-border rounded-lg p-5 flex flex-col gap-4">

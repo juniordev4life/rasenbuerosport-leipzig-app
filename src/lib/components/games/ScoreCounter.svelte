@@ -1,15 +1,15 @@
 <script>
-	let { value = $bindable(0), onchange } = $props();
+let { value = $bindable(0), onchange } = $props();
 
-	function increment() {
-		value = Math.min(value + 1, 99);
-		onchange?.();
-	}
+function increment() {
+	value = Math.min(value + 1, 99);
+	onchange?.();
+}
 
-	function decrement() {
-		value = Math.max(value - 1, 0);
-		onchange?.();
-	}
+function decrement() {
+	value = Math.max(value - 1, 0);
+	onchange?.();
+}
 </script>
 
 <div class="flex flex-col items-center gap-1">

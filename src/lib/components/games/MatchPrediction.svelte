@@ -1,73 +1,80 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { post } from "$lib/services/api.services.js";
+import { getTranslate } from "@tolgee/svelte";
+import { post } from "$lib/services/api.services.js";
 
-	/**
-	 * @type {{
-	 *   homePlayers: string[],
-	 *   awayPlayers: string[],
-	 *   homeTeam: string,
-	 *   awayTeam: string,
-	 *   mode: string,
-	 *   allPlayers: Array<{id: string, username: string}>
-	 * }}
-	 */
-	let { homePlayers = [], awayPlayers = [], homeTeam = "", awayTeam = "", mode = "1v1", allPlayers = [] } = $props();
+/**
+ * @type {{
+ *   homePlayers: string[],
+ *   awayPlayers: string[],
+ *   homeTeam: string,
+ *   awayTeam: string,
+ *   mode: string,
+ *   allPlayers: Array<{id: string, username: string}>
+ * }}
+ */
+let {
+	homePlayers = [],
+	awayPlayers = [],
+	homeTeam = "",
+	awayTeam = "",
+	mode = "1v1",
+	allPlayers = [],
+} = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	const GUEST_ID = "__guest__";
+const GUEST_ID = "__guest__";
 
-	let prediction = $state(null);
-	let loading = $state(false);
-	let error = $state(false);
+let prediction = $state(null);
+let loading = $state(false);
+let error = $state(false);
 
-	/** Check if we have enough data for a prediction */
-	const canPredict = $derived(
-		homePlayers.filter((id) => !id.startsWith(GUEST_ID)).length > 0 &&
+/** Check if we have enough data for a prediction */
+const canPredict = $derived(
+	homePlayers.filter((id) => !id.startsWith(GUEST_ID)).length > 0 &&
 		awayPlayers.filter((id) => !id.startsWith(GUEST_ID)).length > 0 &&
 		homeTeam &&
 		awayTeam,
-	);
+);
 
-	/**
-	 * Build the player payload for the prediction API
-	 * @returns {Array<{id: string, team: string, team_name: string}>}
-	 */
-	function buildPlayerPayload() {
-		const players = [];
-		for (const id of homePlayers) {
-			if (!id.startsWith(GUEST_ID)) {
-				players.push({ id, team: "home", team_name: homeTeam });
-			}
-		}
-		for (const id of awayPlayers) {
-			if (!id.startsWith(GUEST_ID)) {
-				players.push({ id, team: "away", team_name: awayTeam });
-			}
-		}
-		return players;
-	}
-
-	/**
-	 * Fetch prediction from backend AI
-	 */
-	async function fetchPrediction() {
-		loading = true;
-		error = false;
-		try {
-			const res = await post("/v1/games/prediction", {
-				players: buildPlayerPayload(),
-				mode,
-			});
-			prediction = res.data?.prediction || null;
-		} catch (err) {
-			console.error("Failed to generate prediction:", err);
-			error = true;
-		} finally {
-			loading = false;
+/**
+ * Build the player payload for the prediction API
+ * @returns {Array<{id: string, team: string, team_name: string}>}
+ */
+function buildPlayerPayload() {
+	const players = [];
+	for (const id of homePlayers) {
+		if (!id.startsWith(GUEST_ID)) {
+			players.push({ id, team: "home", team_name: homeTeam });
 		}
 	}
+	for (const id of awayPlayers) {
+		if (!id.startsWith(GUEST_ID)) {
+			players.push({ id, team: "away", team_name: awayTeam });
+		}
+	}
+	return players;
+}
+
+/**
+ * Fetch prediction from backend AI
+ */
+async function fetchPrediction() {
+	loading = true;
+	error = false;
+	try {
+		const res = await post("/v1/games/prediction", {
+			players: buildPlayerPayload(),
+			mode,
+		});
+		prediction = res.data?.prediction || null;
+	} catch (err) {
+		console.error("Failed to generate prediction:", err);
+		error = true;
+	} finally {
+		loading = false;
+	}
+}
 </script>
 
 {#if canPredict}

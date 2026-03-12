@@ -1,77 +1,167 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
+import { getTranslate } from "@tolgee/svelte";
 
-	/** @type {{ badges: Array<{type: string, emoji: string, unlocked: boolean, category?: string}> }} */
-	let { badges = [] } = $props();
+/** @type {{ badges: Array<{type: string, emoji: string, unlocked: boolean, category?: string}> }} */
+let { badges = [] } = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	const unlockedCount = $derived(badges.filter((b) => b.unlocked).length);
-	const totalCount = $derived(badges.length);
+const unlockedCount = $derived(badges.filter((b) => b.unlocked).length);
+const totalCount = $derived(badges.length);
 
-	/** @type {Array<{key: string, titleKey: string}>} */
-	const CATEGORY_ORDER = [
-		{ key: "goals", titleKey: "profile.badges.category_goals" },
-		{ key: "match_stats", titleKey: "profile.badges.category_match_stats" },
-		{ key: "general", titleKey: "profile.badges.category_general" },
-	];
+/** @type {Array<{key: string, titleKey: string}>} */
+const CATEGORY_ORDER = [
+	{ key: "goals", titleKey: "profile.badges.category_goals" },
+	{ key: "match_stats", titleKey: "profile.badges.category_match_stats" },
+	{ key: "general", titleKey: "profile.badges.category_general" },
+];
 
-	/** Group badges by category, sorted: unlocked first within each group */
-	const categorizedBadges = $derived.by(() => {
-		return CATEGORY_ORDER.map(({ key, titleKey }) => {
-			const categoryBadges = badges
-				.filter((b) => b.category === key)
-				.sort((a, b) => {
-					if (a.unlocked === b.unlocked) return 0;
-					return a.unlocked ? -1 : 1;
-				});
-			const unlocked = categoryBadges.filter((b) => b.unlocked).length;
-			return { key, titleKey, badges: categoryBadges, unlocked, total: categoryBadges.length };
-		}).filter((c) => c.total > 0);
-	});
+/** Group badges by category, sorted: unlocked first within each group */
+const categorizedBadges = $derived.by(() => {
+	return CATEGORY_ORDER.map(({ key, titleKey }) => {
+		const categoryBadges = badges
+			.filter((b) => b.category === key)
+			.sort((a, b) => {
+				if (a.unlocked === b.unlocked) return 0;
+				return a.unlocked ? -1 : 1;
+			});
+		const unlocked = categoryBadges.filter((b) => b.unlocked).length;
+		return {
+			key,
+			titleKey,
+			badges: categoryBadges,
+			unlocked,
+			total: categoryBadges.length,
+		};
+	}).filter((c) => c.total > 0);
+});
 
-	/** Info dialog state */
-	let showInfo = $state(false);
+/** Info dialog state */
+let showInfo = $state(false);
 
-	/** Badge info data with conditions grouped by category */
-	const BADGE_INFO = [
-		{
-			titleKey: "profile.badges.category_goals",
-			badges: [
-				{ emoji: "\u{1F949}", type: "torjaeger_bronze", conditionKey: "profile.badges.condition_torjaeger_bronze" },
-				{ emoji: "\u{1F948}", type: "torjaeger_silber", conditionKey: "profile.badges.condition_torjaeger_silber" },
-				{ emoji: "\u{1F947}", type: "torjaeger_gold", conditionKey: "profile.badges.condition_torjaeger_gold" },
-				{ emoji: "\u{1F4A0}", type: "torjaeger_platin", conditionKey: "profile.badges.condition_torjaeger_platin" },
-				{ emoji: "\u{1F48E}", type: "torjaeger_diamant", conditionKey: "profile.badges.condition_torjaeger_diamant" },
-				{ emoji: "\u270C\uFE0F", type: "doppelpacker", conditionKey: "profile.badges.condition_doppelpacker" },
-				{ emoji: "\u{1FA96}", type: "hattrick_held", conditionKey: "profile.badges.condition_hattrick_held" },
-			],
-		},
-		{
-			titleKey: "profile.badges.category_match_stats",
-			badges: [
-				{ emoji: "\u{1F3AF}", type: "tiki_taka", conditionKey: "profile.badges.condition_tiki_taka" },
-				{ emoji: "\u{1F9F2}", type: "ball_magnet", conditionKey: "profile.badges.condition_ball_magnet" },
-				{ emoji: "\u26A1", type: "konter_king", conditionKey: "profile.badges.condition_konter_king" },
-				{ emoji: "\u{1F52B}", type: "xg_killer", conditionKey: "profile.badges.condition_xg_killer" },
-				{ emoji: "\u{1F4AA}", type: "duell_monster", conditionKey: "profile.badges.condition_duell_monster" },
-				{ emoji: "\u{1F48E}", type: "perfektionist", conditionKey: "profile.badges.condition_perfektionist" },
-				{ emoji: "\u{1F389}", type: "schuetzenfest", conditionKey: "profile.badges.condition_schuetzenfest" },
-				{ emoji: "\u{1F6E1}\uFE0F", type: "clean_sheet", conditionKey: "profile.badges.condition_clean_sheet" },
-				{ emoji: "\u{1F3F9}", type: "david_vs_goliath", conditionKey: "profile.badges.condition_david_vs_goliath" },
-			],
-		},
-		{
-			titleKey: "profile.badges.category_general",
-			badges: [
-				{ emoji: "\u{1F91D}", type: "fair_play", conditionKey: "profile.badges.condition_fair_play" },
-				{ emoji: "\u{1F476}", type: "debuetant", conditionKey: "profile.badges.condition_debuetant" },
-				{ emoji: "\u2B50", type: "stammspieler", conditionKey: "profile.badges.condition_stammspieler" },
-				{ emoji: "\u{1F451}", type: "klublegende", conditionKey: "profile.badges.condition_klublegende" },
-				{ emoji: "\u{1F525}", type: "seriensieger", conditionKey: "profile.badges.condition_seriensieger" },
-			],
-		},
-	];
+/** Badge info data with conditions grouped by category */
+const BADGE_INFO = [
+	{
+		titleKey: "profile.badges.category_goals",
+		badges: [
+			{
+				emoji: "\u{1F949}",
+				type: "torjaeger_bronze",
+				conditionKey: "profile.badges.condition_torjaeger_bronze",
+			},
+			{
+				emoji: "\u{1F948}",
+				type: "torjaeger_silber",
+				conditionKey: "profile.badges.condition_torjaeger_silber",
+			},
+			{
+				emoji: "\u{1F947}",
+				type: "torjaeger_gold",
+				conditionKey: "profile.badges.condition_torjaeger_gold",
+			},
+			{
+				emoji: "\u{1F4A0}",
+				type: "torjaeger_platin",
+				conditionKey: "profile.badges.condition_torjaeger_platin",
+			},
+			{
+				emoji: "\u{1F48E}",
+				type: "torjaeger_diamant",
+				conditionKey: "profile.badges.condition_torjaeger_diamant",
+			},
+			{
+				emoji: "\u270C\uFE0F",
+				type: "doppelpacker",
+				conditionKey: "profile.badges.condition_doppelpacker",
+			},
+			{
+				emoji: "\u{1FA96}",
+				type: "hattrick_held",
+				conditionKey: "profile.badges.condition_hattrick_held",
+			},
+		],
+	},
+	{
+		titleKey: "profile.badges.category_match_stats",
+		badges: [
+			{
+				emoji: "\u{1F3AF}",
+				type: "tiki_taka",
+				conditionKey: "profile.badges.condition_tiki_taka",
+			},
+			{
+				emoji: "\u{1F9F2}",
+				type: "ball_magnet",
+				conditionKey: "profile.badges.condition_ball_magnet",
+			},
+			{
+				emoji: "\u26A1",
+				type: "konter_king",
+				conditionKey: "profile.badges.condition_konter_king",
+			},
+			{
+				emoji: "\u{1F52B}",
+				type: "xg_killer",
+				conditionKey: "profile.badges.condition_xg_killer",
+			},
+			{
+				emoji: "\u{1F4AA}",
+				type: "duell_monster",
+				conditionKey: "profile.badges.condition_duell_monster",
+			},
+			{
+				emoji: "\u{1F48E}",
+				type: "perfektionist",
+				conditionKey: "profile.badges.condition_perfektionist",
+			},
+			{
+				emoji: "\u{1F389}",
+				type: "schuetzenfest",
+				conditionKey: "profile.badges.condition_schuetzenfest",
+			},
+			{
+				emoji: "\u{1F6E1}\uFE0F",
+				type: "clean_sheet",
+				conditionKey: "profile.badges.condition_clean_sheet",
+			},
+			{
+				emoji: "\u{1F3F9}",
+				type: "david_vs_goliath",
+				conditionKey: "profile.badges.condition_david_vs_goliath",
+			},
+		],
+	},
+	{
+		titleKey: "profile.badges.category_general",
+		badges: [
+			{
+				emoji: "\u{1F91D}",
+				type: "fair_play",
+				conditionKey: "profile.badges.condition_fair_play",
+			},
+			{
+				emoji: "\u{1F476}",
+				type: "debuetant",
+				conditionKey: "profile.badges.condition_debuetant",
+			},
+			{
+				emoji: "\u2B50",
+				type: "stammspieler",
+				conditionKey: "profile.badges.condition_stammspieler",
+			},
+			{
+				emoji: "\u{1F451}",
+				type: "klublegende",
+				conditionKey: "profile.badges.condition_klublegende",
+			},
+			{
+				emoji: "\u{1F525}",
+				type: "seriensieger",
+				conditionKey: "profile.badges.condition_seriensieger",
+			},
+		],
+	},
+];
 </script>
 
 {#if badges.length > 0}

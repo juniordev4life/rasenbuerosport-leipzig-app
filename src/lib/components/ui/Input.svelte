@@ -1,14 +1,14 @@
 <script>
-	let {
-		type = "text",
-		placeholder = "",
-		label = "",
-		value = $bindable(""),
-		required = false,
-		autocomplete = "",
-		id = "",
-		class: className = "",
-	} = $props();
+let {
+	type = "text",
+	placeholder = "",
+	label = "",
+	value = $bindable(""),
+	required = false,
+	autocomplete = "",
+	id = "",
+	class: className = "",
+} = $props();
 </script>
 
 {#if label}

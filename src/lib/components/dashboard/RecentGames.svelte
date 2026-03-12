@@ -1,10 +1,10 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import GameCard from "./GameCard.svelte";
+import { getTranslate } from "@tolgee/svelte";
+import GameCard from "./GameCard.svelte";
 
-	let { games = [] } = $props();
+let { games = [] } = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 </script>
 
 <section>

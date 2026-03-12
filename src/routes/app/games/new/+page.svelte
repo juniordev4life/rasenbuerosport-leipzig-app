@@ -1,156 +1,159 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
-	import { goto } from "$app/navigation";
-	import { get, post } from "$lib/services/api.services.js";
-	import { storage } from "$lib/config/firebase.config.js";
-	import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-	import { ROUTES } from "$lib/constants/routes.constants.js";
-	import StepIndicator from "$lib/components/games/StepIndicator.svelte";
-	import PlayerSelectionStep from "$lib/components/games/PlayerSelectionStep.svelte";
-	import TeamSelectionStep from "$lib/components/games/TeamSelectionStep.svelte";
-	import ScoreStep from "$lib/components/games/ScoreStep.svelte";
-	import MatchPrediction from "$lib/components/games/MatchPrediction.svelte";
+import { getTranslate } from "@tolgee/svelte";
+import { goto } from "$app/navigation";
+import { get, post } from "$lib/services/api.services.js";
+import { storage } from "$lib/config/firebase.config.js";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ROUTES } from "$lib/constants/routes.constants.js";
+import StepIndicator from "$lib/components/games/StepIndicator.svelte";
+import PlayerSelectionStep from "$lib/components/games/PlayerSelectionStep.svelte";
+import TeamSelectionStep from "$lib/components/games/TeamSelectionStep.svelte";
+import ScoreStep from "$lib/components/games/ScoreStep.svelte";
+import MatchPrediction from "$lib/components/games/MatchPrediction.svelte";
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	const GUEST_ID = "__guest__";
+const GUEST_ID = "__guest__";
 
-	// Wizard state
-	let step = $state(1);
+// Wizard state
+let step = $state(1);
 
-	// Step 1: Player selection (IDs including guest IDs)
-	let homePlayers = $state([]);
-	let awayPlayers = $state([]);
+// Step 1: Player selection (IDs including guest IDs)
+let homePlayers = $state([]);
+let awayPlayers = $state([]);
 
-	// Step 2: Teams
-	let homeTeam = $state("");
-	let awayTeam = $state("");
+// Step 2: Teams
+let homeTeam = $state("");
+let awayTeam = $state("");
 
-	// Step 3: Score + Timeline + Stats
-	let scoreHome = $state(0);
-	let scoreAway = $state(0);
-	let scoreTimeline = $state([]);
-	let resultType = $state("regular");
-	let statsOverview = $state(null);
-	let statsPasses = $state(null);
-	let statsDefense = $state(null);
+// Step 3: Score + Timeline + Stats
+let scoreHome = $state(0);
+let scoreAway = $state(0);
+let scoreTimeline = $state([]);
+let resultType = $state("regular");
+let statsOverview = $state(null);
+let statsPasses = $state(null);
+let statsDefense = $state(null);
 
-	// Save state
-	let saving = $state(false);
+// Save state
+let saving = $state(false);
 
-	// Data from API
-	let allPlayers = $state([]);
-	let loading = $state(true);
+// Data from API
+let allPlayers = $state([]);
+let loading = $state(true);
 
-	// Auto-derive game mode from player counts
-	const mode = $derived.by(() => {
-		const h = homePlayers.length;
-		const a = awayPlayers.length;
-		if (h === 1 && a === 1) return "1v1";
-		if (h === 2 && a === 2) return "2v2";
-		return `${h}v${a}`;
-	});
+// Auto-derive game mode from player counts
+const mode = $derived.by(() => {
+	const h = homePlayers.length;
+	const a = awayPlayers.length;
+	if (h === 1 && a === 1) return "1v1";
+	if (h === 2 && a === 2) return "2v2";
+	return `${h}v${a}`;
+});
 
-	$effect(() => {
-		loadData();
-	});
+$effect(() => {
+	loadData();
+});
 
-	async function loadData() {
-		try {
-			const res = await get("/v1/players");
-			allPlayers = res.data || [];
-		} catch (err) {
-			console.error("Failed to load players:", err);
-		} finally {
-			loading = false;
-		}
+async function loadData() {
+	try {
+		const res = await get("/v1/players");
+		allPlayers = res.data || [];
+	} catch (err) {
+		console.error("Failed to load players:", err);
+	} finally {
+		loading = false;
 	}
+}
 
-	function goToStep(n) {
-		step = n;
-	}
+function goToStep(n) {
+	step = n;
+}
 
-	function goBack() {
-		step = Math.max(1, step - 1);
-	}
+function goBack() {
+	step = Math.max(1, step - 1);
+}
 
-	async function saveGame() {
-		saving = true;
-		try {
-			// Filter out guest players (they don't have real IDs in the DB)
-			const players = [
-				...homePlayers
-					.filter((id) => !id.startsWith(GUEST_ID))
-					.map((id) => ({
-						id,
-						team: "home",
-						team_name: homeTeam || undefined,
-					})),
-				...awayPlayers
-					.filter((id) => !id.startsWith(GUEST_ID))
-					.map((id) => ({
-						id,
-						team: "away",
-						team_name: awayTeam || undefined,
-					})),
-			];
+async function saveGame() {
+	saving = true;
+	try {
+		// Filter out guest players (they don't have real IDs in the DB)
+		const players = [
+			...homePlayers
+				.filter((id) => !id.startsWith(GUEST_ID))
+				.map((id) => ({
+					id,
+					team: "home",
+					team_name: homeTeam || undefined,
+				})),
+			...awayPlayers
+				.filter((id) => !id.startsWith(GUEST_ID))
+				.map((id) => ({
+					id,
+					team: "away",
+					team_name: awayTeam || undefined,
+				})),
+		];
 
-			const res = await post("/v1/games", {
-				mode,
-				score_home: scoreHome,
-				score_away: scoreAway,
-				players,
-				score_timeline: scoreTimeline.length > 0 ? scoreTimeline : undefined,
-				result_type: resultType,
-			});
+		const res = await post("/v1/games", {
+			mode,
+			score_home: scoreHome,
+			score_away: scoreAway,
+			players,
+			score_timeline: scoreTimeline.length > 0 ? scoreTimeline : undefined,
+			result_type: resultType,
+		});
 
-			const gameId = res.data?.id;
+		const gameId = res.data?.id;
 
-			// Upload stats images if selected
-			const statsFiles = [
-				{ file: statsOverview, type: "overview" },
-				{ file: statsPasses, type: "passes" },
-				{ file: statsDefense, type: "defense" },
-			].filter((s) => s.file);
+		// Upload stats images if selected
+		const statsFiles = [
+			{ file: statsOverview, type: "overview" },
+			{ file: statsPasses, type: "passes" },
+			{ file: statsDefense, type: "defense" },
+		].filter((s) => s.file);
 
-			if (statsFiles.length > 0 && gameId) {
-				for (const { file, type } of statsFiles) {
-					try {
-						const ext = file.name.split(".").pop();
-						const storageRef = ref(storage, `match-stats/${gameId}/${type}.${ext}`);
-
-						await uploadBytes(storageRef, file);
-						const imageUrl = await getDownloadURL(storageRef);
-
-						await post(`/v1/games/${gameId}/match-stats`, {
-							imageUrl,
-							type,
-						});
-					} catch (statsErr) {
-						console.error(`Stats extraction failed (${type}):`, statsErr);
-					}
-				}
-
-				// Auto-generate match report after all stats are uploaded
+		if (statsFiles.length > 0 && gameId) {
+			for (const { file, type } of statsFiles) {
 				try {
-					await post(`/v1/games/${gameId}/match-report`);
-				} catch (reportErr) {
-					console.error("Match report generation failed:", reportErr);
+					const ext = file.name.split(".").pop();
+					const storageRef = ref(
+						storage,
+						`match-stats/${gameId}/${type}.${ext}`,
+					);
+
+					await uploadBytes(storageRef, file);
+					const imageUrl = await getDownloadURL(storageRef);
+
+					await post(`/v1/games/${gameId}/match-stats`, {
+						imageUrl,
+						type,
+					});
+				} catch (statsErr) {
+					console.error(`Stats extraction failed (${type}):`, statsErr);
 				}
 			}
 
-			// Navigate to game detail if stats were uploaded, otherwise dashboard
-			if (statsFiles.length > 0 && gameId) {
-				goto(`/app/games/${gameId}`);
-			} else {
-				goto(ROUTES.DASHBOARD);
+			// Auto-generate match report after all stats are uploaded
+			try {
+				await post(`/v1/games/${gameId}/match-report`);
+			} catch (reportErr) {
+				console.error("Match report generation failed:", reportErr);
 			}
-		} catch (err) {
-			console.error("Failed to save game:", err);
-		} finally {
-			saving = false;
 		}
+
+		// Navigate to game detail if stats were uploaded, otherwise dashboard
+		if (statsFiles.length > 0 && gameId) {
+			goto(`/app/games/${gameId}`);
+		} else {
+			goto(ROUTES.DASHBOARD);
+		}
+	} catch (err) {
+		console.error("Failed to save game:", err);
+	} finally {
+		saving = false;
 	}
+}
 </script>
 
 <svelte:head>

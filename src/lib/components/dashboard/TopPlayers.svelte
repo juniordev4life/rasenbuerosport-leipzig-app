@@ -1,9 +1,9 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
+import { getTranslate } from "@tolgee/svelte";
 
-	let { players = [] } = $props();
+let { players = [] } = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 </script>
 
 <section>

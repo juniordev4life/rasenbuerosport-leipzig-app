@@ -1,13 +1,13 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
+import { getTranslate } from "@tolgee/svelte";
 
-	let {
-		favoriteOpponent = null,
-		bestTeammate = null,
-		favoriteTeam = null,
-	} = $props();
+let {
+	favoriteOpponent = null,
+	bestTeammate = null,
+	favoriteTeam = null,
+} = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 </script>
 
 <div class="flex flex-col gap-3">

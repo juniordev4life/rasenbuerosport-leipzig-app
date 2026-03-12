@@ -1,37 +1,43 @@
 <script>
-	import { getTranslate } from "@tolgee/svelte";
+import { getTranslate } from "@tolgee/svelte";
 
-	/**
-	 * ProfileHeader - Displays avatar, username, email with edit button
-	 * @param {string} username
-	 * @param {string} email
-	 * @param {string|null} avatarUrl
-	 * @param {string|null} goalTier - Goal scorer tier for avatar ring color
-	 * @param {Function} onEdit - Callback to open profile editor
-	 */
-	let { username = "", email = "", avatarUrl = null, goalTier = null, onEdit } = $props();
+/**
+ * ProfileHeader - Displays avatar, username, email with edit button
+ * @param {string} username
+ * @param {string} email
+ * @param {string|null} avatarUrl
+ * @param {string|null} goalTier - Goal scorer tier for avatar ring color
+ * @param {Function} onEdit - Callback to open profile editor
+ */
+let {
+	username = "",
+	email = "",
+	avatarUrl = null,
+	goalTier = null,
+	onEdit,
+} = $props();
 
-	const { t } = getTranslate();
+const { t } = getTranslate();
 
-	const initial = $derived(username?.charAt(0)?.toUpperCase() || "?");
+const initial = $derived(username?.charAt(0)?.toUpperCase() || "?");
 
-	/** Map goal tier to ring classes */
-	const ringClasses = $derived.by(() => {
-		switch (goalTier) {
-			case "bronze":
-				return "ring-3 ring-amber-600";
-			case "silber":
-				return "ring-3 ring-gray-300";
-			case "gold":
-				return "ring-3 ring-yellow-400";
-			case "platin":
-				return "ring-3 ring-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.5)]";
-			case "diamant":
-				return "ring-3 ring-blue-400 shadow-[0_0_14px_rgba(96,165,250,0.6)]";
-			default:
-				return "ring-2 ring-accent-red";
-		}
-	});
+/** Map goal tier to ring classes */
+const ringClasses = $derived.by(() => {
+	switch (goalTier) {
+		case "bronze":
+			return "ring-3 ring-amber-600";
+		case "silber":
+			return "ring-3 ring-gray-300";
+		case "gold":
+			return "ring-3 ring-yellow-400";
+		case "platin":
+			return "ring-3 ring-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.5)]";
+		case "diamant":
+			return "ring-3 ring-blue-400 shadow-[0_0_14px_rgba(96,165,250,0.6)]";
+		default:
+			return "ring-2 ring-accent-red";
+	}
+});
 </script>
 
 <div class="flex flex-col items-center gap-2 relative">

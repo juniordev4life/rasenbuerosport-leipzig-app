@@ -1,5 +1,5 @@
 <script>
-	let { currentStep = 1, totalSteps = 3, labels = [] } = $props();
+let { currentStep = 1, totalSteps = 3, labels = [] } = $props();
 </script>
 
 <div class="flex items-center justify-center gap-2">
