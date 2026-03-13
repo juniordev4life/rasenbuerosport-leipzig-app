@@ -4,6 +4,7 @@ import BottomNav from "$lib/components/layout/BottomNav.svelte";
 import Sidebar from "$lib/components/layout/Sidebar.svelte";
 import { get } from "$lib/services/api.services.js";
 import { logout } from "$lib/services/auth.services.js";
+import { auth } from "$lib/config/firebase.config.js";
 import { goto } from "$app/navigation";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { browser } from "$app/environment";
@@ -23,6 +24,9 @@ $effect(() => {
 		})
 		.catch(async (err) => {
 			if (err.message === "User not authorized") {
+				if (auth.currentUser) {
+					await auth.currentUser.delete();
+				}
 				await logout();
 				goto(ROUTES.LOGIN);
 			} else {

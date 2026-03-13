@@ -3,6 +3,7 @@ import { getTranslate } from "@tolgee/svelte";
 import { goto } from "$app/navigation";
 import { loginWithGoogle, logout } from "$lib/services/auth.services.js";
 import { get } from "$lib/services/api.services.js";
+import { auth } from "$lib/config/firebase.config.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 
 const { t } = getTranslate();
@@ -24,8 +25,11 @@ async function handleGoogleLogin() {
 	} catch (err) {
 		if (err.code === "auth/popup-closed-by-user") return;
 
-		// If backend rejects the user, sign them out from Firebase
+		// If backend rejects the user, delete Firebase Auth entry and sign out
 		if (err.message === "User not authorized") {
+			if (auth.currentUser) {
+				await auth.currentUser.delete();
+			}
 			await logout();
 			error = $t("auth.errors.not_authorized");
 		} else {
