@@ -1,7 +1,8 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import { goto } from "$app/navigation";
-import { loginWithGoogle } from "$lib/services/auth.services.js";
+import { loginWithGoogle, logout } from "$lib/services/auth.services.js";
+import { get } from "$lib/services/api.services.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 
 const { t } = getTranslate();
@@ -15,10 +16,21 @@ async function handleGoogleLogin() {
 
 	try {
 		await loginWithGoogle();
+
+		// Verify user is authorized (exists in profiles table)
+		await get("/v1/auth/me");
+
 		goto(ROUTES.DASHBOARD);
 	} catch (err) {
 		if (err.code === "auth/popup-closed-by-user") return;
-		error = err.message || $t("auth.errors.generic");
+
+		// If backend rejects the user, sign them out from Firebase
+		if (err.message === "User not authorized") {
+			await logout();
+			error = $t("auth.errors.not_authorized");
+		} else {
+			error = err.message || $t("auth.errors.generic");
+		}
 	} finally {
 		loading = false;
 	}

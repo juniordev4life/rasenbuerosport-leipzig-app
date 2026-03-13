@@ -39,7 +39,8 @@
 			"username_taken": "Username already taken",
 			"passwords_mismatch": "Passwords do not match",
 			"email_domain": "Only @redbulls.com email addresses are allowed",
-			"generic": "An error occurred"
+			"generic": "An error occurred",
+			"not_authorized": "You are not authorized to use this app. Contact an admin."
 		}
 	},
 	"dashboard": {

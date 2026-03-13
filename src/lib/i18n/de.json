@@ -41,7 +41,8 @@
 			"username_taken": "Benutzername bereits vergeben",
 			"passwords_mismatch": "Passwörter stimmen nicht überein",
 			"email_domain": "Nur @redbulls.com E-Mail-Adressen sind erlaubt",
-			"generic": "Ein Fehler ist aufgetreten"
+			"generic": "Ein Fehler ist aufgetreten",
+			"not_authorized": "Du bist nicht berechtigt, diese App zu nutzen. Kontaktiere einen Admin."
 		}
 	},
 	"dashboard": {

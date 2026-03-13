@@ -211,12 +211,16 @@ Is **automatically generated** when statistics are available. The report is ente
 |---------|-------|
 | **Frontend** | Svelte 5, SvelteKit, TailwindCSS 4 |
 | **Backend** | Fastify 5, Node.js 24 |
-| **Database** | Supabase (PostgreSQL + Storage) |
+| **Database** | Cloud SQL PostgreSQL 16 (GCP) |
+| **Storage** | Firebase Storage (Avatars, Screenshots, Logos) |
 | **AI** | Claude API — Anthropic (Vision + Text) |
-| **Auth** | Supabase Auth (Invite-only) |
+| **Auth** | Firebase Auth (Google Sign-In, Invite-only) |
+| **Hosting** | Firebase Hosting (Frontend), Cloud Run (Backend) |
 | **App Type** | Progressive Web App (PWA) |
 | **Languages** | German & English (Tolgee i18n) |
 | **Design** | Mobile-first, Dark Theme |
+
+> For local development setup, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ---
 
