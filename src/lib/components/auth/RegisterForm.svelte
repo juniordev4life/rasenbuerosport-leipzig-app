@@ -3,8 +3,8 @@ import { getTranslate } from "@tolgee/svelte";
 import { goto } from "$app/navigation";
 import Button from "$lib/components/ui/Button.svelte";
 import Input from "$lib/components/ui/Input.svelte";
-import { register } from "$lib/services/auth.services.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
+import { register } from "$lib/services/auth.services.js";
 
 const { t } = getTranslate();
 

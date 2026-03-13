@@ -1,10 +1,10 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { getAllTeams, getLeagues } from "$lib/services/teams.services.js";
-import { getCountryFlag } from "$lib/constants/teams.constants.js";
-import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
 import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
 import StarRating from "$lib/components/ui/StarRating.svelte";
+import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
+import { getCountryFlag } from "$lib/constants/teams.constants.js";
+import { getAllTeams, getLeagues } from "$lib/services/teams.services.js";
 
 const { t } = getTranslate();
 

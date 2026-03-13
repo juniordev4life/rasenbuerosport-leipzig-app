@@ -1,15 +1,15 @@
 <script>
 import "../app.css";
 import { TolgeeProvider } from "@tolgee/svelte";
-import { tolgee } from "$lib/config/i18n.config.js";
-import { auth } from "$lib/config/firebase.config.js";
 import { onAuthStateChanged } from "firebase/auth";
-import { user, isLoading } from "$lib/stores/auth.stores.js";
-import { theme } from "$lib/stores/theme.stores.js";
+import { browser } from "$app/environment";
 import { goto } from "$app/navigation";
 import { page } from "$app/state";
+import { auth } from "$lib/config/firebase.config.js";
+import { tolgee } from "$lib/config/i18n.config.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
-import { browser } from "$app/environment";
+import { isLoading, user } from "$lib/stores/auth.stores.js";
+import { theme } from "$lib/stores/theme.stores.js";
 
 let { children } = $props();
 

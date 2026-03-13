@@ -1,7 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { user } from "$lib/stores/auth.stores.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
+import { user } from "$lib/stores/auth.stores.js";
 
 const { t } = getTranslate();
 </script>

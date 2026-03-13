@@ -1,7 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import AvatarChip from "./AvatarChip.svelte";
 import Button from "$lib/components/ui/Button.svelte";
+import AvatarChip from "./AvatarChip.svelte";
 
 /**
  * PlayerSelectionStep - Step 1 of new game wizard

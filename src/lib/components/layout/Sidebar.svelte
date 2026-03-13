@@ -1,8 +1,8 @@
 <script>
-import { page } from "$app/state";
 import { getTranslate } from "@tolgee/svelte";
-import { user } from "$lib/stores/auth.stores.js";
+import { page } from "$app/state";
 import { ROUTES } from "$lib/constants/routes.constants.js";
+import { user } from "$lib/stores/auth.stores.js";
 
 const { t } = getTranslate();
 

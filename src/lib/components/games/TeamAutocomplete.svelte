@@ -1,9 +1,9 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { getAllTeams, searchTeams } from "$lib/services/teams.services.js";
-import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
 import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
 import StarRating from "$lib/components/ui/StarRating.svelte";
+import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
+import { getAllTeams, searchTeams } from "$lib/services/teams.services.js";
 
 let { value = $bindable("") } = $props();
 

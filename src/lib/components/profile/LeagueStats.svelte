@@ -1,8 +1,8 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { user } from "$lib/stores/auth.stores.js";
-import { getAllTeams } from "$lib/services/teams.services.js";
 import { getCountryFlag } from "$lib/constants/teams.constants.js";
+import { getAllTeams } from "$lib/services/teams.services.js";
+import { user } from "$lib/stores/auth.stores.js";
 
 /**
  * LeagueStats - Shows win rate per football league

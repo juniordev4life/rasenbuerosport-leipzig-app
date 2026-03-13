@@ -1,10 +1,10 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import { goto } from "$app/navigation";
-import { loginWithGoogle, logout } from "$lib/services/auth.services.js";
-import { get } from "$lib/services/api.services.js";
 import { auth } from "$lib/config/firebase.config.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
+import { get } from "$lib/services/api.services.js";
+import { loginWithGoogle, logout } from "$lib/services/auth.services.js";
 
 const { t } = getTranslate();
 

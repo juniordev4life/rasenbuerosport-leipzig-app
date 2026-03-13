@@ -1,8 +1,8 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { get } from "$lib/services/api.services.js";
 import GameCard from "$lib/components/dashboard/GameCard.svelte";
 import Button from "$lib/components/ui/Button.svelte";
+import { get } from "$lib/services/api.services.js";
 
 const { t } = getTranslate();
 

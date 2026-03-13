@@ -1,7 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "$lib/config/firebase.config.js";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { post } from "$lib/services/api.services.js";
 
 /**

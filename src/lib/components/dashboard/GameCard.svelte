@@ -1,8 +1,8 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { user } from "$lib/stores/auth.stores.js";
-import { getTeamByName } from "$lib/services/teams.services.js";
 import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
+import { getTeamByName } from "$lib/services/teams.services.js";
+import { user } from "$lib/stores/auth.stores.js";
 
 let { game } = $props();
 

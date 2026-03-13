@@ -1,7 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import TeamAutocomplete from "./TeamAutocomplete.svelte";
 import Button from "$lib/components/ui/Button.svelte";
+import TeamAutocomplete from "./TeamAutocomplete.svelte";
 
 /**
  * TeamSelectionStep - Step 2 of new game wizard

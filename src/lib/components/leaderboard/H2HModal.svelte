@@ -1,7 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { get } from "$lib/services/api.services.js";
 import GameCard from "$lib/components/dashboard/GameCard.svelte";
+import { get } from "$lib/services/api.services.js";
 
 /**
  * H2HModal - Bottom-sheet overlay showing head-to-head stats

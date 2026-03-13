@@ -1,7 +1,7 @@
 <script>
 import { goto } from "$app/navigation";
-import { user, isLoading } from "$lib/stores/auth.stores.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
+import { isLoading, user } from "$lib/stores/auth.stores.js";
 
 $effect(() => {
 	if (!$isLoading) {

@@ -1,11 +1,11 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { auth, storage } from "$lib/config/firebase.config.js";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import Button from "$lib/components/ui/Button.svelte";
+import { auth, storage } from "$lib/config/firebase.config.js";
 import { patch } from "$lib/services/api.services.js";
 import { user } from "$lib/stores/auth.stores.js";
-import Button from "$lib/components/ui/Button.svelte";
 
 /**
  * ProfileEditor - Inline edit form for username and avatar

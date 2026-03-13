@@ -1,21 +1,24 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import { goto } from "$app/navigation";
-import { user } from "$lib/stores/auth.stores.js";
+import CareerMatchStats from "$lib/components/profile/CareerMatchStats.svelte";
+import EloInfoModal from "$lib/components/profile/EloInfoModal.svelte";
+import EloRating from "$lib/components/profile/EloRating.svelte";
+import FavoriteStats from "$lib/components/profile/FavoriteStats.svelte";
+import FormCurve from "$lib/components/profile/FormCurve.svelte";
+import LeagueStats from "$lib/components/profile/LeagueStats.svelte";
+import ModeBilanz from "$lib/components/profile/ModeBilanz.svelte";
+import ProfileBadges from "$lib/components/profile/ProfileBadges.svelte";
+import ProfileEditor from "$lib/components/profile/ProfileEditor.svelte";
+import ProfileHeader from "$lib/components/profile/ProfileHeader.svelte";
+import StatsOverview from "$lib/components/profile/StatsOverview.svelte";
+import ThemeSelector from "$lib/components/profile/ThemeSelector.svelte";
+import WinRate from "$lib/components/profile/WinRate.svelte";
+import Button from "$lib/components/ui/Button.svelte";
+import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get } from "$lib/services/api.services.js";
 import { logout } from "$lib/services/auth.services.js";
-import { ROUTES } from "$lib/constants/routes.constants.js";
-import Button from "$lib/components/ui/Button.svelte";
-import ProfileHeader from "$lib/components/profile/ProfileHeader.svelte";
-import ProfileEditor from "$lib/components/profile/ProfileEditor.svelte";
-import StatsOverview from "$lib/components/profile/StatsOverview.svelte";
-import WinRate from "$lib/components/profile/WinRate.svelte";
-import ModeBilanz from "$lib/components/profile/ModeBilanz.svelte";
-import FavoriteStats from "$lib/components/profile/FavoriteStats.svelte";
-import CareerMatchStats from "$lib/components/profile/CareerMatchStats.svelte";
-import ProfileBadges from "$lib/components/profile/ProfileBadges.svelte";
-import LeagueStats from "$lib/components/profile/LeagueStats.svelte";
-import ThemeSelector from "$lib/components/profile/ThemeSelector.svelte";
+import { user } from "$lib/stores/auth.stores.js";
 
 const { t } = getTranslate();
 
@@ -23,6 +26,7 @@ let stats = $state(null);
 let userGames = $state([]);
 let loading = $state(true);
 let editing = $state(false);
+let showEloInfo = $state(false);
 
 const username = $derived($user?.user_metadata?.username || "");
 const email = $derived($user?.email || "");
@@ -98,7 +102,16 @@ function handleSaved() {
 					losses={stats.losses}
 				/>
 
+				<EloRating
+					currentElo={stats.current_elo}
+					peakElo={stats.peak_elo}
+					eloChangeLastGame={stats.elo_change_last_game}
+					onInfoClick={() => (showEloInfo = true)}
+				/>
+
 				<WinRate winRate={stats.win_rate} />
+
+				<FormCurve formCurve={stats.form_curve} />
 
 				<ModeBilanz
 					bilanz1v1={stats.bilanz_1v1}
@@ -127,3 +140,7 @@ function handleSaved() {
 		</Button>
 	{/if}
 </div>
+
+{#if showEloInfo}
+	<EloInfoModal onClose={() => (showEloInfo = false)} />
+{/if}

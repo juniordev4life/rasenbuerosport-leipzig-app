@@ -1,10 +1,10 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import { tick } from "svelte";
-import ScoreCounter from "./ScoreCounter.svelte";
 import Button from "$lib/components/ui/Button.svelte";
-import { getTeamByName } from "$lib/services/teams.services.js";
 import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
+import { getTeamByName } from "$lib/services/teams.services.js";
+import ScoreCounter from "./ScoreCounter.svelte";
 
 /**
  * ScoreStep - Step 3 of new game wizard

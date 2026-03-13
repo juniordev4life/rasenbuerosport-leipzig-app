@@ -1,23 +1,26 @@
 <script>
-import { page } from "$app/state";
-import { goto } from "$app/navigation";
 import { getTranslate } from "@tolgee/svelte";
-import { get } from "$lib/services/api.services.js";
-import { user } from "$lib/stores/auth.stores.js";
-import { getTeamByName } from "$lib/services/teams.services.js";
-import { getCountryFlag } from "$lib/constants/teams.constants.js";
-import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
-import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
-import StarRating from "$lib/components/ui/StarRating.svelte";
+import { goto } from "$app/navigation";
+import { page } from "$app/state";
+import MatchReport from "$lib/components/games/MatchReport.svelte";
 import MatchStatsDisplay from "$lib/components/games/MatchStatsDisplay.svelte";
 import MatchStatsUpload from "$lib/components/games/MatchStatsUpload.svelte";
-import MatchReport from "$lib/components/games/MatchReport.svelte";
+import EloInfoModal from "$lib/components/profile/EloInfoModal.svelte";
+import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
+import StarRating from "$lib/components/ui/StarRating.svelte";
+import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
+import { getCountryFlag } from "$lib/constants/teams.constants.js";
+import { get } from "$lib/services/api.services.js";
+import { getTeamByName } from "$lib/services/teams.services.js";
+import { user } from "$lib/stores/auth.stores.js";
 
 const { t } = getTranslate();
 
 let game = $state(null);
+let eloChanges = $state([]);
 let loading = $state(true);
 let error = $state(false);
+let showEloInfo = $state(false);
 
 const gameId = $derived(page.params.id);
 
@@ -29,12 +32,29 @@ async function loadGame() {
 	try {
 		const res = await get(`/v1/games/${gameId}`);
 		game = res.data;
+
+		// Load Elo changes for this game
+		try {
+			const eloRes = await get(`/v1/games/${gameId}/elo`);
+			eloChanges = eloRes.data || [];
+		} catch {
+			eloChanges = [];
+		}
 	} catch (err) {
 		console.error("Failed to load game:", err);
 		error = true;
 	} finally {
 		loading = false;
 	}
+}
+
+/**
+ * Gets the Elo change for a specific player in this game
+ * @param {string} playerId
+ * @returns {{player_id: string, elo_before: number, elo_after: number, elo_change: number}|null}
+ */
+function getPlayerEloChange(playerId) {
+	return eloChanges.find((e) => e.player_id === playerId) || null;
 }
 
 const homePlayers = $derived(
@@ -315,6 +335,7 @@ function getScorerProfile(playerId) {
 				</h3>
 				<div class="flex flex-col gap-3">
 					{#each homePlayers as player (player.player_id)}
+						{@const elo = getPlayerEloChange(player.player_id)}
 						<div class="flex items-center gap-2">
 							{#if player.profiles?.avatar_url}
 								<img
@@ -330,6 +351,11 @@ function getScorerProfile(playerId) {
 							<span class="text-sm text-text-primary font-medium truncate">
 								{player.profiles?.username || "?"}
 							</span>
+							{#if elo}
+								<span class="text-[10px] font-medium ml-auto {elo.elo_change >= 0 ? 'text-success' : 'text-error'}">
+									{elo.elo_change >= 0 ? "+" : ""}{elo.elo_change}
+								</span>
+							{/if}
 						</div>
 					{/each}
 				</div>
@@ -342,6 +368,7 @@ function getScorerProfile(playerId) {
 				</h3>
 				<div class="flex flex-col gap-3">
 					{#each awayPlayers as player (player.player_id)}
+						{@const elo = getPlayerEloChange(player.player_id)}
 						<div class="flex items-center gap-2">
 							{#if player.profiles?.avatar_url}
 								<img
@@ -357,11 +384,62 @@ function getScorerProfile(playerId) {
 							<span class="text-sm text-text-primary font-medium truncate">
 								{player.profiles?.username || "?"}
 							</span>
+							{#if elo}
+								<span class="text-[10px] font-medium ml-auto {elo.elo_change >= 0 ? 'text-success' : 'text-error'}">
+									{elo.elo_change >= 0 ? "+" : ""}{elo.elo_change}
+								</span>
+							{/if}
 						</div>
 					{/each}
 				</div>
 			</div>
 		</div>
+
+		<!-- Elo Changes -->
+		{#if eloChanges.length > 0}
+			<div class="bg-bg-secondary border border-border rounded-lg p-4">
+				<div class="flex items-center justify-between mb-3">
+					<h3 class="text-xs font-bold text-text-secondary uppercase tracking-wider">
+						{$t("elo.game_changes_title")}
+					</h3>
+					<button
+						type="button"
+						onclick={() => (showEloInfo = true)}
+						class="text-text-secondary hover:text-text-primary transition-colors"
+						aria-label={$t("elo.info_title")}
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+					</button>
+				</div>
+				<div class="flex flex-col gap-2">
+					{#each eloChanges as elo (elo.player_id)}
+						{@const player = game.game_players.find((p) => p.player_id === elo.player_id)}
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-2">
+								{#if player?.profiles?.avatar_url}
+									<img src={player.profiles.avatar_url} alt={player.profiles.username} class="w-5 h-5 rounded-full object-cover" />
+								{:else}
+									<div class="w-5 h-5 rounded-full bg-bg-input flex items-center justify-center text-[9px] font-bold text-text-secondary">
+										{(player?.profiles?.username || "?").charAt(0).toUpperCase()}
+									</div>
+								{/if}
+								<span class="text-xs text-text-primary">{player?.profiles?.username || "?"}</span>
+							</div>
+							<div class="flex items-center gap-2">
+								<span class="text-[10px] text-text-secondary">{elo.elo_before}</span>
+								<span class="text-xs text-text-secondary">→</span>
+								<span class="text-xs font-bold text-text-primary">{elo.elo_after}</span>
+								<span class="text-xs font-medium {elo.elo_change >= 0 ? 'text-success' : 'text-error'}">
+									({elo.elo_change >= 0 ? "+" : ""}{elo.elo_change})
+								</span>
+							</div>
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
 
 		<!-- Match Stats (from FC26 screenshots) -->
 		{#if game.match_stats}
@@ -436,3 +514,7 @@ function getScorerProfile(playerId) {
 		{/if}
 	{/if}
 </div>
+
+{#if showEloInfo}
+	<EloInfoModal onClose={() => (showEloInfo = false)} />
+{/if}

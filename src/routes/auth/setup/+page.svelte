@@ -1,14 +1,14 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { goto } from "$app/navigation";
-import { auth } from "$lib/config/firebase.config.js";
 import { updateProfile } from "firebase/auth";
-import { patch } from "$lib/services/api.services.js";
-import { user } from "$lib/stores/auth.stores.js";
-import { ROUTES } from "$lib/constants/routes.constants.js";
+import { browser } from "$app/environment";
+import { goto } from "$app/navigation";
 import Button from "$lib/components/ui/Button.svelte";
 import Input from "$lib/components/ui/Input.svelte";
-import { browser } from "$app/environment";
+import { auth } from "$lib/config/firebase.config.js";
+import { ROUTES } from "$lib/constants/routes.constants.js";
+import { patch } from "$lib/services/api.services.js";
+import { user } from "$lib/stores/auth.stores.js";
 
 const { t } = getTranslate();
 

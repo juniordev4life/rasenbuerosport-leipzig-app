@@ -1,9 +1,9 @@
 <script>
+import { getRedirectResult } from "firebase/auth";
+import { browser } from "$app/environment";
 import { goto } from "$app/navigation";
 import { auth } from "$lib/config/firebase.config.js";
-import { getRedirectResult } from "firebase/auth";
 import { ROUTES } from "$lib/constants/routes.constants.js";
-import { browser } from "$app/environment";
 
 let error = $state("");
 

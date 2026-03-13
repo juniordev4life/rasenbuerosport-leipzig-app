@@ -1,5 +1,5 @@
-import { auth, googleProvider } from "$lib/config/firebase.config.js";
 import { signInWithPopup, signOut } from "firebase/auth";
+import { auth, googleProvider } from "$lib/config/firebase.config.js";
 
 /**
  * Signs in with Google via popup

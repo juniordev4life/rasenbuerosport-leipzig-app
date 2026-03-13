@@ -1,10 +1,10 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import ActivityFeed from "$lib/components/dashboard/ActivityFeed.svelte";
 import RecentGames from "$lib/components/dashboard/RecentGames.svelte";
-import TopPlayers from "$lib/components/dashboard/TopPlayers.svelte";
 import StreakBadge from "$lib/components/dashboard/StreakBadge.svelte";
 import StreakFeed from "$lib/components/dashboard/StreakFeed.svelte";
-import ActivityFeed from "$lib/components/dashboard/ActivityFeed.svelte";
+import TopPlayers from "$lib/components/dashboard/TopPlayers.svelte";
 import { get } from "$lib/services/api.services.js";
 
 const { t } = getTranslate();

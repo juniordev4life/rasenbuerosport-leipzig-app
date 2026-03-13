@@ -27,6 +27,7 @@
 		"@tailwindcss/vite": "^4.2.1",
 		"@tolgee/format-icu": "^6.3.0",
 		"@tolgee/svelte": "^6.3.0",
+		"chart.js": "^4.5.1",
 		"firebase": "^11.0.0",
 		"tailwindcss": "^4.2.1"
 	}

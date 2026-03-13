@@ -1,6 +1,6 @@
 <script>
-import { page } from "$app/state";
 import { getTranslate } from "@tolgee/svelte";
+import { page } from "$app/state";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 
 const { t } = getTranslate();

@@ -1,15 +1,15 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { goto } from "$app/navigation";
-import { get, post } from "$lib/services/api.services.js";
-import { storage } from "$lib/config/firebase.config.js";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { ROUTES } from "$lib/constants/routes.constants.js";
-import StepIndicator from "$lib/components/games/StepIndicator.svelte";
-import PlayerSelectionStep from "$lib/components/games/PlayerSelectionStep.svelte";
-import TeamSelectionStep from "$lib/components/games/TeamSelectionStep.svelte";
-import ScoreStep from "$lib/components/games/ScoreStep.svelte";
 import MatchPrediction from "$lib/components/games/MatchPrediction.svelte";
+import PlayerSelectionStep from "$lib/components/games/PlayerSelectionStep.svelte";
+import ScoreStep from "$lib/components/games/ScoreStep.svelte";
+import StepIndicator from "$lib/components/games/StepIndicator.svelte";
+import TeamSelectionStep from "$lib/components/games/TeamSelectionStep.svelte";
+import { storage } from "$lib/config/firebase.config.js";
+import { ROUTES } from "$lib/constants/routes.constants.js";
+import { get, post } from "$lib/services/api.services.js";
 
 const { t } = getTranslate();
 
