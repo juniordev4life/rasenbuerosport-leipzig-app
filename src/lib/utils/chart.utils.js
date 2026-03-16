@@ -59,6 +59,7 @@ export function getBaseChartOptions(theme) {
  */
 export function formatValue(val, suffix = "") {
 	if (val === null || val === undefined) return "-";
-	const formatted = typeof val === "number" && val % 1 !== 0 ? val.toFixed(1) : String(val);
+	const formatted =
+		typeof val === "number" && val % 1 !== 0 ? val.toFixed(1) : String(val);
 	return formatted + suffix;
 }

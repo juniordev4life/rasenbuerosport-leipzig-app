@@ -14,25 +14,33 @@ const chartConfig = $derived.by(() => {
 	const base = getBaseChartOptions(theme);
 
 	const colors = data.map((p) =>
-		p.username === currentUsername ? theme.accentRed : `${theme.textSecondary}60`,
+		p.username === currentUsername
+			? theme.accentRed
+			: `${theme.textSecondary}60`,
 	);
 
 	return {
 		type: "bar",
 		data: {
 			labels: data.map((p) => p.username),
-			datasets: [{
-				data: data.map((p) => p.elo),
-				backgroundColor: colors,
-				borderRadius: 4,
-				barThickness: 20,
-			}],
+			datasets: [
+				{
+					data: data.map((p) => p.elo),
+					backgroundColor: colors,
+					borderRadius: 4,
+					barThickness: 20,
+				},
+			],
 		},
 		options: {
 			...base,
 			indexAxis: "y",
 			scales: {
-				x: { ...base.scales.x, grid: { color: `${theme.border}30` }, ticks: { ...base.scales.x.ticks } },
+				x: {
+					...base.scales.x,
+					grid: { color: `${theme.border}30` },
+					ticks: { ...base.scales.x.ticks },
+				},
 				y: { ...base.scales.y, grid: { display: false } },
 			},
 			plugins: {

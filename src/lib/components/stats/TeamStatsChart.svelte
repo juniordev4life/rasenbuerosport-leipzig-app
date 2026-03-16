@@ -18,18 +18,24 @@ const gamesConfig = $derived.by(() => {
 		type: "bar",
 		data: {
 			labels: data.map((d) => d.team_name),
-			datasets: [{
-				data: data.map((d) => d.games),
-				backgroundColor: `${theme.accentRed}cc`,
-				borderRadius: 4,
-				barThickness: 18,
-			}],
+			datasets: [
+				{
+					data: data.map((d) => d.games),
+					backgroundColor: `${theme.accentRed}cc`,
+					borderRadius: 4,
+					barThickness: 18,
+				},
+			],
 		},
 		options: {
 			...base,
 			indexAxis: "y",
 			scales: {
-				x: { ...base.scales.x, grid: { color: `${theme.border}30` }, ticks: { ...base.scales.x.ticks, stepSize: 1 } },
+				x: {
+					...base.scales.x,
+					grid: { color: `${theme.border}30` },
+					ticks: { ...base.scales.x.ticks, stepSize: 1 },
+				},
 				y: { ...base.scales.y, grid: { display: false } },
 			},
 			plugins: {
@@ -37,7 +43,8 @@ const gamesConfig = $derived.by(() => {
 				tooltip: {
 					...base.plugins.tooltip,
 					callbacks: {
-						label: (ctx) => `${ctx.raw} ${$t("stats_dashboard.games_count", { count: ctx.raw })}`,
+						label: (ctx) =>
+							`${ctx.raw} ${$t("stats_dashboard.games_count", { count: ctx.raw })}`,
 					},
 				},
 			},
@@ -52,24 +59,34 @@ const winRateConfig = $derived.by(() => {
 	const base = getBaseChartOptions(theme);
 
 	const sorted = [...data].sort((a, b) => b.win_rate - a.win_rate);
-	const colors = sorted.map((d) => (d.win_rate >= 50 ? theme.success : `${theme.textSecondary}60`));
+	const colors = sorted.map((d) =>
+		d.win_rate >= 50 ? theme.success : `${theme.textSecondary}60`,
+	);
 
 	return {
 		type: "bar",
 		data: {
 			labels: sorted.map((d) => d.team_name),
-			datasets: [{
-				data: sorted.map((d) => d.win_rate),
-				backgroundColor: colors,
-				borderRadius: 4,
-				barThickness: 18,
-			}],
+			datasets: [
+				{
+					data: sorted.map((d) => d.win_rate),
+					backgroundColor: colors,
+					borderRadius: 4,
+					barThickness: 18,
+				},
+			],
 		},
 		options: {
 			...base,
 			indexAxis: "y",
 			scales: {
-				x: { ...base.scales.x, grid: { color: `${theme.border}30` }, min: 0, max: 100, ticks: { ...base.scales.x.ticks, callback: (v) => `${v}%` } },
+				x: {
+					...base.scales.x,
+					grid: { color: `${theme.border}30` },
+					min: 0,
+					max: 100,
+					ticks: { ...base.scales.x.ticks, callback: (v) => `${v}%` },
+				},
 				y: { ...base.scales.y, grid: { display: false } },
 			},
 			plugins: {

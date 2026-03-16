@@ -19,13 +19,21 @@ const chartConfig = $derived.by(() => {
 	return {
 		type: "bar",
 		data: {
-			labels: [$t("stats_dashboard.xg_label"), $t("stats_dashboard.goals_label")],
-			datasets: [{
-				data: [data.total_xg, data.total_goals],
-				backgroundColor: [`${theme.textSecondary}50`, isOver ? theme.success : theme.error],
-				borderRadius: 6,
-				barThickness: 40,
-			}],
+			labels: [
+				$t("stats_dashboard.xg_label"),
+				$t("stats_dashboard.goals_label"),
+			],
+			datasets: [
+				{
+					data: [data.total_xg, data.total_goals],
+					backgroundColor: [
+						`${theme.textSecondary}50`,
+						isOver ? theme.success : theme.error,
+					],
+					borderRadius: 6,
+					barThickness: 40,
+				},
+			],
 		},
 		options: {
 			...base,

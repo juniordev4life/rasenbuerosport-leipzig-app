@@ -106,12 +106,23 @@ const awayPlayerIds = $derived(awayPlayers.map((p) => p.player_id));
 
 const rematchUrl = $derived(
 	game
-		? buildRematchUrl({ homePlayers: homePlayerIds, awayPlayers: awayPlayerIds, homeTeam: homeTeamName || "", awayTeam: awayTeamName || "" })
+		? buildRematchUrl({
+				homePlayers: homePlayerIds,
+				awayPlayers: awayPlayerIds,
+				homeTeam: homeTeamName || "",
+				awayTeam: awayTeamName || "",
+			})
 		: "#",
 );
 const rematchSwapUrl = $derived(
 	game
-		? buildRematchUrl({ homePlayers: homePlayerIds, awayPlayers: awayPlayerIds, homeTeam: homeTeamName || "", awayTeam: awayTeamName || "", swap: true })
+		? buildRematchUrl({
+				homePlayers: homePlayerIds,
+				awayPlayers: awayPlayerIds,
+				homeTeam: homeTeamName || "",
+				awayTeam: awayTeamName || "",
+				swap: true,
+			})
 		: "#",
 );
 

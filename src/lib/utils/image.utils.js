@@ -26,9 +26,7 @@ export function resizeImage(file, maxWidth = 1920) {
 
 			canvas.toBlob(
 				(blob) =>
-					blob
-						? resolve(blob)
-						: reject(new Error("Canvas toBlob failed")),
+					blob ? resolve(blob) : reject(new Error("Canvas toBlob failed")),
 				"image/jpeg",
 				0.85,
 			);

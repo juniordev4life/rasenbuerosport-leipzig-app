@@ -14,7 +14,9 @@ const chartConfig = $derived.by(() => {
 	const base = getBaseChartOptions(theme);
 
 	const resultColors = { W: theme.success, D: theme.warning, L: theme.error };
-	const pointColors = data.map((g) => resultColors[g.result] || theme.textSecondary);
+	const pointColors = data.map(
+		(g) => resultColors[g.result] || theme.textSecondary,
+	);
 
 	// Show month label for first game of each month
 	const labels = data.map((g, i) => {
@@ -31,23 +33,28 @@ const chartConfig = $derived.by(() => {
 		type: "line",
 		data: {
 			labels,
-			datasets: [{
-				data: data.map((g) => g.elo_after),
-				borderColor: theme.accentRed,
-				borderWidth: 2,
-				pointBackgroundColor: pointColors,
-				pointBorderColor: pointColors,
-				pointRadius: data.length > 40 ? 2 : 4,
-				pointHoverRadius: 6,
-				tension: 0.3,
-				fill: false,
-			}],
+			datasets: [
+				{
+					data: data.map((g) => g.elo_after),
+					borderColor: theme.accentRed,
+					borderWidth: 2,
+					pointBackgroundColor: pointColors,
+					pointBorderColor: pointColors,
+					pointRadius: data.length > 40 ? 2 : 4,
+					pointHoverRadius: 6,
+					tension: 0.3,
+					fill: false,
+				},
+			],
 		},
 		options: {
 			...base,
 			scales: {
 				...base.scales,
-				y: { ...base.scales.y, ticks: { ...base.scales.y.ticks, stepSize: 20 } },
+				y: {
+					...base.scales.y,
+					ticks: { ...base.scales.y.ticks, stepSize: 20 },
+				},
 			},
 			plugins: {
 				...base.plugins,
@@ -56,7 +63,11 @@ const chartConfig = $derived.by(() => {
 					callbacks: {
 						title: (ctx) => {
 							const g = data[ctx[0].dataIndex];
-							return new Date(g.played_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+							return new Date(g.played_at).toLocaleDateString("de-DE", {
+								day: "2-digit",
+								month: "2-digit",
+								year: "numeric",
+							});
 						},
 						label: (ctx) => {
 							const g = data[ctx.dataIndex];

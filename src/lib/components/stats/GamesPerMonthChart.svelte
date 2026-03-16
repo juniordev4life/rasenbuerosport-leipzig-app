@@ -8,7 +8,20 @@ let { data = [] } = $props();
 
 const { t } = getTranslate();
 
-const MONTHS_DE = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+const MONTHS_DE = [
+	"Jan",
+	"Feb",
+	"Mär",
+	"Apr",
+	"Mai",
+	"Jun",
+	"Jul",
+	"Aug",
+	"Sep",
+	"Okt",
+	"Nov",
+	"Dez",
+];
 
 const chartConfig = $derived.by(() => {
 	if (!data || data.length === 0) return null;
@@ -24,17 +37,23 @@ const chartConfig = $derived.by(() => {
 		type: "bar",
 		data: {
 			labels,
-			datasets: [{
-				data: data.map((d) => d.count),
-				backgroundColor: `${theme.accentRed}cc`,
-				borderRadius: 4,
-			}],
+			datasets: [
+				{
+					data: data.map((d) => d.count),
+					backgroundColor: `${theme.accentRed}cc`,
+					borderRadius: 4,
+				},
+			],
 		},
 		options: {
 			...base,
 			scales: {
 				...base.scales,
-				y: { ...base.scales.y, beginAtZero: true, ticks: { ...base.scales.y.ticks, stepSize: 1 } },
+				y: {
+					...base.scales.y,
+					beginAtZero: true,
+					ticks: { ...base.scales.y.ticks, stepSize: 1 },
+				},
 			},
 			plugins: {
 				...base.plugins,
@@ -42,7 +61,8 @@ const chartConfig = $derived.by(() => {
 					...base.plugins.tooltip,
 					callbacks: {
 						title: (ctx) => data[ctx[0].dataIndex]?.month || "",
-						label: (ctx) => `${ctx.raw} ${$t("stats_dashboard.games_count", { count: ctx.raw })}`,
+						label: (ctx) =>
+							`${ctx.raw} ${$t("stats_dashboard.games_count", { count: ctx.raw })}`,
 					},
 				},
 			},

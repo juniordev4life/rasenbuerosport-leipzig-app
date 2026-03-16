@@ -14,24 +14,32 @@ const chartConfig = $derived.by(() => {
 	const base = getBaseChartOptions(theme);
 
 	const maxVal = Math.max(...data.map((d) => d.count));
-	const colors = data.map((d) => (d.count === maxVal ? theme.accentRed : `${theme.textSecondary}60`));
+	const colors = data.map((d) =>
+		d.count === maxVal ? theme.accentRed : `${theme.textSecondary}60`,
+	);
 
 	return {
 		type: "bar",
 		data: {
 			labels: data.map((d) => d.score),
-			datasets: [{
-				data: data.map((d) => d.count),
-				backgroundColor: colors,
-				borderRadius: 4,
-				barThickness: 20,
-			}],
+			datasets: [
+				{
+					data: data.map((d) => d.count),
+					backgroundColor: colors,
+					borderRadius: 4,
+					barThickness: 20,
+				},
+			],
 		},
 		options: {
 			...base,
 			indexAxis: "y",
 			scales: {
-				x: { ...base.scales.x, grid: { color: `${theme.border}30` }, ticks: { ...base.scales.x.ticks, stepSize: 1 } },
+				x: {
+					...base.scales.x,
+					grid: { color: `${theme.border}30` },
+					ticks: { ...base.scales.x.ticks, stepSize: 1 },
+				},
 				y: { ...base.scales.y, grid: { display: false } },
 			},
 			plugins: {
@@ -39,7 +47,8 @@ const chartConfig = $derived.by(() => {
 				tooltip: {
 					...base.plugins.tooltip,
 					callbacks: {
-						label: (ctx) => `${ctx.raw} ${$t("stats_dashboard.games_count", { count: ctx.raw })}`,
+						label: (ctx) =>
+							`${ctx.raw} ${$t("stats_dashboard.games_count", { count: ctx.raw })}`,
 					},
 				},
 			},

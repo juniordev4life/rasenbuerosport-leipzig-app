@@ -132,10 +132,7 @@ async function saveGame() {
 			for (const { file, type } of statsFiles) {
 				try {
 					const resized = await resizeImage(file);
-					const storageRef = ref(
-						storage,
-						`match-stats/${gameId}/${type}.jpg`,
-					);
+					const storageRef = ref(storage, `match-stats/${gameId}/${type}.jpg`);
 
 					await uploadBytes(storageRef, resized);
 					const imageUrl = await getDownloadURL(storageRef);

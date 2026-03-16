@@ -65,7 +65,15 @@ const chartConfig = $derived.by(() => {
 			},
 			plugins: {
 				...base.plugins,
-				legend: { display: has20, position: "top", labels: { color: theme.textSecondary, font: { size: 10 }, boxWidth: 12 } },
+				legend: {
+					display: has20,
+					position: "top",
+					labels: {
+						color: theme.textSecondary,
+						font: { size: 10 },
+						boxWidth: 12,
+					},
+				},
 				tooltip: {
 					...base.plugins.tooltip,
 					callbacks: {

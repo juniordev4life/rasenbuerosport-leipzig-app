@@ -21,30 +21,39 @@ const chartConfig = $derived.by(() => {
 	const values = WEEKDAYS.map((_, i) => weekdayMap.get(i) || 0);
 
 	const maxVal = Math.max(...values);
-	const colors = values.map((v) => (v === maxVal && maxVal > 0 ? theme.accentRed : `${theme.textSecondary}50`));
+	const colors = values.map((v) =>
+		v === maxVal && maxVal > 0 ? theme.accentRed : `${theme.textSecondary}50`,
+	);
 
 	return {
 		type: "bar",
 		data: {
 			labels,
-			datasets: [{
-				data: values,
-				backgroundColor: colors,
-				borderRadius: 4,
-			}],
+			datasets: [
+				{
+					data: values,
+					backgroundColor: colors,
+					borderRadius: 4,
+				},
+			],
 		},
 		options: {
 			...base,
 			scales: {
 				...base.scales,
-				y: { ...base.scales.y, beginAtZero: true, ticks: { ...base.scales.y.ticks, stepSize: 1 } },
+				y: {
+					...base.scales.y,
+					beginAtZero: true,
+					ticks: { ...base.scales.y.ticks, stepSize: 1 },
+				},
 			},
 			plugins: {
 				...base.plugins,
 				tooltip: {
 					...base.plugins.tooltip,
 					callbacks: {
-						label: (ctx) => `${ctx.raw} ${$t("stats_dashboard.games_count", { count: ctx.raw })}`,
+						label: (ctx) =>
+							`${ctx.raw} ${$t("stats_dashboard.games_count", { count: ctx.raw })}`,
 					},
 				},
 			},

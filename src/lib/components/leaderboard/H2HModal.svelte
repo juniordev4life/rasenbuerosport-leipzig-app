@@ -59,7 +59,11 @@ const streakText = $derived.by(() => {
 });
 
 const streakEmoji = $derived(
-	data?.streak?.type === "win" ? "\u{1F525}" : data?.streak?.type === "loss" ? "\u{1F976}" : "\u{1F91D}",
+	data?.streak?.type === "win"
+		? "\u{1F525}"
+		: data?.streak?.type === "loss"
+			? "\u{1F976}"
+			: "\u{1F91D}",
 );
 
 /** Modes that have games */

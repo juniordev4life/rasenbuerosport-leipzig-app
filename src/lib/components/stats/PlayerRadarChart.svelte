@@ -21,7 +21,10 @@ const chartConfig = $derived.by(() => {
 	];
 
 	// Normalize xG efficiency to 0-100 scale (1.0 = 50, 2.0 = 100)
-	const xgEff = stats.xg_efficiency != null ? Math.min(Math.round(stats.xg_efficiency * 50), 100) : 0;
+	const xgEff =
+		stats.xg_efficiency != null
+			? Math.min(Math.round(stats.xg_efficiency * 50), 100)
+			: 0;
 
 	const values = [
 		stats.avg_possession || 0,
@@ -35,14 +38,16 @@ const chartConfig = $derived.by(() => {
 		type: "radar",
 		data: {
 			labels,
-			datasets: [{
-				data: values,
-				backgroundColor: `${theme.accentRed}30`,
-				borderColor: theme.accentRed,
-				borderWidth: 2,
-				pointBackgroundColor: theme.accentRed,
-				pointRadius: 4,
-			}],
+			datasets: [
+				{
+					data: values,
+					backgroundColor: `${theme.accentRed}30`,
+					borderColor: theme.accentRed,
+					borderWidth: 2,
+					pointBackgroundColor: theme.accentRed,
+					pointRadius: 4,
+				},
+			],
 		},
 		options: {
 			responsive: true,

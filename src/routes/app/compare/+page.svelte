@@ -9,7 +9,9 @@ import { selectedSeason } from "$lib/stores/season.stores.js";
 const { t } = getTranslate();
 
 // Mode toggle
-let mode = $state(page.url.searchParams.get("mode") === "duos" ? "duos" : "players");
+let mode = $state(
+	page.url.searchParams.get("mode") === "duos" ? "duos" : "players",
+);
 
 // Shared state
 let players = $state([]);
@@ -105,7 +107,15 @@ $effect(() => {
 	const m = mode;
 	let aborted = false;
 
-	if (m !== "duos" || !d1a || !d1b || !d2a || !d2b || d1a === d1b || d2a === d2b) {
+	if (
+		m !== "duos" ||
+		!d1a ||
+		!d1b ||
+		!d2a ||
+		!d2b ||
+		d1a === d1b ||
+		d2a === d2b
+	) {
 		if (m === "duos") duoComparison = null;
 		return;
 	}
@@ -158,17 +168,23 @@ const s2 = $derived(p2?.stats);
 const d1 = $derived(duoComparison?.duo1);
 const d2 = $derived(duoComparison?.duo2);
 
-const duoWinRate1 = $derived(d1?.total_games > 0 ? Math.round((d1.wins / d1.total_games) * 100) : 0);
-const duoWinRate2 = $derived(d2?.total_games > 0 ? Math.round((d2.wins / d2.total_games) * 100) : 0);
+const duoWinRate1 = $derived(
+	d1?.total_games > 0 ? Math.round((d1.wins / d1.total_games) * 100) : 0,
+);
+const duoWinRate2 = $derived(
+	d2?.total_games > 0 ? Math.round((d2.wins / d2.total_games) * 100) : 0,
+);
 
 // Find H2H between duo1 and duo2 in opponent_duos
 const duoH2H = $derived.by(() => {
 	if (!d1?.opponent_duos || !duo2Player1Id || !duo2Player2Id) return null;
 	const targetIds = [duo2Player1Id, duo2Player2Id].sort();
-	return d1.opponent_duos.find((opp) => {
-		const oppIds = [opp.player1.player_id, opp.player2.player_id].sort();
-		return oppIds[0] === targetIds[0] && oppIds[1] === targetIds[1];
-	}) || null;
+	return (
+		d1.opponent_duos.find((opp) => {
+			const oppIds = [opp.player1.player_id, opp.player2.player_id].sort();
+			return oppIds[0] === targetIds[0] && oppIds[1] === targetIds[1];
+		}) || null
+	);
 });
 
 /**
@@ -208,7 +224,8 @@ function barWidths(a, b) {
 function streakDisplay(streak) {
 	if (!streak) return "";
 	const { type, count } = streak;
-	const emoji = type === "win" ? "\u{1F525}" : type === "loss" ? "\u{1F976}" : "\u{1F91D}";
+	const emoji =
+		type === "win" ? "\u{1F525}" : type === "loss" ? "\u{1F976}" : "\u{1F91D}";
 	return `${emoji} ${count}${type === "win" ? "W" : type === "loss" ? "L" : "D"}`;
 }
 </script>

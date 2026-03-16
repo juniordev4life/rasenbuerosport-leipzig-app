@@ -14,17 +14,23 @@ const chartConfig = $derived.by(() => {
 	const base = getBaseChartOptions(theme);
 
 	const maxVal = Math.max(...data.map((d) => d.count));
-	const colors = data.map((d) => (d.count === maxVal && maxVal > 0 ? theme.accentRed : `${theme.textSecondary}50`));
+	const colors = data.map((d) =>
+		d.count === maxVal && maxVal > 0
+			? theme.accentRed
+			: `${theme.textSecondary}50`,
+	);
 
 	return {
 		type: "bar",
 		data: {
 			labels: data.map((d) => `${d.total_goals}`),
-			datasets: [{
-				data: data.map((d) => d.count),
-				backgroundColor: colors,
-				borderRadius: 4,
-			}],
+			datasets: [
+				{
+					data: data.map((d) => d.count),
+					backgroundColor: colors,
+					borderRadius: 4,
+				},
+			],
 		},
 		options: {
 			...base,
@@ -32,17 +38,28 @@ const chartConfig = $derived.by(() => {
 				...base.scales,
 				x: {
 					...base.scales.x,
-					title: { display: true, text: $t("stats_dashboard.total_goals_axis"), color: theme.textSecondary, font: { size: 10 } },
+					title: {
+						display: true,
+						text: $t("stats_dashboard.total_goals_axis"),
+						color: theme.textSecondary,
+						font: { size: 10 },
+					},
 				},
-				y: { ...base.scales.y, beginAtZero: true, ticks: { ...base.scales.y.ticks, stepSize: 1 } },
+				y: {
+					...base.scales.y,
+					beginAtZero: true,
+					ticks: { ...base.scales.y.ticks, stepSize: 1 },
+				},
 			},
 			plugins: {
 				...base.plugins,
 				tooltip: {
 					...base.plugins.tooltip,
 					callbacks: {
-						title: (ctx) => `${ctx[0].label} ${$t("stats_dashboard.goals_label")}`,
-						label: (ctx) => `${ctx.raw} ${$t("stats_dashboard.games_count", { count: ctx.raw })}`,
+						title: (ctx) =>
+							`${ctx[0].label} ${$t("stats_dashboard.goals_label")}`,
+						label: (ctx) =>
+							`${ctx.raw} ${$t("stats_dashboard.games_count", { count: ctx.raw })}`,
 					},
 				},
 			},

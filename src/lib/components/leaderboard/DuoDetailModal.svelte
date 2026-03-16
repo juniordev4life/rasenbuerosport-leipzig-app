@@ -34,9 +34,7 @@ async function loadDuoDetail() {
 
 /** Visual bar percentages */
 const winPct = $derived(
-	data?.total_games > 0
-		? Math.round((data.wins / data.total_games) * 100)
-		: 0,
+	data?.total_games > 0 ? Math.round((data.wins / data.total_games) * 100) : 0,
 );
 const lossPct = $derived(
 	data?.total_games > 0
@@ -60,7 +58,11 @@ const streakText = $derived.by(() => {
 });
 
 const streakEmoji = $derived(
-	data?.streak?.type === "win" ? "\u{1F525}" : data?.streak?.type === "loss" ? "\u{1F976}" : "\u{1F91D}",
+	data?.streak?.type === "win"
+		? "\u{1F525}"
+		: data?.streak?.type === "loss"
+			? "\u{1F976}"
+			: "\u{1F91D}",
 );
 </script>
 

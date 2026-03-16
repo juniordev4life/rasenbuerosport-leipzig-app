@@ -68,22 +68,49 @@ const lastGame = $derived(games.length > 0 ? games[0] : null);
 
 const lastGameRematchUrl = $derived.by(() => {
 	if (!lastGame?.game_players) return null;
-	const hp = lastGame.game_players.filter((p) => p.team === "home").map((p) => p.player_id);
-	const ap = lastGame.game_players.filter((p) => p.team === "away").map((p) => p.player_id);
-	const ht = lastGame.game_players.find((p) => p.team === "home" && p.team_name)?.team_name || "";
-	const at = lastGame.game_players.find((p) => p.team === "away" && p.team_name)?.team_name || "";
+	const hp = lastGame.game_players
+		.filter((p) => p.team === "home")
+		.map((p) => p.player_id);
+	const ap = lastGame.game_players
+		.filter((p) => p.team === "away")
+		.map((p) => p.player_id);
+	const ht =
+		lastGame.game_players.find((p) => p.team === "home" && p.team_name)
+			?.team_name || "";
+	const at =
+		lastGame.game_players.find((p) => p.team === "away" && p.team_name)
+			?.team_name || "";
 	if (hp.length === 0 || ap.length === 0) return null;
-	return buildRematchUrl({ homePlayers: hp, awayPlayers: ap, homeTeam: ht, awayTeam: at });
+	return buildRematchUrl({
+		homePlayers: hp,
+		awayPlayers: ap,
+		homeTeam: ht,
+		awayTeam: at,
+	});
 });
 
 const lastGameSwapUrl = $derived.by(() => {
 	if (!lastGame?.game_players) return null;
-	const hp = lastGame.game_players.filter((p) => p.team === "home").map((p) => p.player_id);
-	const ap = lastGame.game_players.filter((p) => p.team === "away").map((p) => p.player_id);
-	const ht = lastGame.game_players.find((p) => p.team === "home" && p.team_name)?.team_name || "";
-	const at = lastGame.game_players.find((p) => p.team === "away" && p.team_name)?.team_name || "";
+	const hp = lastGame.game_players
+		.filter((p) => p.team === "home")
+		.map((p) => p.player_id);
+	const ap = lastGame.game_players
+		.filter((p) => p.team === "away")
+		.map((p) => p.player_id);
+	const ht =
+		lastGame.game_players.find((p) => p.team === "home" && p.team_name)
+			?.team_name || "";
+	const at =
+		lastGame.game_players.find((p) => p.team === "away" && p.team_name)
+			?.team_name || "";
 	if (hp.length === 0 || ap.length === 0) return null;
-	return buildRematchUrl({ homePlayers: hp, awayPlayers: ap, homeTeam: ht, awayTeam: at, swap: true });
+	return buildRematchUrl({
+		homePlayers: hp,
+		awayPlayers: ap,
+		homeTeam: ht,
+		awayTeam: at,
+		swap: true,
+	});
 });
 </script>
 

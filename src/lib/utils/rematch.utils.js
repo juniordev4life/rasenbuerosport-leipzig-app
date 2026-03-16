@@ -10,7 +10,13 @@ import { ROUTES } from "$lib/constants/routes.constants.js";
  * @param {boolean} [params.swap=false] - Whether to swap home/away sides
  * @returns {string} URL path with query params
  */
-export function buildRematchUrl({ homePlayers, awayPlayers, homeTeam, awayTeam, swap = false }) {
+export function buildRematchUrl({
+	homePlayers,
+	awayPlayers,
+	homeTeam,
+	awayTeam,
+	swap = false,
+}) {
 	const params = new URLSearchParams();
 
 	if (swap) {
