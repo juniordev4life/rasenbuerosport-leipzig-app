@@ -2,12 +2,15 @@
 import { getTranslate } from "@tolgee/svelte";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { goto } from "$app/navigation";
+import { page } from "$app/state";
 import MatchPrediction from "$lib/components/games/MatchPrediction.svelte";
 import PlayerSelectionStep from "$lib/components/games/PlayerSelectionStep.svelte";
 import ScoreStep from "$lib/components/games/ScoreStep.svelte";
 import StepIndicator from "$lib/components/games/StepIndicator.svelte";
 import TeamSelectionStep from "$lib/components/games/TeamSelectionStep.svelte";
 import { storage } from "$lib/config/firebase.config.js";
+import { resizeImage } from "$lib/utils/image.utils.js";
+import { parseRematchParams } from "$lib/utils/rematch.utils.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get, post } from "$lib/services/api.services.js";
 
@@ -51,8 +54,20 @@ const mode = $derived.by(() => {
 	return `${h}v${a}`;
 });
 
+// Detect rematch mode from URL params
+const isRematch = $derived(page.url.searchParams.has("hp"));
+
 $effect(() => {
-	loadData();
+	loadData().then(() => {
+		const rematch = parseRematchParams(page.url.searchParams);
+		if (rematch) {
+			homePlayers = rematch.homePlayers;
+			awayPlayers = rematch.awayPlayers;
+			homeTeam = rematch.homeTeam;
+			awayTeam = rematch.awayTeam;
+			step = 3;
+		}
+	});
 });
 
 async function loadData() {
@@ -116,13 +131,13 @@ async function saveGame() {
 		if (statsFiles.length > 0 && gameId) {
 			for (const { file, type } of statsFiles) {
 				try {
-					const ext = file.name.split(".").pop();
+					const resized = await resizeImage(file);
 					const storageRef = ref(
 						storage,
-						`match-stats/${gameId}/${type}.${ext}`,
+						`match-stats/${gameId}/${type}.jpg`,
 					);
 
-					await uploadBytes(storageRef, file);
+					await uploadBytes(storageRef, resized);
 					const imageUrl = await getDownloadURL(storageRef);
 
 					await post(`/v1/games/${gameId}/match-stats`, {
@@ -157,12 +172,12 @@ async function saveGame() {
 </script>
 
 <svelte:head>
-	<title>RasenBürosport - {$t("new_game.title")}</title>
+	<title>RasenBürosport - {isRematch ? $t("rematch.title") : $t("new_game.title")}</title>
 </svelte:head>
 
 <div class="flex flex-col gap-5">
 	<h1 class="text-xl font-bold text-text-primary text-center">
-		{$t("new_game.title")}
+		{isRematch ? $t("rematch.title") : $t("new_game.title")}
 	</h1>
 
 	<StepIndicator currentStep={step} totalSteps={3} />

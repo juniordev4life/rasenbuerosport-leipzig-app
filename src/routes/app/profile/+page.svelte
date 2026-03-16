@@ -14,11 +14,13 @@ import ProfileHeader from "$lib/components/profile/ProfileHeader.svelte";
 import StatsOverview from "$lib/components/profile/StatsOverview.svelte";
 import ThemeSelector from "$lib/components/profile/ThemeSelector.svelte";
 import WinRate from "$lib/components/profile/WinRate.svelte";
+import SeasonSelector from "$lib/components/season/SeasonSelector.svelte";
 import Button from "$lib/components/ui/Button.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get } from "$lib/services/api.services.js";
 import { logout } from "$lib/services/auth.services.js";
 import { user } from "$lib/stores/auth.stores.js";
+import { selectedSeason } from "$lib/stores/season.stores.js";
 
 const { t } = getTranslate();
 
@@ -33,23 +35,36 @@ const email = $derived($user?.email || "");
 const avatarUrl = $derived($user?.user_metadata?.avatar_url || null);
 
 $effect(() => {
-	loadData();
-});
+	const season = $selectedSeason;
+	let aborted = false;
 
-async function loadData() {
-	try {
-		const [statsRes, gamesRes] = await Promise.all([
-			get("/v1/stats/me"),
-			get("/v1/games?limit=100"),
-		]);
-		stats = statsRes.data || null;
-		userGames = gamesRes.data || [];
-	} catch (err) {
-		console.error("Failed to load profile data:", err);
-	} finally {
-		loading = false;
+	loadData(season).catch(() => {});
+
+	return () => {
+		aborted = true;
+	};
+
+	async function loadData(s) {
+		loading = true;
+		try {
+			const seasonParam = s !== "all" ? `&season=${s}` : "";
+			const seasonFirst = s !== "all" ? `?season=${s}` : "";
+
+			const [statsRes, gamesRes] = await Promise.all([
+				get(`/v1/stats/me${seasonFirst}`),
+				get(`/v1/games?limit=100${seasonParam}`),
+			]);
+			if (aborted) return;
+			stats = statsRes.data || null;
+			userGames = gamesRes.data || [];
+		} catch (err) {
+			if (aborted) return;
+			console.error("Failed to load profile data:", err);
+		} finally {
+			if (!aborted) loading = false;
+		}
 	}
-}
+});
 
 async function handleLogout() {
 	try {
@@ -94,6 +109,27 @@ function handleSaved() {
 			/>
 		{/if}
 
+		<!-- Stats Dashboard Link (mobile entry point) -->
+		<a
+			href={ROUTES.STATS}
+			class="flex items-center justify-between bg-bg-secondary border border-border rounded-lg px-4 py-3 hover:bg-bg-input transition-colors"
+		>
+			<div class="flex items-center gap-3">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent-red" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+				</svg>
+				<span class="text-sm font-medium text-text-primary">{$t("stats_dashboard.page_title")}</span>
+			</div>
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+			</svg>
+		</a>
+
+		<!-- Season Selector -->
+		<div class="flex justify-end">
+			<SeasonSelector />
+		</div>
+
 		{#if stats}
 			<div class="flex flex-col gap-5 lg:grid lg:grid-cols-2 lg:gap-4">
 				<StatsOverview
@@ -121,6 +157,7 @@ function handleSaved() {
 				<FavoriteStats
 					favoriteOpponent={stats.favorite_opponent}
 					bestTeammate={stats.best_teammate}
+					topTeammates={stats.top_teammates || []}
 					favoriteTeam={stats.favorite_team}
 				/>
 

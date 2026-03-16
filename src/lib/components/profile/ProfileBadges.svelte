@@ -1,13 +1,16 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import BadgeDetailModal from "./BadgeDetailModal.svelte";
 
-/** @type {{ badges: Array<{type: string, emoji: string, unlocked: boolean, category?: string}> }} */
+/** @type {{ badges: Array<{type: string, emoji: string, unlocked: boolean, category?: string, progress?: {current: number, target: number}, unlocked_at?: string|null, next_tier?: {type: string, target: number}|null}> }} */
 let { badges = [] } = $props();
 
 const { t } = getTranslate();
 
 const unlockedCount = $derived(badges.filter((b) => b.unlocked).length);
 const totalCount = $derived(badges.length);
+
+let selectedBadge = $state(null);
 
 /** @type {Array<{key: string, titleKey: string}>} */
 const CATEGORY_ORDER = [
@@ -79,6 +82,11 @@ const BADGE_INFO = [
 				type: "hattrick_held",
 				conditionKey: "profile.badges.condition_hattrick_held",
 			},
+			{
+				emoji: "\u{1F4A5}",
+				type: "tormaschine",
+				conditionKey: "profile.badges.condition_tormaschine",
+			},
 		],
 	},
 	{
@@ -129,6 +137,16 @@ const BADGE_INFO = [
 				type: "david_vs_goliath",
 				conditionKey: "profile.badges.condition_david_vs_goliath",
 			},
+			{
+				emoji: "\u{1F504}",
+				type: "comeback_king",
+				conditionKey: "profile.badges.condition_comeback_king",
+			},
+			{
+				emoji: "\u{1F305}",
+				type: "fruehstarter",
+				conditionKey: "profile.badges.condition_fruehstarter",
+			},
 		],
 	},
 	{
@@ -159,9 +177,42 @@ const BADGE_INFO = [
 				type: "seriensieger",
 				conditionKey: "profile.badges.condition_seriensieger",
 			},
+			{
+				emoji: "\u{1F93A}",
+				type: "solo_warrior",
+				conditionKey: "profile.badges.condition_solo_warrior",
+			},
+			{
+				emoji: "\u{1F91D}",
+				type: "team_player",
+				conditionKey: "profile.badges.condition_team_player",
+			},
+			{
+				emoji: "\u{1F9BE}",
+				type: "unbesiegbar",
+				conditionKey: "profile.badges.condition_unbesiegbar",
+			},
+			{
+				emoji: "\u{1F3C3}",
+				type: "marathon_spieler",
+				conditionKey: "profile.badges.condition_marathon_spieler",
+			},
 		],
 	},
 ];
+
+/**
+ * Whether a badge should show a mini progress bar
+ * @param {{unlocked: boolean, progress?: {current: number, target: number}}} badge
+ */
+function showMiniProgress(badge) {
+	return (
+		!badge.unlocked &&
+		badge.progress &&
+		badge.progress.target > 1 &&
+		badge.progress.current > 0
+	);
+}
 </script>
 
 {#if badges.length > 0}
@@ -201,17 +252,27 @@ const BADGE_INFO = [
 
 					<div class="grid grid-cols-5 gap-2">
 						{#each category.badges as badge (badge.type)}
-							<div
+							<button
+								type="button"
+								onclick={() => (selectedBadge = badge)}
 								class="flex flex-col items-center gap-1 p-1.5 rounded-lg transition-all {badge.unlocked
-									? 'bg-bg-primary/50'
-									: 'bg-bg-primary/20 opacity-35 grayscale'}"
+									? 'bg-bg-primary/50 hover:bg-bg-primary/80'
+									: 'bg-bg-primary/20 opacity-35 grayscale hover:opacity-50'}"
 								title={$t(`profile.badges.${badge.type}`)}
 							>
 								<span class="text-xl">{badge.emoji}</span>
 								<span class="text-[8px] text-text-secondary text-center leading-tight line-clamp-2">
 									{$t(`profile.badges.${badge.type}`)}
 								</span>
-							</div>
+								{#if showMiniProgress(badge)}
+									<div class="w-full h-1 bg-bg-secondary rounded-full overflow-hidden">
+										<div
+											class="h-full bg-accent-red rounded-full"
+											style="width: {Math.min(100, Math.round((badge.progress.current / badge.progress.target) * 100))}%"
+										></div>
+									</div>
+								{/if}
+							</button>
 						{/each}
 					</div>
 				</div>
@@ -220,12 +281,21 @@ const BADGE_INFO = [
 	</div>
 {/if}
 
+<!-- Badge Detail Modal -->
+{#if selectedBadge}
+	<BadgeDetailModal badge={selectedBadge} onClose={() => (selectedBadge = null)} />
+{/if}
+
 <!-- Badge Info Dialog -->
 {#if showInfo}
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
 		role="dialog"
+		tabindex="-1"
 		aria-label={$t("profile.badges.info_title")}
+		onmousedown={(e) => { if (e.target === e.currentTarget) showInfo = false; }}
+		onkeydown={(e) => e.key === "Escape" && (showInfo = false)}
 	>
 		<div class="bg-bg-secondary border border-border rounded-xl w-full max-w-sm max-h-[80vh] flex flex-col">
 			<!-- Header -->

@@ -13,6 +13,7 @@ import { getCountryFlag } from "$lib/constants/teams.constants.js";
 import { get } from "$lib/services/api.services.js";
 import { getTeamByName } from "$lib/services/teams.services.js";
 import { user } from "$lib/stores/auth.stores.js";
+import { buildRematchUrl } from "$lib/utils/rematch.utils.js";
 
 const { t } = getTranslate();
 
@@ -99,6 +100,20 @@ function getSideTeamName(players) {
 
 const homeTeamName = $derived(getSideTeamName(homePlayers));
 const awayTeamName = $derived(getSideTeamName(awayPlayers));
+
+const homePlayerIds = $derived(homePlayers.map((p) => p.player_id));
+const awayPlayerIds = $derived(awayPlayers.map((p) => p.player_id));
+
+const rematchUrl = $derived(
+	game
+		? buildRematchUrl({ homePlayers: homePlayerIds, awayPlayers: awayPlayerIds, homeTeam: homeTeamName || "", awayTeam: awayTeamName || "" })
+		: "#",
+);
+const rematchSwapUrl = $derived(
+	game
+		? buildRematchUrl({ homePlayers: homePlayerIds, awayPlayers: awayPlayerIds, homeTeam: homeTeamName || "", awayTeam: awayTeamName || "", swap: true })
+		: "#",
+);
 
 /** @type {import('$lib/services/teams.services.js').TeamData|null} */
 let homeTeamData = $state(null);
@@ -248,6 +263,29 @@ function getScorerProfile(playerId) {
 
 			<!-- Date -->
 			<p class="text-xs text-text-secondary mt-4">{formattedDate}</p>
+		</div>
+
+		<!-- Rematch Actions -->
+		<div class="flex gap-2">
+			<a
+				href={rematchUrl}
+				class="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-accent-red text-white font-semibold text-sm hover:bg-accent-red/90 active:scale-[0.98] transition-all"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+				</svg>
+				{$t("rematch.button")}
+			</a>
+			<a
+				href={rematchSwapUrl}
+				class="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm hover:bg-bg-input active:scale-[0.98] transition-all"
+				aria-label={$t("rematch.swap_button")}
+				title={$t("rematch.swap_button")}
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+				</svg>
+			</a>
 		</div>
 
 		<!-- Score Timeline (vertical, bottom to top) -->

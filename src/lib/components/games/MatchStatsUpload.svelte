@@ -3,6 +3,7 @@ import { getTranslate } from "@tolgee/svelte";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "$lib/config/firebase.config.js";
 import { post } from "$lib/services/api.services.js";
+import { resizeImage } from "$lib/utils/image.utils.js";
 
 /**
  * MatchStatsUpload - Upload an FC26 stats screenshot for AI extraction
@@ -32,7 +33,7 @@ function handleFileChange(e) {
 		error = $t("match_stats.error_file_type");
 		return;
 	}
-	if (file.size > 5 * 1024 * 1024) {
+	if (file.size > 20 * 1024 * 1024) {
 		error = $t("match_stats.error_file_size");
 		return;
 	}
@@ -49,11 +50,11 @@ async function handleUpload() {
 	error = "";
 
 	try {
-		// 1. Upload to Cloud Storage
-		const ext = selectedFile.name.split(".").pop();
-		const storageRef = ref(storage, `match-stats/${gameId}/${type}.${ext}`);
+		// 1. Resize and upload to Cloud Storage
+		const resized = await resizeImage(selectedFile);
+		const storageRef = ref(storage, `match-stats/${gameId}/${type}.jpg`);
 
-		await uploadBytes(storageRef, selectedFile);
+		await uploadBytes(storageRef, resized);
 		const imageUrl = await getDownloadURL(storageRef);
 
 		// 2. Call backend to extract stats via Claude Vision

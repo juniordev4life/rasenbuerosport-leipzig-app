@@ -8,4 +8,7 @@ export const ROUTES = {
 	GAME_DETAIL: "/app/games",
 	TEAMS: "/app/teams",
 	PROFILE: "/app/profile",
+	SEASONS: "/app/seasons",
+	COMPARE: "/app/compare",
+	STATS: "/app/stats",
 };

@@ -14,7 +14,7 @@ let { formCurve = [] } = $props();
 const { t } = getTranslate();
 
 let canvas = $state(null);
-let chartInstance = $state(null);
+let chartInstance = null;
 
 /** Reversed so oldest game is first (left-to-right chronological) */
 const sortedCurve = $derived([...formCurve].reverse());

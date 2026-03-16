@@ -28,6 +28,11 @@ const navItems = [
 		icon: "teams",
 	},
 	{
+		href: ROUTES.STATS,
+		labelKey: "nav.stats",
+		icon: "stats",
+	},
+	{
 		href: ROUTES.NEW_GAME,
 		labelKey: "nav.new_game",
 		icon: "new_game",
@@ -83,6 +88,10 @@ const isActive = (href) => page.url.pathname === href;
 					{:else if item.icon === "teams"}
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+						</svg>
+					{:else if item.icon === "stats"}
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
 						</svg>
 					{/if}
 					{$t(item.labelKey)}

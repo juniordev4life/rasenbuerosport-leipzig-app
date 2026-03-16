@@ -8,6 +8,7 @@ import { page } from "$app/state";
 import { auth } from "$lib/config/firebase.config.js";
 import { tolgee } from "$lib/config/i18n.config.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
+import { get as apiGet } from "$lib/services/api.services.js";
 import { isLoading, user } from "$lib/stores/auth.stores.js";
 import { theme } from "$lib/stores/theme.stores.js";
 
@@ -74,13 +75,40 @@ $effect(() => {
 $effect(() => {
 	if (!browser) return;
 
-	const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-		user.set(firebaseUser);
-		isLoading.set(false);
-
-		if (!firebaseUser && page.url.pathname.startsWith("/app")) {
-			goto(ROUTES.LOGIN);
+	const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+		if (!firebaseUser) {
+			user.set(null);
+			isLoading.set(false);
+			if (page.url.pathname.startsWith("/app")) {
+				goto(ROUTES.LOGIN);
+			}
+			return;
 		}
+
+		// Merge Firebase user with backend profile data
+		try {
+			const res = await apiGet("/v1/auth/me");
+			const profile = res.data;
+			user.set({
+				...firebaseUser,
+				email: firebaseUser.email,
+				user_metadata: {
+					username: profile.username || firebaseUser.displayName,
+					avatar_url: profile.avatar_url || firebaseUser.photoURL,
+				},
+			});
+		} catch {
+			// Fallback to Firebase-only data if backend unavailable
+			user.set({
+				...firebaseUser,
+				email: firebaseUser.email,
+				user_metadata: {
+					username: firebaseUser.displayName,
+					avatar_url: firebaseUser.photoURL,
+				},
+			});
+		}
+		isLoading.set(false);
 	});
 
 	return () => unsubscribe();

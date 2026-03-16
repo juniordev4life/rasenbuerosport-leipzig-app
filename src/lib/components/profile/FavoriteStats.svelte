@@ -4,6 +4,7 @@ import { getTranslate } from "@tolgee/svelte";
 let {
 	favoriteOpponent = null,
 	bestTeammate = null,
+	topTeammates = [],
 	favoriteTeam = null,
 } = $props();
 
@@ -37,12 +38,49 @@ const { t } = getTranslate();
 		{/if}
 	</div>
 
-	<!-- Best Teammate -->
+	<!-- Best Teammates (Top 3) -->
 	<div class="bg-bg-secondary border border-border rounded-lg p-4">
 		<h3 class="text-sm font-medium text-text-secondary mb-3">
-			{$t("profile.best_teammate")}
+			{topTeammates.length > 1 ? $t("profile.best_teammates") : $t("profile.best_teammate")}
 		</h3>
-		{#if bestTeammate}
+		{#if topTeammates.length > 0}
+			<div class="flex flex-col gap-2.5">
+				{#each topTeammates as teammate, i (teammate.player_id)}
+					<div class="flex items-center gap-3">
+						<div class="w-5 text-center shrink-0">
+							{#if i === 0}
+								<span class="text-sm">{"\u{1F947}"}</span>
+							{:else if i === 1}
+								<span class="text-sm">{"\u{1F948}"}</span>
+							{:else}
+								<span class="text-sm">{"\u{1F949}"}</span>
+							{/if}
+						</div>
+						{#if teammate.avatar_url}
+							<img
+								src={teammate.avatar_url}
+								alt={teammate.username}
+								class="w-8 h-8 rounded-full object-cover ring-1 ring-border shrink-0"
+							/>
+						{:else}
+							<div
+								class="w-8 h-8 rounded-full bg-bg-input flex items-center justify-center text-xs font-bold text-text-primary shrink-0"
+							>
+								{teammate.username?.charAt(0)?.toUpperCase() || "?"}
+							</div>
+						{/if}
+						<div class="flex-1 min-w-0">
+							<p class="text-sm font-medium text-text-primary truncate">
+								{teammate.username}
+							</p>
+							<p class="text-[10px] text-text-secondary">
+								{$t("profile.games_played", { count: teammate.games })} · {teammate.win_rate}% {$t("profile.win_rate")}
+							</p>
+						</div>
+					</div>
+				{/each}
+			</div>
+		{:else if bestTeammate}
 			<div class="flex items-center gap-3">
 				<div
 					class="w-10 h-10 rounded-full bg-bg-input flex items-center justify-center text-sm font-bold text-text-primary"

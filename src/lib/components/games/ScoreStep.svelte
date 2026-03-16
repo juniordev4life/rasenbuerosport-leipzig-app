@@ -246,7 +246,7 @@ function handleStatsImageChange(type, e) {
 	const file = e.target.files?.[0];
 	if (!file) return;
 	if (!file.type.startsWith("image/")) return;
-	if (file.size > 5 * 1024 * 1024) return;
+	if (file.size > 20 * 1024 * 1024) return;
 
 	const url = URL.createObjectURL(file);
 	if (type === "overview") {

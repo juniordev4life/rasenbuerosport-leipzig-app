@@ -84,8 +84,15 @@ async function handleSave() {
 			avatar_url: avatarUrl,
 		});
 
-		// Refresh local user store with updated Firebase user
-		user.set(auth.currentUser);
+		// Refresh local user store with updated profile data
+		user.update((current) => ({
+			...current,
+			user_metadata: {
+				...current?.user_metadata,
+				username: username.trim(),
+				avatar_url: avatarUrl,
+			},
+		}));
 
 		onSaved?.();
 	} catch (err) {

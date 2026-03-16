@@ -43,6 +43,31 @@ const opponentPct = $derived(
 		: 0,
 );
 const drawPct = $derived(100 - userPct - opponentPct);
+
+/** Streak display text */
+const streakText = $derived.by(() => {
+	if (!data?.streak) return null;
+	const { type, count } = data.streak;
+	if (count === 1) {
+		if (type === "win") return $t("h2h.streak_win_single");
+		if (type === "loss") return $t("h2h.streak_loss_single");
+		return $t("h2h.streak_draw");
+	}
+	if (type === "win") return $t("h2h.streak_win", { count });
+	if (type === "loss") return $t("h2h.streak_loss", { count });
+	return $t("h2h.streak_draw");
+});
+
+const streakEmoji = $derived(
+	data?.streak?.type === "win" ? "\u{1F525}" : data?.streak?.type === "loss" ? "\u{1F976}" : "\u{1F91D}",
+);
+
+/** Modes that have games */
+const activeModes = $derived(
+	data?.mode_bilanz
+		? Object.entries(data.mode_bilanz).filter(([, stats]) => stats.games > 0)
+		: [],
+);
 </script>
 
 <!-- Backdrop -->
@@ -93,6 +118,14 @@ const drawPct = $derived(100 - userPct - opponentPct);
 				</div>
 			{/if}
 
+			<!-- Streak -->
+			{#if streakText}
+				<p class="text-xs text-center text-text-secondary mb-4">
+					<span>{streakEmoji}</span>
+					<span class="font-medium">{streakText}</span>
+				</p>
+			{/if}
+
 			<!-- Stats Grid -->
 			<div class="grid grid-cols-4 gap-2 mb-5">
 				<div class="bg-bg-secondary border border-border rounded-lg p-3 text-center">
@@ -112,6 +145,66 @@ const drawPct = $derived(100 - userPct - opponentPct);
 					<p class="text-[10px] text-text-secondary mt-0.5">{$t("h2h.their_wins")}</p>
 				</div>
 			</div>
+
+			<!-- Trend Dots -->
+			{#if data.trend?.length > 0}
+				<div class="mb-5">
+					<h3 class="text-xs font-medium text-text-secondary mb-2">{$t("h2h.trend_title")}</h3>
+					<div class="flex gap-1.5 flex-wrap">
+						{#each data.trend as entry, i (i)}
+							<span
+								class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white
+									{entry.result === 'W' ? 'bg-success' : entry.result === 'D' ? 'bg-warning' : 'bg-error'}"
+								title={new Date(entry.played_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
+							>
+								{entry.result === "W" ? $t("h2h.your_wins") : entry.result === "D" ? $t("h2h.draws") : $t("h2h.their_wins")}
+							</span>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			<!-- Mode Breakdown -->
+			{#if activeModes.length > 1}
+				<div class="mb-5">
+					<h3 class="text-xs font-medium text-text-secondary mb-2">{$t("h2h.mode_title")}</h3>
+					<div class="flex flex-col gap-1.5">
+						{#each activeModes as [mode, stats] (mode)}
+							<div class="flex items-center justify-between bg-bg-secondary border border-border rounded-lg px-3 py-2">
+								<span class="text-xs font-bold text-text-primary">{$t(`h2h.mode_${mode}`)}</span>
+								<div class="flex items-center gap-2">
+									<span class="text-xs text-text-secondary">
+										{$t("h2h.mode_record", { w: stats.wins, d: stats.draws, l: stats.losses })}
+									</span>
+									<span class="text-xs font-medium text-text-primary">{stats.games} {$t("h2h.total_games")}</span>
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			<!-- Goal Stats -->
+			{#if data.goal_stats}
+				<div class="mb-5">
+					<h3 class="text-xs font-medium text-text-secondary mb-2">
+						{$t("h2h.goals_title")}
+						<span class="text-[10px] font-normal">({$t("h2h.goals_games", { count: data.goal_stats.games_with_data })})</span>
+					</h3>
+					<div class="grid grid-cols-2 gap-2">
+						<div class="bg-bg-secondary border border-border rounded-lg p-3 text-center">
+							<span class="text-xl font-bold text-success">{data.goal_stats.user_goals}</span>
+							<p class="text-[10px] text-text-secondary mt-0.5">{$t("h2h.goals_total")}</p>
+							<p class="text-[10px] text-text-secondary">{$t("h2h.goals_avg")}: {data.goal_stats.user_avg}</p>
+						</div>
+						<div class="bg-bg-secondary border border-border rounded-lg p-3 text-center">
+							<span class="text-xl font-bold text-error">{data.goal_stats.opponent_goals}</span>
+							<p class="text-[10px] text-text-secondary mt-0.5">{$t("h2h.goals_total")}</p>
+							<p class="text-[10px] text-text-secondary">{$t("h2h.goals_avg")}: {data.goal_stats.opponent_avg}</p>
+						</div>
+					</div>
+				</div>
+			{/if}
 
 			<!-- Recent Games -->
 			{#if data.recent_games?.length > 0}
