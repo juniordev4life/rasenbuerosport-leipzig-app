@@ -168,7 +168,12 @@
 		"not_found": "Game not found",
 		"timeline_title": "Score progression",
 		"extra_time_short": "AET",
-		"penalty_short": "Pen."
+		"penalty_short": "Pen.",
+		"delete": "Delete game",
+		"delete_confirm_title": "Delete game?",
+		"delete_confirm_message": "This will permanently delete this game and recalculate all Elo ratings. This action cannot be undone.",
+		"delete_cancel": "Cancel",
+		"delete_confirm": "Delete"
 	},
 	"profile": {
 		"title": "Profile",

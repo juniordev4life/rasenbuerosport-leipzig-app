@@ -71,3 +71,12 @@ export function patch(endpoint, body) {
 		body: JSON.stringify(body),
 	});
 }
+
+/**
+ * DELETE request helper
+ * @param {string} endpoint
+ * @returns {Promise<object>}
+ */
+export function del(endpoint) {
+	return apiRequest(endpoint, { method: "DELETE" });
+}

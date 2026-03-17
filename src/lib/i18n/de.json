@@ -170,7 +170,12 @@
 		"not_found": "Spiel nicht gefunden",
 		"timeline_title": "Spielverlauf",
 		"extra_time_short": "n.V.",
-		"penalty_short": "n.E."
+		"penalty_short": "n.E.",
+		"delete": "Spiel löschen",
+		"delete_confirm_title": "Spiel löschen?",
+		"delete_confirm_message": "Das Spiel wird unwiderruflich gelöscht und alle Elo-Ratings werden neu berechnet.",
+		"delete_cancel": "Abbrechen",
+		"delete_confirm": "Löschen"
 	},
 	"profile": {
 		"title": "Profil",

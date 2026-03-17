@@ -92,6 +92,7 @@ $effect(() => {
 			user.set({
 				...firebaseUser,
 				email: firebaseUser.email,
+				role: profile.role || "user",
 				user_metadata: {
 					username: profile.username || firebaseUser.displayName,
 					avatar_url: profile.avatar_url || firebaseUser.photoURL,

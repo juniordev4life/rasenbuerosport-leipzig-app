@@ -10,10 +10,11 @@ import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
 import StarRating from "$lib/components/ui/StarRating.svelte";
 import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
 import { getCountryFlag } from "$lib/constants/teams.constants.js";
-import { get } from "$lib/services/api.services.js";
+import { get, del } from "$lib/services/api.services.js";
 import { getTeamByName } from "$lib/services/teams.services.js";
 import { user } from "$lib/stores/auth.stores.js";
 import { buildRematchUrl } from "$lib/utils/rematch.utils.js";
+import { ROUTES } from "$lib/constants/routes.constants.js";
 
 const { t } = getTranslate();
 
@@ -22,8 +23,11 @@ let eloChanges = $state([]);
 let loading = $state(true);
 let error = $state(false);
 let showEloInfo = $state(false);
+let showDeleteConfirm = $state(false);
+let deleting = $state(false);
 
 const gameId = $derived(page.params.id);
+const isAdmin = $derived($user?.role === "admin");
 
 $effect(() => {
 	if (gameId) loadGame();
@@ -46,6 +50,18 @@ async function loadGame() {
 		error = true;
 	} finally {
 		loading = false;
+	}
+}
+
+async function handleDeleteGame() {
+	deleting = true;
+	try {
+		await del(`/v1/games/${gameId}`);
+		goto(ROUTES.GAMES);
+	} catch (err) {
+		console.error("Failed to delete game:", err);
+		deleting = false;
+		showDeleteConfirm = false;
 	}
 }
 
@@ -298,6 +314,20 @@ function getScorerProfile(playerId) {
 				</svg>
 			</a>
 		</div>
+
+		<!-- Admin: Delete Game -->
+		{#if isAdmin}
+			<button
+				type="button"
+				onclick={() => (showDeleteConfirm = true)}
+				class="flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-error/30 text-error text-sm hover:bg-error/10 active:scale-[0.98] transition-all"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+				</svg>
+				{$t("game_detail.delete")}
+			</button>
+		{/if}
 
 		<!-- Score Timeline (vertical, bottom to top) -->
 		{#if timelineEntries.length > 0}
@@ -566,4 +596,42 @@ function getScorerProfile(playerId) {
 
 {#if showEloInfo}
 	<EloInfoModal onClose={() => (showEloInfo = false)} />
+{/if}
+
+{#if showDeleteConfirm}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+		onclick={() => (showDeleteConfirm = false)}
+	>
+		<div
+			class="bg-bg-secondary border border-border rounded-xl p-6 w-full max-w-sm"
+			onclick={(e) => e.stopPropagation()}
+		>
+			<h3 class="text-lg font-bold text-text-primary mb-2">
+				{$t("game_detail.delete_confirm_title")}
+			</h3>
+			<p class="text-sm text-text-secondary mb-6">
+				{$t("game_detail.delete_confirm_message")}
+			</p>
+			<div class="flex gap-3">
+				<button
+					type="button"
+					onclick={() => (showDeleteConfirm = false)}
+					class="flex-1 py-2 px-4 rounded-lg bg-bg-input border border-border text-text-primary text-sm font-medium hover:bg-bg-secondary transition-colors"
+				>
+					{$t("game_detail.delete_cancel")}
+				</button>
+				<button
+					type="button"
+					onclick={handleDeleteGame}
+					disabled={deleting}
+					class="flex-1 py-2 px-4 rounded-lg bg-error text-white text-sm font-medium hover:bg-error/90 disabled:opacity-50 transition-colors"
+				>
+					{deleting ? $t("common.loading") : $t("game_detail.delete_confirm")}
+				</button>
+			</div>
+		</div>
+	</div>
 {/if}
