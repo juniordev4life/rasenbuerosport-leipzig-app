@@ -15,44 +15,69 @@ let { onClose, onConfirm } = $props();
 
 const { t } = getTranslate();
 
-const STAR_OPTIONS = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
-
 let minStars = $state(3);
 let maxStars = $state(5);
 let homeResult = $state(null);
 let awayResult = $state(null);
 let error = $state("");
-let searched = $state(false);
+
+/**
+ * Gets filtered teams within the current star range
+ * @returns {Promise<import("$lib/services/teams.services.js").TeamData[]>}
+ */
+async function getFilteredTeams() {
+	const teams = await getAllTeams();
+	return teams.filter(
+		(t) =>
+			t.star_rating !== null &&
+			t.star_rating >= minStars &&
+			t.star_rating <= maxStars,
+	);
+}
 
 /**
  * Picks two distinct random teams within the star rating range
  */
 async function searchRandomTeams() {
 	error = "";
-	const teams = await getAllTeams();
-	const filtered = teams.filter(
-		(t) =>
-			t.star_rating !== null &&
-			t.star_rating >= minStars &&
-			t.star_rating <= maxStars,
-	);
+	const filtered = await getFilteredTeams();
 
 	if (filtered.length < 2) {
 		error = $t("new_game.random_no_teams");
 		homeResult = null;
 		awayResult = null;
-		searched = true;
 		return;
 	}
 
-	// Pick two distinct random teams
 	const idx1 = Math.floor(Math.random() * filtered.length);
 	let idx2 = Math.floor(Math.random() * (filtered.length - 1));
 	if (idx2 >= idx1) idx2++;
 
 	homeResult = filtered[idx1];
 	awayResult = filtered[idx2];
-	searched = true;
+}
+
+/**
+ * Re-rolls a single team (home or away) while keeping the other
+ * @param {"home"|"away"} side
+ */
+async function rerollSingle(side) {
+	error = "";
+	const filtered = await getFilteredTeams();
+	const other = side === "home" ? awayResult : homeResult;
+	const candidates = filtered.filter((t) => t.name !== other?.name);
+
+	if (candidates.length < 1) {
+		error = $t("new_game.random_no_teams");
+		return;
+	}
+
+	const pick = candidates[Math.floor(Math.random() * candidates.length)];
+	if (side === "home") {
+		homeResult = pick;
+	} else {
+		awayResult = pick;
+	}
 }
 
 function handleConfirm() {
@@ -61,12 +86,6 @@ function handleConfirm() {
 	}
 }
 
-/**
- * Renders an interactive star selector row for picking a star rating in 0.5 steps.
- * Each star has a left half (adds 0.5) and right half (adds 1.0).
- * @param {number} value - Current star value
- * @param {(v: number) => void} onChange - Change handler
- */
 function getStarValue(starIndex, isLeft) {
 	return isLeft ? starIndex + 0.5 : starIndex + 1;
 }
@@ -95,21 +114,18 @@ function getStarValue(starIndex, isLeft) {
 					<div class="flex items-center gap-0.5">
 						{#each Array.from({ length: 5 }, (_, i) => i) as starIdx (starIdx)}
 							<div class="relative" style="width: 24px; height: 24px;">
-								<!-- Left half (0.5) -->
 								<button
 									type="button"
 									class="absolute inset-y-0 left-0 w-1/2 z-10 cursor-pointer"
 									onclick={() => { minStars = getStarValue(starIdx, true); }}
 									aria-label="{starIdx + 0.5} stars"
 								></button>
-								<!-- Right half (1.0) -->
 								<button
 									type="button"
 									class="absolute inset-y-0 right-0 w-1/2 z-10 cursor-pointer"
 									onclick={() => { minStars = getStarValue(starIdx, false); }}
 									aria-label="{starIdx + 1} stars"
 								></button>
-								<!-- Visual star -->
 								{#if minStars >= starIdx + 1}
 									<svg class="w-6 h-6 text-warning" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
 										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
@@ -145,21 +161,18 @@ function getStarValue(starIndex, isLeft) {
 					<div class="flex items-center gap-0.5">
 						{#each Array.from({ length: 5 }, (_, i) => i) as starIdx (starIdx)}
 							<div class="relative" style="width: 24px; height: 24px;">
-								<!-- Left half (0.5) -->
 								<button
 									type="button"
 									class="absolute inset-y-0 left-0 w-1/2 z-10 cursor-pointer"
 									onclick={() => { maxStars = getStarValue(starIdx, true); }}
 									aria-label="{starIdx + 0.5} stars"
 								></button>
-								<!-- Right half (1.0) -->
 								<button
 									type="button"
 									class="absolute inset-y-0 right-0 w-1/2 z-10 cursor-pointer"
 									onclick={() => { maxStars = getStarValue(starIdx, false); }}
 									aria-label="{starIdx + 1} stars"
 								></button>
-								<!-- Visual star -->
 								{#if maxStars >= starIdx + 1}
 									<svg class="w-6 h-6 text-warning" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
 										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
@@ -203,7 +216,20 @@ function getStarValue(starIndex, isLeft) {
 				<div class="flex items-center gap-3 bg-bg-secondary border border-border rounded-xl p-3">
 					<TeamLogo logoUrl={homeResult.logo_url} teamName={homeResult.name} size="md" />
 					<div class="flex-1 min-w-0">
-						<p class="text-sm font-bold text-text-primary truncate">{homeResult.name}</p>
+						<div class="flex items-center gap-1.5">
+							<p class="text-sm font-bold text-text-primary truncate">{homeResult.name}</p>
+							<button
+								type="button"
+								onclick={() => rerollSingle("home")}
+								class="shrink-0 text-text-secondary hover:text-accent-red transition-colors"
+								aria-label="Reroll home team"
+							>
+								<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+									<path d="M21 3v5h-5" />
+								</svg>
+							</button>
+						</div>
 						<div class="flex items-center gap-2 mt-0.5">
 							<OvrBadge rating={homeResult.overall_rating} size="xs" />
 							<StarRating rating={homeResult.star_rating} size="xs" />
@@ -218,7 +244,20 @@ function getStarValue(starIndex, isLeft) {
 				<div class="flex items-center gap-3 bg-bg-secondary border border-border rounded-xl p-3">
 					<TeamLogo logoUrl={awayResult.logo_url} teamName={awayResult.name} size="md" />
 					<div class="flex-1 min-w-0">
-						<p class="text-sm font-bold text-text-primary truncate">{awayResult.name}</p>
+						<div class="flex items-center gap-1.5">
+							<p class="text-sm font-bold text-text-primary truncate">{awayResult.name}</p>
+							<button
+								type="button"
+								onclick={() => rerollSingle("away")}
+								class="shrink-0 text-text-secondary hover:text-accent-red transition-colors"
+								aria-label="Reroll away team"
+							>
+								<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+									<path d="M21 3v5h-5" />
+								</svg>
+							</button>
+						</div>
 						<div class="flex items-center gap-2 mt-0.5">
 							<OvrBadge rating={awayResult.overall_rating} size="xs" />
 							<StarRating rating={awayResult.star_rating} size="xs" />
