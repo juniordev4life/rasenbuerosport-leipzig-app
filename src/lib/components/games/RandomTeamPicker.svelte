@@ -93,11 +93,11 @@ function getStarValue(starIndex, isLeft) {
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center"
+	class="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center"
 	onmousedown={(e) => { if (e.target === e.currentTarget) onClose(); }}
 	onkeydown={(e) => e.key === "Escape" && onClose()}
 >
-	<div class="bg-bg-primary border-t border-border rounded-t-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto p-5">
+	<div class="bg-bg-primary border-t border-border rounded-t-2xl sm:rounded-2xl sm:border w-full max-w-lg max-h-[85vh] overflow-y-auto p-5 sm:mx-4">
 		<!-- Title -->
 		<h2 class="text-lg font-bold text-text-primary text-center mb-5">
 			{$t("new_game.random_teams_title")}
@@ -216,25 +216,23 @@ function getStarValue(starIndex, isLeft) {
 				<div class="flex items-center gap-3 bg-bg-secondary border border-border rounded-xl p-3">
 					<TeamLogo logoUrl={homeResult.logo_url} teamName={homeResult.name} size="md" />
 					<div class="flex-1 min-w-0">
-						<div class="flex items-center gap-1.5">
-							<p class="text-sm font-bold text-text-primary truncate">{homeResult.name}</p>
-							<button
-								type="button"
-								onclick={() => rerollSingle("home")}
-								class="shrink-0 text-text-secondary hover:text-accent-red transition-colors"
-								aria-label="Reroll home team"
-							>
-								<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-									<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
-									<path d="M21 3v5h-5" />
-								</svg>
-							</button>
-						</div>
+						<p class="text-sm font-bold text-text-primary truncate">{homeResult.name}</p>
 						<div class="flex items-center gap-2 mt-0.5">
 							<OvrBadge rating={homeResult.overall_rating} size="xs" />
 							<StarRating rating={homeResult.star_rating} size="xs" />
 						</div>
 					</div>
+					<button
+						type="button"
+						onclick={() => rerollSingle("home")}
+						class="shrink-0 text-text-secondary hover:text-accent-red transition-colors p-1.5"
+						aria-label="Reroll home team"
+					>
+						<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+							<path d="M21 3v5h-5" />
+						</svg>
+					</button>
 				</div>
 
 				<!-- VS -->
@@ -244,25 +242,23 @@ function getStarValue(starIndex, isLeft) {
 				<div class="flex items-center gap-3 bg-bg-secondary border border-border rounded-xl p-3">
 					<TeamLogo logoUrl={awayResult.logo_url} teamName={awayResult.name} size="md" />
 					<div class="flex-1 min-w-0">
-						<div class="flex items-center gap-1.5">
-							<p class="text-sm font-bold text-text-primary truncate">{awayResult.name}</p>
-							<button
-								type="button"
-								onclick={() => rerollSingle("away")}
-								class="shrink-0 text-text-secondary hover:text-accent-red transition-colors"
-								aria-label="Reroll away team"
-							>
-								<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-									<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
-									<path d="M21 3v5h-5" />
-								</svg>
-							</button>
-						</div>
+						<p class="text-sm font-bold text-text-primary truncate">{awayResult.name}</p>
 						<div class="flex items-center gap-2 mt-0.5">
 							<OvrBadge rating={awayResult.overall_rating} size="xs" />
 							<StarRating rating={awayResult.star_rating} size="xs" />
 						</div>
 					</div>
+					<button
+						type="button"
+						onclick={() => rerollSingle("away")}
+						class="shrink-0 text-text-secondary hover:text-accent-red transition-colors p-1.5"
+						aria-label="Reroll away team"
+					>
+						<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+							<path d="M21 3v5h-5" />
+						</svg>
+					</button>
 				</div>
 			</div>
 
