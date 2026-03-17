@@ -1,6 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import Button from "$lib/components/ui/Button.svelte";
+import RandomTeamPicker from "./RandomTeamPicker.svelte";
 import TeamAutocomplete from "./TeamAutocomplete.svelte";
 
 /**
@@ -40,6 +41,15 @@ function getPlayerAvatar(playerId) {
 	return allPlayers.find((p) => p.id === playerId)?.avatar_url || null;
 }
 
+let showRandomPicker = $state(false);
+
+/** Handle random team picker confirmation */
+function handleRandomConfirm(home, away) {
+	homeTeam = home;
+	awayTeam = away;
+	showRandomPicker = false;
+}
+
 /** Auto-derived game mode label */
 const modeLabel = $derived(`${homePlayers.length}v${awayPlayers.length}`);
 
@@ -55,6 +65,24 @@ const canProceed = $derived(
 		<span class="bg-accent-red/20 text-accent-red text-xs font-bold px-3 py-1 rounded-full">
 			{modeLabel}
 		</span>
+	</div>
+
+	<!-- Random Teams Button -->
+	<div class="flex justify-center">
+		<button
+			type="button"
+			onclick={() => { showRandomPicker = true; }}
+			class="flex items-center gap-1.5 text-xs font-medium text-accent-red hover:text-accent-red-hover transition-colors"
+		>
+			<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22" />
+				<path d="m18 2 4 4-4 4" />
+				<path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2" />
+				<path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8" />
+				<path d="m18 14 4 4-4 4" />
+			</svg>
+			{$t("new_game.random_teams")}
+		</button>
 	</div>
 
 	<!-- Teams Section -->
@@ -134,3 +162,10 @@ const canProceed = $derived(
 		</Button>
 	</div>
 </div>
+
+{#if showRandomPicker}
+	<RandomTeamPicker
+		onClose={() => { showRandomPicker = false; }}
+		onConfirm={handleRandomConfirm}
+	/>
+{/if}

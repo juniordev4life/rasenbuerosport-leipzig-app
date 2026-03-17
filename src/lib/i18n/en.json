@@ -318,7 +318,17 @@
 		"add_guest": "Add guest",
 		"all_players": "Players",
 		"tap_to_assign": "Tap a player to assign",
-		"who_scored": "Who scored?"
+		"who_scored": "Who scored?",
+		"random_teams": "Random Teams",
+		"random_teams_title": "Pick Random Teams",
+		"random_min_stars": "Min. Stars",
+		"random_max_stars": "Max. Stars",
+		"random_search": "Search",
+		"random_reroll": "Reroll",
+		"random_confirm": "Confirm",
+		"random_cancel": "Cancel",
+		"random_no_teams": "Not enough teams in this star range",
+		"random_vs": "vs."
 	},
 	"match_report": {
 		"title": "AI Match Report",

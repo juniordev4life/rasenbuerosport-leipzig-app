@@ -1,7 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import { getBaseChartOptions, getChartTheme } from "$lib/utils/chart.utils.js";
 import ChartCanvas from "./ChartCanvas.svelte";
-import { getChartTheme, getBaseChartOptions } from "$lib/utils/chart.utils.js";
 
 /** @type {{ data?: Array<{weekday: number, count: number}> }} */
 let { data = [] } = $props();

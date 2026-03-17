@@ -1,7 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import { getBaseChartOptions, getChartTheme } from "$lib/utils/chart.utils.js";
 import ChartCanvas from "./ChartCanvas.svelte";
-import { getChartTheme, getBaseChartOptions } from "$lib/utils/chart.utils.js";
 
 /** @type {{ data?: {total_xg: number, total_goals: number, games_with_xg: number} }} */
 let { data = null } = $props();

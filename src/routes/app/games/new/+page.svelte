@@ -9,10 +9,10 @@ import ScoreStep from "$lib/components/games/ScoreStep.svelte";
 import StepIndicator from "$lib/components/games/StepIndicator.svelte";
 import TeamSelectionStep from "$lib/components/games/TeamSelectionStep.svelte";
 import { storage } from "$lib/config/firebase.config.js";
-import { resizeImage } from "$lib/utils/image.utils.js";
-import { parseRematchParams } from "$lib/utils/rematch.utils.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get, post } from "$lib/services/api.services.js";
+import { resizeImage } from "$lib/utils/image.utils.js";
+import { parseRematchParams } from "$lib/utils/rematch.utils.js";
 
 const { t } = getTranslate();
 

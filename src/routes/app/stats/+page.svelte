@@ -1,16 +1,16 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import SeasonSelector from "$lib/components/season/SeasonSelector.svelte";
-import EloProgressionChart from "$lib/components/stats/EloProgressionChart.svelte";
-import EloDistributionChart from "$lib/components/stats/EloDistributionChart.svelte";
-import RollingWinRateChart from "$lib/components/stats/RollingWinRateChart.svelte";
-import PlayerRadarChart from "$lib/components/stats/PlayerRadarChart.svelte";
-import XgVsGoalsChart from "$lib/components/stats/XgVsGoalsChart.svelte";
-import GamesPerMonthChart from "$lib/components/stats/GamesPerMonthChart.svelte";
-import WeekdayDistributionChart from "$lib/components/stats/WeekdayDistributionChart.svelte";
 import CommonScoresChart from "$lib/components/stats/CommonScoresChart.svelte";
+import EloDistributionChart from "$lib/components/stats/EloDistributionChart.svelte";
+import EloProgressionChart from "$lib/components/stats/EloProgressionChart.svelte";
+import GamesPerMonthChart from "$lib/components/stats/GamesPerMonthChart.svelte";
 import GoalsDistributionChart from "$lib/components/stats/GoalsDistributionChart.svelte";
+import PlayerRadarChart from "$lib/components/stats/PlayerRadarChart.svelte";
+import RollingWinRateChart from "$lib/components/stats/RollingWinRateChart.svelte";
 import TeamStatsChart from "$lib/components/stats/TeamStatsChart.svelte";
+import WeekdayDistributionChart from "$lib/components/stats/WeekdayDistributionChart.svelte";
+import XgVsGoalsChart from "$lib/components/stats/XgVsGoalsChart.svelte";
 import { get } from "$lib/services/api.services.js";
 import { user } from "$lib/stores/auth.stores.js";
 import { selectedSeason } from "$lib/stores/season.stores.js";

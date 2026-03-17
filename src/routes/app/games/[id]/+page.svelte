@@ -9,12 +9,12 @@ import EloInfoModal from "$lib/components/profile/EloInfoModal.svelte";
 import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
 import StarRating from "$lib/components/ui/StarRating.svelte";
 import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
+import { ROUTES } from "$lib/constants/routes.constants.js";
 import { getCountryFlag } from "$lib/constants/teams.constants.js";
-import { get, del } from "$lib/services/api.services.js";
+import { del, get } from "$lib/services/api.services.js";
 import { getTeamByName } from "$lib/services/teams.services.js";
 import { user } from "$lib/stores/auth.stores.js";
 import { buildRematchUrl } from "$lib/utils/rematch.utils.js";
-import { ROUTES } from "$lib/constants/routes.constants.js";
 
 const { t } = getTranslate();
 
