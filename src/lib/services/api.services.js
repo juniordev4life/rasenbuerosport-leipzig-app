@@ -16,7 +16,7 @@ export async function apiRequest(endpoint, options = {}) {
 	}
 
 	const headers = {
-		"Content-Type": "application/json",
+		...(options.body && { "Content-Type": "application/json" }),
 		...(token && {
 			Authorization: `Bearer ${token}`,
 		}),
