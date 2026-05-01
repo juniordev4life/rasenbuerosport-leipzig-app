@@ -2,8 +2,6 @@
 import { getTranslate } from "@tolgee/svelte";
 import SeasonSelector from "$lib/components/season/SeasonSelector.svelte";
 import CommonScoresChart from "$lib/components/stats/CommonScoresChart.svelte";
-import EloDistributionChart from "$lib/components/stats/EloDistributionChart.svelte";
-import EloProgressionChart from "$lib/components/stats/EloProgressionChart.svelte";
 import GamesPerMonthChart from "$lib/components/stats/GamesPerMonthChart.svelte";
 import GoalsDistributionChart from "$lib/components/stats/GoalsDistributionChart.svelte";
 import PlayerRadarChart from "$lib/components/stats/PlayerRadarChart.svelte";
@@ -12,7 +10,6 @@ import TeamStatsChart from "$lib/components/stats/TeamStatsChart.svelte";
 import WeekdayDistributionChart from "$lib/components/stats/WeekdayDistributionChart.svelte";
 import XgVsGoalsChart from "$lib/components/stats/XgVsGoalsChart.svelte";
 import { get } from "$lib/services/api.services.js";
-import { user } from "$lib/stores/auth.stores.js";
 import { selectedSeason } from "$lib/stores/season.stores.js";
 
 const { t } = getTranslate();
@@ -22,8 +19,6 @@ let community = $state(null);
 let statsMe = $state(null);
 let loading = $state(true);
 let error = $state(null);
-
-const currentUsername = $derived($user?.user_metadata?.username || "");
 
 $effect(() => {
 	const season = $selectedSeason;
@@ -82,11 +77,9 @@ $effect(() => {
 			<p class="text-text-secondary">{$t("stats_dashboard.error_loading")}</p>
 		</div>
 	{:else}
-		<!-- Section A: Elo & Performance -->
+		<!-- Section A: Performance -->
 		<section class="flex flex-col gap-4">
-			<h2 class="text-sm font-bold text-text-primary uppercase tracking-wide">{$t("stats_dashboard.section_elo")}</h2>
-			<EloProgressionChart data={dashboard?.elo_history} />
-			<EloDistributionChart data={community?.elo_distribution} currentUsername={currentUsername} />
+			<h2 class="text-sm font-bold text-text-primary uppercase tracking-wide">{$t("stats_dashboard.section_performance")}</h2>
 			<RollingWinRateChart data={dashboard?.rolling_win_rate} />
 		</section>
 
@@ -134,7 +127,7 @@ $effect(() => {
 		{/if}
 
 		<!-- Empty state -->
-		{#if !dashboard?.elo_history?.length && !community?.elo_distribution?.length}
+		{#if !dashboard?.rolling_win_rate?.length && !community?.common_scores?.length}
 			<div class="bg-bg-secondary border border-border rounded-lg p-8 text-center">
 				<p class="text-text-secondary">{$t("stats_dashboard.no_data")}</p>
 			</div>

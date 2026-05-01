@@ -339,30 +339,6 @@ function streakDisplay(streak) {
 				</div>
 			</div>
 
-			<!-- Elo Comparison -->
-			<div class="bg-bg-secondary border border-border rounded-lg p-4">
-				<div class="flex flex-col gap-3">
-					<div class="grid grid-cols-3 items-center">
-						<span class="text-sm font-bold {highlightClass(s1.current_elo, s2.current_elo, 'left')} text-right">
-							{s1.current_elo}
-						</span>
-						<span class="text-xs text-text-secondary text-center">{$t("compare.elo_current")}</span>
-						<span class="text-sm font-bold {highlightClass(s1.current_elo, s2.current_elo, 'right')}">
-							{s2.current_elo}
-						</span>
-					</div>
-					<div class="grid grid-cols-3 items-center">
-						<span class="text-sm font-bold {highlightClass(s1.peak_elo, s2.peak_elo, 'left')} text-right">
-							{s1.peak_elo}
-						</span>
-						<span class="text-xs text-text-secondary text-center">{$t("compare.elo_peak")}</span>
-						<span class="text-sm font-bold {highlightClass(s1.peak_elo, s2.peak_elo, 'right')}">
-							{s2.peak_elo}
-						</span>
-					</div>
-				</div>
-			</div>
-
 			<!-- Career Stats Bars -->
 			{#if s1.career_match_stats || s2.career_match_stats}
 				{@const cs1 = s1.career_match_stats || {}}
@@ -456,39 +432,6 @@ function streakDisplay(streak) {
 					</div>
 				</div>
 			</div>
-
-			<!-- Form (Trend Dots) -->
-			{#if (s1.form_curve?.length > 0) || (s2.form_curve?.length > 0)}
-				<div class="bg-bg-secondary border border-border rounded-lg p-4">
-					<h3 class="text-sm font-medium text-text-secondary mb-3">{$t("compare.form")}</h3>
-					<div class="flex flex-col gap-2">
-						<div class="flex items-center gap-2">
-							<span class="text-xs text-text-secondary w-20 truncate text-right">{p1.username}</span>
-							<div class="flex gap-1 flex-1">
-								{#each (s1.form_curve || []) as game (game.game_id)}
-									<div
-										class="w-3 h-3 rounded-full shrink-0
-											{game.result === 'W' ? 'bg-success' : game.result === 'L' ? 'bg-error' : 'bg-warning'}"
-										title={game.result}
-									></div>
-								{/each}
-							</div>
-						</div>
-						<div class="flex items-center gap-2">
-							<span class="text-xs text-text-secondary w-20 truncate text-right">{p2.username}</span>
-							<div class="flex gap-1 flex-1">
-								{#each (s2.form_curve || []) as game (game.game_id)}
-									<div
-										class="w-3 h-3 rounded-full shrink-0
-											{game.result === 'W' ? 'bg-success' : game.result === 'L' ? 'bg-error' : 'bg-warning'}"
-										title={game.result}
-									></div>
-								{/each}
-							</div>
-						</div>
-					</div>
-				</div>
-			{/if}
 
 			<!-- H2H Section -->
 			{#if h2h && h2h.total_games > 0}

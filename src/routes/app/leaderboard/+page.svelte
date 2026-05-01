@@ -80,9 +80,6 @@ const rankedPlayers = $derived.by(() => {
 			.map((p) => ({ ...p, ppg: p.points / p.games }))
 			.sort((a, b) => b.ppg - a.ppg);
 	}
-	if (viewMode === "elo") {
-		return [...players].sort((a, b) => (b.elo || 1200) - (a.elo || 1200));
-	}
 	return players;
 });
 
@@ -225,16 +222,6 @@ function getPlayerBadges(player) {
 						: 'text-text-secondary border-b border-border hover:text-text-primary'}"
 			>
 				{$t("leaderboard.tab_per_game")}
-			</button>
-			<button
-				type="button"
-				onclick={() => (viewMode = "elo")}
-				class="flex-1 text-center pb-2.5 text-sm transition-colors
-					{viewMode === 'elo'
-						? 'font-semibold text-text-primary border-b-2 border-accent-red'
-						: 'text-text-secondary border-b border-border hover:text-text-primary'}"
-			>
-				{$t("leaderboard.tab_elo")}
 			</button>
 		</div>
 	{/if}
@@ -389,14 +376,11 @@ function getPlayerBadges(player) {
 						</p>
 					</div>
 
-					<!-- Points / PPG / Elo -->
+					<!-- Points / PPG -->
 					<div class="text-right shrink-0">
 						{#if viewMode === "ppg"}
 							<span class="text-lg font-bold text-text-primary">{formatPpg(player.ppg)}</span>
 							<span class="text-[10px] text-text-secondary block">{$t("leaderboard.ppg_label")}</span>
-						{:else if viewMode === "elo"}
-							<span class="text-lg font-bold text-text-primary">{player.elo || 1200}</span>
-							<span class="text-[10px] text-text-secondary block">Elo</span>
 						{:else}
 							<span class="text-lg font-bold text-text-primary">{player.points}</span>
 							<span class="text-[10px] text-text-secondary block">{$t("dashboard.points_short")}</span>
