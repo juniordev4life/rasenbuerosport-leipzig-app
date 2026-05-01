@@ -323,13 +323,12 @@
 		"who_scored": "Wer hat getroffen?",
 		"random_teams": "Zufällige Teams",
 		"random_teams_title": "Zufällige Teams auswählen",
-		"random_min_stars": "Min. Sterne",
-		"random_max_stars": "Max. Sterne",
+		"random_stars": "Sterne",
 		"random_search": "Suchen",
 		"random_reroll": "Nochmal",
 		"random_confirm": "Bestätigen",
 		"random_cancel": "Abbrechen",
-		"random_no_teams": "Nicht genug Teams in diesem Stärkebereich",
+		"random_no_teams": "Nicht genug Teams mit dieser Sterne-Anzahl",
 		"random_vs": "vs."
 	},
 	"match_report": {
