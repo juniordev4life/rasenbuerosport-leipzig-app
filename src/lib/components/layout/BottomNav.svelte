@@ -28,6 +28,11 @@ const navItems = [
 		icon: "games",
 	},
 	{
+		href: ROUTES.WRAPPED,
+		labelKey: "nav.wrapped",
+		icon: "wrapped",
+	},
+	{
 		href: ROUTES.PROFILE,
 		labelKey: "nav.profile",
 		icon: "profile",
@@ -109,6 +114,21 @@ const isActive = (href) => page.url.pathname === href;
 								stroke-linecap="round"
 								stroke-linejoin="round"
 								d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+					{:else if item.icon === "wrapped"}
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-6 w-6"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
 							/>
 						</svg>
 					{:else if item.icon === "profile"}

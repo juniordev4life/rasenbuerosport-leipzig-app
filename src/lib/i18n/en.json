@@ -80,7 +80,8 @@
 		"games": "Games",
 		"teams": "Teams",
 		"stats": "Statistics",
-		"profile": "Profile"
+		"profile": "Profile",
+		"wrapped": "Wrapped"
 	},
 	"common": {
 		"loading": "Loading...",
@@ -90,6 +91,27 @@
 	},
 	"footer": {
 		"copyright": "© {year} RasenBürosport Leipzig IT"
+	},
+	"wrapped": {
+		"title": "This Week at the Office",
+		"subtitle": "Wrapped",
+		"this_week": "This week",
+		"games": "Games",
+		"goals": "Goals",
+		"mvp_title": "MVP of the Week",
+		"mvp_subtitle": "{count} wins",
+		"topscorer_title": "Top Scorer",
+		"topscorer_subtitle": "{count} goals",
+		"most_active_title": "Most Active Player",
+		"most_active_subtitle": "{count} games",
+		"top_duo_title": "Top Duo",
+		"top_duo_subtitle": "{wins}/{games} wins ({rate}%)",
+		"empty_title": "No wrapped yet",
+		"empty_subtitle": "The first wrapped will be generated on Friday at 22:00.",
+		"prev_week": "Previous week",
+		"next_week": "Next week",
+		"latest_label": "Current week",
+		"archive_position": "{current} of {total}"
 	},
 	"leaderboard": {
 		"title": "Leaderboard",

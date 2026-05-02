@@ -82,7 +82,8 @@
 		"games": "Spiele",
 		"teams": "Teams",
 		"stats": "Statistiken",
-		"profile": "Profil"
+		"profile": "Profil",
+		"wrapped": "Wrapped"
 	},
 	"common": {
 		"loading": "Laden...",
@@ -92,6 +93,27 @@
 	},
 	"footer": {
 		"copyright": "© {year} RasenBürosport Leipzig IT"
+	},
+	"wrapped": {
+		"title": "Diese Woche im Büro",
+		"subtitle": "Wrapped",
+		"this_week": "Diese Woche",
+		"games": "Spiele",
+		"goals": "Tore",
+		"mvp_title": "MVP der Woche",
+		"mvp_subtitle": "{count} Siege",
+		"topscorer_title": "Torschützenkönig",
+		"topscorer_subtitle": "{count} Tore",
+		"most_active_title": "Aktivster Spieler",
+		"most_active_subtitle": "{count} Spiele",
+		"top_duo_title": "Top Duo",
+		"top_duo_subtitle": "{wins}/{games} Siege ({rate}%)",
+		"empty_title": "Noch kein Wrapped",
+		"empty_subtitle": "Das erste Wrapped wird Freitag um 22:00 Uhr generiert.",
+		"prev_week": "Vorherige Woche",
+		"next_week": "Nächste Woche",
+		"latest_label": "Aktuelle Woche",
+		"archive_position": "{current} von {total}"
 	},
 	"leaderboard": {
 		"title": "Rangliste",

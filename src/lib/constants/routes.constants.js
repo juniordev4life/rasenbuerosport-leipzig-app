@@ -11,4 +11,5 @@ export const ROUTES = {
 	SEASONS: "/app/seasons",
 	COMPARE: "/app/compare",
 	STATS: "/app/stats",
+	WRAPPED: "/app/wrapped",
 };
