@@ -299,12 +299,13 @@
 		"goal_type_penalty": "Penalty",
 		"random_teams": "Random Teams",
 		"random_teams_title": "Pick Random Teams",
-		"random_stars": "Stars",
+		"random_min_stars": "Min. Stars",
+		"random_max_stars": "Max. Stars",
 		"random_search": "Search",
 		"random_reroll": "Reroll",
 		"random_confirm": "Confirm",
 		"random_cancel": "Cancel",
-		"random_no_teams": "Not enough teams with this star rating",
+		"random_no_teams": "Not enough equally rated teams in star range",
 		"random_vs": "vs."
 	},
 	"match_report": {

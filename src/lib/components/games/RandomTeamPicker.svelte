@@ -8,6 +8,7 @@ import { getAllTeams } from "$lib/services/teams.services.js";
 
 /**
  * RandomTeamPicker - Modal dialog for picking two random teams of equal star rating
+ * within a configurable min/max range. Both teams always share the same exact star rating.
  * @param {Function} onClose - Close handler
  * @param {(homeTeam: string, awayTeam: string) => void} onConfirm - Confirm handler with team names
  */
@@ -15,51 +16,83 @@ let { onClose, onConfirm } = $props();
 
 const { t } = getTranslate();
 
-let stars = $state(4);
+let minStars = $state(4);
+let maxStars = $state(5);
 let homeResult = $state(null);
 let awayResult = $state(null);
 let error = $state("");
 
 /**
- * Gets all teams matching the selected star rating
+ * Gets teams whose star rating equals exactly the given value
+ * @param {number} starRating
  * @returns {Promise<import("$lib/services/teams.services.js").TeamData[]>}
  */
-async function getFilteredTeams() {
+async function getTeamsByExactRating(starRating) {
 	const teams = await getAllTeams();
-	return teams.filter((t) => t.star_rating === stars);
+	return teams.filter((t) => t.star_rating === starRating);
 }
 
 /**
- * Picks two distinct random teams within the star rating range
+ * Picks two distinct random teams that share the same star rating, drawn from the
+ * configured min/max range. The exact rating is chosen randomly from ratings that
+ * have at least 2 teams available within the range.
  */
 async function searchRandomTeams() {
 	error = "";
-	const filtered = await getFilteredTeams();
-
-	if (filtered.length < 2) {
+	if (minStars > maxStars) {
 		error = $t("new_game.random_no_teams");
 		homeResult = null;
 		awayResult = null;
 		return;
 	}
 
-	const idx1 = Math.floor(Math.random() * filtered.length);
-	let idx2 = Math.floor(Math.random() * (filtered.length - 1));
+	const teams = await getAllTeams();
+	const inRange = teams.filter(
+		(t) =>
+			t.star_rating !== null &&
+			t.star_rating >= minStars &&
+			t.star_rating <= maxStars,
+	);
+
+	const ratingCounts = new Map();
+	for (const t of inRange) {
+		ratingCounts.set(t.star_rating, (ratingCounts.get(t.star_rating) || 0) + 1);
+	}
+	const eligibleRatings = [...ratingCounts.entries()]
+		.filter(([, count]) => count >= 2)
+		.map(([rating]) => rating);
+
+	if (eligibleRatings.length === 0) {
+		error = $t("new_game.random_no_teams");
+		homeResult = null;
+		awayResult = null;
+		return;
+	}
+
+	const chosenRating =
+		eligibleRatings[Math.floor(Math.random() * eligibleRatings.length)];
+	const pool = inRange.filter((t) => t.star_rating === chosenRating);
+
+	const idx1 = Math.floor(Math.random() * pool.length);
+	let idx2 = Math.floor(Math.random() * (pool.length - 1));
 	if (idx2 >= idx1) idx2++;
 
-	homeResult = filtered[idx1];
-	awayResult = filtered[idx2];
+	homeResult = pool[idx1];
+	awayResult = pool[idx2];
 }
 
 /**
- * Re-rolls a single team (home or away) while keeping the other
+ * Re-rolls a single team (home or away) while keeping the other.
+ * The new team must match the kept team's exact star rating.
  * @param {"home"|"away"} side
  */
 async function rerollSingle(side) {
 	error = "";
-	const filtered = await getFilteredTeams();
 	const other = side === "home" ? awayResult : homeResult;
-	const candidates = filtered.filter((t) => t.name !== other?.name);
+	if (!other) return;
+
+	const sameRating = await getTeamsByExactRating(other.star_rating);
+	const candidates = sameRating.filter((t) => t.name !== other.name);
 
 	if (candidates.length < 1) {
 		error = $t("new_game.random_no_teams");
@@ -97,11 +130,12 @@ function getStarValue(starIndex, isLeft) {
 			{$t("new_game.random_teams_title")}
 		</h2>
 
-		<!-- Star Selector -->
+		<!-- Star Range Selectors -->
 		<div class="flex flex-col gap-4 mb-5">
+			<!-- Min Stars -->
 			<div>
 				<label class="text-xs font-medium text-text-secondary mb-1.5 block">
-					{$t("new_game.random_stars")}
+					{$t("new_game.random_min_stars")}
 				</label>
 				<div class="flex items-center gap-3">
 					<div class="flex items-center gap-0.5">
@@ -110,28 +144,34 @@ function getStarValue(starIndex, isLeft) {
 								<button
 									type="button"
 									class="absolute inset-y-0 left-0 w-1/2 z-10 cursor-pointer"
-									onclick={() => { stars = getStarValue(starIdx, true); }}
+									onclick={() => {
+										minStars = getStarValue(starIdx, true);
+										if (minStars > maxStars) maxStars = minStars;
+									}}
 									aria-label="{starIdx + 0.5} stars"
 								></button>
 								<button
 									type="button"
 									class="absolute inset-y-0 right-0 w-1/2 z-10 cursor-pointer"
-									onclick={() => { stars = getStarValue(starIdx, false); }}
+									onclick={() => {
+										minStars = getStarValue(starIdx, false);
+										if (minStars > maxStars) maxStars = minStars;
+									}}
 									aria-label="{starIdx + 1} stars"
 								></button>
-								{#if stars >= starIdx + 1}
+								{#if minStars >= starIdx + 1}
 									<svg class="w-6 h-6 text-warning" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
 										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
 									</svg>
-								{:else if stars >= starIdx + 0.5}
+								{:else if minStars >= starIdx + 0.5}
 									<svg class="w-6 h-6 text-warning" viewBox="0 0 24 24" aria-hidden="true">
 										<defs>
-											<linearGradient id="stars-half-{starIdx}">
+											<linearGradient id="min-half-{starIdx}">
 												<stop offset="50%" stop-color="currentColor" />
 												<stop offset="50%" stop-color="var(--color-text-muted)" />
 											</linearGradient>
 										</defs>
-										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="url(#stars-half-{starIdx})" />
+										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="url(#min-half-{starIdx})" />
 									</svg>
 								{:else}
 									<svg class="w-6 h-6 text-text-muted" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -141,7 +181,60 @@ function getStarValue(starIndex, isLeft) {
 							</div>
 						{/each}
 					</div>
-					<span class="text-sm text-text-secondary font-medium min-w-[2rem] text-center">{stars}</span>
+					<span class="text-sm text-text-secondary font-medium min-w-[2rem] text-center">{minStars}</span>
+				</div>
+			</div>
+
+			<!-- Max Stars -->
+			<div>
+				<label class="text-xs font-medium text-text-secondary mb-1.5 block">
+					{$t("new_game.random_max_stars")}
+				</label>
+				<div class="flex items-center gap-3">
+					<div class="flex items-center gap-0.5">
+						{#each Array.from({ length: 5 }, (_, i) => i) as starIdx (starIdx)}
+							<div class="relative" style="width: 24px; height: 24px;">
+								<button
+									type="button"
+									class="absolute inset-y-0 left-0 w-1/2 z-10 cursor-pointer"
+									onclick={() => {
+										maxStars = getStarValue(starIdx, true);
+										if (maxStars < minStars) minStars = maxStars;
+									}}
+									aria-label="{starIdx + 0.5} stars"
+								></button>
+								<button
+									type="button"
+									class="absolute inset-y-0 right-0 w-1/2 z-10 cursor-pointer"
+									onclick={() => {
+										maxStars = getStarValue(starIdx, false);
+										if (maxStars < minStars) minStars = maxStars;
+									}}
+									aria-label="{starIdx + 1} stars"
+								></button>
+								{#if maxStars >= starIdx + 1}
+									<svg class="w-6 h-6 text-warning" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+									</svg>
+								{:else if maxStars >= starIdx + 0.5}
+									<svg class="w-6 h-6 text-warning" viewBox="0 0 24 24" aria-hidden="true">
+										<defs>
+											<linearGradient id="max-half-{starIdx}">
+												<stop offset="50%" stop-color="currentColor" />
+												<stop offset="50%" stop-color="var(--color-text-muted)" />
+											</linearGradient>
+										</defs>
+										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="url(#max-half-{starIdx})" />
+									</svg>
+								{:else}
+									<svg class="w-6 h-6 text-text-muted" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+									</svg>
+								{/if}
+							</div>
+						{/each}
+					</div>
+					<span class="text-sm text-text-secondary font-medium min-w-[2rem] text-center">{maxStars}</span>
 				</div>
 			</div>
 		</div>
