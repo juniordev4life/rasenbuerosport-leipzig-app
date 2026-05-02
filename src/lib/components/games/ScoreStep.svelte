@@ -63,7 +63,15 @@ const currentPeriod = $derived(
 
 /** Scorer picker state */
 let showScorerPicker = $state(false);
+let showGoalTypePicker = $state(false);
 let pendingGoal = $state(null);
+
+const GOAL_TYPES = [
+	{ value: "play", labelKey: "new_game.goal_type_play", icon: "⚽" },
+	{ value: "corner", labelKey: "new_game.goal_type_corner", icon: "🚩" },
+	{ value: "freekick", labelKey: "new_game.goal_type_freekick", icon: "🎯" },
+	{ value: "penalty", labelKey: "new_game.goal_type_penalty", icon: "🥅" },
+];
 
 /**
  * Resolve player profile objects for a side (excluding guests)
@@ -95,27 +103,24 @@ async function handleScoreChange() {
 		const side = scoreHome > lastEntry.home ? "home" : "away";
 		const sidePlayers = getPlayersForSide(side);
 
-		if (sidePlayers.length > 1) {
-			// Multi-player team: show scorer picker popup
-			pendingGoal = {
-				home: scoreHome,
-				away: scoreAway,
-				period: currentPeriod,
-				side,
-			};
+		const scoredBy = sidePlayers.length === 1 ? sidePlayers[0].id : undefined;
+		pendingGoal = {
+			home: scoreHome,
+			away: scoreAway,
+			period: currentPeriod,
+			side,
+			scored_by: scoredBy,
+		};
+
+		if (currentPeriod === "penalty") {
+			// Penalty shootout — every goal is a penalty, skip picker
+			commitPendingGoal("penalty");
+		} else if (sidePlayers.length > 1) {
+			// Multi-player team: scorer picker first, then goal type
 			showScorerPicker = true;
 		} else {
-			// Single player: auto-assign scorer
-			const scoredBy = sidePlayers.length === 1 ? sidePlayers[0].id : undefined;
-			scoreTimeline = [
-				...scoreTimeline,
-				{
-					home: scoreHome,
-					away: scoreAway,
-					period: currentPeriod,
-					scored_by: scoredBy,
-				},
-			];
+			// Single player (or guest-only): straight to goal-type picker
+			showGoalTypePicker = true;
 		}
 	} else if (newTotal < prevTotal && scoreTimeline.length > 0) {
 		// Correction (minus) — pop last entry
@@ -127,10 +132,29 @@ async function handleScoreChange() {
 }
 
 /**
- * Handle scorer selection from picker popup
+ * Handle scorer selection from picker popup — chains to goal-type picker
  * @param {string} playerId
  */
 function selectScorer(playerId) {
+	if (!pendingGoal) return;
+	pendingGoal = { ...pendingGoal, scored_by: playerId };
+	showScorerPicker = false;
+	showGoalTypePicker = true;
+}
+
+/**
+ * Handle goal-type selection — finalizes the timeline entry
+ * @param {"play"|"corner"|"freekick"|"penalty"} goalType
+ */
+function selectGoalType(goalType) {
+	commitPendingGoal(goalType);
+}
+
+/**
+ * Append the pending goal to the timeline with the chosen type
+ * @param {"play"|"corner"|"freekick"|"penalty"} goalType
+ */
+function commitPendingGoal(goalType) {
 	if (!pendingGoal) return;
 	scoreTimeline = [
 		...scoreTimeline,
@@ -138,17 +162,19 @@ function selectScorer(playerId) {
 			home: pendingGoal.home,
 			away: pendingGoal.away,
 			period: pendingGoal.period,
-			scored_by: playerId,
+			scored_by: pendingGoal.scored_by,
+			goal_type: goalType,
 		},
 	];
 	prevTotal = pendingGoal.home + pendingGoal.away;
 	showScorerPicker = false;
+	showGoalTypePicker = false;
 	pendingGoal = null;
 	updateResultType();
 }
 
-/** Cancel scorer picker — revert the score increment */
-function cancelScorerPicker() {
+/** Cancel any picker — reverts the score increment */
+function cancelPicker() {
 	if (!pendingGoal) return;
 	if (pendingGoal.side === "home") {
 		scoreHome = Math.max(0, scoreHome - 1);
@@ -157,6 +183,7 @@ function cancelScorerPicker() {
 	}
 	prevTotal = scoreHome + scoreAway;
 	showScorerPicker = false;
+	showGoalTypePicker = false;
 	pendingGoal = null;
 }
 
@@ -347,6 +374,7 @@ function removeStatsImage(type) {
 			<div class="flex flex-wrap gap-1.5">
 				{#each scoreTimeline as entry, i (i)}
 					{@const scorer = entry.scored_by ? getPlayerProfile(entry.scored_by) : null}
+					{@const goalIcon = GOAL_TYPES.find((g) => g.value === entry.goal_type)?.icon}
 					<span
 						class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium {entry.period === 'penalty'
 							? 'bg-warning/20 text-warning'
@@ -358,6 +386,9 @@ function removeStatsImage(type) {
 							<img src={scorer.avatar_url} alt={scorer.username} class="w-3.5 h-3.5 rounded-full object-cover" />
 						{/if}
 						{entry.home}:{entry.away}
+						{#if goalIcon && entry.goal_type !== "play"}
+							<span class="text-[10px]">{goalIcon}</span>
+						{/if}
 						{#if entry.period === "extra_time"}
 							<span class="text-[8px] opacity-70">{$t("game_detail.extra_time_short")}</span>
 						{:else if entry.period === "penalty"}
@@ -462,7 +493,43 @@ function removeStatsImage(type) {
 
 			<button
 				type="button"
-				onclick={cancelScorerPicker}
+				onclick={cancelPicker}
+				class="w-full mt-4 py-2 text-xs text-text-secondary hover:text-text-primary transition-colors"
+			>
+				{$t("common.back")}
+			</button>
+		</div>
+	</div>
+{/if}
+
+<!-- Goal Type Picker Popup -->
+{#if showGoalTypePicker && pendingGoal}
+	<div
+		class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6"
+		role="dialog"
+		aria-label={$t("new_game.goal_type_title")}
+	>
+		<div class="bg-bg-secondary border border-border rounded-xl p-6 w-full max-w-xs">
+			<h3 class="text-sm font-medium text-text-primary text-center mb-4">
+				{$t("new_game.goal_type_title")}
+			</h3>
+
+			<div class="grid grid-cols-2 gap-2">
+				{#each GOAL_TYPES as type (type.value)}
+					<button
+						type="button"
+						onclick={() => selectGoalType(type.value)}
+						class="flex flex-col items-center gap-1 p-3 rounded-lg bg-bg-input border border-border hover:border-accent-red hover:bg-accent-red/10 transition-colors"
+					>
+						<span class="text-2xl">{type.icon}</span>
+						<span class="text-xs font-medium text-text-primary">{$t(type.labelKey)}</span>
+					</button>
+				{/each}
+			</div>
+
+			<button
+				type="button"
+				onclick={cancelPicker}
 				class="w-full mt-4 py-2 text-xs text-text-secondary hover:text-text-primary transition-colors"
 			>
 				{$t("common.back")}

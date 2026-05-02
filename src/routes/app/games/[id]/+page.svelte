@@ -333,6 +333,13 @@ function getScorerProfile(playerId) {
 
 						<!-- Goal row -->
 						{@const scorer = getScorerProfile(entry.scored_by)}
+						{@const goalTypeIcon = entry.goal_type === "corner"
+							? "🚩"
+							: entry.goal_type === "freekick"
+								? "🎯"
+								: entry.goal_type === "penalty" || entry.period === "penalty"
+									? "🥅"
+									: null}
 						<div class="relative z-10 flex items-center w-full py-1.5">
 							<!-- Home side (left) -->
 							<div class="flex-1 flex items-center justify-end gap-2 pr-4">
@@ -343,8 +350,8 @@ function getScorerProfile(playerId) {
 											<img src={scorer.avatar_url} alt={scorer.username} class="w-4 h-4 rounded-full object-cover" />
 										{/if}
 									{/if}
-									{#if entry.period === "penalty"}
-										<span class="text-xs" title="Elfmeter">🥅</span>
+									{#if goalTypeIcon}
+										<span class="text-xs">{goalTypeIcon}</span>
 									{/if}
 									<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-accent-red/20 text-accent-red">
 										{entry.home}:{entry.away}
@@ -363,8 +370,8 @@ function getScorerProfile(playerId) {
 									<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-500">
 										{entry.home}:{entry.away}
 									</span>
-									{#if entry.period === "penalty"}
-										<span class="text-xs" title="Elfmeter">🥅</span>
+									{#if goalTypeIcon}
+										<span class="text-xs">{goalTypeIcon}</span>
 									{/if}
 									{#if scorer}
 										{#if scorer.avatar_url}
