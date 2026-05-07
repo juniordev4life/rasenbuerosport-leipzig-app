@@ -168,16 +168,23 @@ const resultSuffix = $derived(
 const timeline = $derived(game?.score_timeline || []);
 
 /**
- * Build enriched timeline entries with goal side info
- * Reversed so newest goal is at top
+ * Build enriched timeline entries with side info. Red-card entries carry no
+ * score, so their side is read from the entry's `team` field rather than
+ * derived from the running score. Reversed so newest event is at top.
  * @returns {object[]}
  */
 const timelineEntries = $derived.by(() => {
 	if (!timeline.length) return [];
+	let prevHome = 0;
+	let prevPeriod = null;
 	const entries = timeline.map((entry, i) => {
-		const prev = i > 0 ? timeline[i - 1] : { home: 0, away: 0 };
-		const isHomeGoal = entry.home > prev.home;
-		const periodChanged = i > 0 && timeline[i - 1].period !== entry.period;
+		const periodChanged = i > 0 && prevPeriod !== entry.period;
+		prevPeriod = entry.period;
+		if (entry.event_type === "red_card") {
+			return { ...entry, side: entry.team, periodChanged };
+		}
+		const isHomeGoal = entry.home > prevHome;
+		prevHome = entry.home;
 		return {
 			...entry,
 			side: isHomeGoal ? "home" : "away",
@@ -332,74 +339,115 @@ function getScorerProfile(playerId) {
 							</div>
 						{/if}
 
-						<!-- Goal row -->
-						{@const scorer = getScorerProfile(entry.scored_by)}
-						{@const assist = getScorerProfile(entry.assist_by)}
-						{@const goalTypeIcon = entry.goal_type === "corner"
-							? "🚩"
-							: entry.goal_type === "freekick"
-								? "🎯"
-								: entry.goal_type === "penalty" || entry.period === "penalty"
-									? "🥅"
-									: null}
-						<div class="relative z-10 flex items-center w-full py-1.5">
-							<!-- Home side (left) -->
-							<div class="flex-1 flex items-center justify-end gap-2 pr-4">
-								{#if entry.side === "home"}
-									{#if scorer}
-										<div class="flex flex-col items-end">
-											<span class="text-[10px] text-text-secondary">{scorer.username}</span>
-											{#if assist}
-												<span class="text-[9px] text-text-secondary/70">↳ {assist.username}</span>
+						{#if entry.event_type === "red_card"}
+							{@const offender = getScorerProfile(entry.player_id)}
+							<!-- Red card row -->
+							<div class="relative z-10 flex items-center w-full py-1.5">
+								<!-- Home side (left) -->
+								<div class="flex-1 flex items-center justify-end gap-2 pr-4">
+									{#if entry.side === "home"}
+										{#if offender}
+											<span class="text-[10px] text-text-secondary">{offender.username}</span>
+											{#if offender.avatar_url}
+												<img src={offender.avatar_url} alt={offender.username} class="w-4 h-4 rounded-full object-cover" />
 											{/if}
-										</div>
-										{#if scorer.avatar_url}
-											<img src={scorer.avatar_url} alt={scorer.username} class="w-4 h-4 rounded-full object-cover" />
+										{/if}
+										{#if typeof entry.minute === "number"}
+											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
+										{/if}
+										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-accent-red text-white" aria-label={$t("game_detail.event_red_card")}>🟥</span>
+									{/if}
+								</div>
+
+								<!-- Center dot -->
+								<div class="w-2.5 h-2.5 rounded-full shrink-0 bg-accent-red ring-2 ring-bg-secondary"></div>
+
+								<!-- Away side (right) -->
+								<div class="flex-1 flex items-center justify-start gap-2 pl-4">
+									{#if entry.side === "away"}
+										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-accent-red text-white" aria-label={$t("game_detail.event_red_card")}>🟥</span>
+										{#if typeof entry.minute === "number"}
+											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
+										{/if}
+										{#if offender}
+											{#if offender.avatar_url}
+												<img src={offender.avatar_url} alt={offender.username} class="w-4 h-4 rounded-full object-cover" />
+											{/if}
+											<span class="text-[10px] text-text-secondary">{offender.username}</span>
 										{/if}
 									{/if}
-									{#if goalTypeIcon}
-										<span class="text-xs">{goalTypeIcon}</span>
-									{/if}
-									{#if typeof entry.minute === "number"}
-										<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
-									{/if}
-									<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-accent-red/20 text-accent-red">
-										{entry.home}:{entry.away}
-									</span>
-								{/if}
+								</div>
 							</div>
-
-							<!-- Center dot -->
-							<div class="w-2.5 h-2.5 rounded-full shrink-0 {entry.side === 'home'
-								? 'bg-accent-red'
-								: 'bg-blue-500'}"></div>
-
-							<!-- Away side (right) -->
-							<div class="flex-1 flex items-center justify-start gap-2 pl-4">
-								{#if entry.side === "away"}
-									<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-500">
-										{entry.home}:{entry.away}
-									</span>
-									{#if typeof entry.minute === "number"}
-										<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
-									{/if}
-									{#if goalTypeIcon}
-										<span class="text-xs">{goalTypeIcon}</span>
-									{/if}
-									{#if scorer}
-										{#if scorer.avatar_url}
-											<img src={scorer.avatar_url} alt={scorer.username} class="w-4 h-4 rounded-full object-cover" />
-										{/if}
-										<div class="flex flex-col items-start">
-											<span class="text-[10px] text-text-secondary">{scorer.username}</span>
-											{#if assist}
-												<span class="text-[9px] text-text-secondary/70">↳ {assist.username}</span>
+						{:else}
+							<!-- Goal row -->
+							{@const scorer = getScorerProfile(entry.scored_by)}
+							{@const assist = getScorerProfile(entry.assist_by)}
+							{@const goalTypeIcon = entry.goal_type === "corner"
+								? "🚩"
+								: entry.goal_type === "freekick"
+									? "🎯"
+									: entry.goal_type === "penalty" || entry.period === "penalty"
+										? "🥅"
+										: null}
+							<div class="relative z-10 flex items-center w-full py-1.5">
+								<!-- Home side (left) -->
+								<div class="flex-1 flex items-center justify-end gap-2 pr-4">
+									{#if entry.side === "home"}
+										{#if scorer}
+											<div class="flex flex-col items-end">
+												<span class="text-[10px] text-text-secondary">{scorer.username}</span>
+												{#if assist}
+													<span class="text-[9px] text-text-secondary/70">↳ {assist.username}</span>
+												{/if}
+											</div>
+											{#if scorer.avatar_url}
+												<img src={scorer.avatar_url} alt={scorer.username} class="w-4 h-4 rounded-full object-cover" />
 											{/if}
-										</div>
+										{/if}
+										{#if goalTypeIcon}
+											<span class="text-xs">{goalTypeIcon}</span>
+										{/if}
+										{#if typeof entry.minute === "number"}
+											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
+										{/if}
+										<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-accent-red/20 text-accent-red">
+											{entry.home}:{entry.away}
+										</span>
 									{/if}
-								{/if}
+								</div>
+
+								<!-- Center dot -->
+								<div class="w-2.5 h-2.5 rounded-full shrink-0 {entry.side === 'home'
+									? 'bg-accent-red'
+									: 'bg-blue-500'}"></div>
+
+								<!-- Away side (right) -->
+								<div class="flex-1 flex items-center justify-start gap-2 pl-4">
+									{#if entry.side === "away"}
+										<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-500">
+											{entry.home}:{entry.away}
+										</span>
+										{#if typeof entry.minute === "number"}
+											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
+										{/if}
+										{#if goalTypeIcon}
+											<span class="text-xs">{goalTypeIcon}</span>
+										{/if}
+										{#if scorer}
+											{#if scorer.avatar_url}
+												<img src={scorer.avatar_url} alt={scorer.username} class="w-4 h-4 rounded-full object-cover" />
+											{/if}
+											<div class="flex flex-col items-start">
+												<span class="text-[10px] text-text-secondary">{scorer.username}</span>
+												{#if assist}
+													<span class="text-[9px] text-text-secondary/70">↳ {assist.username}</span>
+												{/if}
+											</div>
+										{/if}
+									{/if}
+								</div>
 							</div>
-						</div>
+						{/if}
 					{/each}
 
 					<!-- Kickoff dot at bottom -->

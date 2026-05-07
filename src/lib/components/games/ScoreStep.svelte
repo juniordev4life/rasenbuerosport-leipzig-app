@@ -72,9 +72,20 @@ let showGoalTypePicker = $state(false);
 let showAssistPicker = $state(false);
 let showMinutePicker = $state(false);
 let pendingGoal = $state(null);
+
+/** Red-card picker state — shares the MinutePicker via `showMinutePicker`. */
+let redCardStep = $state(null); // "team" | "player" | null
+let pendingRedCard = $state(null);
+
+/** Shared minute-picker bindings, used by both the goal and red-card flows. */
 let pickerMinute = $state(1);
 let pickerStoppage = $state(0);
 let pickerShowExtraTime = $state(false);
+
+/** Period of the event currently being timed (for floor validation). */
+const pickerPeriod = $derived(
+	pendingGoal?.period ?? pendingRedCard?.period ?? "regular",
+);
 
 /**
  * Validity of the current MinutePicker selection against the existing timeline.
@@ -83,11 +94,11 @@ let pickerShowExtraTime = $state(false);
  * confirm button honest.
  */
 const pickerValidity = $derived(
-	pendingGoal
+	pendingGoal || pendingRedCard
 		? validateMinuteAgainstTimeline(
 				{ minute: pickerMinute, stoppage: pickerStoppage },
 				scoreTimeline,
-				pendingGoal.period,
+				pickerPeriod,
 			)
 		: { valid: true, floor: null },
 );
@@ -241,15 +252,23 @@ function openMinutePicker() {
 	showMinutePicker = true;
 }
 
-/** Confirm minute selection and commit the goal. */
+/**
+ * Confirm minute selection. Routes to whichever flow currently owns the
+ * picker — goal commit, or red-card commit.
+ */
 function confirmMinute() {
-	if (!pendingGoal) return;
-	pendingGoal = {
-		...pendingGoal,
-		minute: pickerMinute,
-		stoppage: pickerStoppage,
-	};
-	commitPendingGoal();
+	if (pendingGoal) {
+		pendingGoal = {
+			...pendingGoal,
+			minute: pickerMinute,
+			stoppage: pickerStoppage,
+		};
+		commitPendingGoal();
+		return;
+	}
+	if (pendingRedCard) {
+		commitPendingRedCard();
+	}
 }
 
 /** Append the pending goal to the timeline. */
@@ -279,20 +298,80 @@ function commitPendingGoal() {
 	updateResultType();
 }
 
-/** Cancel any picker — reverts the score increment */
+/**
+ * Cancel any picker. For pending goals we must revert the score increment
+ * that opened the flow; pending red cards do not touch the score, so we just
+ * close the picker.
+ */
 function cancelPicker() {
-	if (!pendingGoal) return;
-	if (pendingGoal.side === "home") {
-		scoreHome = Math.max(0, scoreHome - 1);
-	} else {
-		scoreAway = Math.max(0, scoreAway - 1);
+	if (pendingGoal) {
+		if (pendingGoal.side === "home") {
+			scoreHome = Math.max(0, scoreHome - 1);
+		} else {
+			scoreAway = Math.max(0, scoreAway - 1);
+		}
+		prevTotal = scoreHome + scoreAway;
 	}
-	prevTotal = scoreHome + scoreAway;
 	showScorerPicker = false;
 	showGoalTypePicker = false;
 	showAssistPicker = false;
 	showMinutePicker = false;
 	pendingGoal = null;
+	pendingRedCard = null;
+	redCardStep = null;
+}
+
+/**
+ * Open the red-card flow at the team-pick step. Disabled during the penalty
+ * shootout because there are no red cards in a shootout.
+ */
+function startRedCard() {
+	if (currentPeriod === "penalty") return;
+	pendingRedCard = { period: currentPeriod };
+	redCardStep = "team";
+}
+
+/**
+ * Pick which side the offender is on; advances to the player-pick step.
+ * @param {"home"|"away"} team
+ */
+function selectRedCardTeam(team) {
+	if (!pendingRedCard) return;
+	pendingRedCard = { ...pendingRedCard, team };
+	redCardStep = "player";
+}
+
+/**
+ * Pick the offending player; advances to the (shared) minute picker.
+ * @param {string} playerId
+ */
+function selectRedCardPlayer(playerId) {
+	if (!pendingRedCard) return;
+	pendingRedCard = { ...pendingRedCard, player_id: playerId };
+	redCardStep = null;
+	pickerMinute = 1;
+	pickerStoppage = 0;
+	pickerShowExtraTime = extraTimeActive;
+	showMinutePicker = true;
+}
+
+/** Append the pending red card to the timeline and reset the flow. */
+function commitPendingRedCard() {
+	if (!pendingRedCard) return;
+	scoreTimeline = [
+		...scoreTimeline,
+		{
+			event_type: "red_card",
+			player_id: pendingRedCard.player_id,
+			team: pendingRedCard.team,
+			period: pendingRedCard.period,
+			minute: pickerMinute,
+			stoppage: pickerStoppage,
+		},
+	];
+	pendingRedCard = null;
+	redCardStep = null;
+	showMinutePicker = false;
 }
 
 /**
@@ -451,6 +530,7 @@ function removeStatsImage(type) {
 
 		<!-- Phase Toggles -->
 		<div class="flex items-center justify-center gap-2 mt-4">
+			<span class="text-[10px] text-text-secondary">{$t("new_game.phase_label")}</span>
 			<button
 				type="button"
 				onclick={toggleExtraTime}
@@ -473,6 +553,22 @@ function removeStatsImage(type) {
 				{$t("new_game.penalty")}
 			</button>
 		</div>
+
+		<!-- Event Actions (one button per event type — separate from the score arrows) -->
+		<div class="flex items-center justify-center gap-2 mt-2">
+			<span class="text-[10px] text-text-secondary">{$t("new_game.event_label")}</span>
+			<button
+				type="button"
+				onclick={startRedCard}
+				disabled={penaltyActive}
+				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors {penaltyActive
+					? 'bg-bg-input text-text-secondary/40 border-border/40 cursor-not-allowed'
+					: 'bg-bg-input text-text-primary border-border hover:border-accent-red'}"
+			>
+				<span aria-hidden="true">🟥</span>
+				{$t("new_game.add_red_card")}
+			</button>
+		</div>
 	</div>
 
 	<!-- Timeline Preview -->
@@ -481,31 +577,52 @@ function removeStatsImage(type) {
 			<p class="text-[10px] text-text-secondary mb-2">{$t("game_detail.timeline_title")}</p>
 			<div class="flex flex-wrap gap-1.5">
 				{#each scoreTimeline as entry, i (i)}
-					{@const scorer = entry.scored_by ? getPlayerProfile(entry.scored_by) : null}
-					{@const goalIcon = GOAL_TYPES.find((g) => g.value === entry.goal_type)?.icon}
-					<span
-						class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium {entry.period === 'penalty'
-							? 'bg-warning/20 text-warning'
-							: entry.period === 'extra_time'
+					{#if entry.event_type === "red_card"}
+						{@const offender = getPlayerProfile(entry.player_id)}
+						<span
+							class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium {entry.period === 'extra_time'
 								? 'bg-accent-red/20 text-accent-red'
 								: 'bg-bg-input text-text-primary'}"
-					>
-						{#if scorer?.avatar_url}
-							<img src={scorer.avatar_url} alt={scorer.username} class="w-3.5 h-3.5 rounded-full object-cover" />
-						{/if}
-						{entry.home}:{entry.away}
-						{#if typeof entry.minute === "number"}
-							<span class="text-[10px] tabular-nums opacity-80">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
-						{/if}
-						{#if goalIcon && entry.goal_type !== "play"}
-							<span class="text-[10px]">{goalIcon}</span>
-						{/if}
-						{#if entry.period === "extra_time"}
-							<span class="text-[8px] opacity-70">{$t("game_detail.extra_time_short")}</span>
-						{:else if entry.period === "penalty"}
-							<span class="text-[8px] opacity-70">{$t("game_detail.penalty_short")}</span>
-						{/if}
-					</span>
+						>
+							<span aria-hidden="true">🟥</span>
+							{#if offender?.avatar_url}
+								<img src={offender.avatar_url} alt={offender.username} class="w-3.5 h-3.5 rounded-full object-cover" />
+							{/if}
+							<span>{offender?.username ?? "?"}</span>
+							{#if typeof entry.minute === "number"}
+								<span class="text-[10px] tabular-nums opacity-80">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
+							{/if}
+							{#if entry.period === "extra_time"}
+								<span class="text-[8px] opacity-70">{$t("game_detail.extra_time_short")}</span>
+							{/if}
+						</span>
+					{:else}
+						{@const scorer = entry.scored_by ? getPlayerProfile(entry.scored_by) : null}
+						{@const goalIcon = GOAL_TYPES.find((g) => g.value === entry.goal_type)?.icon}
+						<span
+							class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium {entry.period === 'penalty'
+								? 'bg-warning/20 text-warning'
+								: entry.period === 'extra_time'
+									? 'bg-accent-red/20 text-accent-red'
+									: 'bg-bg-input text-text-primary'}"
+						>
+							{#if scorer?.avatar_url}
+								<img src={scorer.avatar_url} alt={scorer.username} class="w-3.5 h-3.5 rounded-full object-cover" />
+							{/if}
+							{entry.home}:{entry.away}
+							{#if typeof entry.minute === "number"}
+								<span class="text-[10px] tabular-nums opacity-80">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
+							{/if}
+							{#if goalIcon && entry.goal_type !== "play"}
+								<span class="text-[10px]">{goalIcon}</span>
+							{/if}
+							{#if entry.period === "extra_time"}
+								<span class="text-[8px] opacity-70">{$t("game_detail.extra_time_short")}</span>
+							{:else if entry.period === "penalty"}
+								<span class="text-[8px] opacity-70">{$t("game_detail.penalty_short")}</span>
+							{/if}
+						</span>
+					{/if}
 				{/each}
 			</div>
 		</div>
@@ -704,16 +821,109 @@ function removeStatsImage(type) {
 	</div>
 {/if}
 
-<!-- Minute Picker Popup -->
-{#if showMinutePicker && pendingGoal}
+<!-- Red Card: Team Picker Popup -->
+{#if redCardStep === "team" && pendingRedCard}
+	<div
+		class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6"
+		role="dialog"
+		aria-label={$t("new_game.red_card_team")}
+	>
+		<div class="bg-bg-secondary border border-border rounded-xl p-6 w-full max-w-xs">
+			<h3 class="text-sm font-medium text-text-primary text-center mb-4">
+				🟥 {$t("new_game.red_card_team")}
+			</h3>
+
+			<div class="flex flex-col gap-3">
+				<button
+					type="button"
+					onclick={() => selectRedCardTeam("home")}
+					class="flex items-center gap-3 p-3 rounded-lg bg-bg-input border border-border hover:border-accent-red hover:bg-accent-red/10 transition-colors"
+				>
+					{#if homeTeamData?.logo_url}
+						<TeamLogo logoUrl={homeTeamData.logo_url} teamName={homeTeamData.name} size="sm" />
+					{/if}
+					<span class="text-sm font-medium text-text-primary">{homeTeam || $t("game_detail.home_team")}</span>
+				</button>
+				<button
+					type="button"
+					onclick={() => selectRedCardTeam("away")}
+					class="flex items-center gap-3 p-3 rounded-lg bg-bg-input border border-border hover:border-accent-red hover:bg-accent-red/10 transition-colors"
+				>
+					{#if awayTeamData?.logo_url}
+						<TeamLogo logoUrl={awayTeamData.logo_url} teamName={awayTeamData.name} size="sm" />
+					{/if}
+					<span class="text-sm font-medium text-text-primary">{awayTeam || $t("game_detail.away_team")}</span>
+				</button>
+			</div>
+
+			<button
+				type="button"
+				onclick={cancelPicker}
+				class="w-full mt-4 py-2 text-xs text-text-secondary hover:text-text-primary transition-colors"
+			>
+				{$t("common.back")}
+			</button>
+		</div>
+	</div>
+{/if}
+
+<!-- Red Card: Player Picker Popup -->
+{#if redCardStep === "player" && pendingRedCard}
+	{@const teamPlayers = getPlayersForSide(pendingRedCard.team)}
+	<div
+		class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6"
+		role="dialog"
+		aria-label={$t("new_game.red_card_player")}
+	>
+		<div class="bg-bg-secondary border border-border rounded-xl p-6 w-full max-w-xs">
+			<h3 class="text-sm font-medium text-text-primary text-center mb-4">
+				🟥 {$t("new_game.red_card_player")}
+			</h3>
+
+			<div class="flex flex-col gap-3">
+				{#each teamPlayers as player (player.id)}
+					<button
+						type="button"
+						onclick={() => selectRedCardPlayer(player.id)}
+						class="flex items-center gap-3 p-3 rounded-lg bg-bg-input border border-border hover:border-accent-red hover:bg-accent-red/10 transition-colors"
+					>
+						{#if player.avatar_url}
+							<img
+								src={player.avatar_url}
+								alt={player.username}
+								class="w-10 h-10 rounded-full object-cover ring-2 ring-border"
+							/>
+						{:else}
+							<div class="w-10 h-10 rounded-full bg-accent-red/20 ring-2 ring-border flex items-center justify-center text-sm font-bold text-text-primary">
+								{(player.username || "?").charAt(0).toUpperCase()}
+							</div>
+						{/if}
+						<span class="text-sm font-medium text-text-primary">{player.username}</span>
+					</button>
+				{/each}
+			</div>
+
+			<button
+				type="button"
+				onclick={cancelPicker}
+				class="w-full mt-4 py-2 text-xs text-text-secondary hover:text-text-primary transition-colors"
+			>
+				{$t("common.back")}
+			</button>
+		</div>
+	</div>
+{/if}
+
+<!-- Minute Picker Popup (shared by goal and red-card flows) -->
+{#if showMinutePicker && (pendingGoal || pendingRedCard)}
 	<div
 		class="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 overflow-y-auto"
 		role="dialog"
-		aria-label={$t("minute_picker.title")}
+		aria-label={pendingRedCard ? $t("new_game.red_card_minute_title") : $t("minute_picker.title")}
 	>
 		<div class="bg-bg-secondary border border-border rounded-xl p-5 w-full max-w-sm mt-8 mb-8">
 			<h3 class="text-sm font-medium text-text-primary text-center mb-4">
-				{$t("minute_picker.title")}
+				{pendingRedCard ? $t("new_game.red_card_minute_title") : $t("minute_picker.title")}
 			</h3>
 
 			<MinutePicker
@@ -721,7 +931,7 @@ function removeStatsImage(type) {
 				bind:stoppage={pickerStoppage}
 				bind:showExtraTime={pickerShowExtraTime}
 				previousGoals={scoreTimeline}
-				period={pendingGoal.period} />
+				period={pickerPeriod} />
 
 			<div class="flex gap-2 mt-5">
 				<button
