@@ -92,6 +92,32 @@
 	"footer": {
 		"copyright": "© {year} RasenBürosport Leipzig IT"
 	},
+	"challenges": {
+		"title": "Weekly Challenges",
+		"subtitle": "Complete this week's tasks and earn bonus points",
+		"tab_active": "Active",
+		"tab_history": "History",
+		"tab_leaderboard": "Bonus points",
+		"completed_label": "Completed!",
+		"completed_short": "done",
+		"bonus_points_short": "bonus",
+		"weeks_short": "weeks",
+		"days_short": "d",
+		"hours_short": "h",
+		"minutes_short": "m",
+		"ends_in": "Ends in {duration}",
+		"dashboard_title": "Weekly Challenges",
+		"dashboard_open": "View all",
+		"dashboard_empty": "No active challenges",
+		"dashboard_error": "Failed to load",
+		"history_empty": "No completed weeks yet",
+		"leaderboard_empty": "No bonus points awarded yet",
+		"difficulty": {
+			"easy": "easy",
+			"medium": "medium",
+			"hard": "hard"
+		}
+	},
 	"wrapped": {
 		"title": "This Week at the Office",
 		"subtitle": "Wrapped",

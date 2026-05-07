@@ -12,4 +12,5 @@ export const ROUTES = {
 	COMPARE: "/app/compare",
 	STATS: "/app/stats",
 	WRAPPED: "/app/wrapped",
+	CHALLENGES: "/app/challenges",
 };
