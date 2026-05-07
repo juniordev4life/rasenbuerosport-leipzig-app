@@ -574,11 +574,11 @@ function removeStatsImage(type) {
 <!-- Minute Picker Popup -->
 {#if showMinutePicker && pendingGoal}
 	<div
-		class="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center p-4"
+		class="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 overflow-y-auto"
 		role="dialog"
 		aria-label={$t("minute_picker.title")}
 	>
-		<div class="bg-bg-secondary border border-border rounded-xl p-5 w-full max-w-sm">
+		<div class="bg-bg-secondary border border-border rounded-xl p-5 w-full max-w-sm mt-8 mb-8">
 			<h3 class="text-sm font-medium text-text-primary text-center mb-4">
 				{$t("minute_picker.title")}
 			</h3>
