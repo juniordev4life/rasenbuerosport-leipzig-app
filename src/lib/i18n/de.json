@@ -94,6 +94,32 @@
 	"footer": {
 		"copyright": "© {year} RasenBürosport Leipzig IT"
 	},
+	"challenges": {
+		"title": "Wochen-Challenges",
+		"subtitle": "Schaffe die Aufgaben dieser Woche und sammle Bonuspunkte",
+		"tab_active": "Aktiv",
+		"tab_history": "Verlauf",
+		"tab_leaderboard": "Bonuspunkte",
+		"completed_label": "Geschafft!",
+		"completed_short": "geschafft",
+		"bonus_points_short": "Bonus",
+		"weeks_short": "Wochen",
+		"days_short": "T",
+		"hours_short": "Std",
+		"minutes_short": "Min",
+		"ends_in": "Endet in {duration}",
+		"dashboard_title": "Wochen-Challenges",
+		"dashboard_open": "Alle ansehen",
+		"dashboard_empty": "Keine Challenges aktiv",
+		"dashboard_error": "Fehler beim Laden",
+		"history_empty": "Noch keine abgeschlossenen Wochen",
+		"leaderboard_empty": "Noch keine Bonuspunkte vergeben",
+		"difficulty": {
+			"easy": "leicht",
+			"medium": "mittel",
+			"hard": "schwer"
+		}
+	},
 	"wrapped": {
 		"title": "Diese Woche im Büro",
 		"subtitle": "Wrapped",
