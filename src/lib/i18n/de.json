@@ -103,6 +103,7 @@
 		"completed_label": "Geschafft!",
 		"completed_short": "geschafft",
 		"bonus_points_short": "Bonus",
+		"bonus_this_week": "+{points} Bonus diese Woche",
 		"weeks_short": "Wochen",
 		"days_short": "T",
 		"hours_short": "Std",

@@ -101,6 +101,7 @@
 		"completed_label": "Completed!",
 		"completed_short": "done",
 		"bonus_points_short": "bonus",
+		"bonus_this_week": "+{points} bonus this week",
 		"weeks_short": "weeks",
 		"days_short": "d",
 		"hours_short": "h",
