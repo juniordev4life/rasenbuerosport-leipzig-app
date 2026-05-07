@@ -314,6 +314,8 @@
 		"all_players": "Players",
 		"tap_to_assign": "Tap a player to assign",
 		"who_scored": "Who scored?",
+		"who_assisted": "Who assisted?",
+		"no_assist": "No assist",
 		"goal_type_title": "How was the goal scored?",
 		"goal_type_play": "Play",
 		"goal_type_corner": "Corner",

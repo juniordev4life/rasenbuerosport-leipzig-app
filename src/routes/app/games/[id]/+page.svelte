@@ -334,6 +334,7 @@ function getScorerProfile(playerId) {
 
 						<!-- Goal row -->
 						{@const scorer = getScorerProfile(entry.scored_by)}
+						{@const assist = getScorerProfile(entry.assist_by)}
 						{@const goalTypeIcon = entry.goal_type === "corner"
 							? "🚩"
 							: entry.goal_type === "freekick"
@@ -346,7 +347,12 @@ function getScorerProfile(playerId) {
 							<div class="flex-1 flex items-center justify-end gap-2 pr-4">
 								{#if entry.side === "home"}
 									{#if scorer}
-										<span class="text-[10px] text-text-secondary">{scorer.username}</span>
+										<div class="flex flex-col items-end">
+											<span class="text-[10px] text-text-secondary">{scorer.username}</span>
+											{#if assist}
+												<span class="text-[9px] text-text-secondary/70">↳ {assist.username}</span>
+											{/if}
+										</div>
 										{#if scorer.avatar_url}
 											<img src={scorer.avatar_url} alt={scorer.username} class="w-4 h-4 rounded-full object-cover" />
 										{/if}
@@ -384,7 +390,12 @@ function getScorerProfile(playerId) {
 										{#if scorer.avatar_url}
 											<img src={scorer.avatar_url} alt={scorer.username} class="w-4 h-4 rounded-full object-cover" />
 										{/if}
-										<span class="text-[10px] text-text-secondary">{scorer.username}</span>
+										<div class="flex flex-col items-start">
+											<span class="text-[10px] text-text-secondary">{scorer.username}</span>
+											{#if assist}
+												<span class="text-[9px] text-text-secondary/70">↳ {assist.username}</span>
+											{/if}
+										</div>
 									{/if}
 								{/if}
 							</div>

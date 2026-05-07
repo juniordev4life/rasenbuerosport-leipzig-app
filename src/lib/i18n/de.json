@@ -316,6 +316,8 @@
 		"all_players": "Spieler",
 		"tap_to_assign": "Tippe auf einen Spieler",
 		"who_scored": "Wer hat getroffen?",
+		"who_assisted": "Wer hat aufgelegt?",
+		"no_assist": "Kein Assist",
 		"goal_type_title": "Wie wurde das Tor erzielt?",
 		"goal_type_play": "Spiel",
 		"goal_type_corner": "Ecke",

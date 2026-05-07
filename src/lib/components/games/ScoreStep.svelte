@@ -69,6 +69,7 @@ const currentPeriod = $derived(
 /** Scorer picker state */
 let showScorerPicker = $state(false);
 let showGoalTypePicker = $state(false);
+let showAssistPicker = $state(false);
 let showMinutePicker = $state(false);
 let pendingGoal = $state(null);
 let pickerMinute = $state(1);
@@ -170,7 +171,9 @@ function selectScorer(playerId) {
 
 /**
  * Handle goal-type selection. Penalty shootout commits immediately;
- * other goals advance to the minute picker for in-game minute entry.
+ * 2v2 goals (other than penalties) advance to the assist picker first;
+ * everything else advances to the minute picker for in-game minute entry.
+ *
  * @param {"play"|"corner"|"freekick"|"penalty"} goalType
  */
 function selectGoalType(goalType) {
@@ -181,6 +184,57 @@ function selectGoalType(goalType) {
 		commitPendingGoal();
 		return;
 	}
+	if (shouldShowAssistPicker(goalType, pendingGoal.side)) {
+		showAssistPicker = true;
+		return;
+	}
+	openMinutePicker();
+}
+
+/**
+ * Whether the assist picker should appear for this goal. Assists exist only
+ * in multi-player teams and are conventionally not credited on penalty kicks.
+ *
+ * @param {"play"|"corner"|"freekick"|"penalty"} goalType
+ * @param {"home"|"away"} side
+ * @returns {boolean}
+ */
+function shouldShowAssistPicker(goalType, side) {
+	if (goalType === "penalty") return false;
+	const eligible = getAssistCandidates(side);
+	return eligible.length > 0;
+}
+
+/**
+ * Handle assist selection. `playerId` of `null` records "no assist" and
+ * proceeds. Either way, the flow advances to the minute picker.
+ *
+ * @param {string|null} playerId
+ */
+function selectAssist(playerId) {
+	if (!pendingGoal) return;
+	if (playerId) {
+		pendingGoal = { ...pendingGoal, assist_by: playerId };
+	}
+	showAssistPicker = false;
+	openMinutePicker();
+}
+
+/**
+ * Resolve assist candidates for a side: same team minus the scorer and minus
+ * any guest entries (guests do not have profiles to credit).
+ *
+ * @param {"home"|"away"} side
+ * @returns {Array<{ id: string, username: string, avatar_url: string|null }>}
+ */
+function getAssistCandidates(side) {
+	const sidePlayers = getPlayersForSide(side);
+	const scorerId = pendingGoal?.scored_by;
+	return sidePlayers.filter((p) => p.id !== scorerId);
+}
+
+/** Initialize MinutePicker state from current phase and reveal it. */
+function openMinutePicker() {
 	pickerMinute = 1;
 	pickerStoppage = 0;
 	pickerShowExtraTime = extraTimeActive;
@@ -208,6 +262,9 @@ function commitPendingGoal() {
 		scored_by: pendingGoal.scored_by,
 		goal_type: pendingGoal.goal_type,
 	};
+	if (pendingGoal.assist_by) {
+		entry.assist_by = pendingGoal.assist_by;
+	}
 	if (typeof pendingGoal.minute === "number") {
 		entry.minute = pendingGoal.minute;
 		entry.stoppage = pendingGoal.stoppage ?? 0;
@@ -216,6 +273,7 @@ function commitPendingGoal() {
 	prevTotal = pendingGoal.home + pendingGoal.away;
 	showScorerPicker = false;
 	showGoalTypePicker = false;
+	showAssistPicker = false;
 	showMinutePicker = false;
 	pendingGoal = null;
 	updateResultType();
@@ -232,6 +290,7 @@ function cancelPicker() {
 	prevTotal = scoreHome + scoreAway;
 	showScorerPicker = false;
 	showGoalTypePicker = false;
+	showAssistPicker = false;
 	showMinutePicker = false;
 	pendingGoal = null;
 }
@@ -577,6 +636,61 @@ function removeStatsImage(type) {
 						<span class="text-xs font-medium text-text-primary">{$t(type.labelKey)}</span>
 					</button>
 				{/each}
+			</div>
+
+			<button
+				type="button"
+				onclick={cancelPicker}
+				class="w-full mt-4 py-2 text-xs text-text-secondary hover:text-text-primary transition-colors"
+			>
+				{$t("common.back")}
+			</button>
+		</div>
+	</div>
+{/if}
+
+<!-- Assist Picker Popup -->
+{#if showAssistPicker && pendingGoal}
+	{@const assistCandidates = getAssistCandidates(pendingGoal.side)}
+	<div
+		class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6"
+		role="dialog"
+		aria-label={$t("new_game.who_assisted")}
+	>
+		<div class="bg-bg-secondary border border-border rounded-xl p-6 w-full max-w-xs">
+			<h3 class="text-sm font-medium text-text-primary text-center mb-4">
+				{$t("new_game.who_assisted")}
+			</h3>
+
+			<div class="flex flex-col gap-3">
+				{#each assistCandidates as player (player.id)}
+					<button
+						type="button"
+						onclick={() => selectAssist(player.id)}
+						class="flex items-center gap-3 p-3 rounded-lg bg-bg-input border border-border hover:border-accent-red hover:bg-accent-red/10 transition-colors"
+					>
+						{#if player.avatar_url}
+							<img
+								src={player.avatar_url}
+								alt={player.username}
+								class="w-10 h-10 rounded-full object-cover ring-2 ring-border"
+							/>
+						{:else}
+							<div class="w-10 h-10 rounded-full bg-accent-red/20 ring-2 ring-border flex items-center justify-center text-sm font-bold text-text-primary">
+								{(player.username || "?").charAt(0).toUpperCase()}
+							</div>
+						{/if}
+						<span class="text-sm font-medium text-text-primary">{player.username}</span>
+					</button>
+				{/each}
+
+				<button
+					type="button"
+					onclick={() => selectAssist(null)}
+					class="flex items-center justify-center gap-2 p-3 rounded-lg bg-bg-input border border-border border-dashed text-text-secondary hover:text-text-primary hover:border-text-secondary transition-colors"
+				>
+					<span class="text-sm font-medium">{$t("new_game.no_assist")}</span>
+				</button>
 			</div>
 
 			<button
