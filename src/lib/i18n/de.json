@@ -332,6 +332,15 @@
 		"random_no_teams": "Nicht genug gleich starke Teams im Sterne-Bereich",
 		"random_vs": "vs."
 	},
+	"minute_picker": {
+		"title": "In welcher Minute fiel das Tor?",
+		"track_label": "Spielminute",
+		"stoppage_label": "Nachspielzeit",
+		"stoppage_hint": "Nachspielzeit nur bei 45', 90', 105' oder 120'",
+		"et_off": "Verlängerung anzeigen",
+		"et_on": "Verlängerung aktiv",
+		"confirm": "Übernehmen"
+	},
 	"match_report": {
 		"title": "KI-Spielbericht",
 		"generating": "Wird generiert...",

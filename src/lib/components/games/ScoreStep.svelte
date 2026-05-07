@@ -4,6 +4,8 @@ import { tick } from "svelte";
 import Button from "$lib/components/ui/Button.svelte";
 import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
 import { getTeamByName } from "$lib/services/teams.services.js";
+import { formatMinute } from "$lib/utils/minute.utils.js";
+import MinutePicker from "./MinutePicker.svelte";
 import ScoreCounter from "./ScoreCounter.svelte";
 
 /**
@@ -64,7 +66,11 @@ const currentPeriod = $derived(
 /** Scorer picker state */
 let showScorerPicker = $state(false);
 let showGoalTypePicker = $state(false);
+let showMinutePicker = $state(false);
 let pendingGoal = $state(null);
+let pickerMinute = $state(1);
+let pickerStoppage = $state(0);
+let pickerShowExtraTime = $state(false);
 
 const GOAL_TYPES = [
 	{ value: "play", labelKey: "new_game.goal_type_play", icon: "⚽" },
@@ -113,8 +119,9 @@ async function handleScoreChange() {
 		};
 
 		if (currentPeriod === "penalty") {
-			// Penalty shootout — every goal is a penalty, skip picker
-			commitPendingGoal("penalty");
+			// Penalty shootout — every goal is a penalty, no minute, skip pickers
+			pendingGoal = { ...pendingGoal, goal_type: "penalty" };
+			commitPendingGoal();
 		} else if (sidePlayers.length > 1) {
 			// Multi-player team: scorer picker first, then goal type
 			showScorerPicker = true;
@@ -143,32 +150,54 @@ function selectScorer(playerId) {
 }
 
 /**
- * Handle goal-type selection — finalizes the timeline entry
+ * Handle goal-type selection. Penalty shootout commits immediately;
+ * other goals advance to the minute picker for in-game minute entry.
  * @param {"play"|"corner"|"freekick"|"penalty"} goalType
  */
 function selectGoalType(goalType) {
-	commitPendingGoal(goalType);
+	if (!pendingGoal) return;
+	pendingGoal = { ...pendingGoal, goal_type: goalType };
+	showGoalTypePicker = false;
+	if (pendingGoal.period === "penalty") {
+		commitPendingGoal();
+		return;
+	}
+	pickerMinute = 1;
+	pickerStoppage = 0;
+	pickerShowExtraTime = extraTimeActive;
+	showMinutePicker = true;
 }
 
-/**
- * Append the pending goal to the timeline with the chosen type
- * @param {"play"|"corner"|"freekick"|"penalty"} goalType
- */
-function commitPendingGoal(goalType) {
+/** Confirm minute selection and commit the goal. */
+function confirmMinute() {
 	if (!pendingGoal) return;
-	scoreTimeline = [
-		...scoreTimeline,
-		{
-			home: pendingGoal.home,
-			away: pendingGoal.away,
-			period: pendingGoal.period,
-			scored_by: pendingGoal.scored_by,
-			goal_type: goalType,
-		},
-	];
+	pendingGoal = {
+		...pendingGoal,
+		minute: pickerMinute,
+		stoppage: pickerStoppage,
+	};
+	commitPendingGoal();
+}
+
+/** Append the pending goal to the timeline. */
+function commitPendingGoal() {
+	if (!pendingGoal) return;
+	const entry = {
+		home: pendingGoal.home,
+		away: pendingGoal.away,
+		period: pendingGoal.period,
+		scored_by: pendingGoal.scored_by,
+		goal_type: pendingGoal.goal_type,
+	};
+	if (typeof pendingGoal.minute === "number") {
+		entry.minute = pendingGoal.minute;
+		entry.stoppage = pendingGoal.stoppage ?? 0;
+	}
+	scoreTimeline = [...scoreTimeline, entry];
 	prevTotal = pendingGoal.home + pendingGoal.away;
 	showScorerPicker = false;
 	showGoalTypePicker = false;
+	showMinutePicker = false;
 	pendingGoal = null;
 	updateResultType();
 }
@@ -184,6 +213,7 @@ function cancelPicker() {
 	prevTotal = scoreHome + scoreAway;
 	showScorerPicker = false;
 	showGoalTypePicker = false;
+	showMinutePicker = false;
 	pendingGoal = null;
 }
 
@@ -386,6 +416,9 @@ function removeStatsImage(type) {
 							<img src={scorer.avatar_url} alt={scorer.username} class="w-3.5 h-3.5 rounded-full object-cover" />
 						{/if}
 						{entry.home}:{entry.away}
+						{#if typeof entry.minute === "number"}
+							<span class="text-[10px] tabular-nums opacity-80">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
+						{/if}
 						{#if goalIcon && entry.goal_type !== "play"}
 							<span class="text-[10px]">{goalIcon}</span>
 						{/if}
@@ -534,6 +567,44 @@ function removeStatsImage(type) {
 			>
 				{$t("common.back")}
 			</button>
+		</div>
+	</div>
+{/if}
+
+<!-- Minute Picker Popup -->
+{#if showMinutePicker && pendingGoal}
+	<div
+		class="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center p-4"
+		role="dialog"
+		aria-label={$t("minute_picker.title")}
+	>
+		<div class="bg-bg-secondary border border-border rounded-xl p-5 w-full max-w-sm">
+			<h3 class="text-sm font-medium text-text-primary text-center mb-4">
+				{$t("minute_picker.title")}
+			</h3>
+
+			<MinutePicker
+				bind:minute={pickerMinute}
+				bind:stoppage={pickerStoppage}
+				bind:showExtraTime={pickerShowExtraTime}
+				previousGoals={scoreTimeline} />
+
+			<div class="flex gap-2 mt-5">
+				<button
+					type="button"
+					onclick={cancelPicker}
+					class="flex-1 py-2 text-xs text-text-secondary hover:text-text-primary border border-border rounded-lg transition-colors"
+				>
+					{$t("common.back")}
+				</button>
+				<button
+					type="button"
+					onclick={confirmMinute}
+					class="flex-1 py-2 text-xs font-medium text-white bg-accent-red border border-accent-red rounded-lg hover:opacity-90 transition-opacity"
+				>
+					{$t("minute_picker.confirm")}
+				</button>
+			</div>
 		</div>
 	</div>
 {/if}
