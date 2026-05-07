@@ -168,9 +168,10 @@ const resultSuffix = $derived(
 const timeline = $derived(game?.score_timeline || []);
 
 /**
- * Build enriched timeline entries with side info. Red-card entries carry no
- * score, so their side is read from the entry's `team` field rather than
- * derived from the running score. Reversed so newest event is at top.
+ * Build enriched timeline entries with side info. Non-goal entries (red
+ * cards, missed penalties) carry no score, so their side is read from the
+ * entry's `team` field rather than derived from the running score. Reversed
+ * so newest event is at top.
  * @returns {object[]}
  */
 const timelineEntries = $derived.by(() => {
@@ -180,7 +181,10 @@ const timelineEntries = $derived.by(() => {
 	const entries = timeline.map((entry, i) => {
 		const periodChanged = i > 0 && prevPeriod !== entry.period;
 		prevPeriod = entry.period;
-		if (entry.event_type === "red_card") {
+		if (
+			entry.event_type === "red_card" ||
+			entry.event_type === "penalty_missed"
+		) {
 			return { ...entry, side: entry.team, periodChanged };
 		}
 		const isHomeGoal = entry.home > prevHome;
@@ -374,6 +378,56 @@ function getScorerProfile(playerId) {
 												<img src={offender.avatar_url} alt={offender.username} class="w-4 h-4 rounded-full object-cover" />
 											{/if}
 											<span class="text-[10px] text-text-secondary">{offender.username}</span>
+										{/if}
+									{/if}
+								</div>
+							</div>
+						{:else if entry.event_type === "penalty_missed"}
+							{@const shooter = getScorerProfile(entry.shooter_id)}
+							{@const keeper = entry.keeper_id ? getScorerProfile(entry.keeper_id) : null}
+							<!-- Missed-penalty row -->
+							<div class="relative z-10 flex items-center w-full py-1.5">
+								<!-- Home side (left) -->
+								<div class="flex-1 flex items-center justify-end gap-2 pr-4">
+									{#if entry.side === "home"}
+										{#if shooter}
+											<div class="flex flex-col items-end">
+												<span class="text-[10px] text-text-secondary">{shooter.username}</span>
+												{#if keeper}
+													<span class="text-[9px] text-text-secondary/70">🧤 {keeper.username}</span>
+												{/if}
+											</div>
+											{#if shooter.avatar_url}
+												<img src={shooter.avatar_url} alt={shooter.username} class="w-4 h-4 rounded-full object-cover" />
+											{/if}
+										{/if}
+										{#if typeof entry.minute === "number"}
+											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
+										{/if}
+										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-warning/20 text-warning" aria-label={$t("game_detail.event_penalty_missed")}>❌</span>
+									{/if}
+								</div>
+
+								<!-- Center dot -->
+								<div class="w-2.5 h-2.5 rounded-full shrink-0 bg-warning ring-2 ring-bg-secondary"></div>
+
+								<!-- Away side (right) -->
+								<div class="flex-1 flex items-center justify-start gap-2 pl-4">
+									{#if entry.side === "away"}
+										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-warning/20 text-warning" aria-label={$t("game_detail.event_penalty_missed")}>❌</span>
+										{#if typeof entry.minute === "number"}
+											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
+										{/if}
+										{#if shooter}
+											{#if shooter.avatar_url}
+												<img src={shooter.avatar_url} alt={shooter.username} class="w-4 h-4 rounded-full object-cover" />
+											{/if}
+											<div class="flex flex-col items-start">
+												<span class="text-[10px] text-text-secondary">{shooter.username}</span>
+												{#if keeper}
+													<span class="text-[9px] text-text-secondary/70">🧤 {keeper.username}</span>
+												{/if}
+											</div>
 										{/if}
 									{/if}
 								</div>
