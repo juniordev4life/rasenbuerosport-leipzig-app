@@ -337,6 +337,8 @@
 		"stoppage_hint": "Stoppage only at 45', 90', 105' or 120'",
 		"et_off": "Show extra time",
 		"et_on": "Extra time active",
+		"hint_floor": "Earliest {minute}",
+		"error_too_early": "No later minute is possible in this phase — switch to extra time",
 		"confirm": "Confirm"
 	},
 	"match_report": {

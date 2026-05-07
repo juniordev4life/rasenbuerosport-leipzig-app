@@ -4,7 +4,10 @@ import { tick } from "svelte";
 import Button from "$lib/components/ui/Button.svelte";
 import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
 import { getTeamByName } from "$lib/services/teams.services.js";
-import { formatMinute } from "$lib/utils/minute.utils.js";
+import {
+	formatMinute,
+	validateMinuteAgainstTimeline,
+} from "$lib/utils/minute.utils.js";
 import MinutePicker from "./MinutePicker.svelte";
 import ScoreCounter from "./ScoreCounter.svelte";
 
@@ -71,6 +74,22 @@ let pendingGoal = $state(null);
 let pickerMinute = $state(1);
 let pickerStoppage = $state(0);
 let pickerShowExtraTime = $state(false);
+
+/**
+ * Validity of the current MinutePicker selection against the existing timeline.
+ * The picker clamps drags to the floor, but stoppage selections and `et_off`
+ * edge cases can still produce a value below the floor — this gate keeps the
+ * confirm button honest.
+ */
+const pickerValidity = $derived(
+	pendingGoal
+		? validateMinuteAgainstTimeline(
+				{ minute: pickerMinute, stoppage: pickerStoppage },
+				scoreTimeline,
+				pendingGoal.period,
+			)
+		: { valid: true, floor: null },
+);
 
 const GOAL_TYPES = [
 	{ value: "play", labelKey: "new_game.goal_type_play", icon: "⚽" },
@@ -587,7 +606,8 @@ function removeStatsImage(type) {
 				bind:minute={pickerMinute}
 				bind:stoppage={pickerStoppage}
 				bind:showExtraTime={pickerShowExtraTime}
-				previousGoals={scoreTimeline} />
+				previousGoals={scoreTimeline}
+				period={pendingGoal.period} />
 
 			<div class="flex gap-2 mt-5">
 				<button
@@ -600,7 +620,8 @@ function removeStatsImage(type) {
 				<button
 					type="button"
 					onclick={confirmMinute}
-					class="flex-1 py-2 text-xs font-medium text-white bg-accent-red border border-accent-red rounded-lg hover:opacity-90 transition-opacity"
+					disabled={!pickerValidity.valid}
+					class="flex-1 py-2 text-xs font-medium text-white bg-accent-red border border-accent-red rounded-lg hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
 				>
 					{$t("minute_picker.confirm")}
 				</button>

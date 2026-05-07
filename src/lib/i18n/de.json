@@ -339,7 +339,9 @@
 		"stoppage_hint": "Nachspielzeit nur bei 45', 90', 105' oder 120'",
 		"et_off": "Verlängerung anzeigen",
 		"et_on": "Verlängerung aktiv",
-		"confirm": "Übernehmen"
+		"confirm": "Übernehmen",
+		"hint_floor": "Frühestens {minute}",
+		"error_too_early": "In dieser Spielphase ist keine spätere Minute möglich — wechsle in die Verlängerung"
 	},
 	"match_report": {
 		"title": "KI-Spielbericht",
