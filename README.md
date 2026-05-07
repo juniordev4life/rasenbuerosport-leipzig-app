@@ -6,6 +6,8 @@
 
 **Track results. Analyze stats. Legends are born.**
 
+![Version](https://img.shields.io/badge/version-v0.1.0-blue)
+
 The app that turns every foosball break at the office into a real sporting event.
 
 ---

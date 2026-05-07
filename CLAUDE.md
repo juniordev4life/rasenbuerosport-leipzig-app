@@ -268,9 +268,22 @@ Never push directly to `main`. Always use feature branches and pull requests.
 - **PR checks**: lint + format must pass
 - **Merge strategy**: Squash merge, delete branch after merge
 
-### Deployment — Firebase Hosting (NOT a GCS bucket)
+### Deployment — Firebase Hosting, release-driven
 
 Unlike the RB Leipzig engineering-unit Striker projects, this app deploys to **Firebase Hosting**, not Cloud Storage + Cloud CDN.
+
+The GitHub Actions `Match Day` workflow runs **only on `v*` tag pushes**. Pushes to `main` run `Pre-Match Checks` (lint + format) but do **not** deploy.
+
+Cut a release with:
+
+```bash
+npm run release           # auto-bump from conventional commits
+npm run release -- 1.2.0  # explicit version
+```
+
+`changelogen` bumps the version, writes `CHANGELOG.md`, tags `v<version>`, pushes — and the tag push triggers Match Day, which builds and deploys to Firebase Hosting.
+
+Local fallback (for emergencies / testing the deploy outside the workflow):
 
 ```bash
 npm run build      # adapter-static → ./build

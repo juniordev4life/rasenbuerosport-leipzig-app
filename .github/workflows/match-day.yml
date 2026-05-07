@@ -2,14 +2,15 @@ name: Match Day
 
 on:
   push:
-    branches: [main]
+    tags:
+      - "v*"
   workflow_dispatch:
 
 env:
   PROJECT_ID: rasenbuerosport-leipzig-9d54f
 
 jobs:
-  pre-match-checks:
+  checks:
     name: Pre-Match Checks
     runs-on: ubuntu-latest
     steps:
@@ -30,7 +31,7 @@ jobs:
 
   deploy:
     name: Deploy to Firebase Hosting
-    needs: pre-match-checks
+    needs: checks
     runs-on: ubuntu-latest
 
     steps:

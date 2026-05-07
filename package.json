@@ -13,10 +13,12 @@
 		"format": "biome format --write .",
 		"format:check": "biome format .",
 		"check": "biome check --write .",
-		"deploy": "npm run build && npx firebase-tools deploy --only hosting"
+		"deploy": "npm run build && npx firebase-tools deploy --only hosting",
+		"release": "node scripts/release.js"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.4",
+		"changelogen": "^0.5.7",
 		"@sveltejs/adapter-static": "^3.0.0",
 		"@sveltejs/kit": "^2.50.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
