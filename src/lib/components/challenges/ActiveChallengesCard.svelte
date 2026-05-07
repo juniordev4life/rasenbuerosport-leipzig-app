@@ -83,9 +83,16 @@ const completedCount = $derived(
 		</div>
 
 		<div class="flex items-center justify-between pt-1">
-			<span class="text-[11px] text-text-secondary">
-				{completedCount}/{active.challenges.length} {$t("challenges.completed_short")}
-			</span>
+			<div class="flex items-center gap-2">
+				<span class="text-[11px] text-text-secondary">
+					{completedCount}/{active.challenges.length} {$t("challenges.completed_short")}
+				</span>
+				{#if active.reward_points_this_week > 0}
+					<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-warning/15 text-warning tabular-nums">
+						+{active.reward_points_this_week} {$t("challenges.bonus_points_short")}
+					</span>
+				{/if}
+			</div>
 			<a
 				href={ROUTES.CHALLENGES}
 				class="text-[11px] font-medium text-accent-red hover:underline"

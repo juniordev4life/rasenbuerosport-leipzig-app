@@ -76,9 +76,16 @@ const formatWeek = (start, end) => {
 			</h1>
 			<p class="text-xs text-text-secondary mt-0.5">{$t("challenges.subtitle")}</p>
 		</div>
-		{#if active}
-			<ChallengeWeekCountdown msRemaining={active.ms_remaining} />
-		{/if}
+		<div class="flex flex-col items-end gap-1">
+			{#if active}
+				<ChallengeWeekCountdown msRemaining={active.ms_remaining} />
+			{/if}
+			{#if active && active.reward_points_this_week > 0}
+				<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-warning/15 text-warning tabular-nums">
+					{$t("challenges.bonus_this_week", { points: active.reward_points_this_week })}
+				</span>
+			{/if}
+		</div>
 	</div>
 
 	<!-- Tabs -->
