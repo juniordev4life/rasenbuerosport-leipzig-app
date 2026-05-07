@@ -2,6 +2,8 @@
 
 This guide explains how to run the full RasenBuerosport stack locally (Frontend + Backend + Database).
 
+The recommended local DB setup is a **Docker Postgres 16 seeded from a PROD snapshot** on port `5434`. The Cloud SQL Auth Proxy is only used for the one-off snapshot dump (and as a fallback for read-only debugging). This keeps your local app fully isolated from production.
+
 ---
 
 ## Prerequisites
@@ -11,14 +13,18 @@ This guide explains how to run the full RasenBuerosport stack locally (Frontend 
 | **Node.js** | >= 24.0.0 | [nodejs.org](https://nodejs.org/) |
 | **gcloud CLI** | latest | [cloud.google.com/sdk](https://cloud.google.com/sdk/docs/install) |
 | **Cloud SQL Auth Proxy** | latest | [cloud.google.com/sql/docs/postgres/connect-auth-proxy](https://cloud.google.com/sql/docs/postgres/connect-auth-proxy) |
+| **Docker Desktop** | latest | [docker.com](https://www.docker.com/products/docker-desktop/) |
+| **psql / pg_dump** | >= 16 | `brew install libpq` (macOS) |
 
-Make sure you are authenticated with GCP:
+Authenticate with GCP and select the project:
 
 ```bash
 gcloud auth login
 gcloud auth application-default login
 gcloud config set project rasenbuerosport-leipzig-9d54f
 ```
+
+You need the **Cloud SQL Client** role on the GCP project to connect through the proxy.
 
 ---
 
@@ -30,23 +36,32 @@ Browser (localhost:5173)
           ├── Firebase Auth (Google Sign-In)
           ├── Firebase Storage (Avatars, Screenshots)
           └── Playmaker API (localhost:3001)
-                 └── Cloud SQL PostgreSQL (via Auth Proxy, localhost:5433)
+                 └── Local Docker Postgres 16 (localhost:5434)
+                        ↑
+                        └── seeded once from PROD via Cloud SQL Auth Proxy (5433)
 ```
 
 ---
 
-## 1. Start the Cloud SQL Auth Proxy
+## 1. Local Database (Docker Postgres + PROD Snapshot)
 
-The proxy creates a secure tunnel to the Cloud SQL PostgreSQL instance. We use port **5433** to avoid conflicts with any local PostgreSQL installation on 5432.
+**One-time:** dump PROD into a local file, then start a Docker Postgres and restore the dump.
+
+The full step-by-step (proxy → `pg_dump` → Docker → restore → `.env`) lives in the API repo:
+
+➡ [`rasenbuerosport-leipzig-api/README.md` → *Local Development with a PROD Snapshot*](https://github.com/juniordev4life/rasenbuerosport-leipzig-api#local-development-with-a-prod-snapshot)
+
+After the one-time setup you have:
+
+- a Docker container `rbsl-pg` listening on `127.0.0.1:5434`
+- DB user `postgres` / password `localdev` / database `rasenbuerosport`
+- a persistent volume `rbsl-pg-data` that survives container restarts
+
+Day-to-day commands:
 
 ```bash
-cloud-sql-proxy rasenbuerosport-leipzig-9d54f:europe-west3:rasenbuerosport-db --port=5433
-```
-
-Keep this terminal open. You should see:
-
-```
-Listening on 127.0.0.1:5433
+docker start rbsl-pg   # resume after a reboot
+docker stop rbsl-pg    # pause
 ```
 
 ---
@@ -74,14 +89,16 @@ cp .env.example .env
 | `PORT` | `3001` | API server port |
 | `HOST` | `0.0.0.0` | Bind address |
 | `NODE_ENV` | `development` | Environment mode |
-| `DATABASE_URL` | `postgresql://postgres:PASSWORD@127.0.0.1:5433/rasenbuerosport` | Cloud SQL via proxy (port 5433!) |
+| `DATABASE_URL` | `postgresql://postgres:localdev@127.0.0.1:5434/rasenbuerosport` | Local Docker Postgres (port 5434) |
 | `FIREBASE_PROJECT_ID` | `rasenbuerosport-leipzig-9d54f` | Firebase project ID |
 | `CORS_ORIGIN` | `http://localhost:5173` | Frontend origin for CORS |
 | `ANTHROPIC_API_KEY` | `sk-ant-...` | For AI features (predictions, reports) |
 
-> **Note:** `DATABASE_URL` uses port **5433** (proxy port), not 5432. Ask a team member for the database password.
+> **Note:** Default local DB password is `localdev` (defined when you create the Docker container). It is **not** the PROD password.
 
 > **Note:** For Firebase Admin SDK authentication locally, `gcloud auth application-default login` is sufficient. No service account key file needed.
+
+> **Optional:** if you ever need to point the API at PROD directly (read-only debugging), keep the PROD `DATABASE_URL` commented in `.env` and start the Cloud SQL Auth Proxy on `5433` — but prefer the local snapshot for normal development.
 
 ### Start the dev server
 
@@ -138,19 +155,17 @@ The app runs at **http://localhost:5173**.
 
 ---
 
-## Quick Start (All Three Terminals)
+## Quick Start (Two Terminals)
 
-Open three terminal windows/tabs:
+Once the local Docker Postgres has been seeded once, the day-to-day loop is just two terminals:
 
 ```bash
-# Terminal 1 — Cloud SQL Proxy
-cloud-sql-proxy rasenbuerosport-leipzig-9d54f:europe-west3:rasenbuerosport-db --port=5433
-
-# Terminal 2 — Backend API
+# Terminal 1 — Backend API (assumes `docker start rbsl-pg` has run)
 cd rasenbuerosport-leipzig-api
+docker start rbsl-pg
 npm run dev
 
-# Terminal 3 — Frontend
+# Terminal 2 — Frontend
 cd rasenbuerosport-leipzig-app
 npm run dev
 ```
@@ -159,23 +174,46 @@ Then open **http://localhost:5173** in your browser.
 
 ---
 
-## Database Migrations
+## Database Tasks
 
-If you need to set up a fresh database or run migrations:
+### Refresh the local snapshot from PROD
+
+Re-run the snapshot workflow in the API README. Short version:
 
 ```bash
-# Make sure the Cloud SQL Proxy is running on port 5433
+# 1. Proxy to PROD (read-only)
+cloud-sql-proxy rasenbuerosport-leipzig-9d54f:europe-west3:rasenbuerosport-db --port=5433
+
+# 2. Dump (in another terminal, in the API repo)
+set -a; source .env.prod; set +a   # or set DATABASE_URL inline
+pg_dump "$DATABASE_URL" --no-owner --no-acl --format=plain --file=$HOME/rbsl-prod-dump.sql
+sed -i.bak '/^SET transaction_timeout/d' $HOME/rbsl-prod-dump.sql   # if pg_dump >= 17
+
+# 3. Reset local DB and restore
+docker exec -e PGPASSWORD=localdev rbsl-pg psql -U postgres -c "DROP DATABASE rasenbuerosport;"
+docker exec -e PGPASSWORD=localdev rbsl-pg psql -U postgres -c "CREATE DATABASE rasenbuerosport;"
+PGPASSWORD=localdev psql -h 127.0.0.1 -p 5434 -U postgres -d rasenbuerosport \
+  -v ON_ERROR_STOP=1 -f $HOME/rbsl-prod-dump.sql
+```
+
+### Run migrations on a fresh local DB
+
+If you ever start from an empty Docker Postgres instead of a PROD snapshot:
+
+```bash
 cd rasenbuerosport-leipzig-api
 
-# Run the init schema
-psql "postgresql://postgres:PASSWORD@127.0.0.1:5433/rasenbuerosport" -f migrations/001_init.sql
+# Schema
+PGPASSWORD=localdev psql -h 127.0.0.1 -p 5434 -U postgres -d rasenbuerosport -f migrations/001_init.sql
 
-# Import seed data (profiles)
-psql "postgresql://postgres:PASSWORD@127.0.0.1:5433/rasenbuerosport" -f migrations/002_import_data.sql
+# Initial data
+PGPASSWORD=localdev psql -h 127.0.0.1 -p 5434 -U postgres -d rasenbuerosport -f migrations/002_import_data.sql
 
-# Import all 633 teams from scraped data
-DATABASE_URL="postgresql://postgres:PASSWORD@127.0.0.1:5433/rasenbuerosport" node scripts/import-teams.js
+# All 633 teams from scraped data
+DATABASE_URL="postgresql://postgres:localdev@127.0.0.1:5434/rasenbuerosport" node scripts/import-teams.js
 ```
+
+> Migrations against PROD must go through the Cloud SQL Proxy (`127.0.0.1:5433`) and are usually run as part of a release, not from a developer machine.
 
 ---
 
@@ -209,9 +247,25 @@ DATABASE_URL="postgresql://postgres:PASSWORD@127.0.0.1:5433/rasenbuerosport" nod
 
 ## Troubleshooting
 
+### Docker: `Cannot connect to the Docker daemon`
+
+Docker Desktop is not running. Start the Docker Desktop app and wait until the whale icon in the menu bar is green, then retry.
+
+### Postgres: `port is already allocated` on 5434
+
+Another container or local Postgres is using 5434. Either stop that process or pick a different host port (e.g. `-p 5435:5432` when creating the container) and update `DATABASE_URL` accordingly.
+
+### Restore fails on `unrecognized configuration parameter "transaction_timeout"`
+
+Your `pg_dump` is version 17+ but the local container runs Postgres 16. Strip the line:
+
+```bash
+sed -i.bak '/^SET transaction_timeout/d' $HOME/rbsl-prod-dump.sql
+```
+
 ### Cloud SQL Proxy: "address already in use"
 
-Port 5432 is likely used by a local PostgreSQL. Use port 5433 instead (as shown above) and make sure `DATABASE_URL` in your backend `.env` also uses port 5433.
+Port 5432 is likely used by a local PostgreSQL. Use port 5433 (proxy) and 5434 (Docker) as shown above. Make sure `DATABASE_URL` matches the port you actually want to talk to.
 
 ### CORS errors in browser
 
