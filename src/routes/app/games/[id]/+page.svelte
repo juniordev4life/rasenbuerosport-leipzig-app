@@ -13,6 +13,7 @@ import { getCountryFlag } from "$lib/constants/teams.constants.js";
 import { del, get } from "$lib/services/api.services.js";
 import { getTeamByName } from "$lib/services/teams.services.js";
 import { user } from "$lib/stores/auth.stores.js";
+import { formatMinute } from "$lib/utils/minute.utils.js";
 import { buildRematchUrl } from "$lib/utils/rematch.utils.js";
 
 const { t } = getTranslate();
@@ -353,6 +354,9 @@ function getScorerProfile(playerId) {
 									{#if goalTypeIcon}
 										<span class="text-xs">{goalTypeIcon}</span>
 									{/if}
+									{#if typeof entry.minute === "number"}
+										<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
+									{/if}
 									<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-accent-red/20 text-accent-red">
 										{entry.home}:{entry.away}
 									</span>
@@ -370,6 +374,9 @@ function getScorerProfile(playerId) {
 									<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-500">
 										{entry.home}:{entry.away}
 									</span>
+									{#if typeof entry.minute === "number"}
+										<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
+									{/if}
 									{#if goalTypeIcon}
 										<span class="text-xs">{goalTypeIcon}</span>
 									{/if}

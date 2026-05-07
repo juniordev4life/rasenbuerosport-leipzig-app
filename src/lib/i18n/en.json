@@ -330,6 +330,15 @@
 		"random_no_teams": "Not enough equally rated teams in star range",
 		"random_vs": "vs."
 	},
+	"minute_picker": {
+		"title": "What minute was the goal scored?",
+		"track_label": "Match minute",
+		"stoppage_label": "Stoppage time",
+		"stoppage_hint": "Stoppage only at 45', 90', 105' or 120'",
+		"et_off": "Show extra time",
+		"et_on": "Extra time active",
+		"confirm": "Confirm"
+	},
 	"match_report": {
 		"title": "AI Match Report",
 		"generating": "Generating...",
