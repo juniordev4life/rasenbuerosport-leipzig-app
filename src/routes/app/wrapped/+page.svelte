@@ -1,5 +1,6 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import MatchOfTheWeek from "$lib/components/wrapped/MatchOfTheWeek.svelte";
 import { get } from "$lib/services/api.services.js";
 
 const { t } = getTranslate();
@@ -131,6 +132,9 @@ function formatDate(iso) {
 				</div>
 			</div>
 		</div>
+
+		<!-- Match of the Week (longer AI narrative for the most dramatic game) -->
+		<MatchOfTheWeek match={p.match_of_the_week} />
 
 		<!-- MVP -->
 		{#if p.mvp}

@@ -140,7 +140,17 @@
 		"prev_week": "Vorherige Woche",
 		"next_week": "Nächste Woche",
 		"latest_label": "Aktuelle Woche",
-		"archive_position": "{current} von {total}"
+		"archive_position": "{current} von {total}",
+		"match_of_the_week_title": "Spiel der Woche",
+		"match_of_the_week_open": "Spiel ansehen"
+	},
+	"recap": {
+		"title": "Deine Woche bisher",
+		"bonus_points_short": "Bonus",
+		"games": "Spiele",
+		"wins": "Siege",
+		"goals": "Tore",
+		"assists": "Vorlagen"
 	},
 	"leaderboard": {
 		"title": "Rangliste",
