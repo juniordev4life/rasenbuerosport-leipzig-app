@@ -1,6 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import ActiveChallengesCard from "$lib/components/challenges/ActiveChallengesCard.svelte";
+import PersonalRecapCard from "$lib/components/wrapped/PersonalRecapCard.svelte";
 import ActivityFeed from "$lib/components/dashboard/ActivityFeed.svelte";
 import RecentGames from "$lib/components/dashboard/RecentGames.svelte";
 import StreakBadge from "$lib/components/dashboard/StreakBadge.svelte";
@@ -136,6 +137,11 @@ const lastGameSwapUrl = $derived.by(() => {
 	<!-- Active Challenges (week teaser) -->
 	<div class="lg:col-span-2">
 		<ActiveChallengesCard />
+	</div>
+
+	<!-- Personal weekly recap (live AI narrative) -->
+	<div class="lg:col-span-2">
+		<PersonalRecapCard />
 	</div>
 
 

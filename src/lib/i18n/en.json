@@ -138,7 +138,17 @@
 		"prev_week": "Previous week",
 		"next_week": "Next week",
 		"latest_label": "Current week",
-		"archive_position": "{current} of {total}"
+		"archive_position": "{current} of {total}",
+		"match_of_the_week_title": "Match of the Week",
+		"match_of_the_week_open": "Open game"
+	},
+	"recap": {
+		"title": "Your week so far",
+		"bonus_points_short": "bonus",
+		"games": "Games",
+		"wins": "Wins",
+		"goals": "Goals",
+		"assists": "Assists"
 	},
 	"leaderboard": {
 		"title": "Leaderboard",
