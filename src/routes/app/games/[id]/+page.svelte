@@ -183,6 +183,7 @@ const timelineEntries = $derived.by(() => {
 		prevPeriod = entry.period;
 		if (
 			entry.event_type === "red_card" ||
+			entry.event_type === "card" ||
 			entry.event_type === "penalty_missed"
 		) {
 			return { ...entry, side: entry.team, periodChanged };
@@ -343,9 +344,18 @@ function getScorerProfile(playerId) {
 							</div>
 						{/if}
 
-						{#if entry.event_type === "red_card"}
+						{#if entry.event_type === "red_card" || entry.event_type === "card"}
 							{@const offender = getScorerProfile(entry.player_id)}
-							<!-- Red card row -->
+							{@const isYellow = entry.event_type === "card" && entry.card_type === "yellow"}
+							{@const cardIcon = isYellow ? "🟨" : "🟥"}
+							{@const badgeClass = isYellow
+								? "bg-warning text-bg-primary"
+								: "bg-accent-red text-white"}
+							{@const dotClass = isYellow ? "bg-warning" : "bg-accent-red"}
+							{@const cardLabel = isYellow
+								? $t("game_detail.event_yellow_card")
+								: $t("game_detail.event_red_card")}
+							<!-- Card row (yellow or red) -->
 							<div class="relative z-10 flex items-center w-full py-1.5">
 								<!-- Home side (left) -->
 								<div class="flex-1 flex items-center justify-end gap-2 pr-4">
@@ -359,17 +369,17 @@ function getScorerProfile(playerId) {
 										{#if typeof entry.minute === "number"}
 											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
 										{/if}
-										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-accent-red text-white" aria-label={$t("game_detail.event_red_card")}>🟥</span>
+										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold {badgeClass}" aria-label={cardLabel}>{cardIcon}</span>
 									{/if}
 								</div>
 
 								<!-- Center dot -->
-								<div class="w-2.5 h-2.5 rounded-full shrink-0 bg-accent-red ring-2 ring-bg-secondary"></div>
+								<div class="w-2.5 h-2.5 rounded-full shrink-0 {dotClass} ring-2 ring-bg-secondary"></div>
 
 								<!-- Away side (right) -->
 								<div class="flex-1 flex items-center justify-start gap-2 pl-4">
 									{#if entry.side === "away"}
-										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-accent-red text-white" aria-label={$t("game_detail.event_red_card")}>🟥</span>
+										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold {badgeClass}" aria-label={cardLabel}>{cardIcon}</span>
 										{#if typeof entry.minute === "number"}
 											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
 										{/if}

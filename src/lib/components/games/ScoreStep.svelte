@@ -73,9 +73,9 @@ let showAssistPicker = $state(false);
 let showMinutePicker = $state(false);
 let pendingGoal = $state(null);
 
-/** Red-card picker state — shares the MinutePicker via `showMinutePicker`. */
-let redCardStep = $state(null); // "team" | "player" | null
-let pendingRedCard = $state(null);
+/** Card picker state — yellow OR red, shares the MinutePicker via `showMinutePicker`. */
+let cardStep = $state(null); // "team" | "player" | "type" | null
+let pendingCard = $state(null);
 
 /** Penalty-missed picker state — also shares the MinutePicker. */
 let penaltyMissedStep = $state(null); // "team" | "shooter" | "keeper" | null
@@ -89,7 +89,7 @@ let pickerShowExtraTime = $state(false);
 /** Period of the event currently being timed (for floor validation). */
 const pickerPeriod = $derived(
 	pendingGoal?.period ??
-		pendingRedCard?.period ??
+		pendingCard?.period ??
 		pendingPenaltyMissed?.period ??
 		"regular",
 );
@@ -100,8 +100,8 @@ const pickerKind = $derived(
 		? "goal"
 		: pendingPenaltyMissed
 			? "penalty_missed"
-			: pendingRedCard
-				? "red_card"
+			: pendingCard
+				? "card"
 				: null,
 );
 
@@ -284,8 +284,8 @@ function confirmMinute() {
 		commitPendingGoal();
 		return;
 	}
-	if (pendingRedCard) {
-		commitPendingRedCard();
+	if (pendingCard) {
+		commitPendingCard();
 		return;
 	}
 	if (pendingPenaltyMissed) {
@@ -339,59 +339,71 @@ function cancelPicker() {
 	showAssistPicker = false;
 	showMinutePicker = false;
 	pendingGoal = null;
-	pendingRedCard = null;
-	redCardStep = null;
+	pendingCard = null;
+	cardStep = null;
 	pendingPenaltyMissed = null;
 	penaltyMissedStep = null;
 }
 
 /**
- * Open the red-card flow at the team-pick step. Disabled during the penalty
- * shootout because there are no red cards in a shootout.
+ * Open the card flow (yellow OR red) at the team-pick step. Disabled
+ * during the penalty shootout because cards are not modelled there.
  */
-function startRedCard() {
+function startCard() {
 	if (currentPeriod === "penalty") return;
-	pendingRedCard = { period: currentPeriod };
-	redCardStep = "team";
+	pendingCard = { period: currentPeriod };
+	cardStep = "team";
 }
 
 /**
  * Pick which side the offender is on; advances to the player-pick step.
  * @param {"home"|"away"} team
  */
-function selectRedCardTeam(team) {
-	if (!pendingRedCard) return;
-	pendingRedCard = { ...pendingRedCard, team };
-	redCardStep = "player";
+function selectCardTeam(team) {
+	if (!pendingCard) return;
+	pendingCard = { ...pendingCard, team };
+	cardStep = "player";
 }
 
 /**
- * Pick the offending player; advances to the (shared) minute picker.
+ * Pick the offending player; advances to the card-type step where the
+ * user chooses yellow or red — mirrors the goal-type pattern.
  * @param {string} playerId
  */
-function selectRedCardPlayer(playerId) {
-	if (!pendingRedCard) return;
-	pendingRedCard = { ...pendingRedCard, player_id: playerId };
-	redCardStep = null;
+function selectCardPlayer(playerId) {
+	if (!pendingCard) return;
+	pendingCard = { ...pendingCard, player_id: playerId };
+	cardStep = "type";
+}
+
+/**
+ * Pick yellow / red and advance to the (shared) minute picker.
+ * @param {"yellow"|"red"} cardType
+ */
+function selectCardType(cardType) {
+	if (!pendingCard) return;
+	pendingCard = { ...pendingCard, card_type: cardType };
+	cardStep = null;
 	openSharedMinutePicker();
 }
 
-/** Append the pending red card to the timeline and reset the flow. */
-function commitPendingRedCard() {
-	if (!pendingRedCard) return;
+/** Append the pending card event to the timeline and reset the flow. */
+function commitPendingCard() {
+	if (!pendingCard) return;
 	scoreTimeline = [
 		...scoreTimeline,
 		{
-			event_type: "red_card",
-			player_id: pendingRedCard.player_id,
-			team: pendingRedCard.team,
-			period: pendingRedCard.period,
+			event_type: "card",
+			card_type: pendingCard.card_type,
+			player_id: pendingCard.player_id,
+			team: pendingCard.team,
+			period: pendingCard.period,
 			minute: pickerMinute,
 			stoppage: pickerStoppage,
 		},
 	];
-	pendingRedCard = null;
-	redCardStep = null;
+	pendingCard = null;
+	cardStep = null;
 	showMinutePicker = false;
 }
 
@@ -703,14 +715,14 @@ function removeStatsImage(type) {
 			<span class="text-[10px] text-text-secondary">{$t("new_game.event_label")}</span>
 			<button
 				type="button"
-				onclick={startRedCard}
+				onclick={startCard}
 				disabled={penaltyActive}
 				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors {penaltyActive
 					? 'bg-bg-input text-text-secondary/40 border-border/40 cursor-not-allowed'
 					: 'bg-bg-input text-text-primary border-border hover:border-accent-red'}"
 			>
-				<span aria-hidden="true">🟥</span>
-				{$t("new_game.add_red_card")}
+				<span aria-hidden="true">🟨🟥</span>
+				{$t("new_game.add_card")}
 			</button>
 			<button
 				type="button"
@@ -732,14 +744,17 @@ function removeStatsImage(type) {
 			<p class="text-[10px] text-text-secondary mb-2">{$t("game_detail.timeline_title")}</p>
 			<div class="flex flex-wrap gap-1.5">
 				{#each scoreTimeline as entry, i (i)}
-					{#if entry.event_type === "red_card"}
+					{#if entry.event_type === "red_card" || entry.event_type === "card"}
 						{@const offender = getPlayerProfile(entry.player_id)}
+						{@const cardIcon = entry.event_type === "card" && entry.card_type === "yellow"
+							? "🟨"
+							: "🟥"}
 						<span
 							class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium {entry.period === 'extra_time'
 								? 'bg-accent-red/20 text-accent-red'
 								: 'bg-bg-input text-text-primary'}"
 						>
-							<span aria-hidden="true">🟥</span>
+							<span aria-hidden="true">{cardIcon}</span>
 							{#if offender?.avatar_url}
 								<img src={offender.avatar_url} alt={offender.username} class="w-3.5 h-3.5 rounded-full object-cover" />
 							{/if}
@@ -999,22 +1014,22 @@ function removeStatsImage(type) {
 	</div>
 {/if}
 
-<!-- Red Card: Team Picker Popup -->
-{#if redCardStep === "team" && pendingRedCard}
+<!-- Card: Team Picker Popup -->
+{#if cardStep === "team" && pendingCard}
 	<div
 		class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6"
 		role="dialog"
-		aria-label={$t("new_game.red_card_team")}
+		aria-label={$t("new_game.card_team")}
 	>
 		<div class="bg-bg-secondary border border-border rounded-xl p-6 w-full max-w-xs">
 			<h3 class="text-sm font-medium text-text-primary text-center mb-4">
-				🟥 {$t("new_game.red_card_team")}
+				🟨🟥 {$t("new_game.card_team")}
 			</h3>
 
 			<div class="flex flex-col gap-3">
 				<button
 					type="button"
-					onclick={() => selectRedCardTeam("home")}
+					onclick={() => selectCardTeam("home")}
 					class="flex items-center gap-3 p-3 rounded-lg bg-bg-input border border-border hover:border-accent-red hover:bg-accent-red/10 transition-colors"
 				>
 					{#if homeTeamData?.logo_url}
@@ -1024,7 +1039,7 @@ function removeStatsImage(type) {
 				</button>
 				<button
 					type="button"
-					onclick={() => selectRedCardTeam("away")}
+					onclick={() => selectCardTeam("away")}
 					class="flex items-center gap-3 p-3 rounded-lg bg-bg-input border border-border hover:border-accent-red hover:bg-accent-red/10 transition-colors"
 				>
 					{#if awayTeamData?.logo_url}
@@ -1045,24 +1060,24 @@ function removeStatsImage(type) {
 	</div>
 {/if}
 
-<!-- Red Card: Player Picker Popup -->
-{#if redCardStep === "player" && pendingRedCard}
-	{@const teamPlayers = getPlayersForSide(pendingRedCard.team)}
+<!-- Card: Player Picker Popup -->
+{#if cardStep === "player" && pendingCard}
+	{@const teamPlayers = getPlayersForSide(pendingCard.team)}
 	<div
 		class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6"
 		role="dialog"
-		aria-label={$t("new_game.red_card_player")}
+		aria-label={$t("new_game.card_player")}
 	>
 		<div class="bg-bg-secondary border border-border rounded-xl p-6 w-full max-w-xs">
 			<h3 class="text-sm font-medium text-text-primary text-center mb-4">
-				🟥 {$t("new_game.red_card_player")}
+				🟨🟥 {$t("new_game.card_player")}
 			</h3>
 
 			<div class="flex flex-col gap-3">
 				{#each teamPlayers as player (player.id)}
 					<button
 						type="button"
-						onclick={() => selectRedCardPlayer(player.id)}
+						onclick={() => selectCardPlayer(player.id)}
 						class="flex items-center gap-3 p-3 rounded-lg bg-bg-input border border-border hover:border-accent-red hover:bg-accent-red/10 transition-colors"
 					>
 						{#if player.avatar_url}
@@ -1079,6 +1094,48 @@ function removeStatsImage(type) {
 						<span class="text-sm font-medium text-text-primary">{player.username}</span>
 					</button>
 				{/each}
+			</div>
+
+			<button
+				type="button"
+				onclick={cancelPicker}
+				class="w-full mt-4 py-2 text-xs text-text-secondary hover:text-text-primary transition-colors"
+			>
+				{$t("common.back")}
+			</button>
+		</div>
+	</div>
+{/if}
+
+<!-- Card: Type Picker Popup (yellow vs red, mirrors goal_type) -->
+{#if cardStep === "type" && pendingCard}
+	<div
+		class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6"
+		role="dialog"
+		aria-label={$t("new_game.card_type_title")}
+	>
+		<div class="bg-bg-secondary border border-border rounded-xl p-6 w-full max-w-xs">
+			<h3 class="text-sm font-medium text-text-primary text-center mb-4">
+				{$t("new_game.card_type_title")}
+			</h3>
+
+			<div class="grid grid-cols-2 gap-2">
+				<button
+					type="button"
+					onclick={() => selectCardType("yellow")}
+					class="flex flex-col items-center gap-1 p-3 rounded-lg bg-bg-input border border-border hover:border-warning hover:bg-warning/10 transition-colors"
+				>
+					<span class="text-2xl" aria-hidden="true">🟨</span>
+					<span class="text-xs font-medium text-text-primary">{$t("new_game.card_type_yellow")}</span>
+				</button>
+				<button
+					type="button"
+					onclick={() => selectCardType("red")}
+					class="flex flex-col items-center gap-1 p-3 rounded-lg bg-bg-input border border-border hover:border-accent-red hover:bg-accent-red/10 transition-colors"
+				>
+					<span class="text-2xl" aria-hidden="true">🟥</span>
+					<span class="text-xs font-medium text-text-primary">{$t("new_game.card_type_red")}</span>
+				</button>
 			</div>
 
 			<button
@@ -1240,12 +1297,14 @@ function removeStatsImage(type) {
 	</div>
 {/if}
 
-<!-- Minute Picker Popup (shared by goal, red-card and penalty-missed flows) -->
-{#if showMinutePicker && (pendingGoal || pendingRedCard || pendingPenaltyMissed)}
+<!-- Minute Picker Popup (shared by goal, card and penalty-missed flows) -->
+{#if showMinutePicker && (pendingGoal || pendingCard || pendingPenaltyMissed)}
 	{@const minuteTitle = pendingPenaltyMissed
 		? $t("new_game.penalty_minute_title")
-		: pendingRedCard
-			? $t("new_game.red_card_minute_title")
+		: pendingCard
+			? pendingCard.card_type === "yellow"
+				? $t("new_game.yellow_card_minute_title")
+				: $t("new_game.red_card_minute_title")
 			: $t("minute_picker.title")}
 	<div
 		class="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 overflow-y-auto"
