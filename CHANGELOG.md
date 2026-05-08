@@ -5,3 +5,83 @@ All notable changes to this project will be documented in this file. Generated b
 Releases are cut with `npm run release`, which bumps the version, writes this file, tags `v<version>`, and pushes. The tag push triggers the `Match Day` GitHub Actions workflow which builds and deploys to Firebase Hosting.
 
 <!-- changelogen entries appear below -->
+
+## v0.1.1
+
+
+### 🚀 Enhancements
+
+- Initial frontend setup with SvelteKit, TailwindCSS and Tolgee ([58df282](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/58df282))
+- Add profile page, games history and new game wizard ([d55ffe4](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/d55ffe4))
+- Add V1 features — leaderboard, H2H, streaks, game timeline, PWA ([86110ed](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/86110ed))
+- Add match stats, AI reports, badges, career stats & marketing docs ([05e0ada](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/05e0ada))
+- Enhance README with additional dashboard and profile statistics details ([17d01f4](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/17d01f4))
+- Add ~400 teams from 25 European leagues for autocomplete ([e466992](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/e466992))
+- Add game mode filter (All/1v1/2v2) to leaderboard ([b7de9f5](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/b7de9f5))
+- Redesign PWA nav bar and fix homescreen icon + safe areas ([0d94319](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/0d94319))
+- Implement team management features with logo display and search functionality ([d2be36f](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/d2be36f))
+- Enhance match stats upload functionality and UI ([2deabea](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/2deabea))
+- Add badge info dialog and conditions for badge unlocking ([33b245f](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/33b245f))
+- Implement theme selection and dynamic theme management ([1d20848](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/1d20848))
+- Add OAuth redirect handling for authentication flow ([7a7c5ef](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/7a7c5ef))
+- Migrate from Supabase to Firebase for authentication and storage ([#1](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/1))
+- Update database and authentication details in README, add local development setup guide ([be2100c](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/be2100c))
+- Add Elo rating system components and integrate into profile and game pages ([b79d150](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/b79d150))
+- Add seasons archive and stats pages with data loading and error handling ([1089c34](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/1089c34))
+- Add game deletion functionality with confirmation dialog and API integration ([aa6da67](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/aa6da67))
+- Implement random team picker component with UI and integration in team selection ([ab95232](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/ab95232))
+- Refactor RandomTeamPicker to improve team selection logic and add reroll functionality ([d39b668](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/d39b668))
+- Add goal type selection and update scoring logic in ScoreStep component ([4a7abed](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/4a7abed))
+- Enhance RandomTeamPicker to support configurable star rating range and update related UI labels ([0c36ab5](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/0c36ab5))
+- Add Wrapped page and navigation to BottomNav and Sidebar components ([4fe2541](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/4fe2541))
+- Add minute picker step to in-match goal entry ([#2](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/2))
+- Add project instructions and guidelines in CLAUDE.md ([c0f5093](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/c0f5093))
+- Implement release workflow and update project documentation ([f98cc34](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/f98cc34))
+- Enforce strictly chronological events in MinutePicker ([#5](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/5))
+- Track assists in goal events and surface in game timeline ([#6](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/6))
+- Red-card events in score wizard and game timeline ([#7](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/7))
+- Missed-penalty events in score wizard and game timeline ([#8](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/8))
+- I18n labels and conditions for Phase 5 badges ([#9](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/9))
+- /app/challenges page and dashboard teaser ([#10](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/10))
+- Unified yellow/red card flow in score wizard and game timeline ([#12](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/12))
+- Render assists in the in-wizard event-list preview ([#13](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/13))
+- Surface Match of the Week and personal weekly recap ([#15](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/15))
+
+### 🩹 Fixes
+
+- Use dynamic env for optional Tolgee config ([50b7faf](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/50b7faf))
+- Enable PKCE auth flow for invite token exchange ([1681dea](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/1681dea))
+- Handle implicit flow hash fragments in auth callback ([8823e6b](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/8823e6b))
+- Update file includes in biome configuration for better scanning ([b5db942](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/b5db942))
+- Handle user deletion on unauthorized access during Google login and layout verification ([76f0670](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/76f0670))
+- Conditionally set Content-Type header in API requests ([2239acc](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/2239acc))
+- Dock minute picker popup to top of viewport ([#3](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/3))
+- Show this-week's challenge bonus immediately on dashboard and page ([#11](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/11))
+
+### 💅 Refactors
+
+- Make match prediction manual instead of auto-generated ([35816cf](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/35816cf))
+- Improve code readability by simplifying expressions and formatting ([b32f9ff](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/b32f9ff))
+- Update RandomTeamPicker to select teams with equal star rating and adjust UI labels ([64a7028](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/64a7028))
+- Remove Elo rating and related components from the profile and stats sections ([419f309](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/419f309))
+
+### 📖 Documentation
+
+- Update local development setup instructions for Docker Postgres and PROD snapshot ([9951f66](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/9951f66))
+
+### 🏡 Chore
+
+- Drop legacy red_card-only i18n keys superseded by the unified card flow ([#14](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/14))
+
+### ✅ Tests
+
+- Bootstrap Vitest unit and Playwright E2E foundation ([#4](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/4))
+
+### 🎨 Styles
+
+- Enhance layout and button styling in RandomTeamPicker component ([4fd8dc2](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/4fd8dc2))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
