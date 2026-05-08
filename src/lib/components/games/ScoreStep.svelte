@@ -791,6 +791,7 @@ function removeStatsImage(type) {
 						</span>
 					{:else}
 						{@const scorer = entry.scored_by ? getPlayerProfile(entry.scored_by) : null}
+						{@const assist = entry.assist_by ? getPlayerProfile(entry.assist_by) : null}
 						{@const goalIcon = GOAL_TYPES.find((g) => g.value === entry.goal_type)?.icon}
 						<span
 							class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium {entry.period === 'penalty'
@@ -808,6 +809,11 @@ function removeStatsImage(type) {
 							{/if}
 							{#if goalIcon && entry.goal_type !== "play"}
 								<span class="text-[10px]">{goalIcon}</span>
+							{/if}
+							{#if assist}
+								<span class="text-[10px] opacity-70" title={$t("game_detail.assisted_by", { name: assist.username })}>
+									↳ {assist.username}
+								</span>
 							{/if}
 							{#if entry.period === "extra_time"}
 								<span class="text-[8px] opacity-70">{$t("game_detail.extra_time_short")}</span>

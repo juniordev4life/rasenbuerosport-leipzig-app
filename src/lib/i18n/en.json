@@ -194,6 +194,7 @@
 		"event_red_card": "Red card",
 		"event_yellow_card": "Yellow card",
 		"event_penalty_missed": "Missed penalty",
+		"assisted_by": "Assist: {name}",
 		"delete": "Delete game",
 		"delete_confirm_title": "Delete game?",
 		"delete_confirm_message": "This will permanently delete this game. This action cannot be undone.",
