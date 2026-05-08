@@ -196,6 +196,7 @@
 		"event_red_card": "Rote Karte",
 		"event_yellow_card": "Gelbe Karte",
 		"event_penalty_missed": "Elfmeter verschossen",
+		"assisted_by": "Vorlage: {name}",
 		"delete": "Spiel löschen",
 		"delete_confirm_title": "Spiel löschen?",
 		"delete_confirm_message": "Das Spiel wird unwiderruflich gelöscht.",
