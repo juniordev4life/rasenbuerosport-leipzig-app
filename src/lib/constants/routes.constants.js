@@ -1,6 +1,7 @@
 export const ROUTES = {
 	LOGIN: "/auth/login",
 	REGISTER: "/auth/register",
+	SETUP: "/auth/setup",
 	DASHBOARD: "/app/dashboard",
 	LEADERBOARD: "/app/leaderboard",
 	GAMES: "/app/games",

@@ -18,7 +18,11 @@ $effect(() => {
 	if (!browser) return;
 
 	get("/v1/auth/me")
-		.then(() => {
+		.then(({ data }) => {
+			if (data?.needsSetup) {
+				goto(ROUTES.SETUP);
+				return;
+			}
 			authorized = true;
 			checking = false;
 		})
