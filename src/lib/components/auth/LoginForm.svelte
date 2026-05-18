@@ -18,10 +18,9 @@ async function handleGoogleLogin() {
 	try {
 		await loginWithGoogle();
 
-		// Verify user is authorized (exists in profiles table)
-		await get("/v1/auth/me");
+		const { data } = await get("/v1/auth/me");
 
-		goto(ROUTES.DASHBOARD);
+		goto(data?.needsSetup ? ROUTES.SETUP : ROUTES.DASHBOARD);
 	} catch (err) {
 		if (err.code === "auth/popup-closed-by-user") return;
 
