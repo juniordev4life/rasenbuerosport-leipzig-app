@@ -33,7 +33,10 @@ export const REPORTERS = {
 		ringClass: "ring-accent-red",
 		gradientFromClass: "from-accent-red/10",
 		pills: [
-			{ iconKey: "📺", labelKey: "match_report.reporter_bio.marcel.pill_experience" },
+			{
+				iconKey: "📺",
+				labelKey: "match_report.reporter_bio.marcel.pill_experience",
+			},
 			{ iconKey: "🎙", labelKey: "match_report.reporter_bio.marcel.pill_role" },
 		],
 		bioKeys: [
@@ -52,8 +55,14 @@ export const REPORTERS = {
 		ringClass: "ring-blue-400",
 		gradientFromClass: "from-blue-400/10",
 		pills: [
-			{ iconKey: "📊", labelKey: "match_report.reporter_bio.sophie.pill_field" },
-			{ iconKey: "🎓", labelKey: "match_report.reporter_bio.sophie.pill_degree" },
+			{
+				iconKey: "📊",
+				labelKey: "match_report.reporter_bio.sophie.pill_field",
+			},
+			{
+				iconKey: "🎓",
+				labelKey: "match_report.reporter_bio.sophie.pill_degree",
+			},
 		],
 		bioKeys: [
 			"match_report.reporter_bio.sophie.bio_1",
@@ -71,7 +80,10 @@ export const REPORTERS = {
 		ringClass: "ring-warning",
 		gradientFromClass: "from-warning/10",
 		pills: [
-			{ iconKey: "🔥", labelKey: "match_report.reporter_bio.frank.pill_experience" },
+			{
+				iconKey: "🔥",
+				labelKey: "match_report.reporter_bio.frank.pill_experience",
+			},
 			{ iconKey: "⚽", labelKey: "match_report.reporter_bio.frank.pill_role" },
 		],
 		bioKeys: [
