@@ -4,6 +4,7 @@ import { goto } from "$app/navigation";
 import { page } from "$app/state";
 import MatchReport from "$lib/components/games/MatchReport.svelte";
 import MatchStatsDisplay from "$lib/components/games/MatchStatsDisplay.svelte";
+import PassNetworkTags from "$lib/components/games/PassNetworkTags.svelte";
 import MatchStatsUpload from "$lib/components/games/MatchStatsUpload.svelte";
 import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
 import StarRating from "$lib/components/ui/StarRating.svelte";
@@ -583,6 +584,14 @@ function getScorerProfile(playerId) {
 		{#if game.match_stats}
 			<MatchStatsDisplay matchStats={game.match_stats} />
 		{/if}
+
+		<!-- Pass-Verteilungs-Tags aus der Pässe-Screenshot-Auswertung -->
+		<PassNetworkTags
+			homePassNetwork={game.home_pass_network}
+			awayPassNetwork={game.away_pass_network}
+			{homeTeamName}
+			{awayTeamName}
+		/>
 
 		<!-- Upload Slots (show remaining upload options) -->
 		{@const hasOverview = !!game.stats_image_url}

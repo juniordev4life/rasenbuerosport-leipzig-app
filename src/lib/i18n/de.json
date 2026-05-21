@@ -469,6 +469,17 @@
 	},
 	"match_stats": {
 		"title": "Spielstatistiken",
+		"pass_style": {
+			"title": "Passverteilung",
+			"section_label": "Passverteilung pro Team",
+			"home_fallback": "Heim",
+			"away_fallback": "Auswärts",
+			"zentral": "Zentral",
+			"rechtslastig": "Rechtslastig",
+			"linkslastig": "Linkslastig",
+			"ausgewogen": "Ausgewogen",
+			"fluegelspiel": "Flügelspiel"
+		},
 		"upload_title": "Stats-Screenshot hochladen",
 		"upload_hint": "FC26 Spielstatistik-Foto hochladen",
 		"upload_button": "Stats auslesen",

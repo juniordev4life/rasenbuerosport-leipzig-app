@@ -467,6 +467,17 @@
 	},
 	"match_stats": {
 		"title": "Match Statistics",
+		"pass_style": {
+			"title": "Pass Distribution",
+			"section_label": "Pass distribution per team",
+			"home_fallback": "Home",
+			"away_fallback": "Away",
+			"zentral": "Central",
+			"rechtslastig": "Right-leaning",
+			"linkslastig": "Left-leaning",
+			"ausgewogen": "Balanced",
+			"fluegelspiel": "Wing play"
+		},
 		"upload_title": "Upload Stats Screenshot",
 		"upload_hint": "Upload FC26 post-match stats photo",
 		"upload_button": "Extract Stats",
