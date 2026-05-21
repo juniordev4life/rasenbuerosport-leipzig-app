@@ -2,8 +2,9 @@
 import { getTranslate } from "@tolgee/svelte";
 
 /**
- * Hero block: avatar + name + archetype-title on the left, ELO on the right.
- * Bio + match count sit below.
+ * Hero block: avatar + name + archetype-title on the left, ELO on the right
+ * on >= sm screens. On mobile the ELO drops down into the stats row to keep
+ * the title from getting squeezed against a two-digit / four-digit number.
  *
  * @type {{ username:string, avatarUrl:string|null, initials:string, archetype:{label:string,color:string,icon:string}|null, bio:{adjective:string,bio:string}|null, matchCount:number, currentRating:number|null, rank:number|null }}
  */
@@ -20,11 +21,33 @@ let {
 
 const { t } = getTranslate();
 
+/**
+ * Map backend archetype-icon identifiers to display emojis. The backend
+ * stores these as plain strings (see profileArchetypes.constants.js)
+ * so the frontend owns the actual glyph.
+ */
+const ARCHETYPE_EMOJI = {
+	striker: "⚽",
+	playmaker: "🎯",
+	metronome: "⏱️",
+	"all-around": "🌟",
+	fire: "🔥",
+	shield: "🛡️",
+	"arm-flex": "💪",
+	"clock-late": "⏰",
+};
+
+const archetypeEmoji = $derived(
+	archetype?.icon ? (ARCHETYPE_EMOJI[archetype.icon] ?? "") : "",
+);
+
 const archetypeTitle = $derived.by(() => {
 	if (!archetype) return "";
 	const adj = bio?.adjective ? `${bio.adjective} ` : "";
 	return `${adj}${archetype.label}`;
 });
+
+const hasElo = $derived(currentRating !== null && currentRating !== undefined);
 </script>
 
 <div class="bg-bg-secondary border border-border rounded-2xl p-6 shadow-sm">
@@ -43,12 +66,13 @@ const archetypeTitle = $derived.by(() => {
 			<h1 class="truncate text-2xl font-bold text-text-primary">{username}</h1>
 			{#if archetype}
 				<p class="mt-1 text-sm font-semibold" style="color: {archetype.color};">
-					{archetype.icon} {archetypeTitle}
+					{archetypeEmoji}
+					{archetypeTitle}
 				</p>
 			{/if}
 		</div>
-		{#if currentRating !== null && currentRating !== undefined}
-			<div class="text-right shrink-0">
+		{#if hasElo}
+			<div class="hidden sm:block text-right shrink-0">
 				<div class="text-xs uppercase tracking-wide text-text-secondary">
 					{$t("player_profile.rating")}
 				</div>
@@ -69,5 +93,16 @@ const archetypeTitle = $derived.by(() => {
 			<div class="text-text-secondary">{$t("player_profile.matches")}</div>
 			<div class="text-lg font-bold text-text-primary">{matchCount}</div>
 		</div>
+		{#if hasElo}
+			<div class="sm:hidden">
+				<div class="text-text-secondary">{$t("player_profile.rating")}</div>
+				<div class="text-lg font-bold text-text-primary">
+					{Math.round(currentRating)}
+					{#if rank}
+						<span class="text-xs font-normal text-text-muted">· #{rank}</span>
+					{/if}
+				</div>
+			</div>
+		{/if}
 	</div>
 </div>
