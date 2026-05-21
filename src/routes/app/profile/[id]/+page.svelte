@@ -1,6 +1,6 @@
 <script>
-import { getTranslate } from "@tolgee/svelte";
 import { page } from "$app/state";
+import { getTranslate } from "@tolgee/svelte";
 import AxisInfoModal from "$lib/components/playerProfile/AxisInfoModal.svelte";
 import FormSnapshot from "$lib/components/playerProfile/FormSnapshot.svelte";
 import PlayerCharacter from "$lib/components/playerProfile/PlayerCharacter.svelte";
@@ -36,10 +36,12 @@ $effect(() => {
 });
 
 const archetypeColor = $derived(profile?.archetype?.color ?? "#6b7280");
+const isFreshman = $derived(profile?.profileState === "frischling");
+const isDeveloping = $derived(profile?.profileState === "im_aufbau");
 </script>
 
 <svelte:head>
-	<title>{profile?.username ?? $t("player_profile.loading")}</title>
+	<title>{profile?.player?.name ?? $t("player_profile.loading")}</title>
 </svelte:head>
 
 <div class="mx-auto max-w-3xl space-y-4 p-4">
@@ -53,22 +55,23 @@ const archetypeColor = $derived(profile?.archetype?.color ?? "#6b7280");
 		</div>
 	{:else if profile}
 		<PlayerHero
-			username={profile.username}
-			avatarUrl={profile.avatarUrl}
-			initials={profile.initials}
+			username={profile.player.name}
+			avatarUrl={profile.player.avatarUrl}
+			initials={profile.player.initials}
 			archetype={profile.archetype}
 			bio={profile.bio}
-			matchCount={profile.matchCount}
-			currentRating={profile.currentRating}
+			matchCount={profile.player.matchCount}
+			currentRating={profile.player.currentRating}
 		/>
 
-		{#if profile.state === "freshman"}
+		{#if isFreshman}
 			<div class="bg-bg-secondary border border-warning/60 rounded-2xl p-6 text-text-primary">
 				<h2 class="text-lg font-bold text-warning">{$t("player_profile.freshman_title")}</h2>
 				<p class="mt-2 text-sm text-text-secondary">{$t("player_profile.freshman_body")}</p>
 			</div>
+			<FormSnapshot recentForm={profile.recentForm ?? []} />
 		{:else}
-			{#if profile.state === "developing"}
+			{#if isDeveloping}
 				<div class="bg-bg-secondary border border-accent-red/60 rounded-2xl p-4 text-text-primary">
 					<h2 class="text-sm font-bold text-accent-red">{$t("player_profile.developing_title")}</h2>
 					<p class="mt-1 text-xs text-text-secondary">{$t("player_profile.developing_body")}</p>
