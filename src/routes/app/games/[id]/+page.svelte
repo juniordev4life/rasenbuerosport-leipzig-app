@@ -2,19 +2,18 @@
 import { getTranslate } from "@tolgee/svelte";
 import { goto } from "$app/navigation";
 import { page } from "$app/state";
-import MatchReport from "$lib/components/games/MatchReport.svelte";
-import MatchStatsDisplay from "$lib/components/games/MatchStatsDisplay.svelte";
+import MatchDetailStatsCard from "$lib/components/games/MatchDetailStatsCard.svelte";
+import MatchHeroCard from "$lib/components/games/MatchHeroCard.svelte";
+import MatchKpiCard from "$lib/components/games/MatchKpiCard.svelte";
+import MatchLineupsCard from "$lib/components/games/MatchLineupsCard.svelte";
+import MatchPassCharacterCard from "$lib/components/games/MatchPassCharacterCard.svelte";
+import MatchReportCard from "$lib/components/games/MatchReportCard.svelte";
 import MatchStatsUpload from "$lib/components/games/MatchStatsUpload.svelte";
-import PassNetworkTags from "$lib/components/games/PassNetworkTags.svelte";
-import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
-import StarRating from "$lib/components/ui/StarRating.svelte";
-import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
+import MatchTimelineCard from "$lib/components/games/MatchTimelineCard.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
-import { getCountryFlag } from "$lib/constants/teams.constants.js";
 import { del, get } from "$lib/services/api.services.js";
 import { getTeamByName } from "$lib/services/teams.services.js";
 import { user } from "$lib/stores/auth.stores.js";
-import { formatMinute } from "$lib/utils/minute.utils.js";
 import { buildRematchUrl } from "$lib/utils/rematch.utils.js";
 
 const { t } = getTranslate();
@@ -63,36 +62,8 @@ const awayPlayers = $derived(
 	game?.game_players?.filter((p) => p.team === "away") || [],
 );
 
-const userId = $derived($user?.id);
-
-const userTeam = $derived(
-	game?.game_players?.find((p) => p.player_id === userId)?.team || null,
-);
-
-const isWin = $derived(
-	userTeam === "home"
-		? game?.score_home > game?.score_away
-		: userTeam === "away"
-			? game?.score_away > game?.score_home
-			: false,
-);
-const isDraw = $derived(game?.score_home === game?.score_away);
-
-const resultColor = $derived(
-	isDraw
-		? "text-warning"
-		: isWin
-			? "text-success"
-			: userTeam
-				? "text-error"
-				: "text-text-secondary",
-);
-
-/** Get the team name used by a side */
 function getSideTeamName(players) {
-	for (const p of players) {
-		if (p.team_name) return p.team_name;
-	}
+	for (const p of players) if (p.team_name) return p.team_name;
 	return null;
 }
 
@@ -112,51 +83,27 @@ const rematchUrl = $derived(
 			})
 		: "#",
 );
-const rematchSwapUrl = $derived(
-	game
-		? buildRematchUrl({
-				homePlayers: homePlayerIds,
-				awayPlayers: awayPlayerIds,
-				homeTeam: homeTeamName || "",
-				awayTeam: awayTeamName || "",
-				swap: true,
-			})
-		: "#",
-);
 
 /** @type {import('$lib/services/teams.services.js').TeamData|null} */
 let homeTeamData = $state(null);
 /** @type {import('$lib/services/teams.services.js').TeamData|null} */
 let awayTeamData = $state(null);
 
-// Resolve team data asynchronously
 $effect(() => {
 	if (homeTeamName) {
-		getTeamByName(homeTeamName).then((t) => {
-			homeTeamData = t || null;
+		getTeamByName(homeTeamName).then((td) => {
+			homeTeamData = td || null;
 		});
 	}
 });
 $effect(() => {
 	if (awayTeamName) {
-		getTeamByName(awayTeamName).then((t) => {
-			awayTeamData = t || null;
+		getTeamByName(awayTeamName).then((td) => {
+			awayTeamData = td || null;
 		});
 	}
 });
 
-const formattedDate = $derived(
-	game
-		? new Date(game.played_at).toLocaleDateString("de-DE", {
-				weekday: "long",
-				day: "2-digit",
-				month: "long",
-				year: "numeric",
-			})
-		: "",
-);
-
-/** Result type suffix (n.V. / n.E.) */
 const resultSuffix = $derived(
 	game?.result_type === "penalty"
 		? $t("game_detail.penalty_short")
@@ -165,55 +112,24 @@ const resultSuffix = $derived(
 			: "",
 );
 
-/** Score timeline data */
-const timeline = $derived(game?.score_timeline || []);
-
-/**
- * Build enriched timeline entries with side info. Non-goal entries (red
- * cards, missed penalties) carry no score, so their side is read from the
- * entry's `team` field rather than derived from the running score. Reversed
- * so newest event is at top.
- * @returns {object[]}
- */
-const timelineEntries = $derived.by(() => {
-	if (!timeline.length) return [];
-	let prevHome = 0;
-	let prevPeriod = null;
-	const entries = timeline.map((entry, i) => {
-		const periodChanged = i > 0 && prevPeriod !== entry.period;
-		prevPeriod = entry.period;
-		if (
-			entry.event_type === "red_card" ||
-			entry.event_type === "card" ||
-			entry.event_type === "penalty_missed"
-		) {
-			return { ...entry, side: entry.team, periodChanged };
-		}
-		const isHomeGoal = entry.home > prevHome;
-		prevHome = entry.home;
-		return {
-			...entry,
-			side: isHomeGoal ? "home" : "away",
-			periodChanged,
-		};
-	});
-	return entries.toReversed();
-});
-
-/** Lookup scorer profile from game_players by player_id */
-function getScorerProfile(playerId) {
+/** Lookup profile for any player in the game by player_id. */
+function getProfile(playerId) {
 	if (!playerId || !game?.game_players) return null;
 	const gp = game.game_players.find((p) => p.player_id === playerId);
 	return gp?.profiles || null;
 }
+
+const hasOverview = $derived(!!game?.stats_image_url);
+const hasPasses = $derived(!!game?.passes_image_url);
+const hasDefense = $derived(!!game?.defense_image_url);
+const allUploaded = $derived(hasOverview && hasPasses && hasDefense);
 </script>
 
 <svelte:head>
 	<title>RasenBürosport - {$t("game_detail.title")}</title>
 </svelte:head>
 
-<div class="flex flex-col gap-4">
-	<!-- Back Button -->
+<div class="flex flex-col gap-3 max-w-5xl mx-auto pb-8">
 	<button
 		type="button"
 		onclick={() => history.back()}
@@ -234,386 +150,60 @@ function getScorerProfile(playerId) {
 			<p class="text-text-secondary">{$t("game_detail.not_found")}</p>
 		</div>
 	{:else}
-		<!-- Score Display -->
-		<div class="bg-bg-secondary border border-border rounded-xl p-6 text-center">
-			<!-- Mode Badge -->
-			<span class="bg-accent-red/20 text-accent-red text-xs font-bold px-3 py-1 rounded-full">
-				{game.mode}
-			</span>
+		<MatchHeroCard
+			{game}
+			homeTeam={homeTeamData}
+			awayTeam={awayTeamData}
+			{homeTeamName}
+			{awayTeamName}
+			{resultSuffix}
+		/>
 
-			<!-- Big Score -->
-			<div class="flex items-center justify-center gap-6 mt-4">
-				<div class="flex flex-col items-center gap-1">
-					{#if homeTeamData}
-						<TeamLogo logoUrl={homeTeamData.logo_url} teamName={homeTeamData.name} size="lg" />
-						<span class="text-sm text-text-secondary">
-							{getCountryFlag(homeTeamData.country_code)} {homeTeamData.name}
-						</span>
-						<div class="flex items-center gap-1">
-							<OvrBadge rating={homeTeamData.overall_rating} size="xs" />
-							<StarRating rating={homeTeamData.star_rating} size="xs" />
-						</div>
-					{:else if homeTeamName}
-						<span class="text-sm text-text-secondary">{homeTeamName}</span>
-					{/if}
-					<span class="text-5xl font-bold {resultColor}">{game.score_home}</span>
-				</div>
-
-				<span class="text-3xl font-bold text-text-secondary">:</span>
-
-				<div class="flex flex-col items-center gap-1">
-					{#if awayTeamData}
-						<TeamLogo logoUrl={awayTeamData.logo_url} teamName={awayTeamData.name} size="lg" />
-						<span class="text-sm text-text-secondary">
-							{getCountryFlag(awayTeamData.country_code)} {awayTeamData.name}
-						</span>
-						<div class="flex items-center gap-1">
-							<OvrBadge rating={awayTeamData.overall_rating} size="xs" />
-							<StarRating rating={awayTeamData.star_rating} size="xs" />
-						</div>
-					{:else if awayTeamName}
-						<span class="text-sm text-text-secondary">{awayTeamName}</span>
-					{/if}
-					<span class="text-5xl font-bold {resultColor}">{game.score_away}</span>
-				</div>
+		{#if allUploaded}
+			<div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+				<MatchReportCard
+					{gameId}
+					existingReport={game.match_report}
+					existingAudioUrl={game.match_report_audio_url}
+					existingReporterId={game.reporter_id}
+					onReportGenerated={(report) => { game = { ...game, match_report: report, match_report_audio_url: null }; }}
+					onAudioGenerated={(url) => { game = { ...game, match_report_audio_url: url }; }}
+					onReporterAssigned={(rid) => { game = { ...game, reporter_id: rid }; }}
+				/>
+				<MatchTimelineCard timeline={game.score_timeline || []} {getProfile} />
 			</div>
-
-			{#if resultSuffix}
-				<p class="text-sm font-medium text-accent-red mt-2">{resultSuffix}</p>
-			{/if}
-
-			<!-- Date -->
-			<p class="text-xs text-text-secondary mt-4">{formattedDate}</p>
-		</div>
-
-		<!-- Rematch Actions -->
-		<div class="flex gap-2">
-			<a
-				href={rematchUrl}
-				class="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-accent-red text-white font-semibold text-sm hover:bg-accent-red/90 active:scale-[0.98] transition-all"
-			>
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-				</svg>
-				{$t("rematch.button")}
-			</a>
-			<a
-				href={rematchSwapUrl}
-				class="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm hover:bg-bg-input active:scale-[0.98] transition-all"
-				aria-label={$t("rematch.swap_button")}
-				title={$t("rematch.swap_button")}
-			>
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-				</svg>
-			</a>
-		</div>
-
-		<!-- Admin: Delete Game -->
-		{#if isAdmin}
-			<button
-				type="button"
-				onclick={() => (showDeleteConfirm = true)}
-				class="flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-error/30 text-error text-sm hover:bg-error/10 active:scale-[0.98] transition-all"
-			>
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-				</svg>
-				{$t("game_detail.delete")}
-			</button>
+		{:else}
+			<MatchTimelineCard timeline={game.score_timeline || []} {getProfile} />
 		{/if}
 
-		<!-- Score Timeline (vertical, bottom to top) -->
-		{#if timelineEntries.length > 0}
-			<div class="bg-bg-secondary border border-border rounded-lg p-4">
-				<h3 class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-3">
-					{$t("game_detail.timeline_title")}
-				</h3>
-				<div class="relative flex flex-col items-center">
-					<!-- Center line -->
-					<div class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-px bg-border"></div>
+		<MatchLineupsCard
+			{game}
+			{homePlayers}
+			{awayPlayers}
+			{homeTeamName}
+			{awayTeamName}
+		/>
 
-					{#each timelineEntries as entry, i (i)}
-						<!-- Period divider -->
-						{#if entry.periodChanged}
-							<div class="relative z-10 flex items-center justify-center w-full my-1">
-								<span class="bg-bg-secondary px-2 text-[10px] font-bold text-text-secondary uppercase">
-									{entry.period === "penalty"
-										? $t("game_detail.penalty_short")
-										: $t("game_detail.extra_time_short")}
-								</span>
-							</div>
-						{/if}
-
-						{#if entry.event_type === "red_card" || entry.event_type === "card"}
-							{@const offender = getScorerProfile(entry.player_id)}
-							{@const isYellow = entry.event_type === "card" && entry.card_type === "yellow"}
-							{@const cardIcon = isYellow ? "🟨" : "🟥"}
-							{@const badgeClass = isYellow
-								? "bg-warning text-bg-primary"
-								: "bg-accent-red text-white"}
-							{@const dotClass = isYellow ? "bg-warning" : "bg-accent-red"}
-							{@const cardLabel = isYellow
-								? $t("game_detail.event_yellow_card")
-								: $t("game_detail.event_red_card")}
-							<!-- Card row (yellow or red) -->
-							<div class="relative z-10 flex items-center w-full py-1.5">
-								<!-- Home side (left) -->
-								<div class="flex-1 flex items-center justify-end gap-2 pr-4">
-									{#if entry.side === "home"}
-										{#if offender}
-											<span class="text-[10px] text-text-secondary">{offender.username}</span>
-											{#if offender.avatar_url}
-												<img src={offender.avatar_url} alt={offender.username} class="w-4 h-4 rounded-full object-cover" />
-											{/if}
-										{/if}
-										{#if typeof entry.minute === "number"}
-											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
-										{/if}
-										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold {badgeClass}" aria-label={cardLabel}>{cardIcon}</span>
-									{/if}
-								</div>
-
-								<!-- Center dot -->
-								<div class="w-2.5 h-2.5 rounded-full shrink-0 {dotClass} ring-2 ring-bg-secondary"></div>
-
-								<!-- Away side (right) -->
-								<div class="flex-1 flex items-center justify-start gap-2 pl-4">
-									{#if entry.side === "away"}
-										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold {badgeClass}" aria-label={cardLabel}>{cardIcon}</span>
-										{#if typeof entry.minute === "number"}
-											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
-										{/if}
-										{#if offender}
-											{#if offender.avatar_url}
-												<img src={offender.avatar_url} alt={offender.username} class="w-4 h-4 rounded-full object-cover" />
-											{/if}
-											<span class="text-[10px] text-text-secondary">{offender.username}</span>
-										{/if}
-									{/if}
-								</div>
-							</div>
-						{:else if entry.event_type === "penalty_missed"}
-							{@const shooter = getScorerProfile(entry.shooter_id)}
-							{@const keeper = entry.keeper_id ? getScorerProfile(entry.keeper_id) : null}
-							<!-- Missed-penalty row -->
-							<div class="relative z-10 flex items-center w-full py-1.5">
-								<!-- Home side (left) -->
-								<div class="flex-1 flex items-center justify-end gap-2 pr-4">
-									{#if entry.side === "home"}
-										{#if shooter}
-											<div class="flex flex-col items-end">
-												<span class="text-[10px] text-text-secondary">{shooter.username}</span>
-												{#if keeper}
-													<span class="text-[9px] text-text-secondary/70">🧤 {keeper.username}</span>
-												{/if}
-											</div>
-											{#if shooter.avatar_url}
-												<img src={shooter.avatar_url} alt={shooter.username} class="w-4 h-4 rounded-full object-cover" />
-											{/if}
-										{/if}
-										{#if typeof entry.minute === "number"}
-											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
-										{/if}
-										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-warning/20 text-warning" aria-label={$t("game_detail.event_penalty_missed")}>❌</span>
-									{/if}
-								</div>
-
-								<!-- Center dot -->
-								<div class="w-2.5 h-2.5 rounded-full shrink-0 bg-warning ring-2 ring-bg-secondary"></div>
-
-								<!-- Away side (right) -->
-								<div class="flex-1 flex items-center justify-start gap-2 pl-4">
-									{#if entry.side === "away"}
-										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-warning/20 text-warning" aria-label={$t("game_detail.event_penalty_missed")}>❌</span>
-										{#if typeof entry.minute === "number"}
-											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
-										{/if}
-										{#if shooter}
-											{#if shooter.avatar_url}
-												<img src={shooter.avatar_url} alt={shooter.username} class="w-4 h-4 rounded-full object-cover" />
-											{/if}
-											<div class="flex flex-col items-start">
-												<span class="text-[10px] text-text-secondary">{shooter.username}</span>
-												{#if keeper}
-													<span class="text-[9px] text-text-secondary/70">🧤 {keeper.username}</span>
-												{/if}
-											</div>
-										{/if}
-									{/if}
-								</div>
-							</div>
-						{:else}
-							<!-- Goal row -->
-							{@const scorer = getScorerProfile(entry.scored_by)}
-							{@const assist = getScorerProfile(entry.assist_by)}
-							{@const goalTypeIcon = entry.goal_type === "corner"
-								? "🚩"
-								: entry.goal_type === "freekick"
-									? "🎯"
-									: entry.goal_type === "penalty" || entry.period === "penalty"
-										? "🥅"
-										: null}
-							<div class="relative z-10 flex items-center w-full py-1.5">
-								<!-- Home side (left) -->
-								<div class="flex-1 flex items-center justify-end gap-2 pr-4">
-									{#if entry.side === "home"}
-										{#if scorer}
-											<div class="flex flex-col items-end">
-												<span class="text-[10px] text-text-secondary">{scorer.username}</span>
-												{#if assist}
-													<span class="text-[9px] text-text-secondary/70">↳ {assist.username}</span>
-												{/if}
-											</div>
-											{#if scorer.avatar_url}
-												<img src={scorer.avatar_url} alt={scorer.username} class="w-4 h-4 rounded-full object-cover" />
-											{/if}
-										{/if}
-										{#if goalTypeIcon}
-											<span class="text-xs">{goalTypeIcon}</span>
-										{/if}
-										{#if typeof entry.minute === "number"}
-											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
-										{/if}
-										<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-accent-red/20 text-accent-red">
-											{entry.home}:{entry.away}
-										</span>
-									{/if}
-								</div>
-
-								<!-- Center dot -->
-								<div class="w-2.5 h-2.5 rounded-full shrink-0 {entry.side === 'home'
-									? 'bg-accent-red'
-									: 'bg-blue-500'}"></div>
-
-								<!-- Away side (right) -->
-								<div class="flex-1 flex items-center justify-start gap-2 pl-4">
-									{#if entry.side === "away"}
-										<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-500">
-											{entry.home}:{entry.away}
-										</span>
-										{#if typeof entry.minute === "number"}
-											<span class="text-[10px] tabular-nums text-text-secondary">{formatMinute({ minute: entry.minute, stoppage: entry.stoppage ?? 0 })}</span>
-										{/if}
-										{#if goalTypeIcon}
-											<span class="text-xs">{goalTypeIcon}</span>
-										{/if}
-										{#if scorer}
-											{#if scorer.avatar_url}
-												<img src={scorer.avatar_url} alt={scorer.username} class="w-4 h-4 rounded-full object-cover" />
-											{/if}
-											<div class="flex flex-col items-start">
-												<span class="text-[10px] text-text-secondary">{scorer.username}</span>
-												{#if assist}
-													<span class="text-[9px] text-text-secondary/70">↳ {assist.username}</span>
-												{/if}
-											</div>
-										{/if}
-									{/if}
-								</div>
-							</div>
-						{/if}
-					{/each}
-
-					<!-- Kickoff dot at bottom -->
-					<div class="relative z-10 flex items-center justify-center w-full pt-1.5">
-						<div class="w-2 h-2 rounded-full bg-text-secondary/40"></div>
-					</div>
-				</div>
-			</div>
-		{/if}
-
-		<!-- Teams -->
-		<div class="grid grid-cols-2 gap-3">
-			<!-- Home Team -->
-			<div class="bg-bg-secondary border border-border rounded-lg p-4">
-				<h3 class="text-xs font-bold text-accent-red text-center uppercase tracking-wider mb-3">
-					{$t("game_detail.home_team")}
-				</h3>
-				<div class="flex flex-col gap-3">
-					{#each homePlayers as player (player.player_id)}
-						<div class="flex items-center gap-2">
-							{#if player.profiles?.avatar_url}
-								<img
-									src={player.profiles.avatar_url}
-									alt={player.profiles?.username}
-									class="w-8 h-8 rounded-full object-cover ring-1 ring-accent-red"
-								/>
-							{:else}
-								<div class="w-8 h-8 rounded-full bg-accent-red/20 ring-1 ring-accent-red flex items-center justify-center text-xs font-bold text-text-primary">
-									{(player.profiles?.username || "?").charAt(0).toUpperCase()}
-								</div>
-							{/if}
-							<span class="text-sm text-text-primary font-medium truncate">
-								{player.profiles?.username || "?"}
-							</span>
-						</div>
-					{/each}
-				</div>
-			</div>
-
-			<!-- Away Team -->
-			<div class="bg-bg-secondary border border-border rounded-lg p-4">
-				<h3 class="text-xs font-bold text-blue-500 text-center uppercase tracking-wider mb-3">
-					{$t("game_detail.away_team")}
-				</h3>
-				<div class="flex flex-col gap-3">
-					{#each awayPlayers as player (player.player_id)}
-						<div class="flex items-center gap-2">
-							{#if player.profiles?.avatar_url}
-								<img
-									src={player.profiles.avatar_url}
-									alt={player.profiles?.username}
-									class="w-8 h-8 rounded-full object-cover ring-1 ring-blue-500"
-								/>
-							{:else}
-								<div class="w-8 h-8 rounded-full bg-blue-500/20 ring-1 ring-blue-500 flex items-center justify-center text-xs font-bold text-text-primary">
-									{(player.profiles?.username || "?").charAt(0).toUpperCase()}
-								</div>
-							{/if}
-							<span class="text-sm text-text-primary font-medium truncate">
-								{player.profiles?.username || "?"}
-							</span>
-						</div>
-					{/each}
-				</div>
-			</div>
-		</div>
-
-		<!-- Match Stats (from FC26 screenshots) -->
 		{#if game.match_stats}
-			<MatchStatsDisplay matchStats={game.match_stats} />
+			<MatchKpiCard matchStats={game.match_stats} />
 		{/if}
 
-		<!-- Pass-Verteilungs-Tags aus der Pässe-Screenshot-Auswertung -->
-		<PassNetworkTags
+		<MatchPassCharacterCard
 			homePassNetwork={game.home_pass_network}
 			awayPassNetwork={game.away_pass_network}
 			{homeTeamName}
 			{awayTeamName}
 		/>
 
-		<!-- Upload Slots (show remaining upload options) -->
-		{@const hasOverview = !!game.stats_image_url}
-		{@const hasPasses = !!game.passes_image_url}
-		{@const hasDefense = !!game.defense_image_url}
-		{@const allUploaded = hasOverview && hasPasses && hasDefense}
-
-		<!-- AI Match Report (only when all three screenshots are uploaded) -->
-		{#if allUploaded}
-			<MatchReport
-				{gameId}
-				existingReport={game.match_report}
-				existingAudioUrl={game.match_report_audio_url}
-				existingReporterId={game.reporter_id}
-				onReportGenerated={(report) => { game = { ...game, match_report: report, match_report_audio_url: null }; }}
-				onAudioGenerated={(url) => { game = { ...game, match_report_audio_url: url }; }}
-				onReporterAssigned={(rid) => { game = { ...game, reporter_id: rid }; }}
-			/>
+		{#if game.match_stats}
+			<MatchDetailStatsCard matchStats={game.match_stats} />
 		{/if}
 
-		{#if !hasOverview || !hasPasses || !hasDefense}
-			<div class="flex flex-col gap-3">
+		{#if !allUploaded}
+			<section class="rounded-2xl border border-border bg-bg-secondary p-4 sm:p-5 flex flex-col gap-3">
+				<h3 class="text-[11px] tracking-[0.08em] uppercase text-text-muted font-semibold">
+					{$t("match_stats.title")}
+				</h3>
 				{#if !hasOverview}
 					<MatchStatsUpload
 						{gameId}
@@ -623,13 +213,12 @@ function getScorerProfile(playerId) {
 						onStatsExtracted={() => loadGame()}
 					/>
 				{:else}
-					<div class="bg-bg-secondary border border-success/30 rounded-lg p-3 flex items-center gap-2">
+					<div class="bg-bg-input border border-success/30 rounded-lg p-3 flex items-center gap-2">
 						<span class="text-success text-lg">✓</span>
 						<span class="text-xs text-text-secondary">{$t("match_stats.upload_overview_title")}</span>
 						<span class="text-xs text-success ml-auto">{$t("match_stats.uploaded")}</span>
 					</div>
 				{/if}
-
 				{#if !hasPasses}
 					<MatchStatsUpload
 						{gameId}
@@ -639,13 +228,12 @@ function getScorerProfile(playerId) {
 						onStatsExtracted={() => loadGame()}
 					/>
 				{:else}
-					<div class="bg-bg-secondary border border-success/30 rounded-lg p-3 flex items-center gap-2">
+					<div class="bg-bg-input border border-success/30 rounded-lg p-3 flex items-center gap-2">
 						<span class="text-success text-lg">✓</span>
 						<span class="text-xs text-text-secondary">{$t("match_stats.upload_passes_title")}</span>
 						<span class="text-xs text-success ml-auto">{$t("match_stats.uploaded")}</span>
 					</div>
 				{/if}
-
 				{#if !hasDefense}
 					<MatchStatsUpload
 						{gameId}
@@ -655,12 +243,44 @@ function getScorerProfile(playerId) {
 						onStatsExtracted={() => loadGame()}
 					/>
 				{:else}
-					<div class="bg-bg-secondary border border-success/30 rounded-lg p-3 flex items-center gap-2">
+					<div class="bg-bg-input border border-success/30 rounded-lg p-3 flex items-center gap-2">
 						<span class="text-success text-lg">✓</span>
 						<span class="text-xs text-text-secondary">{$t("match_stats.upload_defense_title")}</span>
 						<span class="text-xs text-success ml-auto">{$t("match_stats.uploaded")}</span>
 					</div>
 				{/if}
+			</section>
+		{/if}
+
+		<div class="mt-2">
+			<a
+				href={rematchUrl}
+				class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-accent-red text-white font-semibold text-sm hover:bg-accent-red-hover active:scale-[0.99] transition-all"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+				</svg>
+				{$t("rematch.button")}
+			</a>
+		</div>
+
+		{#if isAdmin}
+			<div class="mt-2 rounded-xl border border-accent-red/30 px-4 sm:px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between">
+				<div class="leading-tight">
+					<div class="text-[10px] tracking-[0.08em] uppercase text-text-muted mb-1 font-semibold">
+						{$t("game_detail.section.danger_zone")}
+					</div>
+					<div class="text-sm text-text-secondary">
+						{$t("game_detail.danger_zone.description")}
+					</div>
+				</div>
+				<button
+					type="button"
+					onclick={() => (showDeleteConfirm = true)}
+					class="shrink-0 px-4 py-2.5 rounded-lg border border-accent-red/40 text-accent-red text-sm font-medium hover:bg-accent-red/10 transition-colors"
+				>
+					{$t("game_detail.delete")}
+				</button>
 			</div>
 		{/if}
 	{/if}
