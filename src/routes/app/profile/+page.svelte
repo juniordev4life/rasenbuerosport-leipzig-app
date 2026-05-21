@@ -127,7 +127,7 @@ async function handleLogout() {
 				/>
 			{:else}
 				<Button variant="ghost" onclick={() => (editing = true)}>
-					{$t("profile.edit")}
+					{$t("profile.edit.title")}
 				</Button>
 			{/if}
 
