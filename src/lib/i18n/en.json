@@ -76,7 +76,7 @@
 	"nav": {
 		"dashboard": "Dashboard",
 		"leaderboard": "Ranking",
-		"new_game": "New Game",
+		"new_game": "Quick game",
 		"games": "Games",
 		"teams": "Teams",
 		"stats": "Statistics",
@@ -412,9 +412,38 @@
 	},
 	"new_game": {
 		"title": "New Game",
+		"cancel": "Cancel",
 		"step_players": "Players",
 		"step_teams": "Teams",
 		"step_score": "Score",
+		"lobby": {
+			"page_title": "Who's playing today?",
+			"page_subtitle": "Drag yourselves into the teams",
+			"step_label": "Lineup",
+			"pool_title": "Available players",
+			"pool_hint": "Tap, then ▲ Home or ▼ Away",
+			"helper_desktop": "Drag & drop, or click the arrows that appear on a player",
+			"helper_mobile": "Tap a player, then send them up or down",
+			"assign_home": "Send to home",
+			"assign_away": "Send to away",
+			"of": "of"
+		},
+		"poster": {
+			"page_title": "Kick-off ready",
+			"page_subtitle": "We rolled two teams for you",
+			"step_label": "Kick-off",
+			"generation_info": "Randomly generated · {min}–{max}★",
+			"balanced": "Balanced",
+			"imbalanced": "Stars uneven",
+			"action_roll": "Reroll",
+			"action_customize": "Customize",
+			"action_manual": "Pick manually",
+			"anpfiff_cta": "Kick-off — start the match"
+		},
+		"score": {
+			"page_title": "Enter the score",
+			"page_subtitle": "Final score and highlights"
+		},
 		"home": "Home",
 		"away": "Away",
 		"select_team": "Select team",
