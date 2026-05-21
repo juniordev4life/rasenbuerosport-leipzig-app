@@ -24,6 +24,7 @@ let { challenge } = $props();
 const { t } = getTranslate();
 
 import { tolgee } from "$lib/config/i18n.config.js";
+
 let language = $state(tolgee.getLanguage());
 $effect(() => {
 	const update = () => {

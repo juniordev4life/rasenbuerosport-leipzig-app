@@ -1,13 +1,13 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import ActiveChallengesCard from "$lib/components/challenges/ActiveChallengesCard.svelte";
-import PersonalRecapCard from "$lib/components/wrapped/PersonalRecapCard.svelte";
 import ActivityFeed from "$lib/components/dashboard/ActivityFeed.svelte";
 import RecentGames from "$lib/components/dashboard/RecentGames.svelte";
 import StreakBadge from "$lib/components/dashboard/StreakBadge.svelte";
 import StreakFeed from "$lib/components/dashboard/StreakFeed.svelte";
 import TopPlayers from "$lib/components/dashboard/TopPlayers.svelte";
 import SeasonSelector from "$lib/components/season/SeasonSelector.svelte";
+import PersonalRecapCard from "$lib/components/wrapped/PersonalRecapCard.svelte";
 import { get } from "$lib/services/api.services.js";
 import { selectedSeason } from "$lib/stores/season.stores.js";
 import { buildRematchUrl } from "$lib/utils/rematch.utils.js";

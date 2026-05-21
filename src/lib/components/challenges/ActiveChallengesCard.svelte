@@ -1,11 +1,10 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import { tolgee } from "$lib/config/i18n.config.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { fetchActiveChallenges } from "$lib/services/challenges.services.js";
 import ChallengeProgressBar from "./ChallengeProgressBar.svelte";
 import ChallengeWeekCountdown from "./ChallengeWeekCountdown.svelte";
-
-import { tolgee } from "$lib/config/i18n.config.js";
 
 const { t } = getTranslate();
 

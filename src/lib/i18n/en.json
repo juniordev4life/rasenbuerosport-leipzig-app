@@ -429,7 +429,17 @@
 	"match_report": {
 		"title": "AI Match Report",
 		"generating": "Generating...",
-		"error": "Failed to generate match report"
+		"error": "Failed to generate match report",
+		"listen": "Listen",
+		"generating_audio": "Generating audio report...",
+		"audio_error": "Failed to generate audio report",
+		"audio_label": "Audio match report",
+		"reporter_label": "Reporter",
+		"reporter": {
+			"klassiker": "Marcel, the Chronicler",
+			"analyst": "Sophie, the Analyst",
+			"euphoriker": "Frank, the Enthusiast"
+		}
 	},
 	"prediction": {
 		"title": "Match Prediction",
