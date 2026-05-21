@@ -642,5 +642,48 @@
 		"button": "Revanche",
 		"swap_button": "Seiten tauschen",
 		"quick_title": "Schnelles Rematch?"
+	},
+	"player_profile": {
+		"loading": "Profil wird geladen…",
+		"error": "Profil konnte nicht geladen werden.",
+		"back": "Zurück",
+		"freshman_title": "Frischling",
+		"freshman_body": "Dieser Spieler hat noch nicht genug Spiele für ein Profil. Nach 5 Spielen geht's los.",
+		"developing_title": "Im Aufbau",
+		"developing_body": "Erste Tendenzen sind da, aber der Charakter ist noch nicht final. Mehr Daten = präziseres Bild.",
+		"matches": "Spiele",
+		"rating": "ELO",
+		"recent_form": "Letzte Spiele",
+		"axes_title": "Charakter",
+		"axes": {
+			"finisher": "Vollstrecker",
+			"playmaker": "Vorbereiter",
+			"clutch": "Schlussphase",
+			"consistency": "Konstanz",
+			"discipline": "Disziplin",
+			"winner": "Sieger-Faktor"
+		},
+		"axis_info": {
+			"finisher": "Tore pro Spiel im Liga-Vergleich (Perzentil).",
+			"playmaker": "Vorlagen pro Spiel im Liga-Vergleich (Perzentil).",
+			"clutch": "Aktionen in der Schlussphase (ab Minute ~85).",
+			"consistency": "Wie gleichmäßig die Leistung über die letzten Spiele ist.",
+			"discipline": "Weniger Rote Karten → höherer Wert. Inverses Perzentil.",
+			"winner": "Wie sehr deine Anwesenheit die Mitspieler besser macht."
+		},
+		"relationships_title": "Mitspieler & Gegner",
+		"lieblingsgegner": "Lieblingsgegner",
+		"angstgegner": "Angstgegner",
+		"top_partner": "Top-Partner",
+		"no_relationship": "Noch keiner — mindestens 3 gemeinsame Spiele nötig.",
+		"wins_short": "S",
+		"losses_short": "N",
+		"matches_short": "Sp.",
+		"top_badges_title": "Top-Auszeichnungen",
+		"no_badges": "Noch keine Auszeichnungen.",
+		"result_win": "S",
+		"result_loss": "N",
+		"result_draw": "U",
+		"axis_modal_close": "Schließen"
 	}
 }

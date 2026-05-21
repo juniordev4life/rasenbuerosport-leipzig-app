@@ -640,5 +640,48 @@
 		"button": "Rematch",
 		"swap_button": "Swap sides",
 		"quick_title": "Quick rematch?"
+	},
+	"player_profile": {
+		"loading": "Loading profile…",
+		"error": "Profile could not be loaded.",
+		"back": "Back",
+		"freshman_title": "Rookie",
+		"freshman_body": "This player hasn't played enough matches yet. The profile unlocks after 5 games.",
+		"developing_title": "Developing",
+		"developing_body": "Early trends are showing, but the character isn't final yet. More data sharpens the picture.",
+		"matches": "Matches",
+		"rating": "ELO",
+		"recent_form": "Recent form",
+		"axes_title": "Character",
+		"axes": {
+			"finisher": "Finisher",
+			"playmaker": "Playmaker",
+			"clutch": "Clutch",
+			"consistency": "Consistency",
+			"discipline": "Discipline",
+			"winner": "Winner"
+		},
+		"axis_info": {
+			"finisher": "Goals per match, league percentile.",
+			"playmaker": "Assists per match, league percentile.",
+			"clutch": "Late-game actions (from ~85th minute).",
+			"consistency": "How even the performance has been across recent matches.",
+			"discipline": "Fewer red cards → higher score. Inverse percentile.",
+			"winner": "How much your presence lifts your teammates."
+		},
+		"relationships_title": "Teammates & Opponents",
+		"lieblingsgegner": "Favourite opponent",
+		"angstgegner": "Nemesis",
+		"top_partner": "Top partner",
+		"no_relationship": "Nobody yet — at least 3 shared matches required.",
+		"wins_short": "W",
+		"losses_short": "L",
+		"matches_short": "Mt.",
+		"top_badges_title": "Top achievements",
+		"no_badges": "No achievements yet.",
+		"result_win": "W",
+		"result_loss": "L",
+		"result_draw": "D",
+		"axis_modal_close": "Close"
 	}
 }

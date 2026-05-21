@@ -1,0 +1,65 @@
+<script>
+import { getTranslate } from "@tolgee/svelte";
+
+/**
+ * Hero block: avatar, name, archetype-title and bio.
+ * @type {{ username:string, avatarUrl:string|null, initials:string, archetype:{label:string,color:string,icon:string}|null, bio:{adjective:string,bio:string}|null, matchCount:number, currentRating:number|null }}
+ */
+let {
+	username,
+	avatarUrl,
+	initials,
+	archetype,
+	bio,
+	matchCount,
+	currentRating,
+} = $props();
+
+const { t } = getTranslate();
+
+const archetypeTitle = $derived.by(() => {
+	if (!archetype) return "";
+	const adj = bio?.adjective ? `${bio.adjective} ` : "";
+	return `${adj}${archetype.label}`;
+});
+</script>
+
+<div class="bg-bg-secondary border border-border rounded-2xl p-6 shadow-sm">
+	<div class="flex items-center gap-4">
+		<div
+			class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full text-2xl font-bold text-white"
+			style="background: linear-gradient(135deg, {archetype?.color ?? 'var(--color-text-muted)'}, var(--color-bg-card));"
+		>
+			{#if avatarUrl}
+				<img src={avatarUrl} alt={username} class="h-20 w-20 rounded-full object-cover" />
+			{:else}
+				{initials}
+			{/if}
+		</div>
+		<div class="min-w-0 flex-1">
+			<h1 class="truncate text-2xl font-bold text-text-primary">{username}</h1>
+			{#if archetype}
+				<p class="mt-1 text-sm font-semibold" style="color: {archetype.color};">
+					{archetype.icon} {archetypeTitle}
+				</p>
+			{/if}
+		</div>
+	</div>
+
+	{#if bio?.bio}
+		<p class="mt-4 text-sm italic text-text-secondary">„{bio.bio}"</p>
+	{/if}
+
+	<div class="mt-4 flex gap-6 border-t border-border pt-4 text-sm">
+		<div>
+			<div class="text-text-secondary">{$t("player_profile.matches")}</div>
+			<div class="text-lg font-bold text-text-primary">{matchCount}</div>
+		</div>
+		{#if currentRating !== null && currentRating !== undefined}
+			<div>
+				<div class="text-text-secondary">{$t("player_profile.rating")}</div>
+				<div class="text-lg font-bold text-text-primary">{Math.round(currentRating)}</div>
+			</div>
+		{/if}
+	</div>
+</div>
