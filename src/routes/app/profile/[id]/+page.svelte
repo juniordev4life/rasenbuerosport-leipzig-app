@@ -62,6 +62,7 @@ const isDeveloping = $derived(profile?.profileState === "im_aufbau");
 			bio={profile.bio}
 			matchCount={profile.player.matchCount}
 			currentRating={profile.player.currentRating}
+			rank={profile.player.rank}
 		/>
 
 		{#if isFreshman}

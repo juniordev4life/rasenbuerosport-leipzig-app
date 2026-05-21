@@ -2,8 +2,10 @@
 import { getTranslate } from "@tolgee/svelte";
 
 /**
- * Hero block: avatar, name, archetype-title and bio.
- * @type {{ username:string, avatarUrl:string|null, initials:string, archetype:{label:string,color:string,icon:string}|null, bio:{adjective:string,bio:string}|null, matchCount:number, currentRating:number|null }}
+ * Hero block: avatar + name + archetype-title on the left, ELO on the right.
+ * Bio + match count sit below.
+ *
+ * @type {{ username:string, avatarUrl:string|null, initials:string, archetype:{label:string,color:string,icon:string}|null, bio:{adjective:string,bio:string}|null, matchCount:number, currentRating:number|null, rank:number|null }}
  */
 let {
 	username,
@@ -13,6 +15,7 @@ let {
 	bio,
 	matchCount,
 	currentRating,
+	rank,
 } = $props();
 
 const { t } = getTranslate();
@@ -25,7 +28,7 @@ const archetypeTitle = $derived.by(() => {
 </script>
 
 <div class="bg-bg-secondary border border-border rounded-2xl p-6 shadow-sm">
-	<div class="flex items-center gap-4">
+	<div class="flex items-start gap-4">
 		<div
 			class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full text-2xl font-bold text-white"
 			style="background: linear-gradient(135deg, {archetype?.color ?? 'var(--color-text-muted)'}, var(--color-bg-card));"
@@ -44,6 +47,17 @@ const archetypeTitle = $derived.by(() => {
 				</p>
 			{/if}
 		</div>
+		{#if currentRating !== null && currentRating !== undefined}
+			<div class="text-right shrink-0">
+				<div class="text-xs uppercase tracking-wide text-text-secondary">
+					{$t("player_profile.rating")}
+				</div>
+				<div class="text-2xl font-bold text-text-primary">{Math.round(currentRating)}</div>
+				{#if rank}
+					<div class="text-xs text-text-muted">#{rank}</div>
+				{/if}
+			</div>
+		{/if}
 	</div>
 
 	{#if bio?.bio}
@@ -55,11 +69,5 @@ const archetypeTitle = $derived.by(() => {
 			<div class="text-text-secondary">{$t("player_profile.matches")}</div>
 			<div class="text-lg font-bold text-text-primary">{matchCount}</div>
 		</div>
-		{#if currentRating !== null && currentRating !== undefined}
-			<div>
-				<div class="text-text-secondary">{$t("player_profile.rating")}</div>
-				<div class="text-lg font-bold text-text-primary">{Math.round(currentRating)}</div>
-			</div>
-		{/if}
 	</div>
 </div>
