@@ -431,7 +431,17 @@
 	"match_report": {
 		"title": "KI-Spielbericht",
 		"generating": "Wird generiert...",
-		"error": "Spielbericht konnte nicht generiert werden"
+		"error": "Spielbericht konnte nicht generiert werden",
+		"listen": "Anhören",
+		"generating_audio": "Audio-Bericht wird erzeugt...",
+		"audio_error": "Audio-Bericht konnte nicht erstellt werden",
+		"audio_label": "Audio-Spielbericht",
+		"reporter_label": "Reporter",
+		"reporter": {
+			"klassiker": "Marcel, der Chronist",
+			"analyst": "Sophie, die Analytikerin",
+			"euphoriker": "Frank, der Euphoriker"
+		}
 	},
 	"prediction": {
 		"title": "Match-Vorhersage",

@@ -595,7 +595,11 @@ function getScorerProfile(playerId) {
 			<MatchReport
 				{gameId}
 				existingReport={game.match_report}
-				onReportGenerated={(report) => { game = { ...game, match_report: report }; }}
+				existingAudioUrl={game.match_report_audio_url}
+				existingReporterId={game.reporter_id}
+				onReportGenerated={(report) => { game = { ...game, match_report: report, match_report_audio_url: null }; }}
+				onAudioGenerated={(url) => { game = { ...game, match_report_audio_url: url }; }}
+				onReporterAssigned={(rid) => { game = { ...game, reporter_id: rid }; }}
 			/>
 		{/if}
 
