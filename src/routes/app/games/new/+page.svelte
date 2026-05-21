@@ -3,11 +3,10 @@ import { getTranslate } from "@tolgee/svelte";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { goto } from "$app/navigation";
 import { page } from "$app/state";
+import MatchPosterStep from "$lib/components/games/MatchPosterStep.svelte";
 import MatchPrediction from "$lib/components/games/MatchPrediction.svelte";
-import PlayerSelectionStep from "$lib/components/games/PlayerSelectionStep.svelte";
+import PlayerLobbyStep from "$lib/components/games/PlayerLobbyStep.svelte";
 import ScoreStep from "$lib/components/games/ScoreStep.svelte";
-import StepIndicator from "$lib/components/games/StepIndicator.svelte";
-import TeamSelectionStep from "$lib/components/games/TeamSelectionStep.svelte";
 import { storage } from "$lib/config/firebase.config.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get, post } from "$lib/services/api.services.js";
@@ -18,18 +17,16 @@ const { t } = getTranslate();
 
 const GUEST_ID = "__guest__";
 
-// Wizard state
+// Wizard step. 1 = Lobby, 2 = Match poster, 3 = Score (hidden from
+// the visible stepper but still part of the linear flow after Anpfiff).
 let step = $state(1);
 
-// Step 1: Player selection (IDs including guest IDs)
 let homePlayers = $state([]);
 let awayPlayers = $state([]);
 
-// Step 2: Teams
 let homeTeam = $state("");
 let awayTeam = $state("");
 
-// Step 3: Score + Timeline + Stats
 let scoreHome = $state(0);
 let scoreAway = $state(0);
 let scoreTimeline = $state([]);
@@ -38,14 +35,11 @@ let statsOverview = $state(null);
 let statsPasses = $state(null);
 let statsDefense = $state(null);
 
-// Save state
 let saving = $state(false);
 
-// Data from API
 let allPlayers = $state([]);
 let loading = $state(true);
 
-// Auto-derive game mode from player counts
 const mode = $derived.by(() => {
 	const h = homePlayers.length;
 	const a = awayPlayers.length;
@@ -54,7 +48,6 @@ const mode = $derived.by(() => {
 	return `${h}v${a}`;
 });
 
-// Detect rematch mode from URL params
 const isRematch = $derived(page.url.searchParams.has("hp"));
 
 $effect(() => {
@@ -89,10 +82,13 @@ function goBack() {
 	step = Math.max(1, step - 1);
 }
 
+function cancel() {
+	goto(ROUTES.DASHBOARD);
+}
+
 async function saveGame() {
 	saving = true;
 	try {
-		// Filter out guest players (they don't have real IDs in the DB)
 		const players = [
 			...homePlayers
 				.filter((id) => !id.startsWith(GUEST_ID))
@@ -121,7 +117,6 @@ async function saveGame() {
 
 		const gameId = res.data?.id;
 
-		// Upload stats images if selected
 		const statsFiles = [
 			{ file: statsOverview, type: "overview" },
 			{ file: statsPasses, type: "passes" },
@@ -146,7 +141,6 @@ async function saveGame() {
 				}
 			}
 
-			// Auto-generate match report after all stats are uploaded
 			try {
 				await post(`/v1/games/${gameId}/match-report`);
 			} catch (reportErr) {
@@ -154,7 +148,6 @@ async function saveGame() {
 			}
 		}
 
-		// Navigate to game detail if stats were uploaded, otherwise dashboard
 		if (statsFiles.length > 0 && gameId) {
 			goto(`/app/games/${gameId}`);
 		} else {
@@ -166,44 +159,85 @@ async function saveGame() {
 		saving = false;
 	}
 }
+
+/** Index of the active stepper dot. Step 3 (score) still highlights "Anpfiff". */
+const visibleStep = $derived(step >= 2 ? 2 : 1);
 </script>
 
 <svelte:head>
 	<title>RasenBürosport - {isRematch ? $t("rematch.title") : $t("new_game.title")}</title>
 </svelte:head>
 
-<div class="flex flex-col gap-5">
-	<h1 class="text-xl font-bold text-text-primary text-center">
-		{isRematch ? $t("rematch.title") : $t("new_game.title")}
-	</h1>
+<div class="flex flex-col gap-5 lg:gap-7 max-w-4xl mx-auto w-full">
+	<header class="text-center">
+		<h1 class="text-xl sm:text-2xl font-bold tracking-tight">
+			{step === 1
+				? $t("new_game.lobby.page_title")
+				: step === 2
+					? $t("new_game.poster.page_title")
+					: $t("new_game.score.page_title")}
+		</h1>
+		<p class="mt-1 text-sm text-text-secondary">
+			{step === 1
+				? $t("new_game.lobby.page_subtitle")
+				: step === 2
+					? $t("new_game.poster.page_subtitle")
+					: $t("new_game.score.page_subtitle")}
+		</p>
+	</header>
 
-	<StepIndicator currentStep={step} totalSteps={3} />
+	<!-- 2-step indicator -->
+	<div class="flex items-start justify-center gap-3">
+		<div class="flex flex-col items-center gap-1.5">
+			<div class={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
+				visibleStep === 1
+					? "bg-accent-red text-white ring-4 ring-accent-red/20"
+					: "bg-success/15 text-success"
+			}`}>
+				{visibleStep === 1 ? "1" : "✓"}
+			</div>
+			<span class={`text-[10px] tracking-[0.05em] uppercase font-semibold ${visibleStep === 1 ? "text-text-primary" : "text-success"}`}>
+				{$t("new_game.lobby.step_label")}
+			</span>
+		</div>
+		<div class="flex-1 max-w-[120px] h-px bg-border mt-4"></div>
+		<div class="flex flex-col items-center gap-1.5">
+			<div class={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
+				visibleStep === 2
+					? "bg-accent-red text-white ring-4 ring-accent-red/20"
+					: "bg-bg-input border border-border text-text-muted"
+			}`}>
+				2
+			</div>
+			<span class={`text-[10px] tracking-[0.05em] uppercase font-semibold ${visibleStep === 2 ? "text-text-primary" : "text-text-muted"}`}>
+				{$t("new_game.poster.step_label")}
+			</span>
+		</div>
+	</div>
 
 	{#if loading}
 		<div class="flex justify-center py-8">
-			<div
-				class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"
-			></div>
+			<div class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"></div>
 		</div>
 	{:else if step === 1}
-		<PlayerSelectionStep
+		<PlayerLobbyStep
 			{allPlayers}
 			bind:homePlayers
 			bind:awayPlayers
 			onNext={() => goToStep(2)}
+			onCancel={cancel}
 		/>
 	{:else if step === 2}
-		<TeamSelectionStep
+		<MatchPosterStep
 			{homePlayers}
 			{awayPlayers}
 			{allPlayers}
 			bind:homeTeam
 			bind:awayTeam
-			onNext={() => goToStep(3)}
+			onAnpfiff={() => goToStep(3)}
 			onBack={goBack}
 		/>
 	{:else if step === 3}
-		<!-- AI Match Prediction (visible when players + teams are set) -->
 		<MatchPrediction
 			{homePlayers}
 			{awayPlayers}

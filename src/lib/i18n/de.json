@@ -78,7 +78,7 @@
 	"nav": {
 		"dashboard": "Dashboard",
 		"leaderboard": "Rangliste",
-		"new_game": "Neues Spiel",
+		"new_game": "Schnelles Spiel",
 		"games": "Spiele",
 		"teams": "Teams",
 		"stats": "Statistiken",
@@ -414,9 +414,38 @@
 	},
 	"new_game": {
 		"title": "Neues Spiel",
+		"cancel": "Abbruch",
 		"step_players": "Spieler",
 		"step_teams": "Teams",
 		"step_score": "Ergebnis",
+		"lobby": {
+			"page_title": "Wer spielt heute?",
+			"page_subtitle": "Zieht euch in eure Teams",
+			"step_label": "Mannschaft",
+			"pool_title": "Verfügbare Spieler",
+			"pool_hint": "Antippen, dann ▲ Heim oder ▼ Auswärts",
+			"helper_desktop": "Zieh per Drag & Drop oder klick die Pfeile am Spieler",
+			"helper_mobile": "Tipp auf einen Spieler — dann zeig ihm die Richtung",
+			"assign_home": "Zu Heim hinzufügen",
+			"assign_away": "Zu Auswärts hinzufügen",
+			"of": "von"
+		},
+		"poster": {
+			"page_title": "Anpfiff bereit",
+			"page_subtitle": "Wir haben zwei Teams für euch ausgewürfelt",
+			"step_label": "Anpfiff",
+			"generation_info": "Zufällig generiert · {min}–{max}★",
+			"balanced": "Ausgeglichen",
+			"imbalanced": "Sterne ungleich",
+			"action_roll": "Neu würfeln",
+			"action_customize": "Anpassen",
+			"action_manual": "Manuell wählen",
+			"anpfiff_cta": "Anpfiff — Spiel starten"
+		},
+		"score": {
+			"page_title": "Ergebnis eintragen",
+			"page_subtitle": "Trag das Endergebnis und Highlights ein"
+		},
 		"home": "Heim",
 		"away": "Auswärts",
 		"select_team": "Team auswählen",
