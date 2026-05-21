@@ -89,7 +89,8 @@
 		"loading": "Laden...",
 		"error": "Fehler",
 		"vs": "vs.",
-		"back": "Zurück"
+		"back": "Zurück",
+		"close": "Schließen"
 	},
 	"footer": {
 		"copyright": "© {year} RasenBürosport Leipzig IT"
@@ -211,7 +212,56 @@
 		"delete_confirm_title": "Spiel löschen?",
 		"delete_confirm_message": "Das Spiel wird unwiderruflich gelöscht.",
 		"delete_cancel": "Abbrechen",
-		"delete_confirm": "Löschen"
+		"delete_confirm": "Löschen",
+		"section": {
+			"report": "Spielbericht",
+			"timeline": "Spielverlauf",
+			"lineups": "Aufstellungen & Performance",
+			"kpis": "Wichtigste Zahlen",
+			"pass_character": "Pass-Charakter",
+			"detail_stats": "Detail-Statistiken",
+			"danger_zone": "Gefahrenzone"
+		},
+		"character_tag": {
+			"late_drama": "Spätes Drama",
+			"lucky_win": "Glücklicher Sieg",
+			"defensive_battle": "Defensivschlacht",
+			"penalty_decision": "Elfmeter-Entscheidung",
+			"goal_fest": "Torreich",
+			"clear_win": "Klare Sache",
+			"draw": "Unentschieden",
+			"comeback": "Comeback"
+		},
+		"report": {
+			"reporter_pending": "Reporter wird ausgewählt …",
+			"reporter_unknown": "Reporter unbekannt",
+			"reporter_role": "Reporter dieser Partie",
+			"audio_title": "Audio-Version anhören",
+			"audio_meta": "~50 Sekunden · auf Wunsch generiert"
+		},
+		"timeline": {
+			"event_count": "{count, plural, one {# Ereignis} other {# Ereignisse}}",
+			"empty": "Keine Ereignisse in dieser Partie.",
+			"kickoff": "Anpfiff",
+			"halftime": "Halbzeit",
+			"fulltime": "Abpfiff"
+		},
+		"lineup": {
+			"result_win": "Sieg",
+			"result_loss": "Niederlage",
+			"result_draw": "Unentschieden"
+		},
+		"pass_character": {
+			"unknown": "Pass-Stil nicht erkannt"
+		},
+		"detail_stats": {
+			"top_hint": "Top 5 angezeigt",
+			"expand": "Alle {count} Detail-Statistiken anzeigen",
+			"collapse": "Top 5 zeigen"
+		},
+		"danger_zone": {
+			"description": "Spiel dauerhaft löschen — alle Stats und ELO-Berechnungen werden rückgängig gemacht."
+		}
 	},
 	"profile": {
 		"title": "Profil",
@@ -230,6 +280,7 @@
 		"favorite_team": "Dein Lieblingsteam",
 		"games_played": "{count} Spiele",
 		"logout": "Abmelden",
+		"settings": "Einstellungen",
 		"no_data": "Noch keine Daten",
 		"league_stats": "Deine Ligen",
 		"league_stats_empty": "Noch keine Ligadaten",
@@ -441,6 +492,33 @@
 			"klassiker": "Marcel, der Chronist",
 			"analyst": "Sophie, die Analytikerin",
 			"euphoriker": "Frank, der Euphoriker"
+		},
+		"reporter_bio_cta": "Mehr über {name}",
+		"reporter_bio": {
+			"marcel": {
+				"title": "Der Chronist",
+				"pill_experience": "34 Jahre im Geschäft",
+				"pill_role": "Live-Reporter",
+				"bio_1": "Marcel begleitet die großen Spiele seit drei Jahrzehnten — von der Bundesliga über Europacup-Nächte bis zu Weltmeisterschaften. Er hat die Tore von Vier-Generationen-Stürmern live kommentiert und seine Stimme ist für viele zum Synonym fürs Spiel selbst geworden.",
+				"bio_2": "Seine Stärke ist die Geschichte hinter dem Tor. Er erzählt nicht nur, was passiert ist, sondern was es bedeutet — für den Spieler, für das Team, für den Moment. Wenn ein Match brennt oder still wird, ist Marcel der Mann, der die Atmosphäre einfängt. In der Büroliga liefert er Spielberichte mit dem Pathos großer Reportagen und einer trockenen Pointe, die nur erfahrene Stimmen treffen.",
+				"quote": "„Tja… dieser Treffer — ein Säbelhieb in der 84. Minute. Das müssen Sie sich merken, meine Damen und Herren.“"
+			},
+			"sophie": {
+				"title": "Die Analytikerin",
+				"pill_field": "Sportstatistik",
+				"pill_degree": "M.Sc. Sportwissenschaft",
+				"bio_1": "Sophie kommt aus der neuen Generation des Sportjournalismus, die das Spiel mit Daten erklärt statt mit Bauchgefühl. Nach dem Studium der Sportwissenschaft hat sie zunächst für ein Datenanalyse-Startup im Profifußball gearbeitet, bevor sie sich auf datengetriebene Spielanalyse für Medien spezialisiert hat.",
+				"bio_2": "Wenn Sophie eine Partie kommentiert, hört man die Zahlen unter der Sprache. xG-Werte, Pass-Genauigkeit, Pressing-Intensität — sie übersetzt das, was die Analytics zeigen, in klare Sätze, die jeder versteht. Bei knappen oder taktisch interessanten Spielen liefert sie die ruhige, präzise Einordnung, die andere im Drama vergessen. Wer wissen will, warum ein Team gewonnen hat, hört Sophie.",
+				"quote": "„Auffällig in dieser Partie: 64 % Ballbesitz bedeuten in diesem Fall nicht mehr, sondern weniger Kontrolle. Die Zahlen lügen selten.“"
+			},
+			"frank": {
+				"title": "Der Euphoriker",
+				"pill_experience": "20+ Jahre am Mikro",
+				"pill_role": "Tor-Spezialist",
+				"bio_1": "Frank ist die Stimme, die du nicht überhörst. Aufgewachsen mit der Bundesliga der späten 90er, geprägt von den großen Champions-League-Nächten und mit einem unerschütterlichen Glauben daran, dass jedes Spiel ein Drama ist, das nur noch entdeckt werden muss. Er hat alles kommentiert — vom Pokalfinale bis zum Kreisliga-Derby — und liebt jedes davon mit derselben Intensität.",
+				"bio_2": "Wenn ein Tor fällt, explodiert Frank. Wenn ein Comeback läuft, ist er nicht zu halten. Seine Spezialität sind die großen Momente: Hattricks, Last-Minute-Treffer, Rote Karten, Krimi-Endspiele. Er steigert sich rein, manchmal über die Top, aber immer mit echter Begeisterung. In der Büroliga ist er die Energie, die spektakuläre Spiele bekommen, wenn das Drama zu groß für Sachlichkeit ist.",
+				"quote": "„WAS für ein Spiel hier in der Büroliga! Marco! Marco! In der 84. Minute! Das müssen Sie gesehen haben — UNGLAUBLICH!“"
+			}
 		}
 	},
 	"prediction": {

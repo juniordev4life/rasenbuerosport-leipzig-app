@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="140" height="168" role="img" aria-label="Pass-Charakter: Zentral — Spielzug durch die Mitte">
+  <title>Zentral</title>
+
+  <!-- Spielfeld -->
+  <rect x="2" y="2" width="96" height="116" rx="4" fill="#1a1f2a" stroke="#3A4258" stroke-width="1.2"/>
+  <line x1="2" y1="60" x2="98" y2="60" stroke="#3A4258" stroke-width="0.8"/>
+  <circle cx="50" cy="60" r="10" fill="none" stroke="#3A4258" stroke-width="0.8"/>
+  <circle cx="50" cy="60" r="1" fill="#3A4258"/>
+
+  <!-- Gegnerisches Tor (oben) -->
+  <rect x="32" y="2" width="36" height="14" fill="none" stroke="#3A4258" stroke-width="0.8"/>
+  <rect x="42" y="2" width="16" height="6" fill="none" stroke="#3A4258" stroke-width="0.8"/>
+
+  <!-- Eigenes Tor (unten) -->
+  <rect x="32" y="104" width="36" height="14" fill="none" stroke="#3A4258" stroke-width="0.8"/>
+  <rect x="42" y="112" width="16" height="6" fill="none" stroke="#3A4258" stroke-width="0.8"/>
+
+  <defs>
+    <linearGradient id="pc-zentral-gradient" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#84CC16" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#84CC16" stop-opacity="0.9"/>
+    </linearGradient>
+    <marker id="pc-zentral-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#84CC16"/>
+    </marker>
+  </defs>
+
+  <!-- Zentraler Pfeil: von eigener Hälfte (y=85) in gegnerische Hälfte (y=30) -->
+  <line x1="50" y1="85" x2="50" y2="30"
+        stroke="url(#pc-zentral-gradient)"
+        stroke-width="3"
+        marker-end="url(#pc-zentral-arrow)"/>
+</svg>

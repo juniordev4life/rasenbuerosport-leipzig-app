@@ -87,7 +87,8 @@
 		"loading": "Loading...",
 		"error": "Error",
 		"vs": "vs.",
-		"back": "Back"
+		"back": "Back",
+		"close": "Close"
 	},
 	"footer": {
 		"copyright": "© {year} RasenBürosport Leipzig IT"
@@ -209,7 +210,56 @@
 		"delete_confirm_title": "Delete game?",
 		"delete_confirm_message": "This will permanently delete this game. This action cannot be undone.",
 		"delete_cancel": "Cancel",
-		"delete_confirm": "Delete"
+		"delete_confirm": "Delete",
+		"section": {
+			"report": "Match report",
+			"timeline": "Match flow",
+			"lineups": "Lineups & performance",
+			"kpis": "Headline numbers",
+			"pass_character": "Pass character",
+			"detail_stats": "Detail statistics",
+			"danger_zone": "Danger zone"
+		},
+		"character_tag": {
+			"late_drama": "Late drama",
+			"lucky_win": "Lucky win",
+			"defensive_battle": "Defensive battle",
+			"penalty_decision": "Penalty decider",
+			"goal_fest": "Goal fest",
+			"clear_win": "Comfortable win",
+			"draw": "Draw",
+			"comeback": "Comeback"
+		},
+		"report": {
+			"reporter_pending": "Picking a reporter…",
+			"reporter_unknown": "Reporter unknown",
+			"reporter_role": "Reporting this match",
+			"audio_title": "Listen to audio version",
+			"audio_meta": "~50 seconds · generated on demand"
+		},
+		"timeline": {
+			"event_count": "{count, plural, one {# event} other {# events}}",
+			"empty": "No events in this match.",
+			"kickoff": "Kick-off",
+			"halftime": "Half-time",
+			"fulltime": "Full-time"
+		},
+		"lineup": {
+			"result_win": "Win",
+			"result_loss": "Loss",
+			"result_draw": "Draw"
+		},
+		"pass_character": {
+			"unknown": "Pass style unknown"
+		},
+		"detail_stats": {
+			"top_hint": "Top 5 shown",
+			"expand": "Show all {count} detail stats",
+			"collapse": "Show top 5"
+		},
+		"danger_zone": {
+			"description": "Permanently delete this game — all stats and ELO will be reverted."
+		}
 	},
 	"profile": {
 		"title": "Profile",
@@ -228,6 +278,7 @@
 		"favorite_team": "Your favorite team",
 		"games_played": "{count} games",
 		"logout": "Log out",
+		"settings": "Settings",
 		"no_data": "No data yet",
 		"league_stats": "Your Leagues",
 		"league_stats_empty": "No league data yet",
@@ -439,6 +490,33 @@
 			"klassiker": "Marcel, the Chronicler",
 			"analyst": "Sophie, the Analyst",
 			"euphoriker": "Frank, the Enthusiast"
+		},
+		"reporter_bio_cta": "More about {name}",
+		"reporter_bio": {
+			"marcel": {
+				"title": "The Chronicler",
+				"pill_experience": "34 years in the booth",
+				"pill_role": "Live commentator",
+				"bio_1": "Marcel has been covering the big games for three decades — from Bundesliga to European nights and World Cups. He has called the goals of four generations of strikers live, and for many his voice has become synonymous with the game itself.",
+				"bio_2": "His strength is the story behind the goal. He tells you not only what happened, but what it means — for the player, for the team, for the moment. When a match boils over or falls silent, Marcel is the one who captures the atmosphere. For the office league he delivers reports with the gravitas of classic broadcasts and a dry punchline only experienced voices land.",
+				"quote": "“Well now… that strike — a sabre blow in the 84th minute. Remember this one, ladies and gentlemen.”"
+			},
+			"sophie": {
+				"title": "The Analyst",
+				"pill_field": "Sports statistics",
+				"pill_degree": "M.Sc. Sports Science",
+				"bio_1": "Sophie comes from the new generation of sports journalism that explains the game with data instead of gut feel. After studying sports science she worked at a football analytics start-up before specialising in data-driven match analysis for the media.",
+				"bio_2": "When Sophie commentates a match, you can hear the numbers under the words. xG, pass accuracy, pressing intensity — she translates what analytics show into clear sentences anyone can follow. In tight or tactically interesting games she delivers the calm, precise framing others forget about in the drama. If you want to know why a team won, listen to Sophie.",
+				"quote": "“Notable in this game: 64 % possession means less control, not more. The numbers rarely lie.”"
+			},
+			"frank": {
+				"title": "The Enthusiast",
+				"pill_experience": "20+ years on the mic",
+				"pill_role": "Goal specialist",
+				"bio_1": "Frank is the voice you can't ignore. Raised on late-90s Bundesliga, shaped by epic Champions League nights and an unshakable belief that every game is a drama waiting to be uncovered. He has called everything — from cup finals to amateur derbies — and loves each one with the same intensity.",
+				"bio_2": "When a goal goes in, Frank explodes. When a comeback is on, you can't hold him down. His speciality is the big moments: hat-tricks, last-minute winners, red cards, knife-edge endings. He gets carried away, sometimes over the top, but always with genuine passion. For the office league he is the energy that spectacular games deserve when the drama gets too big for restraint.",
+				"quote": "“WHAT a game in the office league! Marco! Marco! In the 84th minute! You have to see this — UNBELIEVABLE!”"
+			}
 		}
 	},
 	"prediction": {

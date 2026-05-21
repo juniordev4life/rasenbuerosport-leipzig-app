@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="140" height="168" role="img" aria-label="Pass-Charakter: Ausgewogen — Spielzüge über alle Bereiche">
+  <title>Ausgewogen</title>
+
+  <!-- Spielfeld -->
+  <rect x="2" y="2" width="96" height="116" rx="4" fill="#1a1f2a" stroke="#3A4258" stroke-width="1.2"/>
+  <line x1="2" y1="60" x2="98" y2="60" stroke="#3A4258" stroke-width="0.8"/>
+  <circle cx="50" cy="60" r="10" fill="none" stroke="#3A4258" stroke-width="0.8"/>
+  <circle cx="50" cy="60" r="1" fill="#3A4258"/>
+
+  <!-- Gegnerisches Tor (oben) -->
+  <rect x="32" y="2" width="36" height="14" fill="none" stroke="#3A4258" stroke-width="0.8"/>
+  <rect x="42" y="2" width="16" height="6" fill="none" stroke="#3A4258" stroke-width="0.8"/>
+
+  <!-- Eigenes Tor (unten) -->
+  <rect x="32" y="104" width="36" height="14" fill="none" stroke="#3A4258" stroke-width="0.8"/>
+  <rect x="42" y="112" width="16" height="6" fill="none" stroke="#3A4258" stroke-width="0.8"/>
+
+  <defs>
+    <!-- Linker Pfeil Gradient -->
+    <linearGradient id="pc-ausgewogen-grad-links" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#84CC16" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#84CC16" stop-opacity="0.85"/>
+    </linearGradient>
+    <!-- Zentraler Pfeil Gradient -->
+    <linearGradient id="pc-ausgewogen-grad-zentral" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#84CC16" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#84CC16" stop-opacity="0.85"/>
+    </linearGradient>
+    <!-- Rechter Pfeil Gradient -->
+    <linearGradient id="pc-ausgewogen-grad-rechts" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#84CC16" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#84CC16" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <!-- Pfeilspitzen -->
+    <marker id="pc-ausgewogen-arrow-links" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#84CC16"/>
+    </marker>
+    <marker id="pc-ausgewogen-arrow-zentral" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#84CC16"/>
+    </marker>
+    <marker id="pc-ausgewogen-arrow-rechts" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#84CC16"/>
+    </marker>
+  </defs>
+
+  <!-- Linker Pfeil -->
+  <path d="M 50 85 Q 35 70, 25 30"
+        fill="none"
+        stroke="url(#pc-ausgewogen-grad-links)"
+        stroke-width="2.4"
+        marker-end="url(#pc-ausgewogen-arrow-links)"/>
+
+  <!-- Zentraler Pfeil -->
+  <line x1="50" y1="85" x2="50" y2="30"
+        stroke="url(#pc-ausgewogen-grad-zentral)"
+        stroke-width="2.6"
+        marker-end="url(#pc-ausgewogen-arrow-zentral)"/>
+
+  <!-- Rechter Pfeil -->
+  <path d="M 50 85 Q 65 70, 75 30"
+        fill="none"
+        stroke="url(#pc-ausgewogen-grad-rechts)"
+        stroke-width="2.4"
+        marker-end="url(#pc-ausgewogen-arrow-rechts)"/>
+</svg>
