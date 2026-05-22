@@ -90,6 +90,25 @@
 		"back": "Back",
 		"close": "Close"
 	},
+	"push": {
+		"title": "Push notifications",
+		"subtitle": "Get notified when new matches are saved.",
+		"state_active": "Active",
+		"activate": "Activate",
+		"deactivate": "Deactivate",
+		"unsupported": "Your browser does not support push notifications.",
+		"ios_install_hint": "On iOS, add the app to your home screen first to enable push notifications.",
+		"denied_hint": "Notifications are blocked in your browser. Enable them in browser settings to receive push.",
+		"error_denied": "You declined the permission.",
+		"error_unsupported": "Your browser does not support push notifications.",
+		"error_generic": "Couldn't activate notifications.",
+		"soft_prompt": {
+			"title": "Want to get notified?",
+			"body": "We'll ping you whenever a new match is recorded — no need to keep the app open.",
+			"accept": "Sure",
+			"deny": "Later"
+		}
+	},
 	"footer": {
 		"copyright": "© {year} RasenBürosport Leipzig IT"
 	},

@@ -8,6 +8,7 @@ import PlayerHero from "$lib/components/playerProfile/PlayerHero.svelte";
 import RelationshipCards from "$lib/components/playerProfile/RelationshipCards.svelte";
 import TopBadgesRow from "$lib/components/playerProfile/TopBadgesRow.svelte";
 import ProfileEditor from "$lib/components/profile/ProfileEditor.svelte";
+import PushNotificationSettings from "$lib/components/profile/PushNotificationSettings.svelte";
 import ThemeSelector from "$lib/components/profile/ThemeSelector.svelte";
 import Button from "$lib/components/ui/Button.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
@@ -132,6 +133,8 @@ async function handleLogout() {
 			{/if}
 
 			<ThemeSelector />
+
+			<PushNotificationSettings />
 
 			<Button variant="ghost" onclick={handleLogout}>
 				{$t("profile.logout")}
