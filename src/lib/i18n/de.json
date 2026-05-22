@@ -412,6 +412,33 @@
 		"no_more": "Keine weiteren Spiele",
 		"no_games": "Noch keine Spiele gespielt"
 	},
+	"live_match": {
+		"live_pill": "LIVE",
+		"hint": {
+			"idle": "Tipp einen Spieler bei Tor an",
+			"card_yellow": "Welcher Spieler bekommt die gelbe Karte?",
+			"card_red": "Welcher Spieler bekommt die rote Karte?",
+			"penalty_miss": "Wer hat den Elfmeter verschossen?",
+			"penalty_keeper": "Welcher Keeper hat gehalten?"
+		},
+		"editor": {
+			"label_goal": "Tor",
+			"label_own_goal": "Eigentor",
+			"stoppage_label": "Nachspiel",
+			"confirm": "Speichern"
+		},
+		"footer": {
+			"yellow": "Gelb",
+			"red": "Rot",
+			"penalty_missed": "Elfer verschossen",
+			"end_match": "Spiel beenden"
+		},
+		"events": {
+			"delete_aria": "Ereignis entfernen",
+			"delete_title": "Ereignis löschen?",
+			"delete_body": "Das Ereignis wird entfernt und der Spielstand neu berechnet."
+		}
+	},
 	"new_game": {
 		"title": "Neues Spiel",
 		"cancel": "Abbruch",
@@ -421,6 +448,8 @@
 		"lobby": {
 			"page_title": "Wer spielt heute?",
 			"page_subtitle": "Zieht euch in eure Teams",
+			"page_subtitle_v2": "Tipp auf einen Avatar in deiner Hälfte, um dich oder andere zuzuweisen.",
+			"center_hint": "Wähle die Spieler auf jeder Seite aus",
 			"step_label": "Mannschaft",
 			"pool_title": "Verfügbare Spieler",
 			"pool_hint": "Antippen, dann ▲ Heim oder ▼ Auswärts",

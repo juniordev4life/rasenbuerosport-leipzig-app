@@ -410,6 +410,33 @@
 		"no_more": "No more games",
 		"no_games": "No games played yet"
 	},
+	"live_match": {
+		"live_pill": "LIVE",
+		"hint": {
+			"idle": "Tap a player to record a goal",
+			"card_yellow": "Which player gets the yellow card?",
+			"card_red": "Which player gets the red card?",
+			"penalty_miss": "Who missed the penalty?",
+			"penalty_keeper": "Which keeper saved it?"
+		},
+		"editor": {
+			"label_goal": "Goal",
+			"label_own_goal": "Own goal",
+			"stoppage_label": "Stoppage",
+			"confirm": "Save"
+		},
+		"footer": {
+			"yellow": "Yellow",
+			"red": "Red",
+			"penalty_missed": "Missed penalty",
+			"end_match": "End match"
+		},
+		"events": {
+			"delete_aria": "Remove event",
+			"delete_title": "Remove event?",
+			"delete_body": "This event will be removed and the score recalculated."
+		}
+	},
 	"new_game": {
 		"title": "New Game",
 		"cancel": "Cancel",
@@ -419,6 +446,8 @@
 		"lobby": {
 			"page_title": "Who's playing today?",
 			"page_subtitle": "Drag yourselves into the teams",
+			"page_subtitle_v2": "Tap an avatar on your half to send a player there.",
+			"center_hint": "Pick the players on each side",
 			"step_label": "Lineup",
 			"pool_title": "Available players",
 			"pool_hint": "Tap, then ▲ Home or ▼ Away",

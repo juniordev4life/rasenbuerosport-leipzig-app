@@ -1,6 +1,7 @@
 <script>
 import { browser } from "$app/environment";
 import { goto } from "$app/navigation";
+import { page } from "$app/state";
 import BottomNav from "$lib/components/layout/BottomNav.svelte";
 import Header from "$lib/components/layout/Header.svelte";
 import Sidebar from "$lib/components/layout/Sidebar.svelte";
@@ -12,6 +13,10 @@ import { logout } from "$lib/services/auth.services.js";
 let { children } = $props();
 let authorized = $state(false);
 let checking = $state(true);
+
+/** Hide the chrome (Header greeting) inside the new-game wizard so the
+ *  event-entry screen has the full vertical room. */
+const isImmersive = $derived(page.url.pathname.startsWith("/app/games/new"));
 
 // Verify user is authorized (has a profile in the database)
 $effect(() => {
@@ -53,7 +58,9 @@ $effect(() => {
 		<Sidebar />
 
 		<div class="flex flex-col flex-1 pb-16 lg:pb-0">
-			<Header />
+			{#if !isImmersive}
+				<Header />
+			{/if}
 			<main class="flex-1 px-4 lg:px-8 py-2 lg:py-6 max-w-lg lg:max-w-4xl mx-auto w-full">
 				{@render children()}
 			</main>
