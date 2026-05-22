@@ -466,7 +466,7 @@
 			"imbalanced": "Stars uneven",
 			"action_roll": "Reroll",
 			"action_customize": "Customize",
-			"action_manual": "Pick manually",
+			"action_manual": "Manual",
 			"anpfiff_cta": "Kick-off — start the match"
 		},
 		"score": {
@@ -517,7 +517,7 @@
 		"random_teams_title": "Pick Random Teams",
 		"random_min_stars": "Min. Stars",
 		"random_max_stars": "Max. Stars",
-		"random_search": "Search",
+		"random_search": "Save",
 		"random_reroll": "Reroll",
 		"random_confirm": "Confirm",
 		"random_cancel": "Cancel",

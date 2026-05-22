@@ -1,6 +1,6 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import Button from "$lib/components/ui/Button.svelte";
+import MinuteScroller from "$lib/components/liveMatch/MinuteScroller.svelte";
 import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
 import StarRating from "$lib/components/ui/StarRating.svelte";
 import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
@@ -112,10 +112,6 @@ function handleConfirm() {
 		onConfirm(homeResult.name, awayResult.name);
 	}
 }
-
-function getStarValue(starIndex, isLeft) {
-	return isLeft ? starIndex + 0.5 : starIndex + 1;
-}
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -124,125 +120,69 @@ function getStarValue(starIndex, isLeft) {
 	onmousedown={(e) => { if (e.target === e.currentTarget) onClose(); }}
 	onkeydown={(e) => e.key === "Escape" && onClose()}
 >
-	<div class="bg-bg-primary border-t border-border rounded-t-2xl sm:rounded-2xl sm:border w-full max-w-lg max-h-[85vh] overflow-y-auto p-5 sm:mx-4">
+	<div class="bg-bg-secondary border-t border-border rounded-t-2xl sm:rounded-2xl sm:border w-full max-w-lg max-h-[85vh] overflow-y-auto p-5 sm:mx-4">
 		<!-- Title -->
 		<h2 class="text-lg font-bold text-text-primary text-center mb-5">
 			{$t("new_game.random_teams_title")}
 		</h2>
 
-		<!-- Star Range Selectors -->
+		<!-- Star Range Selectors with a horizontal half-star scroller
+		     so picking 3.5★ is precise on mobile. The star strip is
+		     a read-only visualisation; the scroller is the input. -->
 		<div class="flex flex-col gap-4 mb-5">
-			<!-- Min Stars -->
 			<div>
 				<label class="text-xs font-medium text-text-secondary mb-1.5 block">
 					{$t("new_game.random_min_stars")}
 				</label>
 				<div class="flex items-center gap-3">
-					<div class="flex items-center gap-0.5">
-						{#each Array.from({ length: 5 }, (_, i) => i) as starIdx (starIdx)}
-							<div class="relative" style="width: 24px; height: 24px;">
-								<button
-									type="button"
-									class="absolute inset-y-0 left-0 w-1/2 z-10 cursor-pointer"
-									onclick={() => {
-										minStars = getStarValue(starIdx, true);
-										if (minStars > maxStars) maxStars = minStars;
-									}}
-									aria-label="{starIdx + 0.5} stars"
-								></button>
-								<button
-									type="button"
-									class="absolute inset-y-0 right-0 w-1/2 z-10 cursor-pointer"
-									onclick={() => {
-										minStars = getStarValue(starIdx, false);
-										if (minStars > maxStars) maxStars = minStars;
-									}}
-									aria-label="{starIdx + 1} stars"
-								></button>
-								{#if minStars >= starIdx + 1}
-									<svg class="w-6 h-6 text-warning" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-									</svg>
-								{:else if minStars >= starIdx + 0.5}
-									<svg class="w-6 h-6 text-warning" viewBox="0 0 24 24" aria-hidden="true">
-										<defs>
-											<linearGradient id="min-half-{starIdx}">
-												<stop offset="50%" stop-color="currentColor" />
-												<stop offset="50%" stop-color="var(--color-text-muted)" />
-											</linearGradient>
-										</defs>
-										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="url(#min-half-{starIdx})" />
-									</svg>
-								{:else}
-									<svg class="w-6 h-6 text-text-muted" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-									</svg>
-								{/if}
-							</div>
-						{/each}
+					<StarRating rating={minStars} size="md" />
+					<div class="flex-1">
+						<MinuteScroller
+							value={minStars}
+							min={0.5}
+							max={5}
+							step={0.5}
+							variant="secondary"
+							onChange={(v) => {
+								minStars = v;
+								if (minStars > maxStars) maxStars = minStars;
+							}}
+						/>
 					</div>
-					<span class="text-sm text-text-secondary font-medium min-w-[2rem] text-center">{minStars}</span>
 				</div>
 			</div>
 
-			<!-- Max Stars -->
 			<div>
 				<label class="text-xs font-medium text-text-secondary mb-1.5 block">
 					{$t("new_game.random_max_stars")}
 				</label>
 				<div class="flex items-center gap-3">
-					<div class="flex items-center gap-0.5">
-						{#each Array.from({ length: 5 }, (_, i) => i) as starIdx (starIdx)}
-							<div class="relative" style="width: 24px; height: 24px;">
-								<button
-									type="button"
-									class="absolute inset-y-0 left-0 w-1/2 z-10 cursor-pointer"
-									onclick={() => {
-										maxStars = getStarValue(starIdx, true);
-										if (maxStars < minStars) minStars = maxStars;
-									}}
-									aria-label="{starIdx + 0.5} stars"
-								></button>
-								<button
-									type="button"
-									class="absolute inset-y-0 right-0 w-1/2 z-10 cursor-pointer"
-									onclick={() => {
-										maxStars = getStarValue(starIdx, false);
-										if (maxStars < minStars) minStars = maxStars;
-									}}
-									aria-label="{starIdx + 1} stars"
-								></button>
-								{#if maxStars >= starIdx + 1}
-									<svg class="w-6 h-6 text-warning" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-									</svg>
-								{:else if maxStars >= starIdx + 0.5}
-									<svg class="w-6 h-6 text-warning" viewBox="0 0 24 24" aria-hidden="true">
-										<defs>
-											<linearGradient id="max-half-{starIdx}">
-												<stop offset="50%" stop-color="currentColor" />
-												<stop offset="50%" stop-color="var(--color-text-muted)" />
-											</linearGradient>
-										</defs>
-										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="url(#max-half-{starIdx})" />
-									</svg>
-								{:else}
-									<svg class="w-6 h-6 text-text-muted" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-										<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-									</svg>
-								{/if}
-							</div>
-						{/each}
+					<StarRating rating={maxStars} size="md" />
+					<div class="flex-1">
+						<MinuteScroller
+							value={maxStars}
+							min={0.5}
+							max={5}
+							step={0.5}
+							variant="secondary"
+							onChange={(v) => {
+								maxStars = v;
+								if (maxStars < minStars) minStars = maxStars;
+							}}
+						/>
 					</div>
-					<span class="text-sm text-text-secondary font-medium min-w-[2rem] text-center">{maxStars}</span>
 				</div>
 			</div>
 		</div>
 
 		<!-- Search Button -->
-		<Button variant="primary" onclick={searchRandomTeams} class="mb-5">
+		<button
+			type="button"
+			onclick={searchRandomTeams}
+			class="w-full mb-5 rounded-xl bg-accent-red hover:bg-accent-red-hover text-white text-sm font-semibold px-5 py-2.5 shadow-md shadow-accent-red/20 transition-colors"
+		>
 			{$t("new_game.random_search")}
-		</Button>
+		</button>
 
 		<!-- Results -->
 		{#if error}
@@ -302,13 +242,21 @@ function getStarValue(starIndex, isLeft) {
 			</div>
 
 			<!-- Action Buttons -->
-			<div class="flex gap-3">
-				<Button variant="secondary" onclick={searchRandomTeams} class="flex-1">
+			<div class="flex gap-2">
+				<button
+					type="button"
+					onclick={searchRandomTeams}
+					class="flex-1 rounded-xl border border-border bg-bg-input hover:bg-bg-card text-text-secondary text-sm font-semibold px-4 py-2.5 transition-colors"
+				>
 					{$t("new_game.random_reroll")}
-				</Button>
-				<Button variant="primary" onclick={handleConfirm} class="flex-1">
+				</button>
+				<button
+					type="button"
+					onclick={handleConfirm}
+					class="flex-1 rounded-xl bg-accent-red hover:bg-accent-red-hover text-white text-sm font-semibold px-4 py-2.5 shadow-md shadow-accent-red/20 transition-colors"
+				>
 					{$t("new_game.random_confirm")}
-				</Button>
+				</button>
 			</div>
 		{/if}
 
@@ -316,7 +264,7 @@ function getStarValue(starIndex, isLeft) {
 		<button
 			type="button"
 			onclick={onClose}
-			class="w-full mt-4 py-2.5 text-sm font-medium text-text-secondary border border-border rounded-lg hover:bg-bg-secondary transition-colors"
+			class="w-full mt-4 py-2 text-xs font-medium text-text-muted hover:text-text-primary rounded-lg transition-colors"
 		>
 			{$t("new_game.random_cancel")}
 		</button>

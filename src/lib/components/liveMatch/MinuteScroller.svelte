@@ -2,25 +2,26 @@
 import { onMount, untrack } from "svelte";
 
 /**
- * Horizontal scroll-snap minute picker. The active number sits in the
+ * Horizontal scroll-snap value picker. The active number sits in the
  * centre of the strip; items snap into place via CSS `scroll-snap` so
- * there is zero JS drag logic. An IntersectionObserver with a thin
- * centre-column root margin tells us which item is currently centred.
+ * there is zero JS drag logic. The active value is derived from the
+ * scroll offset via the picker's own index math.
  *
- * Two variants:
- * - `primary`: large active digit (32px), 1..120 used for minutes
- * - `secondary`: smaller active digit (18px), 1..10 used for stoppage
+ * Variants:
+ * - `primary`: large active digit (30px) — used for minutes 1..120
+ * - `secondary`: smaller active digit (18px) — used for stoppage and
+ *   the star-range pickers (`step = 0.5`, range 0.5..5)
  *
  * Items below `min` render in a dim "locked" state and the picker
  * snaps back to `min` if the user inertia-scrolls into the locked
  * range. When `disabled` is set the scroller blocks pointer events
- * and dims to ~30 % opacity (used to gate the stoppage row until the
- * primary minute is 45/90/120).
+ * and dims to ~30 % opacity.
  *
  * @type {{
  *   value: number,
  *   min?: number,
  *   max?: number,
+ *   step?: number,
  *   variant?: "primary"|"secondary",
  *   disabled?: boolean,
  *   onChange?: (value: number) => void,
@@ -30,28 +31,51 @@ let {
 	value = $bindable(1),
 	min = 1,
 	max = 120,
+	step = 1,
 	variant = "primary",
 	disabled = false,
 	onChange,
 } = $props();
 
 const itemWidth = $derived(variant === "primary" ? 52 : 28);
+/** Tolerance for float-safe equality. */
+const EPS = 1e-6;
 
 let scrollerEl = $state(null);
-/** Suppress the IntersectionObserver callback while we programmatically
- *  re-centre the strip (otherwise external value changes feed back as
- *  fresh user-driven changes and we get a reactive loop). */
+/** Suppress the scroll callback while we programmatically re-centre
+ *  the strip (otherwise external value changes feed back as fresh
+ *  user-driven changes and we get a reactive loop). */
 let suppressEvents = $state(false);
 
-const numbers = $derived(
-	Array.from({ length: max - 0 }, (_, i) => i + 1).slice(0, max),
-);
+/** Inclusive [min..max] stepped numbers, rounded to absorb float drift. */
+const numbers = $derived.by(() => {
+	const arr = [];
+	const decimals = step < 1 ? 1 : 0;
+	const factor = 10 ** decimals;
+	for (let v = min; v <= max + EPS; v += step) {
+		arr.push(Math.round(v * factor) / factor);
+	}
+	return arr;
+});
+
+/** Format a value for display: drop trailing `.0` so "4" stays "4". */
+function fmt(n) {
+	return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
 
 function classFor(n) {
-	if (n < min) return "locked";
-	if (n === value) return "active";
-	if (Math.abs(n - value) === 1) return "near";
+	if (n < min - EPS) return "locked";
+	if (Math.abs(n - value) < EPS) return "active";
+	if (Math.abs(Math.abs(n - value) - step) < EPS) return "near";
 	return "";
+}
+
+/** Look up the array index of `target`; defaults to 0 when unknown. */
+function indexOf(target) {
+	for (let i = 0; i < numbers.length; i += 1) {
+		if (Math.abs(numbers[i] - target) < EPS) return i;
+	}
+	return 0;
 }
 
 /**
@@ -61,7 +85,7 @@ function classFor(n) {
  */
 function scrollToValue(target, smooth = true) {
 	if (!scrollerEl) return;
-	const index = target - 1;
+	const index = indexOf(target);
 	const left = index * itemWidth + itemWidth / 2;
 	suppressEvents = true;
 	scrollerEl.scrollTo({ left, behavior: smooth ? "smooth" : "instant" });
@@ -92,11 +116,11 @@ function handleScroll() {
 	if (rafId) cancelAnimationFrame(rafId);
 	rafId = requestAnimationFrame(() => {
 		const next = activeValueFromScroll();
-		if (next < min) {
+		if (next < min - EPS) {
 			scrollToValue(min);
 			return;
 		}
-		if (next !== value) {
+		if (Math.abs(next - value) > EPS) {
 			value = next;
 			onChange?.(next);
 		}
@@ -122,7 +146,7 @@ $effect(() => {
 $effect(() => {
 	const floor = min;
 	untrack(() => {
-		if (value < floor) {
+		if (value < floor - EPS) {
 			value = floor;
 			onChange?.(floor);
 		}
@@ -131,13 +155,13 @@ $effect(() => {
 
 function handleKeydown(event) {
 	if (disabled) return;
-	if (event.key === "ArrowLeft" && value > min) {
+	if (event.key === "ArrowLeft" && value > min + EPS) {
 		event.preventDefault();
-		value -= 1;
+		value = Math.max(min, value - step);
 		onChange?.(value);
-	} else if (event.key === "ArrowRight" && value < max) {
+	} else if (event.key === "ArrowRight" && value < max - EPS) {
 		event.preventDefault();
-		value += 1;
+		value = Math.min(max, value + step);
 		onChange?.(value);
 	}
 }
@@ -160,7 +184,7 @@ function handleKeydown(event) {
 	<div class="picker-scroller" bind:this={scrollerEl} onscroll={handleScroll}>
 		{#each numbers as n (n)}
 			<div class="picker-number {classFor(n)}" data-value={n}>
-				{n}
+				{fmt(n)}
 			</div>
 		{/each}
 	</div>

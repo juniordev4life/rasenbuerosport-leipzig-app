@@ -466,9 +466,9 @@
 			"generation_info": "Zufällig generiert · {min}–{max}★",
 			"balanced": "Ausgeglichen",
 			"imbalanced": "Sterne ungleich",
-			"action_roll": "Neu würfeln",
+			"action_roll": "Würfeln",
 			"action_customize": "Anpassen",
-			"action_manual": "Manuell wählen",
+			"action_manual": "Manuell",
 			"anpfiff_cta": "Anpfiff — Spiel starten"
 		},
 		"score": {
@@ -519,7 +519,7 @@
 		"random_teams_title": "Zufällige Teams auswählen",
 		"random_min_stars": "Min. Sterne",
 		"random_max_stars": "Max. Sterne",
-		"random_search": "Suchen",
+		"random_search": "Speichern",
 		"random_reroll": "Nochmal",
 		"random_confirm": "Bestätigen",
 		"random_cancel": "Abbrechen",

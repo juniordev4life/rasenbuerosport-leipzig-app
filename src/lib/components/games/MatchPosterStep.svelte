@@ -6,7 +6,7 @@ import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
 import { getTeamByName } from "$lib/services/teams.services.js";
 import { rollRandomTeams } from "$lib/utils/randomTeams.utils.js";
 import RandomTeamPicker from "./RandomTeamPicker.svelte";
-import TeamSelectionStep from "./TeamSelectionStep.svelte";
+import TeamAutocomplete from "./TeamAutocomplete.svelte";
 
 /**
  * Step 2 of the new-game wizard — match poster with the two teams
@@ -55,6 +55,24 @@ let rolling = $state(false);
 let rollError = $state("");
 let showAnpassen = $state(false);
 let showManuell = $state(false);
+/** Local drafts so the manual modal can be cancelled without
+ *  overwriting the currently displayed teams. */
+let manualHomeDraft = $state("");
+let manualAwayDraft = $state("");
+
+function openManuell() {
+	manualHomeDraft = homeTeam;
+	manualAwayDraft = awayTeam;
+	showManuell = true;
+}
+
+function saveManuell() {
+	homeTeam = manualHomeDraft;
+	awayTeam = manualAwayDraft;
+	homeTeamData = null;
+	awayTeamData = null;
+	showManuell = false;
+}
 
 const hasTeams = $derived(!!homeTeamData && !!awayTeamData);
 const sameStars = $derived(
@@ -162,18 +180,14 @@ function avatarGradient(id) {
 	</div>
 {/snippet}
 
-{#snippet teamBlock(team, side, players)}
-	{@const accent = side === "home" ? "text-accent-red" : "text-success"}
-	<div class="flex flex-col items-center gap-3 text-center min-w-0">
-		<div class="text-[11px] tracking-[0.12em] uppercase font-extrabold {accent}">
-			{side === "home" ? `▶ ${$t("new_game.home")}` : `${$t("new_game.away")} ◀`}
-		</div>
+{#snippet teamBlock(team, players)}
+	<div class="relative z-10 flex flex-col items-center justify-center gap-2.5 text-center min-w-0 px-4">
 		{#if team}
 			<TeamLogo logoUrl={team.logo_url} teamName={team.name} size="lg" />
 		{:else}
 			<div class="w-14 h-14 rounded-full bg-bg-input animate-pulse"></div>
 		{/if}
-		<h2 class="text-sm sm:text-base lg:text-lg font-bold leading-tight truncate max-w-[180px] sm:max-w-[220px]">
+		<h2 class="text-sm sm:text-base font-bold leading-tight truncate max-w-[200px]">
 			{team?.name ?? "—"}
 		</h2>
 		{#if team}
@@ -194,7 +208,56 @@ function avatarGradient(id) {
 	</div>
 {/snippet}
 
-<div class="flex flex-col gap-5">
+<div class="flex flex-col gap-3">
+	{#if rollError}
+		<div class="text-center text-xs text-warning">{rollError}</div>
+	{/if}
+
+	<!-- Pitch with the two teams in their respective halves — same
+	     visual as the player lobby and live-match screens. -->
+	<div
+		class="relative rounded-2xl border-2 border-border overflow-hidden"
+		style="background: linear-gradient(135deg, #0d3320 0%, #0a2516 100%);"
+	>
+		<svg
+			viewBox="0 0 200 280"
+			preserveAspectRatio="none"
+			class="absolute inset-0 w-full h-full opacity-40 pointer-events-none lg:hidden"
+			aria-hidden="true"
+		>
+			<line x1="0" y1="140" x2="200" y2="140" stroke="#84CC16" stroke-width="0.5" />
+			<circle cx="100" cy="140" r="22" fill="none" stroke="#84CC16" stroke-width="0.5" />
+			<circle cx="100" cy="140" r="1.5" fill="#84CC16" />
+			<rect x="60" y="0" width="80" height="32" fill="none" stroke="#84CC16" stroke-width="0.5" />
+			<rect x="60" y="248" width="80" height="32" fill="none" stroke="#84CC16" stroke-width="0.5" />
+		</svg>
+		<svg
+			viewBox="0 0 320 200"
+			preserveAspectRatio="none"
+			class="absolute inset-0 w-full h-full opacity-40 pointer-events-none hidden lg:block"
+			aria-hidden="true"
+		>
+			<line x1="160" y1="0" x2="160" y2="200" stroke="#84CC16" stroke-width="0.5" />
+			<circle cx="160" cy="100" r="22" fill="none" stroke="#84CC16" stroke-width="0.5" />
+			<circle cx="160" cy="100" r="1.5" fill="#84CC16" />
+			<rect x="0" y="60" width="36" height="80" fill="none" stroke="#84CC16" stroke-width="0.5" />
+			<rect x="284" y="60" width="36" height="80" fill="none" stroke="#84CC16" stroke-width="0.5" />
+		</svg>
+
+		<div class="relative grid grid-cols-1 lg:grid-cols-2 grid-rows-2 lg:grid-rows-1 h-[460px] lg:h-[440px]">
+			<div class="relative min-h-0 overflow-hidden flex items-center justify-center">
+				{@render teamBlock(homeTeamData, homePlayers)}
+			</div>
+			<div class="absolute inset-x-0 top-1/2 h-px bg-white/10 lg:hidden" aria-hidden="true"></div>
+			<div class="hidden lg:block absolute inset-y-0 left-1/2 w-px bg-white/10" aria-hidden="true"></div>
+			<div class="relative min-h-0 overflow-hidden flex items-center justify-center">
+				{@render teamBlock(awayTeamData, awayPlayers)}
+			</div>
+		</div>
+	</div>
+
+	<!-- Generation info below the pitch — keeps the screen above-fold
+	     focused on the teams and the kick-off CTA. -->
 	<div class="flex justify-center">
 		<span class="inline-flex items-center gap-2 text-[11px] text-text-muted bg-bg-input border border-border rounded-full px-3 py-1">
 			<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
@@ -205,42 +268,23 @@ function avatarGradient(id) {
 		</span>
 	</div>
 
-	{#if rollError}
-		<div class="text-center text-xs text-warning">{rollError}</div>
-	{/if}
+	<button
+		type="button"
+		onclick={onAnpfiff}
+		disabled={!homeTeam || !awayTeam}
+		class="w-full rounded-xl bg-accent-red hover:bg-accent-red-hover text-white text-sm font-semibold px-5 py-3 shadow-lg shadow-accent-red/25 disabled:opacity-40 disabled:shadow-none transition-all flex items-center justify-center gap-2"
+	>
+		<span aria-hidden="true">⚽</span>
+		<span>{$t("new_game.poster.anpfiff_cta")}</span>
+	</button>
 
-	<div class="rounded-2xl border border-border bg-bg-card p-5 lg:p-8">
-		<div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] items-center gap-6 lg:gap-4">
-			{@render teamBlock(homeTeamData, "home", homePlayers)}
-
-			<div class="flex flex-col items-center gap-2 lg:px-3">
-				<div class="flex items-center gap-3 lg:flex-col">
-					<div class="h-px w-12 bg-border lg:h-12 lg:w-px"></div>
-					<div class="w-14 h-14 rounded-full bg-bg-input border-2 border-border flex items-center justify-center text-sm font-bold text-text-primary tabular-nums">
-						VS
-					</div>
-					<div class="h-px w-12 bg-border lg:h-12 lg:w-px"></div>
-				</div>
-				{#if hasTeams}
-					<span class="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full {sameStars ? 'bg-success/15 text-success' : 'bg-warning/15 text-warning'}">
-						{sameStars ? "⚖" : "⚠"}
-						{sameStars
-							? $t("new_game.poster.balanced")
-							: $t("new_game.poster.imbalanced")}
-					</span>
-				{/if}
-			</div>
-
-			{@render teamBlock(awayTeamData, "away", awayPlayers)}
-		</div>
-	</div>
-
-	<div class="grid grid-cols-3 gap-2.5">
+	<!-- Secondary actions below the CTA, compact single-row layout. -->
+	<div class="grid grid-cols-3 gap-2">
 		<button
 			type="button"
 			onclick={roll}
 			disabled={rolling}
-			class="flex items-center justify-center gap-2 rounded-xl border border-border bg-bg-input px-3 py-3 text-sm font-semibold text-text-primary hover:bg-bg-secondary disabled:opacity-50"
+			class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-bg-input px-2 py-2 text-[12px] font-semibold text-text-secondary hover:bg-bg-card disabled:opacity-50"
 		>
 			<span aria-hidden="true">🎲</span>
 			<span>{$t("new_game.poster.action_roll")}</span>
@@ -248,30 +292,20 @@ function avatarGradient(id) {
 		<button
 			type="button"
 			onclick={() => (showAnpassen = true)}
-			class="flex items-center justify-center gap-2 rounded-xl border border-border bg-bg-input px-3 py-3 text-sm font-semibold text-text-primary hover:bg-bg-secondary"
+			class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-bg-input px-2 py-2 text-[12px] font-semibold text-text-secondary hover:bg-bg-card"
 		>
 			<span aria-hidden="true">⚙️</span>
 			<span>{$t("new_game.poster.action_customize")}</span>
 		</button>
 		<button
 			type="button"
-			onclick={() => (showManuell = true)}
-			class="flex items-center justify-center gap-2 rounded-xl border border-border bg-bg-input px-3 py-3 text-sm font-semibold text-text-primary hover:bg-bg-secondary"
+			onclick={openManuell}
+			class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-bg-input px-2 py-2 text-[12px] font-semibold text-text-secondary hover:bg-bg-card"
 		>
 			<span aria-hidden="true">✋</span>
 			<span>{$t("new_game.poster.action_manual")}</span>
 		</button>
 	</div>
-
-	<button
-		type="button"
-		onclick={onAnpfiff}
-		disabled={!homeTeam || !awayTeam}
-		class="w-full rounded-2xl bg-gradient-to-br from-accent-red to-accent-red-hover px-5 py-4 lg:py-5 text-base lg:text-lg font-bold text-white shadow-xl shadow-accent-red/30 hover:-translate-y-0.5 transition-all disabled:opacity-40 disabled:translate-y-0 disabled:shadow-none flex items-center justify-center gap-3"
-	>
-		<span aria-hidden="true" class="text-xl">⚽</span>
-		<span>{$t("new_game.poster.anpfiff_cta")}</span>
-	</button>
 
 	<div class="flex justify-center">
 		<button
@@ -295,35 +329,51 @@ function avatarGradient(id) {
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-0 sm:p-4"
-		onclick={() => (showManuell = false)}
+		class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
+		onmousedown={(e) => {
+			if (e.target === e.currentTarget) showManuell = false;
+		}}
+		onkeydown={(e) => e.key === "Escape" && (showManuell = false)}
 	>
 		<div
-			class="bg-bg-secondary border border-border w-full h-full sm:h-auto sm:max-w-lg sm:max-h-[90vh] sm:rounded-2xl overflow-y-auto p-5"
-			onclick={(e) => e.stopPropagation()}
+			class="bg-bg-secondary border-t border-border rounded-t-2xl sm:rounded-2xl sm:border w-full max-w-lg overflow-y-auto p-5 sm:mx-4"
 		>
-			<div class="flex items-center justify-between mb-4">
-				<h3 class="text-base font-bold">{$t("new_game.poster.action_manual")}</h3>
+			<h2 class="text-lg font-bold text-text-primary text-center mb-5">
+				{$t("new_game.poster.action_manual")}
+			</h2>
+
+			<div class="flex flex-col gap-4 mb-5">
+				<div>
+					<label class="text-xs font-medium text-accent-red mb-1.5 block tracking-[0.06em] uppercase">
+						{$t("new_game.home")}
+					</label>
+					<TeamAutocomplete bind:value={manualHomeDraft} />
+				</div>
+				<div>
+					<label class="text-xs font-medium text-success mb-1.5 block tracking-[0.06em] uppercase">
+						{$t("new_game.away")}
+					</label>
+					<TeamAutocomplete bind:value={manualAwayDraft} direction="up" />
+				</div>
+			</div>
+
+			<div class="flex gap-2">
 				<button
 					type="button"
 					onclick={() => (showManuell = false)}
-					class="w-8 h-8 rounded-full bg-bg-input text-text-secondary text-lg flex items-center justify-center hover:bg-bg-card"
-					aria-label={$t("common.close")}
-				>×</button>
+					class="flex-1 rounded-xl border border-border bg-bg-input hover:bg-bg-card text-text-secondary text-sm font-semibold px-4 py-2.5 transition-colors"
+				>
+					{$t("new_game.cancel")}
+				</button>
+				<button
+					type="button"
+					onclick={saveManuell}
+					disabled={!manualHomeDraft.trim() || !manualAwayDraft.trim()}
+					class="flex-1 rounded-xl bg-accent-red hover:bg-accent-red-hover text-white text-sm font-semibold px-4 py-2.5 shadow-md shadow-accent-red/20 disabled:opacity-40 disabled:shadow-none transition-colors"
+				>
+					{$t("live_match.editor.confirm")}
+				</button>
 			</div>
-			<TeamSelectionStep
-				{homePlayers}
-				{awayPlayers}
-				{allPlayers}
-				bind:homeTeam
-				bind:awayTeam
-				onNext={() => {
-					showManuell = false;
-					homeTeamData = null;
-					awayTeamData = null;
-				}}
-				onBack={() => (showManuell = false)}
-			/>
 		</div>
 	</div>
 {/if}

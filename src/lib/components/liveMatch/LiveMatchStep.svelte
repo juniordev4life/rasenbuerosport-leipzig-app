@@ -136,7 +136,7 @@ function handleEnd() {
 	>×</button>
 {/snippet}
 
-<div class="flex flex-col gap-3 mt-8">
+<div class="flex flex-col gap-3">
 	<MatchHeader
 		homeTeam={homeTeamData}
 		awayTeam={awayTeamData}
@@ -144,7 +144,8 @@ function handleEnd() {
 		scoreAway={state.scoreAway}
 	/>
 
-	<Pitch
+	<div class="my-3">
+		<Pitch
 		homePlayers={homePitchPlayers}
 		awayPlayers={awayPitchPlayers}
 		homeTeam={homeTeamData}
@@ -163,6 +164,7 @@ function handleEnd() {
 		onCancel={() => (state = cancelEntry(state))}
 		onConfirm={() => (state = confirmEntry(state))}
 	/>
+	</div>
 
 	{#if state.events.length > 0}
 		{@const reversed = state.events.toReversed()}

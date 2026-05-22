@@ -41,9 +41,11 @@ const redActive = $derived(
 );
 </script>
 
-<div class="flex flex-col gap-2 rounded-2xl border border-border bg-bg-secondary p-3">
+<div class="flex flex-col gap-4 rounded-2xl border border-border bg-bg-secondary p-3">
 	<div class="flex gap-2">
-		<div class="flex flex-1 rounded-xl border border-border bg-bg-input overflow-hidden">
+		<!-- Card toggle with a subtle partial-height divider so the two
+		     halves read as one control with two functions. -->
+		<div class="relative flex flex-1 rounded-xl border border-border bg-bg-input overflow-hidden">
 			<button
 				type="button"
 				onclick={() => onToggleCard(CARD_COLOR.YELLOW)}
@@ -52,6 +54,10 @@ const redActive = $derived(
 			>
 				🟨 {$t("live_match.footer.yellow")}
 			</button>
+			<span
+				class="pointer-events-none absolute left-1/2 -translate-x-1/2 top-2 bottom-2 w-px bg-border"
+				aria-hidden="true"
+			></span>
 			<button
 				type="button"
 				onclick={() => onToggleCard(CARD_COLOR.RED)}

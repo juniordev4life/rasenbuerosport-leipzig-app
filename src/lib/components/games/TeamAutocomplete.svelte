@@ -5,7 +5,18 @@ import StarRating from "$lib/components/ui/StarRating.svelte";
 import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
 import { getAllTeams, searchTeams } from "$lib/services/teams.services.js";
 
-let { value = $bindable("") } = $props();
+/**
+ * @type {{
+ *   value?: string,
+ *   direction?: "down"|"up",
+ *   maxVisible?: number,
+ * }}
+ */
+let { value = $bindable(""), direction = "down", maxVisible = 3 } = $props();
+
+/** Approx height of a single suggestion row (px). Used to cap the
+ *  dropdown to `maxVisible` items before the list starts scrolling. */
+const ROW_PX = 44;
 
 const { t } = getTranslate();
 
@@ -97,7 +108,8 @@ $effect(() => {
 
 	{#if showSuggestions && suggestions.length > 0}
 		<ul
-			class="absolute z-10 w-full mt-1 bg-bg-secondary border border-border rounded-lg overflow-hidden shadow-lg max-h-64 overflow-y-auto"
+			class="absolute z-10 w-full bg-bg-secondary border border-border rounded-lg overflow-y-auto shadow-lg {direction === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}"
+			style="max-height: {maxVisible * ROW_PX}px;"
 		>
 			{#each suggestions as team, i (team.name)}
 				<li>

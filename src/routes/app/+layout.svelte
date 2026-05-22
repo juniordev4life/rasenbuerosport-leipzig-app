@@ -57,7 +57,7 @@ $effect(() => {
 	<div class="min-h-screen bg-bg-primary flex flex-col lg:flex-row">
 		<Sidebar />
 
-		<div class="flex flex-col flex-1 pb-16 lg:pb-0">
+		<div class="flex flex-col flex-1 {isImmersive ? '' : 'pb-16 lg:pb-0'}">
 			{#if !isImmersive}
 				<Header />
 			{/if}
@@ -66,6 +66,8 @@ $effect(() => {
 			</main>
 		</div>
 
-		<BottomNav />
+		{#if !isImmersive}
+			<BottomNav />
+		{/if}
 	</div>
 {/if}
