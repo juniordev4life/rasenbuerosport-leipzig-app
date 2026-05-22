@@ -55,6 +55,7 @@ jobs:
           PUBLIC_API_URL: ${{ secrets.PUBLIC_API_URL }}
           PUBLIC_TOLGEE_API_KEY: ${{ secrets.PUBLIC_TOLGEE_API_KEY }}
           PUBLIC_TOLGEE_API_URL: ${{ secrets.PUBLIC_TOLGEE_API_URL }}
+          PUBLIC_VAPID_KEY: ${{ secrets.PUBLIC_VAPID_KEY }}
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0

@@ -5,6 +5,7 @@ import { page } from "$app/state";
 import BottomNav from "$lib/components/layout/BottomNav.svelte";
 import Header from "$lib/components/layout/Header.svelte";
 import Sidebar from "$lib/components/layout/Sidebar.svelte";
+import PushSoftPrompt from "$lib/components/profile/PushSoftPrompt.svelte";
 import { auth } from "$lib/config/firebase.config.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get } from "$lib/services/api.services.js";
@@ -68,6 +69,10 @@ $effect(() => {
 
 		{#if !isImmersive}
 			<BottomNav />
+		{/if}
+
+		{#if !isImmersive}
+			<PushSoftPrompt />
 		{/if}
 	</div>
 {/if}

@@ -7,7 +7,11 @@ const { t } = getTranslate();
 </script>
 
 <header class="flex items-center justify-end px-4 py-3 lg:hidden" style="padding-top: calc(env(safe-area-inset-top) + 0.75rem);">
-	<div class="flex items-center gap-3">
+	<a
+		href={ROUTES.PROFILE}
+		class="flex items-center gap-3 rounded-full -m-1 p-1 hover:bg-bg-secondary transition-colors"
+		aria-label={$t("nav.profile")}
+	>
 		<span class="text-sm text-text-primary">
 			{$t("dashboard.greeting", { username: $user?.user_metadata?.username || "User" })}
 		</span>
@@ -24,5 +28,5 @@ const { t } = getTranslate();
 				{($user?.user_metadata?.username || "U").charAt(0).toUpperCase()}
 			</div>
 		{/if}
-	</div>
+	</a>
 </header>

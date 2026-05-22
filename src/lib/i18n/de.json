@@ -92,6 +92,25 @@
 		"back": "Zurück",
 		"close": "Schließen"
 	},
+	"push": {
+		"title": "Push-Benachrichtigungen",
+		"subtitle": "Werde benachrichtigt, wenn neue Spiele eingetragen werden.",
+		"state_active": "Aktiv",
+		"activate": "Aktivieren",
+		"deactivate": "Deaktivieren",
+		"unsupported": "Dein Browser unterstützt keine Push-Benachrichtigungen.",
+		"ios_install_hint": "Auf iOS musst du die App zuerst zum Home-Bildschirm hinzufügen, damit Push-Benachrichtigungen funktionieren.",
+		"denied_hint": "Benachrichtigungen wurden im Browser blockiert. Aktiviere sie in den Browser-Einstellungen, um wieder Push zu empfangen.",
+		"error_denied": "Du hast die Berechtigung verweigert.",
+		"error_unsupported": "Dein Browser unterstützt keine Push-Benachrichtigungen.",
+		"error_generic": "Benachrichtigungen konnten nicht aktiviert werden.",
+		"soft_prompt": {
+			"title": "Möchtest du benachrichtigt werden?",
+			"body": "Erfahre sofort, wenn neue Spiele eingetragen werden — ohne die App offen zu lassen.",
+			"accept": "Ja, gerne",
+			"deny": "Später"
+		}
+	},
 	"footer": {
 		"copyright": "© {year} RasenBürosport Leipzig IT"
 	},
