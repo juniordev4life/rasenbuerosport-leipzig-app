@@ -1,159 +1,135 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import DuoDetailModal from "$lib/components/leaderboard/DuoDetailModal.svelte";
+import { untrack } from "svelte";
+import { goto, replaceState } from "$app/navigation";
+import DuoRow from "$lib/components/leaderboard/DuoRow.svelte";
 import H2HModal from "$lib/components/leaderboard/H2HModal.svelte";
-import SeasonSelector from "$lib/components/season/SeasonSelector.svelte";
-import { ROUTES } from "$lib/constants/routes.constants.js";
+import ModeSwitch from "$lib/components/leaderboard/ModeSwitch.svelte";
+import PlayerRow from "$lib/components/leaderboard/PlayerRow.svelte";
+import RanglisteHero from "$lib/components/leaderboard/RanglisteHero.svelte";
+import SubSwitches from "$lib/components/leaderboard/SubSwitches.svelte";
 import { get } from "$lib/services/api.services.js";
 import { user } from "$lib/stores/auth.stores.js";
-import { selectedSeason } from "$lib/stores/season.stores.js";
+import { buildEloHistory } from "$lib/utils/eloHistory.utils.js";
 
 const { t } = getTranslate();
 
-let players = $state([]);
+const DUO_TOP_N = 3;
+const GAMES_WINDOW = 200;
+
+let games = $state([]);
 let duos = $state([]);
 let loading = $state(true);
+
+let teamSize = $state(initialTeamSize());
+let sort = $state(initialSort());
+
 let selectedPlayerId = $state(null);
-let selectedDuo = $state(null);
-let viewMode = $state("total");
-let selectedMode = $state("all");
 
-const ONE_MONTH_MS = 30 * 24 * 60 * 60 * 1000;
-const MIN_GAMES_PPG = 3;
+const userId = $derived($user?.uid ?? null);
 
-const isDuosMode = $derived(selectedMode === "duos");
+function initialTeamSize() {
+	if (typeof window === "undefined") return "2v2";
+	const v = new URL(window.location.href).searchParams.get("type");
+	return v === "1v1" ? "1v1" : "2v2";
+}
+function initialSort() {
+	if (typeof window === "undefined") return "current";
+	const v = new URL(window.location.href).searchParams.get("sort");
+	return v === "form" ? "form" : "current";
+}
+
+function syncUrl() {
+	if (typeof window === "undefined") return;
+	const url = new URL(window.location.href);
+	const desired = `mode=skill&type=${teamSize}&sort=${sort}`;
+	const current = `mode=${url.searchParams.get("mode") ?? ""}&type=${url.searchParams.get("type") ?? ""}&sort=${url.searchParams.get("sort") ?? ""}`;
+	if (desired === current) return;
+	url.searchParams.set("mode", "skill");
+	url.searchParams.set("type", teamSize);
+	url.searchParams.set("sort", sort);
+	replaceState(url, {});
+}
 
 $effect(() => {
-	const season = $selectedSeason;
-	const mode = selectedMode;
 	let aborted = false;
-
-	if (mode === "duos") {
-		loadDuoLeaderboard(season).catch(() => {});
-	} else {
-		loadLeaderboard(season, mode).catch(() => {});
-	}
-
+	(async () => {
+		try {
+			const [gamesRes, duosRes] = await Promise.all([
+				get(`/v1/games?limit=${GAMES_WINDOW}`),
+				get("/v1/duos?limit=20"),
+			]);
+			if (aborted) return;
+			games = gamesRes.data || [];
+			duos = duosRes.data || [];
+		} catch (err) {
+			console.error("Rangliste load failed:", err);
+		} finally {
+			if (!aborted) loading = false;
+		}
+	})();
 	return () => {
 		aborted = true;
 	};
-
-	async function loadLeaderboard(s, m) {
-		loading = true;
-		try {
-			let url = "/v1/leaderboard?limit=50";
-			if (s !== "all") url += `&season=${s}`;
-			if (m !== "all") url += `&mode=${m}`;
-			const res = await get(url);
-			if (aborted) return;
-			players = res.data || [];
-		} catch (err) {
-			if (aborted) return;
-			console.error("Failed to load leaderboard:", err);
-		} finally {
-			if (!aborted) loading = false;
-		}
-	}
-
-	async function loadDuoLeaderboard(s) {
-		loading = true;
-		try {
-			let url = "/v1/duos?limit=50";
-			if (s !== "all") url += `&season=${s}`;
-			const res = await get(url);
-			if (aborted) return;
-			duos = res.data || [];
-		} catch (err) {
-			if (aborted) return;
-			console.error("Failed to load duo leaderboard:", err);
-		} finally {
-			if (!aborted) loading = false;
-		}
-	}
 });
 
-/** Sorted & filtered players based on view mode */
-const rankedPlayers = $derived.by(() => {
-	if (viewMode === "ppg") {
-		return players
-			.filter((p) => p.games >= MIN_GAMES_PPG)
-			.map((p) => ({ ...p, ppg: p.points / p.games }))
-			.sort((a, b) => b.ppg - a.ppg);
-	}
-	return players;
+$effect(() => {
+	const _ts = teamSize;
+	const _s = sort;
+	void _ts;
+	void _s;
+	untrack(() => syncUrl());
 });
 
-/** Get medal emoji for top 3 */
-function getMedal(index) {
-	if (index === 0) return "\u{1F947}";
-	if (index === 1) return "\u{1F948}";
-	if (index === 2) return "\u{1F949}";
-	return null;
-}
+const eloHistory = $derived.by(() =>
+	buildEloHistory(games, { mode: teamSize }),
+);
 
-/** Get rank text style */
-function getRankStyle(index) {
-	if (index === 0) return "text-yellow-400";
-	if (index === 1) return "text-gray-400";
-	if (index === 2) return "text-amber-600";
-	return "text-text-secondary";
-}
-
-/** Check if player is sleeping (last game > 1 month ago) */
-function isSleeping(lastPlayedAt) {
-	if (!lastPlayedAt) return false;
-	return Date.now() - new Date(lastPlayedAt).getTime() > ONE_MONTH_MS;
-}
-
-/** Handle player row click - open H2H modal (not for current user) */
-function handlePlayerClick(playerId) {
-	if (playerId === userId) return;
-	selectedPlayerId = playerId;
-}
-
-/** Format PPG with locale-aware decimal separator */
-function formatPpg(value) {
-	return value.toFixed(2).replace(".", ",");
-}
-
-const userId = $derived($user?.id);
-
-/**
- * Collects all badge emojis for a player (streak + wall + scorer)
- * @param {object} player
- * @returns {Array<{emoji: string, title: string}>}
- */
-function getPlayerBadges(player) {
-	const badges = [];
-
-	if (player.current_streak?.type === "win") {
-		badges.push({
-			emoji: "\u{1F525}",
-			title: `${player.current_streak.count} Siege in Folge`,
-		});
-	} else if (player.current_streak?.type === "loss") {
-		badges.push({
-			emoji: "\u{1F976}",
-			title: `${player.current_streak.count} Niederlagen in Folge`,
+const ranked = $derived.by(() => {
+	const rows = [];
+	for (const entry of eloHistory.values()) {
+		if (entry.games < 1) continue;
+		rows.push({
+			id: entry.playerId,
+			username: entry.username ?? "?",
+			avatarUrl: entry.avatarUrl,
+			initials: (entry.username ?? "?").charAt(0).toUpperCase(),
+			currentRating: entry.currentRating,
+			ratings: entry.ratings,
+			formDelta: entry.formDelta,
+			weekDelta: entry.weekDelta,
+			wins: entry.wins,
+			draws: entry.draws,
+			losses: entry.losses,
+			games: entry.games,
+			currentStreak: entry.currentStreak,
 		});
 	}
-
-	for (const badge of player.badges || []) {
-		if (badge.type === "wall") {
-			badges.push({
-				emoji: "\u{1F9F1}",
-				title: `${badge.count} Spiele zu Null`,
-			});
+	rows.sort((a, b) => {
+		if (sort === "form") {
+			return (b.formDelta ?? -Infinity) - (a.formDelta ?? -Infinity);
 		}
-		if (badge.type === "scorer") {
-			badges.push({
-				emoji: "\u26BD",
-				title: `${badge.count} Spiele mit 3+ Toren`,
-			});
-		}
-	}
+		return (b.currentRating ?? -Infinity) - (a.currentRating ?? -Infinity);
+	});
+	return rows;
+});
 
-	return badges;
+const hero = $derived(ranked[0] ?? null);
+
+const filteredDuos = $derived(
+	teamSize === "2v2"
+		? duos.filter((d) => (d.mode ?? "2v2") === "2v2").slice(0, DUO_TOP_N)
+		: [],
+);
+
+function handlePlayerClick(id) {
+	if (!id || id === userId) return;
+	selectedPlayerId = id;
+}
+
+function handleDuoClick(duo) {
+	const ids = [duo.player1.player_id, duo.player2.player_id].sort();
+	goto(`/app/duo/${ids[0]}_${ids[1]}`);
 }
 </script>
 
@@ -161,247 +137,90 @@ function getPlayerBadges(player) {
 	<title>RasenBürosport - {$t("leaderboard.title")}</title>
 </svelte:head>
 
-<div class="flex flex-col gap-4">
-	<div class="flex items-center justify-between">
-		<div class="flex items-center gap-2">
-			<h1 class="text-xl font-bold text-text-primary">{$t("leaderboard.title")}</h1>
-			<a
-				href={ROUTES.COMPARE}
-				class="flex items-center gap-1 px-2 py-1 text-xs font-medium text-text-secondary bg-bg-secondary border border-border rounded-md hover:text-text-primary hover:bg-bg-input transition-colors"
-				title={$t("leaderboard.compare")}
-			>
-				<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-				</svg>
-				{$t("leaderboard.compare")}
-			</a>
-		</div>
-		<SeasonSelector />
-	</div>
+<div class="flex flex-col gap-3 pb-4">
+	<header class="flex items-end justify-between pt-1">
+		<h1 class="text-2xl font-extrabold tracking-tight text-text-primary">
+			{$t("leaderboard.title")}
+		</h1>
+		<button
+			type="button"
+			onclick={() => goto("/app/compare")}
+			class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full border border-warning/40 text-warning bg-warning/5 hover:bg-warning/10 transition-colors"
+		>
+			<span>⇄</span>
+			{$t("leaderboard.compare")}
+		</button>
+	</header>
 
-	<!-- Game Mode Filter -->
-	<div class="flex bg-bg-secondary border border-border rounded-lg p-1 gap-1">
-		{#each [
-			{ value: "all", label: $t("leaderboard.mode_all") },
-			{ value: "1v1", label: $t("leaderboard.mode_1v1") },
-			{ value: "2v2", label: $t("leaderboard.mode_2v2") },
-			{ value: "duos", label: $t("leaderboard.mode_duos") }
-		] as option (option.value)}
-			<button
-				type="button"
-				onclick={() => (selectedMode = option.value)}
-				class="flex-1 text-center py-1.5 text-sm rounded-md transition-colors
-					{selectedMode === option.value
-						? 'bg-accent-red text-white font-semibold'
-						: 'text-text-secondary hover:text-text-primary'}"
-			>
-				{option.label}
-			</button>
-		{/each}
-	</div>
+	<ModeSwitch value="skill" onChange={() => {}} />
 
-	<!-- Tab Navigation (hidden in duos mode) -->
-	{#if !isDuosMode}
-		<div class="flex w-full">
-			<button
-				type="button"
-				onclick={() => (viewMode = "total")}
-				class="flex-1 text-center pb-2.5 text-sm transition-colors
-					{viewMode === 'total'
-						? 'font-semibold text-text-primary border-b-2 border-accent-red'
-						: 'text-text-secondary border-b border-border hover:text-text-primary'}"
-			>
-				{$t("leaderboard.tab_total")}
-			</button>
-			<button
-				type="button"
-				onclick={() => (viewMode = "ppg")}
-				class="flex-1 text-center pb-2.5 text-sm transition-colors
-					{viewMode === 'ppg'
-						? 'font-semibold text-text-primary border-b-2 border-accent-red'
-						: 'text-text-secondary border-b border-border hover:text-text-primary'}"
-			>
-				{$t("leaderboard.tab_per_game")}
-			</button>
-		</div>
-	{/if}
+	<SubSwitches
+		{teamSize}
+		{sort}
+		onTeamSize={(v) => (teamSize = v)}
+		onSort={(v) => (sort = v)}
+	/>
 
 	{#if loading}
-		<div class="flex justify-center py-8">
-			<div
-				class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"
-			></div>
+		<div class="flex justify-center py-12">
+			<div class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"></div>
 		</div>
-	{:else if isDuosMode}
-		<!-- Duo Leaderboard -->
-		{#if duos.length === 0}
-			<p class="text-text-secondary text-center py-8">{$t("duos.no_data")}</p>
-		{:else}
-			<div class="flex flex-col gap-2">
-				{#each duos as duo, index (duo.duo_id)}
-					{@const medal = getMedal(index)}
-					<button
-						type="button"
-						onclick={() => (selectedDuo = duo)}
-						class="flex items-center gap-3 bg-bg-secondary border border-border rounded-lg px-3 py-3 transition-colors text-left w-full hover:bg-bg-input active:scale-[0.98]"
-					>
-						<!-- Rank -->
-						<div class="w-8 text-center shrink-0">
-							{#if medal}
-								<span class="text-lg">{medal}</span>
-							{:else}
-								<span class="text-sm font-bold {getRankStyle(index)}">{index + 1}</span>
-							{/if}
-						</div>
+	{:else if ranked.length === 0}
+		<p class="text-text-secondary text-center py-8">{$t("leaderboard.no_data")}</p>
+	{:else}
+		{#if hero}
+			<RanglisteHero player={hero} />
+		{/if}
 
-						<!-- Duo Avatars -->
-						<div class="flex -space-x-2 shrink-0">
-							{#if duo.player1.avatar_url}
-								<img
-									src={duo.player1.avatar_url}
-									alt={duo.player1.username}
-									class="w-9 h-9 rounded-full object-cover ring-1 ring-bg-secondary"
-								/>
-							{:else}
-								<div class="w-9 h-9 rounded-full bg-bg-input ring-1 ring-bg-secondary flex items-center justify-center text-sm font-bold text-text-secondary">
-									{(duo.player1.username || "?").charAt(0).toUpperCase()}
-								</div>
-							{/if}
-							{#if duo.player2.avatar_url}
-								<img
-									src={duo.player2.avatar_url}
-									alt={duo.player2.username}
-									class="w-9 h-9 rounded-full object-cover ring-1 ring-bg-secondary"
-								/>
-							{:else}
-								<div class="w-9 h-9 rounded-full bg-bg-input ring-1 ring-bg-secondary flex items-center justify-center text-sm font-bold text-text-secondary">
-									{(duo.player2.username || "?").charAt(0).toUpperCase()}
-								</div>
-							{/if}
-						</div>
+		<div class="section-header">
+			<h3 class="section-title">{$t("leaderboard.solo_section")} · {teamSize}</h3>
+		</div>
 
-						<!-- Names + Stats -->
-						<div class="flex-1 min-w-0">
-							<p class="text-sm font-medium text-text-primary truncate">
-								{duo.player1.username} {$t("duos.and")} {duo.player2.username}
-							</p>
-							<p class="text-[10px] text-text-secondary">
-								{duo.wins}{$t("leaderboard.w_short")} ·
-								{duo.draws}{$t("leaderboard.d_short")} ·
-								{duo.losses}{$t("leaderboard.l_short")} ·
-								{duo.games} {$t("leaderboard.games_short")}
-							</p>
-						</div>
+		<div class="list">
+			{#each ranked as p, i (p.id)}
+				<PlayerRow
+					rank={i + 1}
+					player={p}
+					{sort}
+					isCurrentUser={p.id === userId}
+					dimmed={i === 0}
+					onClick={handlePlayerClick}
+				/>
+			{/each}
+		</div>
 
-						<!-- Points + Win Rate -->
-						<div class="text-right shrink-0">
-							<span class="text-lg font-bold text-text-primary">{duo.points}</span>
-							<span class="text-[10px] text-text-secondary block">{duo.win_rate}%</span>
-						</div>
-					</button>
+		{#if teamSize === "2v2" && filteredDuos.length > 0}
+			<div class="section-header">
+				<h3 class="section-title">{"⚡"} {$t("leaderboard.duo_section")} · 2v2</h3>
+			</div>
+			<div class="list">
+				{#each filteredDuos as duo, i (duo.duo_id)}
+					<DuoRow rank={i + 1} {duo} onClick={handleDuoClick} />
 				{/each}
 			</div>
 		{/if}
-	{:else if rankedPlayers.length === 0}
-		<p class="text-text-secondary text-center py-8">{$t("leaderboard.no_data")}</p>
-	{:else}
-		<div class="flex flex-col gap-2">
-			{#each rankedPlayers as player, index (player.player_id)}
-				{@const isCurrentUser = player.player_id === userId}
-				{@const medal = getMedal(index)}
-				{@const sleeping = isSleeping(player.last_played_at)}
-				{@const badges = getPlayerBadges(player)}
-				<button
-					type="button"
-					onclick={() => handlePlayerClick(player.player_id)}
-					class="flex items-center gap-3 bg-bg-secondary border rounded-lg px-3 py-3 transition-colors text-left w-full
-						{isCurrentUser ? 'border-accent-red bg-accent-red/5' : 'border-border'}
-						{!isCurrentUser ? 'hover:bg-bg-input active:scale-[0.98]' : ''}"
-				>
-					<!-- Rank -->
-					<div class="w-8 text-center shrink-0">
-						{#if medal}
-							<span class="text-lg">{medal}</span>
-						{:else}
-							<span class="text-sm font-bold {getRankStyle(index)}">{index + 1}</span>
-						{/if}
-					</div>
-
-					<!-- Avatar with badges -->
-					<div class="relative shrink-0">
-						{#if player.avatar_url}
-							<img
-								src={player.avatar_url}
-								alt={player.username}
-								class="w-9 h-9 rounded-full object-cover ring-1 {isCurrentUser ? 'ring-accent-red' : 'ring-border'}"
-							/>
-						{:else}
-							<div
-								class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold
-									{isCurrentUser ? 'bg-accent-red/20 ring-1 ring-accent-red text-text-primary' : 'bg-bg-input ring-1 ring-border text-text-secondary'}"
-							>
-								{(player.username || "?").charAt(0).toUpperCase()}
-							</div>
-						{/if}
-						{#if badges.length > 0}
-							<div class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 flex gap-0.5">
-								{#each badges as badge, bi (bi)}
-									<span
-										class="text-[10px] leading-none drop-shadow-sm"
-										title={badge.title}
-									>
-										{badge.emoji}
-									</span>
-								{/each}
-							</div>
-						{/if}
-					</div>
-
-					<!-- Name + Stats -->
-					<div class="flex-1 min-w-0">
-						<p class="text-sm font-medium text-text-primary truncate">
-							{player.username}
-							{#if isCurrentUser}
-								<span class="text-[10px] text-accent-red">({$t("leaderboard.you")})</span>
-							{/if}
-							{#if sleeping}
-								<span class="text-sm" title={$t("dashboard.streak_sleeping")}>{"\u{1F634}"}</span>
-							{/if}
-						</p>
-						<p class="text-[10px] text-text-secondary">
-							{player.wins}{$t("leaderboard.w_short")} ·
-							{player.draws}{$t("leaderboard.d_short")} ·
-							{player.losses}{$t("leaderboard.l_short")} ·
-							{player.games} {$t("leaderboard.games_short")}
-						</p>
-					</div>
-
-					<!-- Points / PPG -->
-					<div class="text-right shrink-0">
-						{#if viewMode === "ppg"}
-							<span class="text-lg font-bold text-text-primary">{formatPpg(player.ppg)}</span>
-							<span class="text-[10px] text-text-secondary block">{$t("leaderboard.ppg_label")}</span>
-						{:else}
-							<span class="text-lg font-bold text-text-primary">{player.points}</span>
-							<span class="text-[10px] text-text-secondary block">{$t("dashboard.points_short")}</span>
-						{/if}
-					</div>
-				</button>
-			{/each}
-		</div>
 	{/if}
 </div>
 
-<!-- H2H Modal -->
 {#if selectedPlayerId}
 	<H2HModal playerId={selectedPlayerId} onClose={() => (selectedPlayerId = null)} />
 {/if}
 
-<!-- Duo Detail Modal -->
-{#if selectedDuo}
-	<DuoDetailModal
-		player1Id={selectedDuo.player1.player_id}
-		player2Id={selectedDuo.player2.player_id}
-		onClose={() => (selectedDuo = null)}
-	/>
-{/if}
+<style>
+.section-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin: 14px 0 6px;
+	padding: 0 2px;
+}
+.section-title {
+	font-size: 11px;
+	font-weight: 700;
+	color: #9CA3AF;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	margin: 0;
+}
+.list { display: flex; flex-direction: column; }
+</style>

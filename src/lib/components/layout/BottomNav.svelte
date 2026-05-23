@@ -1,134 +1,104 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import { goto } from "$app/navigation";
 import { page } from "$app/state";
+import HistoryIcon from "$lib/components/icons/HistoryIcon.svelte";
+import HomeIcon from "$lib/components/icons/HomeIcon.svelte";
+import PlusIcon from "$lib/components/icons/PlusIcon.svelte";
+import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
+import UserIcon from "$lib/components/icons/UserIcon.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
+
+/**
+ * V2 bottom navigation: four tabs with a centred FAB. The FAB is not
+ * a tab — it is a primary action (start a new match). The Home tab is
+ * the new-style `/app/dashboard` landing screen; the Profile tab is
+ * back as a dedicated slot.
+ */
 
 const { t } = getTranslate();
 
-const navItems = [
-	{
-		href: ROUTES.DASHBOARD,
-		labelKey: "nav.dashboard",
-		icon: "dashboard",
-	},
-	{
-		href: ROUTES.LEADERBOARD,
-		labelKey: "nav.leaderboard",
-		icon: "leaderboard",
-	},
-	{
-		href: ROUTES.NEW_GAME,
-		labelKey: "nav.new_game",
-		icon: "new_game",
-		isCenter: true,
-	},
-	{
-		href: ROUTES.GAMES,
-		labelKey: "nav.games",
-		icon: "games",
-	},
-	{
-		href: ROUTES.WRAPPED,
-		labelKey: "nav.wrapped",
-		icon: "wrapped",
-	},
+const TABS = [
+	{ href: ROUTES.DASHBOARD, labelKey: "nav.home", Icon: HomeIcon },
+	{ href: ROUTES.LEADERBOARD, labelKey: "nav.leaderboard", Icon: TrophyIcon },
+	{ href: ROUTES.GAMES, labelKey: "nav.history", Icon: HistoryIcon },
+	{ href: ROUTES.PROFILE, labelKey: "nav.profile", Icon: UserIcon },
 ];
 
-const isActive = (href) => page.url.pathname === href;
+function isActive(href) {
+	if (href === ROUTES.DASHBOARD) return page.url.pathname === href;
+	return page.url.pathname.startsWith(href);
+}
 </script>
 
 <nav
-	class="fixed bottom-0 left-0 right-0 bg-bg-secondary border-t border-border px-2 py-1 z-50 lg:hidden"
-	style="padding-bottom: env(safe-area-inset-bottom);"
+	class="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-[1fr_1fr_auto_1fr_1fr] gap-1 items-center bg-bg-primary/95 backdrop-blur-md border-t border-bg-secondary px-3 lg:hidden"
+	style="padding-top: 8px; padding-bottom: max(14px, env(safe-area-inset-bottom));"
 >
-	<div class="flex justify-around items-center max-w-lg mx-auto">
-		{#each navItems as item (item.href)}
-			{#if item.isCenter}
-				<a
-					href={item.href}
-					class="flex items-center justify-center w-12 h-12 -mt-5 rounded-full bg-accent-red text-white shadow-lg hover:bg-accent-red/90 active:scale-95 transition-all"
-					aria-label={$t(item.labelKey)}
-				>
-					<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-						<line x1="12" y1="5" x2="12" y2="19"></line>
-						<line x1="5" y1="12" x2="19" y2="12"></line>
-					</svg>
-				</a>
-			{:else}
-				<a
-					href={item.href}
-					class="flex items-center justify-center py-2 px-3 rounded-lg transition-colors
-						{isActive(item.href) ? 'text-accent-red' : 'text-text-secondary hover:text-text-primary'}"
-					aria-label={$t(item.labelKey)}
-				>
-					{#if item.icon === "dashboard"}
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-6 w-6"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-							/>
-						</svg>
-					{:else if item.icon === "leaderboard"}
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-6 w-6"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-							/>
-						</svg>
-					{:else if item.icon === "games"}
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-6 w-6"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-							/>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-							/>
-						</svg>
-					{:else if item.icon === "wrapped"}
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-6 w-6"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
-							/>
-						</svg>
-					{/if}
-				</a>
-			{/if}
-		{/each}
-	</div>
+	{#each TABS.slice(0, 2) as tab (tab.href)}
+		<a
+			href={tab.href}
+			class="flex flex-col items-center gap-0.5 py-1.5 rounded-lg transition-colors {isActive(tab.href)
+				? 'text-accent-red'
+				: 'text-text-muted hover:text-text-secondary'}"
+		>
+			<tab.Icon size={22} />
+			<span class="text-[9px] font-semibold tracking-wide">{$t(tab.labelKey)}</span>
+		</a>
+	{/each}
+
+	<!-- FAB: primary action, not a tab. Pulse animation draws a faint
+	     outer ring every 2.5s so the button reads as a CTA. -->
+	<button
+		type="button"
+		onclick={() => goto(ROUTES.NEW_GAME)}
+		aria-label={$t("nav.new_game")}
+		class="fab"
+	>
+		<PlusIcon size={22} strokeWidth={2.4} />
+	</button>
+
+	{#each TABS.slice(2) as tab (tab.href)}
+		<a
+			href={tab.href}
+			class="flex flex-col items-center gap-0.5 py-1.5 rounded-lg transition-colors {isActive(tab.href)
+				? 'text-accent-red'
+				: 'text-text-muted hover:text-text-secondary'}"
+		>
+			<tab.Icon size={22} />
+			<span class="text-[9px] font-semibold tracking-wide">{$t(tab.labelKey)}</span>
+		</a>
+	{/each}
 </nav>
+
+<style>
+.fab {
+	position: relative;
+	margin: -16px 8px 0;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, var(--color-accent-red), var(--color-accent-red-hover));
+	color: #fff;
+	border: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	box-shadow: 0 8px 24px rgba(226, 75, 74, 0.45);
+}
+.fab::before {
+	content: "";
+	position: absolute;
+	inset: -4px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, var(--color-accent-red), var(--color-accent-red-hover));
+	opacity: 0.2;
+	z-index: -1;
+	animation: fab-pulse 2.5s ease-in-out infinite;
+}
+@keyframes fab-pulse {
+	0%, 100% { transform: scale(1); opacity: 0.2; }
+	50% { transform: scale(1.1); opacity: 0; }
+}
+</style>

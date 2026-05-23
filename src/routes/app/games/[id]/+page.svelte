@@ -2,14 +2,15 @@
 import { getTranslate } from "@tolgee/svelte";
 import { goto } from "$app/navigation";
 import { page } from "$app/state";
-import MatchDetailStatsCard from "$lib/components/games/MatchDetailStatsCard.svelte";
-import MatchHeroCard from "$lib/components/games/MatchHeroCard.svelte";
-import MatchKpiCard from "$lib/components/games/MatchKpiCard.svelte";
-import MatchLineupsCard from "$lib/components/games/MatchLineupsCard.svelte";
+import MatchDetailStatsNew from "$lib/components/games/MatchDetailStatsNew.svelte";
+import MatchHeroNew from "$lib/components/games/MatchHeroNew.svelte";
+import MatchKeyStatsNew from "$lib/components/games/MatchKeyStatsNew.svelte";
+import MatchLineupsNew from "$lib/components/games/MatchLineupsNew.svelte";
 import MatchPassCharacterCard from "$lib/components/games/MatchPassCharacterCard.svelte";
-import MatchReportCard from "$lib/components/games/MatchReportCard.svelte";
-import MatchStatsUpload from "$lib/components/games/MatchStatsUpload.svelte";
-import MatchTimelineCard from "$lib/components/games/MatchTimelineCard.svelte";
+import MatchReporterAwaitingCard from "$lib/components/games/MatchReporterAwaitingCard.svelte";
+import MatchReporterCardNew from "$lib/components/games/MatchReporterCardNew.svelte";
+import MatchTeaserPlaceholder from "$lib/components/games/MatchTeaserPlaceholder.svelte";
+import MatchTimelineNew from "$lib/components/games/MatchTimelineNew.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { del, get } from "$lib/services/api.services.js";
 import { getTeamByName } from "$lib/services/teams.services.js";
@@ -129,11 +130,11 @@ const allUploaded = $derived(hasOverview && hasPasses && hasDefense);
 	<title>RasenBürosport - {$t("game_detail.title")}</title>
 </svelte:head>
 
-<div class="flex flex-col gap-3 max-w-5xl mx-auto pb-8">
+<div class="flex flex-col gap-3 max-w-5xl mx-auto px-1 pt-0 pb-8">
 	<button
 		type="button"
 		onclick={() => history.back()}
-		class="flex items-center gap-1 text-text-secondary text-sm hover:text-text-primary transition-colors self-start"
+		class="flex items-center gap-1 text-text-secondary text-sm hover:text-text-primary transition-colors self-start mb-1"
 	>
 		<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 			<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
@@ -150,119 +151,77 @@ const allUploaded = $derived(hasOverview && hasPasses && hasDefense);
 			<p class="text-text-secondary">{$t("game_detail.not_found")}</p>
 		</div>
 	{:else}
-		<MatchHeroCard
+		<MatchHeroNew
 			{game}
 			homeTeam={homeTeamData}
 			awayTeam={awayTeamData}
 			{homeTeamName}
 			{awayTeamName}
+			{homePlayers}
+			{awayPlayers}
+			currentUserId={$user?.uid ?? null}
 			{resultSuffix}
+			{rematchUrl}
 		/>
 
 		{#if allUploaded}
-			<div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-				<MatchReportCard
-					{gameId}
-					existingReport={game.match_report}
-					existingAudioUrl={game.match_report_audio_url}
-					existingReporterId={game.reporter_id}
-					onReportGenerated={(report) => { game = { ...game, match_report: report, match_report_audio_url: null }; }}
-					onAudioGenerated={(url) => { game = { ...game, match_report_audio_url: url }; }}
-					onReporterAssigned={(rid) => { game = { ...game, reporter_id: rid }; }}
+			<MatchReporterCardNew
+				{gameId}
+				existingReport={game.match_report}
+				existingAudioUrl={game.match_report_audio_url}
+				existingReporterId={game.reporter_id}
+				onReportGenerated={(report) => { game = { ...game, match_report: report, match_report_audio_url: null }; }}
+				onAudioGenerated={(url) => { game = { ...game, match_report_audio_url: url }; }}
+				onReporterAssigned={(rid) => { game = { ...game, reporter_id: rid }; }}
+			/>
+
+			<MatchTimelineNew
+				timeline={game.score_timeline || []}
+				gamePlayers={game.game_players ?? []}
+				currentUserId={$user?.uid ?? null}
+			/>
+
+			<MatchLineupsNew
+				{game}
+				{homePlayers}
+				{awayPlayers}
+				{homeTeamName}
+				{awayTeamName}
+				currentUserId={$user?.uid ?? null}
+			/>
+
+			{#if game.match_stats}
+				<MatchKeyStatsNew matchStats={game.match_stats} />
+			{/if}
+
+			<MatchPassCharacterCard
+				homePassNetwork={game.home_pass_network}
+				awayPassNetwork={game.away_pass_network}
+				{homeTeamName}
+				{awayTeamName}
+			/>
+
+			{#if game.match_stats}
+				<MatchDetailStatsNew
+					matchStats={game.match_stats}
+					homeTeamLabel={homeTeamName}
+					awayTeamLabel={awayTeamName}
 				/>
-				<MatchTimelineCard timeline={game.score_timeline || []} {getProfile} />
-			</div>
+			{/if}
 		{:else}
-			<MatchTimelineCard timeline={game.score_timeline || []} {getProfile} />
+			<MatchReporterAwaitingCard
+				{gameId}
+				{hasOverview}
+				{hasPasses}
+				{hasDefense}
+				onStatsExtracted={() => loadGame()}
+				onAllUploaded={() => loadGame()}
+			/>
+
+			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_timeline")} />
+			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_lineups")} />
+			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_stats")} />
 		{/if}
-
-		<MatchLineupsCard
-			{game}
-			{homePlayers}
-			{awayPlayers}
-			{homeTeamName}
-			{awayTeamName}
-		/>
-
-		{#if game.match_stats}
-			<MatchKpiCard matchStats={game.match_stats} />
-		{/if}
-
-		<MatchPassCharacterCard
-			homePassNetwork={game.home_pass_network}
-			awayPassNetwork={game.away_pass_network}
-			{homeTeamName}
-			{awayTeamName}
-		/>
-
-		{#if game.match_stats}
-			<MatchDetailStatsCard matchStats={game.match_stats} />
-		{/if}
-
-		{#if !allUploaded}
-			<section class="rounded-2xl border border-border bg-bg-secondary p-4 sm:p-5 flex flex-col gap-3">
-				<h3 class="text-[11px] tracking-[0.08em] uppercase text-text-muted font-semibold">
-					{$t("match_stats.title")}
-				</h3>
-				{#if !hasOverview}
-					<MatchStatsUpload
-						{gameId}
-						type="overview"
-						label="match_stats.upload_overview_title"
-						hint="match_stats.upload_overview_hint"
-						onStatsExtracted={() => loadGame()}
-					/>
-				{:else}
-					<div class="bg-bg-input border border-success/30 rounded-lg p-3 flex items-center gap-2">
-						<span class="text-success text-lg">✓</span>
-						<span class="text-xs text-text-secondary">{$t("match_stats.upload_overview_title")}</span>
-						<span class="text-xs text-success ml-auto">{$t("match_stats.uploaded")}</span>
-					</div>
-				{/if}
-				{#if !hasPasses}
-					<MatchStatsUpload
-						{gameId}
-						type="passes"
-						label="match_stats.upload_passes_title"
-						hint="match_stats.upload_passes_hint"
-						onStatsExtracted={() => loadGame()}
-					/>
-				{:else}
-					<div class="bg-bg-input border border-success/30 rounded-lg p-3 flex items-center gap-2">
-						<span class="text-success text-lg">✓</span>
-						<span class="text-xs text-text-secondary">{$t("match_stats.upload_passes_title")}</span>
-						<span class="text-xs text-success ml-auto">{$t("match_stats.uploaded")}</span>
-					</div>
-				{/if}
-				{#if !hasDefense}
-					<MatchStatsUpload
-						{gameId}
-						type="defense"
-						label="match_stats.upload_defense_title"
-						hint="match_stats.upload_defense_hint"
-						onStatsExtracted={() => loadGame()}
-					/>
-				{:else}
-					<div class="bg-bg-input border border-success/30 rounded-lg p-3 flex items-center gap-2">
-						<span class="text-success text-lg">✓</span>
-						<span class="text-xs text-text-secondary">{$t("match_stats.upload_defense_title")}</span>
-						<span class="text-xs text-success ml-auto">{$t("match_stats.uploaded")}</span>
-					</div>
-				{/if}
-			</section>
-		{/if}
-
-		<div class="mt-2">
-			<a
-				href={rematchUrl}
-				class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-accent-red text-white font-semibold text-sm hover:bg-accent-red-hover active:scale-[0.99] transition-all"
-			>
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-				</svg>
-				{$t("rematch.button")}
-			</a>
-		</div>
 
 		{#if isAdmin}
 			<div class="mt-2 rounded-xl border border-accent-red/30 px-4 sm:px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between">

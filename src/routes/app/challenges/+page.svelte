@@ -1,14 +1,20 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import ChallengeCard from "$lib/components/challenges/ChallengeCard.svelte";
-import ChallengeProgressBar from "$lib/components/challenges/ChallengeProgressBar.svelte";
-import ChallengeWeekCountdown from "$lib/components/challenges/ChallengeWeekCountdown.svelte";
+import ActiveChallengeCard from "$lib/components/challenges/ActiveChallengeCard.svelte";
+import ChallengesHero from "$lib/components/challenges/ChallengesHero.svelte";
+import ChallengesTabs from "$lib/components/challenges/ChallengesTabs.svelte";
+import StreakBanner from "$lib/components/challenges/StreakBanner.svelte";
+import WeekCard from "$lib/components/challenges/WeekCard.svelte";
 import { tolgee } from "$lib/config/i18n.config.js";
 import {
 	fetchActiveChallenges,
 	fetchChallengeHistory,
-	fetchChallengeLeaderboard,
 } from "$lib/services/challenges.services.js";
+import {
+	challengeStatusKey,
+	formatCountdown,
+	streakBannerKey,
+} from "$lib/utils/challengeStatus.utils.js";
 
 const { t } = getTranslate();
 
@@ -20,193 +26,165 @@ $effect(() => {
 	tolgee.on("language", update);
 });
 
-/** @type {"active" | "history" | "leaderboard"} */
+/** @type {"active" | "history"} */
 let tab = $state("active");
 
 let active = $state(null);
 let history = $state(null);
-let leaderboard = $state(null);
 let loading = $state(true);
-let error = $state(false);
+let errorState = $state(false);
 
 $effect(() => {
-	loadAll();
+	let aborted = false;
+	loading = true;
+	errorState = false;
+	(async () => {
+		try {
+			const [a, h] = await Promise.all([
+				fetchActiveChallenges(),
+				fetchChallengeHistory(8),
+			]);
+			if (aborted) return;
+			active = a.data;
+			history = h.data;
+		} catch (err) {
+			if (aborted) return;
+			console.error("Failed to load challenges:", err);
+			errorState = true;
+		} finally {
+			if (!aborted) loading = false;
+		}
+	})();
+	return () => {
+		aborted = true;
+	};
 });
 
-async function loadAll() {
-	loading = true;
-	error = false;
-	try {
-		const [a, h, l] = await Promise.all([
-			fetchActiveChallenges(),
-			fetchChallengeHistory(8),
-			fetchChallengeLeaderboard(20),
-		]);
-		active = a.data;
-		history = h.data;
-		leaderboard = l.data;
-	} catch (err) {
-		console.error("Failed to load challenges:", err);
-		error = true;
-	} finally {
-		loading = false;
-	}
-}
+const challenges = $derived(active?.challenges ?? []);
+const completedCount = $derived(
+	challenges.filter((c) => c.progress?.completed).length,
+);
+const totalCount = $derived(challenges.length);
+const msRemaining = $derived(active?.ms_remaining ?? 0);
+const hoursRemaining = $derived(msRemaining / (1000 * 60 * 60));
+const countdownText = $derived(formatCountdown(msRemaining));
 
-const formatWeek = (start, end) => {
-	const fmt = (s) =>
-		new Date(`${s}T12:00:00Z`).toLocaleDateString(
-			language === "de" ? "de-DE" : "en-US",
-			{ day: "2-digit", month: "short" },
-		);
-	return `${fmt(start)} – ${fmt(end)}`;
-};
+const status = $derived(
+	challengeStatusKey(completedCount, totalCount, hoursRemaining),
+);
+const statusHeadline = $derived(
+	$t(`challenges.status.${status.key}`, status.params),
+);
+const statusDetail = $derived(
+	$t(`challenges.status.${status.key}_detail`, status.params),
+);
+
+const historyWeeks = $derived(history?.weeks ?? history ?? []);
+const streak = $derived(streakBannerKey(historyWeeks.slice(0, 4)));
+const streakHeadline = $derived($t(`challenges.${streak.key}`, streak.params));
+const streakDetail = $derived(
+	$t(`challenges.${streak.key}_detail`, streak.params),
+);
 </script>
 
 <svelte:head>
 	<title>RasenBürosport - {$t("challenges.title")}</title>
 </svelte:head>
 
-<div class="flex flex-col gap-4">
-	<!-- Header -->
-	<div class="flex items-baseline justify-between gap-3">
-		<div>
-			<h1 class="text-xl font-bold text-text-primary">
-				🏅 {$t("challenges.title")}
-			</h1>
-			<p class="text-xs text-text-secondary mt-0.5">{$t("challenges.subtitle")}</p>
-		</div>
-		<div class="flex flex-col items-end gap-1">
-			{#if active}
-				<ChallengeWeekCountdown msRemaining={active.ms_remaining} />
-			{/if}
-			{#if active && active.reward_points_this_week > 0}
-				<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-warning/15 text-warning tabular-nums">
-					{$t("challenges.bonus_this_week", { points: active.reward_points_this_week })}
-				</span>
-			{/if}
-		</div>
-	</div>
-
-	<!-- Tabs -->
-	<div class="flex gap-1 p-1 bg-bg-secondary border border-border rounded-lg">
-		<button
-			type="button"
-			onclick={() => (tab = "active")}
-			class="flex-1 py-2 px-3 rounded-md text-xs font-medium transition-colors {tab ===
-			'active'
-				? 'bg-accent-red text-white'
-				: 'text-text-secondary hover:text-text-primary'}"
-		>
-			{$t("challenges.tab_active")}
-		</button>
-		<button
-			type="button"
-			onclick={() => (tab = "history")}
-			class="flex-1 py-2 px-3 rounded-md text-xs font-medium transition-colors {tab ===
-			'history'
-				? 'bg-accent-red text-white'
-				: 'text-text-secondary hover:text-text-primary'}"
-		>
-			{$t("challenges.tab_history")}
-		</button>
-		<button
-			type="button"
-			onclick={() => (tab = "leaderboard")}
-			class="flex-1 py-2 px-3 rounded-md text-xs font-medium transition-colors {tab ===
-			'leaderboard'
-				? 'bg-accent-red text-white'
-				: 'text-text-secondary hover:text-text-primary'}"
-		>
-			{$t("challenges.tab_leaderboard")}
-		</button>
-	</div>
-
+<div class="page">
 	{#if loading}
-		<div class="flex justify-center py-12">
-			<div class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"></div>
+		<div class="loading">
+			<div class="spinner"></div>
 		</div>
-	{:else if error}
-		<p class="text-center py-12 text-text-secondary">{$t("challenges.dashboard_error")}</p>
-	{:else if tab === "active"}
-		{#if active?.challenges?.length}
-			<div class="flex flex-col gap-3">
-				{#each active.challenges as challenge (challenge.definition_id)}
-					<ChallengeCard {challenge} />
-				{/each}
-			</div>
+	{:else if errorState}
+		<div class="error">{$t("challenges.error")}</div>
+	{:else}
+		<ChallengesHero
+			completed={completedCount}
+			total={totalCount}
+			{countdownText}
+			{statusHeadline}
+			{statusDetail}
+		/>
+
+		<div class="tabs-wrap">
+			<ChallengesTabs
+				value={tab}
+				onChange={(v) => (tab = v)}
+				activeLabel={$t("challenges.tab_active")}
+				historyLabel={$t("challenges.tab_history")}
+			/>
+		</div>
+
+		{#if tab === "active"}
+			{#if challenges.length === 0}
+				<div class="empty">{$t("challenges.empty_active")}</div>
+			{:else}
+				<div class="list">
+					{#each challenges as c, i (i)}
+						<ActiveChallengeCard
+							challenge={c}
+							{hoursRemaining}
+							locale={language === "en" ? "en" : "de"}
+						/>
+					{/each}
+				</div>
+			{/if}
 		{:else}
-			<p class="text-center py-12 text-text-secondary">{$t("challenges.dashboard_empty")}</p>
-		{/if}
-	{:else if tab === "history"}
-		{#if history?.length}
-			<div class="flex flex-col gap-3">
-				{#each history as week (week.week_start)}
-					<div class="bg-bg-secondary border border-border rounded-xl p-4 flex flex-col gap-3">
-						<div class="flex items-center justify-between gap-2">
-							<span class="text-xs font-bold text-text-primary">
-								{formatWeek(week.week_start, week.week_end)}
-							</span>
-							<span class="text-[11px] tabular-nums text-text-secondary">
-								{week.completed_count}/{week.challenges.length} ·
-								<span class="text-warning font-medium">+{week.reward_points}</span>
-							</span>
-						</div>
-						<div class="flex flex-col gap-2">
-							{#each week.challenges as c (c.definition_id)}
-								<div class="flex items-center gap-2">
-									{#if c.emoji}<span class="text-sm" aria-hidden="true">{c.emoji}</span>{/if}
-									<div class="flex-1 min-w-0">
-										<p class="text-[11px] text-text-primary truncate">
-											{language === "de" ? c.label_de : c.label_en}
-										</p>
-										<ChallengeProgressBar
-											current={c.progress.current}
-											target={c.progress.target}
-											completed={c.progress.completed}
-											size="sm" />
-									</div>
-								</div>
-							{/each}
-						</div>
-					</div>
-				{/each}
-			</div>
-		{:else}
-			<p class="text-center py-12 text-text-secondary">{$t("challenges.history_empty")}</p>
-		{/if}
-	{:else if tab === "leaderboard"}
-		{#if leaderboard?.length}
-			<div class="bg-bg-secondary border border-border rounded-xl divide-y divide-border">
-				{#each leaderboard as entry, i (entry.player.id)}
-					<div class="flex items-center gap-3 p-3">
-						<span class="w-6 text-center text-xs font-bold text-text-secondary tabular-nums">
-							{i + 1}
-						</span>
-						{#if entry.player.avatar_url}
-							<img
-								src={entry.player.avatar_url}
-								alt={entry.player.username}
-								class="w-8 h-8 rounded-full object-cover ring-1 ring-border" />
-						{:else}
-							<div class="w-8 h-8 rounded-full bg-accent-red/20 ring-1 ring-border flex items-center justify-center text-xs font-bold text-text-primary">
-								{(entry.player.username || "?").charAt(0).toUpperCase()}
-							</div>
-						{/if}
-						<span class="flex-1 text-sm text-text-primary font-medium truncate">
-							{entry.player.username}
-						</span>
-						<span class="text-[11px] text-text-secondary tabular-nums">
-							{entry.weeks_completed} {$t("challenges.weeks_short")}
-						</span>
-						<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-warning/15 text-warning tabular-nums">
-							{entry.total_points}
-						</span>
-					</div>
-				{/each}
-			</div>
-		{:else}
-			<p class="text-center py-12 text-text-secondary">{$t("challenges.leaderboard_empty")}</p>
+			<StreakBanner headline={streakHeadline} detail={streakDetail} />
+
+			{#if historyWeeks.length === 0}
+				<div class="empty">{$t("challenges.empty_history")}</div>
+			{:else}
+				<div class="list">
+					{#each historyWeeks as week, i (week.week_start ?? i)}
+						<WeekCard {week} locale={language === "en" ? "en" : "de"} />
+					{/each}
+				</div>
+			{/if}
 		{/if}
 	{/if}
 </div>
+
+<style>
+.page {
+	padding: 0 4px 32px;
+	display: flex; flex-direction: column;
+	gap: 12px;
+}
+.tabs-wrap { margin-top: 2px; }
+.list {
+	display: flex; flex-direction: column;
+	gap: 8px;
+}
+.loading {
+	display: flex; justify-content: center;
+	padding: 48px 0;
+}
+.spinner {
+	width: 28px; height: 28px;
+	border: 2px solid #F59E0B;
+	border-top-color: transparent;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.error {
+	background: rgba(226, 75, 74, 0.1);
+	border: 1px solid rgba(226, 75, 74, 0.3);
+	color: #E24B4A;
+	border-radius: 12px;
+	padding: 16px;
+	text-align: center;
+	font-size: 13px;
+}
+.empty {
+	background: #131822;
+	border: 1px solid #1F2937;
+	border-radius: 14px;
+	padding: 28px 18px;
+	text-align: center;
+	color: #9CA3AF;
+	font-size: 13px;
+}
+</style>
