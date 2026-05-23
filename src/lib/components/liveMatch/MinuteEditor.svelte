@@ -2,9 +2,9 @@
 import { getTranslate } from "@tolgee/svelte";
 import { GOAL_TYPE } from "$lib/constants/liveMatch.constants.js";
 import {
-	STOPPAGE_TRIGGER_MINUTES,
 	getMinAllowedMinute,
 	getMinAllowedStoppage,
+	STOPPAGE_TRIGGER_MINUTES,
 } from "$lib/utils/liveMatchState.utils.js";
 import MinuteScroller from "./MinuteScroller.svelte";
 
@@ -57,16 +57,23 @@ const minAllowed = $derived(getMinAllowedMinute(previousEvents));
 const stoppageFloor = $derived(getMinAllowedStoppage(previousEvents, minute));
 const stoppageEnabled = $derived(STOPPAGE_TRIGGER_MINUTES.includes(minute));
 
-const inlineLabel = $derived.by(() => {
+const labelKind = $derived.by(() => {
 	if (eventKind === "card") {
-		return cardColor === "red"
-			? `🟥 ${$t("game_detail.event_red_card")}`
-			: `🟨 ${$t("game_detail.event_yellow_card")}`;
+		return {
+			text:
+				cardColor === "red"
+					? $t("game_detail.event_red_card")
+					: $t("game_detail.event_yellow_card"),
+			variant: cardColor === "red" ? "card-red" : "card-yellow",
+		};
 	}
-	if (eventKind === "penalty_missed")
-		return `❌ ${$t("game_detail.event_penalty_missed")}`;
-	if (isOwnGoal) return `⚽ ${$t("live_match.editor.label_own_goal")}`;
-	return `⚽ ${$t("live_match.editor.label_goal")}`;
+	if (eventKind === "penalty_missed") {
+		return { text: $t("game_detail.event_penalty_missed"), variant: "miss" };
+	}
+	if (isOwnGoal) {
+		return { text: $t("live_match.editor.label_own_goal"), variant: "goal" };
+	}
+	return { text: $t("live_match.editor.label_goal"), variant: "goal" };
 });
 
 const goalTypeLabel = $derived.by(() => {
@@ -81,35 +88,64 @@ const goalTypeLabel = $derived.by(() => {
 			return $t("new_game.goal_type_play");
 	}
 });
-
-const goalTypeIcon = $derived.by(() => {
-	switch (goalType) {
-		case GOAL_TYPE.CORNER:
-			return "🚩";
-		case GOAL_TYPE.FREEKICK:
-			return "🎯";
-		case GOAL_TYPE.PENALTY:
-			return "🥅";
-		default:
-			return "⚽";
-	}
-});
 </script>
 
 <div class="flex flex-col gap-1.5 h-full">
 	<div class="flex items-center justify-between gap-2">
-		<span class="text-[11px] tracking-[0.06em] uppercase font-bold text-text-secondary truncate">
-			{inlineLabel}
+		<span class="inline-flex items-center gap-1.5 text-[11px] tracking-[0.06em] uppercase font-bold text-text-secondary truncate">
+			{#if labelKind.variant === "goal"}
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+					<circle cx="12" cy="12" r="9" />
+					<path d="M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13" />
+				</svg>
+			{:else if labelKind.variant === "card-yellow"}
+				<span class="inline-block" aria-hidden="true" style="width: 9px; height: 12px; background: #F59E0B; border-radius: 2px;"></span>
+			{:else if labelKind.variant === "card-red"}
+				<span class="inline-block" aria-hidden="true" style="width: 9px; height: 12px; background: #E24B4A; border-radius: 2px;"></span>
+			{:else if labelKind.variant === "miss"}
+				<svg viewBox="0 0 24 24" fill="none" stroke="#E24B4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true">
+					<line x1="18" y1="6" x2="6" y2="18" />
+					<line x1="6" y1="6" x2="18" y2="18" />
+				</svg>
+			{/if}
+			<span class="truncate">{labelKind.text}</span>
 		</span>
 		{#if eventKind === "goal"}
 			<button
 				type="button"
 				onclick={onGoalTypeClick}
 				class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-bg-input border border-border text-[11px] font-semibold whitespace-nowrap"
+				aria-label={$t("new_game.goal_type_title")}
 			>
-				<span aria-hidden="true">{goalTypeIcon}</span>
+				{#if goalType === GOAL_TYPE.CORNER}
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true">
+						<line x1="4" y1="21" x2="4" y2="3" />
+						<path d="M4 3h12l-3 4 3 4H4" />
+					</svg>
+				{:else if goalType === GOAL_TYPE.FREEKICK}
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true">
+						<circle cx="12" cy="12" r="9" />
+						<circle cx="12" cy="12" r="5" />
+						<circle cx="12" cy="12" r="1.5" fill="currentColor" />
+					</svg>
+				{:else if goalType === GOAL_TYPE.PENALTY}
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true">
+						<rect x="3" y="6" width="18" height="12" rx="1" />
+						<line x1="3" y1="10" x2="21" y2="10" />
+						<line x1="7" y1="6" x2="7" y2="18" />
+						<line x1="12" y1="6" x2="12" y2="18" />
+						<line x1="17" y1="6" x2="17" y2="18" />
+					</svg>
+				{:else}
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true">
+						<circle cx="12" cy="12" r="9" />
+						<path d="M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13" />
+					</svg>
+				{/if}
 				<span class="truncate max-w-[80px]">{goalTypeLabel}</span>
-				<span class="text-text-muted text-[10px]">▾</span>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="8" height="8" aria-hidden="true">
+					<polyline points="6 9 12 15 18 9" />
+				</svg>
 			</button>
 		{/if}
 	</div>
@@ -139,19 +175,59 @@ const goalTypeIcon = $derived.by(() => {
 		</div>
 	</div>
 
-	<div class="flex gap-3 mt-3 pt-2 justify-center">
-		<button
-			type="button"
-			onclick={onCancel}
-			class="w-10 h-10 inline-flex items-center justify-center rounded-full border border-border bg-bg-input text-text-secondary text-lg hover:bg-bg-card"
-			aria-label={$t("new_game.back")}
-		>✕</button>
-		<button
-			type="button"
-			onclick={onConfirm}
-			disabled={saving}
-			class="w-10 h-10 inline-flex items-center justify-center rounded-full bg-gradient-to-br from-success to-success/80 text-white text-lg shadow-md shadow-success/30 disabled:opacity-50"
-			aria-label={$t("live_match.editor.confirm")}
-		>✓</button>
+	<div class="confirm-row">
+		<button type="button" class="confirm-btn cancel" onclick={onCancel}>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true">
+				<line x1="18" y1="6" x2="6" y2="18" />
+				<line x1="6" y1="6" x2="18" y2="18" />
+			</svg>
+			<span>{$t("live_match.editor.cancel")}</span>
+		</button>
+		<button type="button" class="confirm-btn save" onclick={onConfirm} disabled={saving}>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true">
+				<polyline points="20 6 9 17 4 12" />
+			</svg>
+			<span>{$t("live_match.editor.confirm")}</span>
+		</button>
 	</div>
 </div>
+
+<style>
+.confirm-row {
+	display: flex;
+	gap: 8px;
+	margin-top: 10px;
+	padding-top: 8px;
+}
+.confirm-btn {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	border-radius: 12px;
+	padding: 11px;
+	font-size: 12px;
+	font-weight: 800;
+	border: 1px solid transparent;
+	cursor: pointer;
+	transition: transform 0.1s, opacity 0.15s, background-color 0.15s, border-color 0.15s;
+}
+.confirm-btn:active:not(:disabled) { transform: scale(0.98); }
+.confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.confirm-btn.cancel {
+	background: #131822;
+	border-color: #1F2937;
+	color: #D1D5DB;
+}
+.confirm-btn.cancel:hover:not(:disabled) {
+	background: #1A1F2A;
+	border-color: #2A3142;
+}
+.confirm-btn.save {
+	background: linear-gradient(135deg, #84CC16, #65A30D);
+	color: white;
+	box-shadow: 0 6px 18px rgba(132, 204, 22, 0.4);
+}
+.confirm-btn.save:hover:not(:disabled) { transform: translateY(-1px); }
+</style>

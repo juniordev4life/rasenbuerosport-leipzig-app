@@ -75,12 +75,15 @@
 	},
 	"nav": {
 		"dashboard": "Dashboard",
+		"home": "Home",
 		"leaderboard": "Ranking",
 		"new_game": "Quick game",
 		"games": "Games",
+		"history": "History",
 		"teams": "Teams",
 		"stats": "Statistics",
 		"profile": "Profile",
+		"settings": "Settings",
 		"wrapped": "Wrapped"
 	},
 	"common": {
@@ -89,6 +92,43 @@
 		"vs": "vs.",
 		"back": "Back",
 		"close": "Close"
+	},
+	"home": {
+		"frank": {
+			"role": "Your week so far",
+			"record": "Record",
+			"matches": "Matches",
+			"positive": "{name}, what a week! +{delta} ELO — keep this up and we'll need to make room at the top!",
+			"negative": "{name}, that was tough — but everyone has off-weeks. Next one is better, I can feel it!",
+			"neutral": "{name}, solid week — there's still some hype to be had though, right?",
+			"empty": "{name}, fresh week, fresh chances! Time for your first match!"
+		},
+		"sections": {
+			"challenges": "Weekly challenges",
+			"talkrunde": "Friday talk show",
+			"series": "Current streaks",
+			"quick_stats": "Your standing",
+			"recent_matches": "Your last matches",
+			"top3": "Top 3 of the league",
+			"action_profile": "Profile →",
+			"action_all": "All →",
+			"action_ranking": "Ranking →"
+		},
+		"talkrunde": {
+			"new": "New",
+			"placeholder_title": "Friday talk show coming soon",
+			"placeholder_subtitle": "First episode: Friday 22:00",
+			"lineup_suffix": "discuss the week",
+			"empty_state": "First episode drops Friday at 22:00 — stay tuned!"
+		},
+		"quick_stats": {
+			"this_week": "this week",
+			"last_five": "Last 5",
+			"no_form": "No games yet"
+		},
+		"recent_matches": {
+			"empty": "No games yet — time for the first!"
+		}
 	},
 	"push": {
 		"title": "Push notifications",
@@ -114,30 +154,65 @@
 	},
 	"challenges": {
 		"title": "Weekly Challenges",
-		"subtitle": "Complete this week's tasks and earn bonus points",
+		"subtitle": "Three tasks per week — beat as many as you can.",
+		"hero_tag": "Your Challenges",
 		"tab_active": "Active",
 		"tab_history": "History",
-		"tab_leaderboard": "Bonus points",
+		"ends_in": "Ends in",
+		"done_label": "Done",
+		"behind_label": "Close call",
+		"remaining_label": "{count} to go",
+		"empty_active": "No active challenges this week.",
+		"empty_history": "No completed weeks yet.",
+		"error": "Could not load challenges.",
 		"completed_label": "Completed!",
 		"completed_short": "done",
-		"bonus_points_short": "bonus",
-		"bonus_this_week": "+{points} bonus this week",
+		"dashboard_of": "of",
 		"weeks_short": "weeks",
 		"days_short": "d",
 		"hours_short": "h",
 		"minutes_short": "m",
-		"ends_in": "Ends in {duration}",
 		"dashboard_title": "Weekly Challenges",
 		"dashboard_open": "View all",
 		"dashboard_empty": "No active challenges",
 		"dashboard_error": "Failed to load",
 		"history_empty": "No completed weeks yet",
-		"leaderboard_empty": "No bonus points awarded yet",
 		"difficulty": {
 			"easy": "easy",
 			"medium": "medium",
-			"hard": "hard"
-		}
+			"hard": "hard",
+			"leicht": "Easy",
+			"mittel": "Medium",
+			"schwer": "Hard"
+		},
+		"status": {
+			"headline_empty": "No challenges yet",
+			"headline_empty_detail": "Check back soon.",
+			"headline_perfect": "All challenges done!",
+			"headline_perfect_detail": "Perfect week — nicely done.",
+			"headline_last_chance": "Last chance!",
+			"headline_last_chance_detail": "Nothing completed yet — clock is ticking.",
+			"headline_start": "Let's go!",
+			"headline_start_detail": "Three challenges waiting — pick the first.",
+			"headline_solid": "Solid week!",
+			"headline_solid_detail": "{remaining} challenge(s) left — you've got this.",
+			"headline_endspurt": "Final stretch!",
+			"headline_endspurt_detail": "{remaining} challenges in {hours}h — full throttle!",
+			"headline_keep_going": "Keep it up!",
+			"headline_keep_going_detail": "{completed} done, {remaining} to go."
+		},
+		"streak_empty": "No streak yet",
+		"streak_empty_detail": "The challenges are waiting — go grab one!",
+		"streak_perfect_streak": "{count} perfect weeks in a row!",
+		"streak_perfect_streak_detail": "You're on a mission — keep going!",
+		"streak_outstanding": "Outstanding completion rate!",
+		"streak_outstanding_detail": "Last weeks: {completed} of {total} challenges done.",
+		"streak_solid": "Solid completion rate!",
+		"streak_solid_detail": "Last weeks: {completed} of {total} challenges done.",
+		"streak_none_yet": "No challenges done yet",
+		"streak_none_yet_detail": "The first wins are still ahead.",
+		"streak_keep_pushing": "Room to grow",
+		"streak_keep_pushing_detail": "{completed} of {total} in the last weeks — more is possible."
 	},
 	"wrapped": {
 		"title": "This Week at the Office",
@@ -186,7 +261,24 @@
 		"mode_all": "All",
 		"mode_1v1": "1v1",
 		"mode_2v2": "2v2",
-		"mode_duos": "Duos"
+		"mode_duos": "Duos",
+		"mode_skill": "Skill Rating",
+		"mode_skill_sub": "ELO · live",
+		"mode_league": "League",
+		"mode_league_sub": "Season table",
+		"coming_soon": "Soon",
+		"team_size": "Team size",
+		"sort": "Sort by",
+		"sort_current": "Current",
+		"sort_form": "Form",
+		"hero_label": "Top of the table",
+		"this_week": "this week",
+		"streak_suffix": " streak",
+		"rookie": "Rookie",
+		"solo_section": "Solo players",
+		"duo_section": "Top duos",
+		"win_rate_short": "win rate",
+		"points_short": "pts"
 	},
 	"h2h": {
 		"title": "Head to Head",
@@ -211,6 +303,60 @@
 		"goals_total": "Total goals",
 		"goals_avg": "Avg. per game",
 		"goals_games": "from {count} games"
+	},
+	"awaiting_report": {
+		"status_waiting": "Waiting on the stats",
+		"status_processing": "Reading the {slot} screenshot …",
+		"status_done": "Writing the report",
+		"quote_initial": "Before I can break this match down I need the three FC26 stat screenshots. Once they're in I'll write the report.",
+		"quote_partial": "Got the first one. Send the others and I'll get writing.",
+		"quote_processing": "I'm parsing the {slot} screenshot — hang on.",
+		"quote_done": "All the stats are in — report coming up.",
+		"screenshots_label": "FC26 screenshots",
+		"counter_suffix": "loaded",
+		"slots": {
+			"overview": { "label": "Overview" },
+			"passes": { "label": "Passes" },
+			"defense": { "label": "Defence" }
+		},
+		"sub": {
+			"done": "parsed",
+			"processing": "reading",
+			"active": "open",
+			"pending": "open"
+		},
+		"cta_all": "Snap all three now",
+		"cta_next": "Add {slot} screenshot",
+		"cta_done": "Report incoming",
+		"secondary_gallery": "or pick them from your gallery",
+		"secondary_reupload": "Load more from gallery",
+		"toast_extracted": "parsed",
+		"teaser_timeline": "Timeline · available after the report",
+		"teaser_lineups": "Lineups · available after the report",
+		"teaser_stats": "Stats · available after the report"
+	},
+	"match_hero": {
+		"home_label": "Home",
+		"away_label": "Away",
+		"wins": "Wins",
+		"loses": "Loss",
+		"draw_label": "Draw",
+		"rematch": "Start rematch",
+		"rematch_hint": "Same teams · fresh match",
+		"goal": "goal",
+		"goals": "goals",
+		"assist": "assist",
+		"assists": "assists",
+		"tags": {
+			"late_drama": "Late drama",
+			"lucky_win": "Lucky win",
+			"defensive_battle": "Defensive battle",
+			"penalty_decision": "Penalty decision",
+			"goal_fest": "Goal fest",
+			"clear_win": "Clear win",
+			"draw": "Draw",
+			"comeback": "Comeback"
+		}
 	},
 	"game_detail": {
 		"title": "Game Details",
@@ -282,6 +428,49 @@
 	},
 	"profile": {
 		"title": "Profile",
+		"hero_tag": "Player profile",
+		"rank_short": "Rank",
+		"games_short": "games",
+		"this_week": "this week",
+		"w_short": "W",
+		"d_short": "D",
+		"l_short": "L",
+		"character_section": "Player character",
+		"form_section": "Current form · last 5",
+		"relations_section": "Favourite & nemesis",
+		"lifetime_section": "Career stats",
+		"awards_section": "Top awards",
+		"awards_empty": "No awards yet — keep playing, they'll come!",
+		"awards_new": "New",
+		"awards_of": "of",
+		"awards_unlocked": "unlocked",
+		"awards_view_all": "View all →",
+		"league_average": "League average",
+		"strengths": "Strengths",
+		"weaknesses": "Weaknesses",
+		"playstyle": "Playstyle",
+		"elo_last_five": "ELO · last 5 games",
+		"archetype_placeholder": "Rising",
+		"relation_favorite": "Favourite",
+		"relation_nemesis": "Nemesis",
+		"relation_partner": "Top duo",
+		"marcel_fallback_character": "A reliable presence in the league.",
+		"marcel_fallback_form_empty": "Not enough data yet — the form curve is hungry.",
+		"marcel_fallback_form_up": "{wins} out of {total} — the trend is clearly up.",
+		"marcel_fallback_form_down": "{wins} out of {total} — the curve is tipping, time to dig in.",
+		"marcel_fallback_form_flat": "{wins} out of {total} — solid form without outliers.",
+		"lifetime": {
+			"total_goals": "Total goals",
+			"total_assists": "Assists",
+			"per_game": "per game",
+			"longest_streak": "Longest streak",
+			"streak_meta": "Wins in a row",
+			"hattricks": "Hattricks",
+			"hattrick_meta": "3+ goals / game",
+			"highest_win": "Biggest win",
+			"vs": "vs.",
+			"peak_elo": "Peak ELO"
+		},
 		"email": "Email",
 		"stats_games": "Games",
 		"stats_wins": "Wins",
@@ -423,6 +612,53 @@
 			"error_generic": "Failed to save"
 		}
 	},
+	"historie": {
+		"title": "History",
+		"matches": "matches",
+		"w_short": "W",
+		"d_short": "D",
+		"l_short": "L",
+		"load_more": "Load more matches",
+		"load_more_remaining": "Load {count} more",
+		"load_more_loading": "Loading …",
+		"load_more_hint": "Tap to load",
+		"filter_who_title": "Who played?",
+		"filter_zeit_title": "Which time range?",
+		"filter_erg_title": "Which results?",
+		"who": {
+			"all": "All games",
+			"me": "My games"
+		},
+		"zeit": {
+			"all": "All time",
+			"today": "Today",
+			"thisweek": "This week",
+			"thismonth": "This month"
+		},
+		"erg": {
+			"all": "All results",
+			"wins": "Wins only",
+			"losses": "Losses only",
+			"zunull": "Clean sheet"
+		},
+		"markers": {
+			"comeback": "Comeback",
+			"hattrick": "Hat-trick",
+			"klar": "Clear win",
+			"zunull": "Clean sheet",
+			"torreich": "Goal feast",
+			"krimi": "Thriller"
+		},
+		"empty": {
+			"default": "No matches for the current filter.",
+			"today": "Nothing played today — the league is resting.",
+			"me_thisweek": "No matches of your own this week — time for a game!",
+			"me_default": "No matches of your own in this filter.",
+			"comebacks": "No comebacks documented yet.",
+			"hattricks": "No hat-tricks yet — who'll score the first?",
+			"reset": "Reset filters"
+		}
+	},
 	"games": {
 		"title": "Games",
 		"load_more": "Load more games...",
@@ -442,12 +678,13 @@
 			"label_goal": "Goal",
 			"label_own_goal": "Own goal",
 			"stoppage_label": "Stoppage",
-			"confirm": "Save"
+			"confirm": "Save",
+			"cancel": "Cancel"
 		},
 		"footer": {
 			"yellow": "Yellow",
 			"red": "Red",
-			"penalty_missed": "Missed penalty",
+			"penalty_missed": "Penalty",
 			"end_match": "End match"
 		},
 		"events": {
@@ -491,6 +728,11 @@
 		"score": {
 			"page_title": "Enter the score",
 			"page_subtitle": "Final score and highlights"
+		},
+		"banner": {
+			"step_1": "1 · Team selection",
+			"step_2": "2 · Ready to kick off",
+			"step_3": "3 · Live match"
 		},
 		"home": "Home",
 		"away": "Away",
@@ -694,6 +936,63 @@
 		"penalties_conceded": "Penalties Conceded",
 		"red_cards": "Red Cards"
 	},
+	"duo": {
+		"title": "Duo profile",
+		"team_identity": "Team identity",
+		"archetype_placeholder": "Rising duo",
+		"w_short": "W",
+		"d_short": "D",
+		"l_short": "L",
+		"invalid_id": "Invalid duo id",
+		"load_error": "Could not load duo.",
+		"last_month": "last month",
+		"chemistry_label": "Chemistry",
+		"chemistry_pending_sub": "Chemistry unlocks at 10 shared matches",
+		"league_average": "League average",
+		"spider_section": "Playstyle as a duo",
+		"contribution_section": "Contribution split",
+		"recent_section": "Recent shared games",
+		"tentative_banner": "Values stabilise with more matches",
+		"onboarding_headline": "{remaining} more matches to a full profile",
+		"onboarding_body": "Play more games together to unlock playstyle, chemistry and the contribution split.",
+		"axes": {
+			"offensive": "Offence",
+			"possession": "Possession",
+			"passing": "Passing",
+			"defending": "Defence",
+			"pressing": "Pressing",
+			"efficiency": "Efficiency"
+		},
+		"kpi": {
+			"matches": "Matches",
+			"win_rate": "Win rate",
+			"goals_per_game": "Goals / game",
+			"goals_against": "Conceded / game",
+			"matches_meta_fresh": "Brand new pairing",
+			"matches_meta_some": "{count} shared matches",
+			"based_on_recent": "across the last 5 games"
+		},
+		"contrib": {
+			"wins": "Wins",
+			"matches": "Matches",
+			"goals": "Goals",
+			"assists": "Assists"
+		},
+		"archetypes": {
+			"fresh": "Fresh duo",
+			"counter_kings": "Counter tandem",
+			"controllers": "Possession architects",
+			"efficient": "Cold-blooded duo",
+			"balanced": "Solid team"
+		},
+		"sophie": {
+			"fresh": "Too early to call — but I'm watching these two.",
+			"finding": "First numbers suggest a profile — we need more data points.",
+			"mature_high": "{wr}% win rate — one of the strongest pairings in the league.",
+			"mature_mid": "{wr}% win rate — solid record, roles are starting to lock in.",
+			"mature_low": "{wr}% win rate — chemistry isn't there yet, room to grow."
+		}
+	},
 	"duos": {
 		"title": "Duo Stats",
 		"total_games": "Games",
@@ -722,8 +1021,50 @@
 		"no_data": "No duo data yet"
 	},
 	"compare": {
-		"title": "Player Comparison",
-		"select_player": "Select player",
+		"title": "Compare",
+		"h2h_title": "Head-to-head",
+		"h2h_tag": "Direct duel",
+		"pick_title": "Who do you want to compare?",
+		"pick_sub_empty": "Pick your opponent",
+		"pick_sub_ready": "{a} vs {b} · direct duel",
+		"ready_title": "Ready to compare?",
+		"mode_players": "Players",
+		"mode_players_sub": "Head to head",
+		"mode_duos": "Duos",
+		"mode_duos_sub": "Duo vs duo",
+		"coming_soon": "Soon",
+		"duo_soon_toast": "Duo comparison is coming soon — stay tuned!",
+		"slot_pick": "Pick a player",
+		"slot_you": "You",
+		"slot_opponent": "Opponent",
+		"slot_clear": "Clear selection",
+		"you": "You",
+		"grid_label": "All players · by ELO",
+		"start_btn": "Start comparison",
+		"start_btn_disabled": "Pick an opponent first",
+		"back_to_selection": "Back to selection",
+		"load_error": "Could not load comparison.",
+		"empty_headline": "{a} and {b} have never played each other.",
+		"empty_body": "Play the next match — and we'll build your head-to-head!",
+		"draws_short": "draws",
+		"in_a_row": "in a row",
+		"elo_delta_section": "ELO delta over time",
+		"character_section": "Character compared",
+		"stat_section": "Stat compare",
+		"matches_section": "Recent direct duels",
+		"marcel_empty": "No data yet — the head-to-head is waiting for its first match.",
+		"marcel_dominance_a": "Clear data: {a} dominates the duel {winsA} to {winsB}.",
+		"marcel_dominance_b": "The numbers favour {b} — {winsB} to {winsA}.",
+		"marcel_tied": "Balanced split — {winsA} to {winsB}, neither player pulls away.",
+		"marcel_close": "Tight profile — {winsA} to {winsB}, every detail can tip it.",
+		"marcel_lead": "{leader} leads the duel {winsA} to {winsB}, but the gap is closeable.",
+		"stats": {
+			"goals_per_game": "Goals / game",
+			"assists_per_game": "Assists / game",
+			"win_rate": "Win rate",
+			"total_wins": "Total wins",
+			"total_games": "Total games"
+		},
 		"search_placeholder": "Search...",
 		"vs": "vs",
 		"select_two": "Select two players to compare",
@@ -731,7 +1072,6 @@
 		"wins": "Wins",
 		"losses": "Losses",
 		"draws": "Draws",
-		"win_rate": "Win Rate",
 		"career_stats": "Career Stats",
 		"possession": "Possession",
 		"pass_accuracy": "Pass Accuracy",
@@ -740,15 +1080,12 @@
 		"duels": "Duel Win Rate",
 		"mode_bilanz": "Mode Record",
 		"form": "Current Form",
-		"h2h_title": "Head to Head",
 		"h2h_no_games": "No matches yet",
 		"goals_title": "Goals",
 		"goals_total": "Total Goals",
 		"goals_avg": "Avg per Game",
 		"no_stats": "No stats available",
 		"goals_per_game": "Goals per Game",
-		"mode_players": "Players",
-		"mode_duos": "Duos",
 		"duo_1": "Duo 1",
 		"duo_2": "Duo 2",
 		"select_four": "Select two players per duo",

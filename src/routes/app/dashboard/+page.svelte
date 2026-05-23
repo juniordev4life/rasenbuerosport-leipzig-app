@@ -1,207 +1,277 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import ActiveChallengesCard from "$lib/components/challenges/ActiveChallengesCard.svelte";
-import ActivityFeed from "$lib/components/dashboard/ActivityFeed.svelte";
-import RecentGames from "$lib/components/dashboard/RecentGames.svelte";
-import StreakBadge from "$lib/components/dashboard/StreakBadge.svelte";
-import StreakFeed from "$lib/components/dashboard/StreakFeed.svelte";
-import TopPlayers from "$lib/components/dashboard/TopPlayers.svelte";
-import SeasonSelector from "$lib/components/season/SeasonSelector.svelte";
-import PersonalRecapCard from "$lib/components/wrapped/PersonalRecapCard.svelte";
+import FrankCard from "$lib/components/home/FrankCard.svelte";
+import QuickStats from "$lib/components/home/QuickStats.svelte";
+import RecentMatchesList from "$lib/components/home/RecentMatchesList.svelte";
+import SectionHeader from "$lib/components/home/SectionHeader.svelte";
+import SeriesList from "$lib/components/home/SeriesList.svelte";
+import TalkrundeCard from "$lib/components/home/TalkrundeCard.svelte";
+import Top3List from "$lib/components/home/Top3List.svelte";
+import CheckIcon from "$lib/components/icons/CheckIcon.svelte";
+import ClockIcon from "$lib/components/icons/ClockIcon.svelte";
+import HistoryIcon from "$lib/components/icons/HistoryIcon.svelte";
+import LightningIcon from "$lib/components/icons/LightningIcon.svelte";
+import MicIcon from "$lib/components/icons/MicIcon.svelte";
+import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
+import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get } from "$lib/services/api.services.js";
-import { selectedSeason } from "$lib/stores/season.stores.js";
-import { buildRematchUrl } from "$lib/utils/rematch.utils.js";
+import { user } from "$lib/stores/auth.stores.js";
+import { detectUserSeries } from "$lib/utils/series.utils.js";
 
 const { t } = getTranslate();
 
 let games = $state([]);
 let leaderboard = $state([]);
-let allPlayers = $state([]);
-let stats = $state(null);
-let recentActivity = $state([]);
 let loading = $state(true);
 
+const userId = $derived($user?.uid ?? null);
+const userName = $derived($user?.user_metadata?.username ?? "Spieler");
+
 $effect(() => {
-	const season = $selectedSeason;
 	let aborted = false;
-
-	loadData(season).catch(() => {});
-
-	return () => {
-		aborted = true;
-	};
-
-	async function loadData(s) {
-		loading = true;
+	(async () => {
 		try {
-			const seasonParam = s !== "all" ? `&season=${s}` : "";
-			const seasonFirst = s !== "all" ? `?season=${s}` : "";
-
-			const [gamesRes, leaderboardRes, allPlayersRes, statsRes, activityRes] =
-				await Promise.all([
-					get(`/v1/games?limit=5${seasonParam}`),
-					get(`/v1/leaderboard?limit=3${seasonParam}`),
-					get(`/v1/leaderboard?limit=50${seasonParam}`),
-					get(`/v1/stats/me${seasonFirst}`),
-					get(`/v1/games/recent?limit=10${seasonParam}`),
-				]);
+			const [gamesRes, lbRes] = await Promise.all([
+				get("/v1/games?limit=20"),
+				get("/v1/leaderboard?limit=10"),
+			]);
 			if (aborted) return;
 			games = gamesRes.data || [];
-			leaderboard = leaderboardRes.data || [];
-			allPlayers = allPlayersRes.data || [];
-			stats = statsRes.data || null;
-			recentActivity = activityRes.data || [];
+			leaderboard = lbRes.data || [];
 		} catch (err) {
-			if (aborted) return;
-			console.error("Failed to load dashboard data:", err);
+			console.error("Home load failed:", err);
 		} finally {
 			if (!aborted) loading = false;
 		}
+	})();
+	return () => {
+		aborted = true;
+	};
+});
+
+/** ISO week number (Mon–Sun) for the German UI. */
+function isoWeek(date) {
+	const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+	const dayNum = (d.getDay() + 6) % 7;
+	d.setDate(d.getDate() - dayNum + 3);
+	const firstThursday = new Date(d.getFullYear(), 0, 4);
+	const diff = d - firstThursday;
+	return 1 + Math.round(diff / (7 * 24 * 60 * 60 * 1000));
+}
+
+const today = new Date();
+const kalenderwoche = isoWeek(today);
+
+/** Monday 00:00 of the current ISO week. */
+function startOfIsoWeek(date) {
+	const d = new Date(date);
+	const dayNum = (d.getDay() + 6) % 7;
+	d.setDate(d.getDate() - dayNum);
+	d.setHours(0, 0, 0, 0);
+	return d;
+}
+
+/** Games the logged-in user took part in. */
+const myGames = $derived(
+	userId
+		? games.filter((g) => g.game_players?.some((p) => p.player_id === userId))
+		: [],
+);
+
+const weekStart = startOfIsoWeek(today);
+const myWeekGames = $derived(
+	myGames.filter((g) => new Date(g.played_at) >= weekStart),
+);
+
+const weekStats = $derived.by(() => {
+	let wins = 0;
+	let losses = 0;
+	let eloDelta = 0;
+	for (const game of myWeekGames) {
+		const player = game.game_players?.find((p) => p.player_id === userId);
+		if (!player) continue;
+		const homeScore = game.score_home ?? 0;
+		const awayScore = game.score_away ?? 0;
+		if (homeScore === awayScore) continue;
+		const winnerSide = homeScore > awayScore ? "home" : "away";
+		if (player.team === winnerSide) wins += 1;
+		else losses += 1;
+		const snap = game.elo_snapshot;
+		if (snap) {
+			const entry = [...(snap.teamA ?? []), ...(snap.teamB ?? [])].find(
+				(e) => e.playerId === userId,
+			);
+			if (entry?.delta != null) eloDelta += entry.delta;
+		}
 	}
+	return { wins, losses, matches: myWeekGames.length, eloDelta };
 });
 
-/** Players with active streaks or badges */
-const activeStreaks = $derived.by(() => {
-	return allPlayers.filter((p) => p.current_streak || p.badges?.length > 0);
+/**
+ * Current ELO comes from the most recent `elo_snapshot.ratingAfter`
+ * for the user — the leaderboard endpoint returns points, not ELO,
+ * so we read it back from the games window instead.
+ */
+const myCurrentElo = $derived.by(() => {
+	for (const game of myGames) {
+		const snap = game.elo_snapshot;
+		if (!snap) continue;
+		const entry = [...(snap.teamA ?? []), ...(snap.teamB ?? [])].find(
+			(e) => e.playerId === userId,
+		);
+		if (entry?.ratingAfter != null) return entry.ratingAfter;
+	}
+	return null;
 });
 
-/** Quick Rematch: build URLs from last game */
-const lastGame = $derived(games.length > 0 ? games[0] : null);
+/** Look up another player's latest ELO from the same games window. */
+function latestEloFor(id) {
+	for (const game of games) {
+		const snap = game.elo_snapshot;
+		if (!snap) continue;
+		const entry = [...(snap.teamA ?? []), ...(snap.teamB ?? [])].find(
+			(e) => e.playerId === id,
+		);
+		if (entry?.ratingAfter != null) return entry.ratingAfter;
+	}
+	return null;
+}
 
-const lastGameRematchUrl = $derived.by(() => {
-	if (!lastGame?.game_players) return null;
-	const hp = lastGame.game_players
-		.filter((p) => p.team === "home")
-		.map((p) => p.player_id);
-	const ap = lastGame.game_players
-		.filter((p) => p.team === "away")
-		.map((p) => p.player_id);
-	const ht =
-		lastGame.game_players.find((p) => p.team === "home" && p.team_name)
-			?.team_name || "";
-	const at =
-		lastGame.game_players.find((p) => p.team === "away" && p.team_name)
-			?.team_name || "";
-	if (hp.length === 0 || ap.length === 0) return null;
-	return buildRematchUrl({
-		homePlayers: hp,
-		awayPlayers: ap,
-		homeTeam: ht,
-		awayTeam: at,
-	});
+const lastFiveResults = $derived.by(() => {
+	const out = [];
+	for (const game of myGames.slice(0, 5)) {
+		const player = game.game_players?.find((p) => p.player_id === userId);
+		if (!player) continue;
+		const homeScore = game.score_home ?? 0;
+		const awayScore = game.score_away ?? 0;
+		if (homeScore === awayScore) {
+			out.push("D");
+			continue;
+		}
+		const winnerSide = homeScore > awayScore ? "home" : "away";
+		out.push(player.team === winnerSide ? "W" : "L");
+	}
+	return out;
 });
 
-const lastGameSwapUrl = $derived.by(() => {
-	if (!lastGame?.game_players) return null;
-	const hp = lastGame.game_players
-		.filter((p) => p.team === "home")
-		.map((p) => p.player_id);
-	const ap = lastGame.game_players
-		.filter((p) => p.team === "away")
-		.map((p) => p.player_id);
-	const ht =
-		lastGame.game_players.find((p) => p.team === "home" && p.team_name)
-			?.team_name || "";
-	const at =
-		lastGame.game_players.find((p) => p.team === "away" && p.team_name)
-			?.team_name || "";
-	if (hp.length === 0 || ap.length === 0) return null;
-	return buildRematchUrl({
-		homePlayers: hp,
-		awayPlayers: ap,
-		homeTeam: ht,
-		awayTeam: at,
-		swap: true,
-	});
-});
+const series = $derived(detectUserSeries(myGames, userId, userName));
+
+function formatMatchDate(iso) {
+	const d = new Date(iso);
+	return d.toLocaleDateString("de-DE", { day: "2-digit", month: "short" });
+}
+
+const recentMatches = $derived(
+	myGames.slice(0, 3).map((game) => {
+		const player = game.game_players?.find((p) => p.player_id === userId);
+		const opponents =
+			game.game_players
+				?.filter((p) => p.team !== player?.team)
+				.map((p) => p.profiles?.username ?? "?")
+				.join(" & ") ?? "?";
+		const homeScore = game.score_home ?? 0;
+		const awayScore = game.score_away ?? 0;
+		const isDraw = homeScore === awayScore;
+		const winnerSide = !isDraw && (homeScore > awayScore ? "home" : "away");
+		const result = isDraw
+			? "draw"
+			: player?.team === winnerSide
+				? "win"
+				: "loss";
+		const snap = game.elo_snapshot;
+		const eloEntry = snap
+			? [...(snap.teamA ?? []), ...(snap.teamB ?? [])].find(
+					(e) => e.playerId === userId,
+				)
+			: null;
+		return {
+			id: game.id,
+			opponent: opponents,
+			dateLabel: formatMatchDate(game.played_at),
+			mode: game.mode ?? "—",
+			result,
+			score: `${homeScore}:${awayScore}`,
+			eloDelta: eloEntry?.delta ?? null,
+		};
+	}),
+);
+
+const top3 = $derived(
+	leaderboard.slice(0, 3).map((row) => ({
+		id: row.player_id,
+		name: row.username ?? "?",
+		elo: latestEloFor(row.player_id),
+		avatarUrl: row.avatar_url ?? null,
+	})),
+);
 </script>
 
 <svelte:head>
-	<title>RasenBürosport - Dashboard</title>
+	<title>RasenBürosport</title>
 </svelte:head>
 
-<div class="flex flex-col gap-6 lg:grid lg:grid-cols-2">
-	<!-- Header with Season Selector -->
-	<div class="flex items-center justify-between lg:col-span-2">
-		<h1 class="text-xl font-bold text-text-primary">{$t("nav.dashboard")}</h1>
-		<SeasonSelector />
-	</div>
-
-	<!-- Streak Badge -->
-	{#if stats}
-		<div class="lg:col-span-2">
-			<StreakBadge streak={stats.current_streak} lastPlayedAt={stats.last_played_at} />
-		</div>
-	{/if}
-
-	<!-- Active Challenges (week teaser) -->
-	<div class="lg:col-span-2">
-		<ActiveChallengesCard />
-	</div>
-
-	<!-- Personal weekly recap (live AI narrative) -->
-	<div class="lg:col-span-2">
-		<PersonalRecapCard />
-	</div>
-
-
+<div class="flex flex-col pb-2">
 	{#if loading}
-		<div class="flex justify-center py-8 lg:col-span-2">
-			<div
-				class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"
-			></div>
+		<div class="flex justify-center py-12">
+			<div class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"></div>
 		</div>
 	{:else}
-		<!-- Quick Rematch -->
-		{#if lastGameRematchUrl}
-			<div class="lg:col-span-2 bg-bg-secondary border border-border rounded-xl p-4">
-				<div class="flex items-center justify-between">
-					<div class="flex-1 min-w-0">
-						<p class="text-sm font-semibold text-text-primary">
-							{$t("rematch.quick_title")}
-						</p>
-						<p class="text-xs text-text-secondary mt-0.5 truncate">
-							{lastGame.game_players?.find((p) => p.team === "home" && p.team_name)?.team_name || ""}
-							{$t("common.vs")}
-							{lastGame.game_players?.find((p) => p.team === "away" && p.team_name)?.team_name || ""}
-							&middot; {lastGame.mode}
-						</p>
-					</div>
-					<div class="flex gap-2 shrink-0 ml-3">
-						<a
-							href={lastGameSwapUrl}
-							class="flex items-center justify-center w-10 h-10 rounded-lg bg-bg-input border border-border text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-all"
-							aria-label={$t("rematch.swap_button")}
-							title={$t("rematch.swap_button")}
-						>
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-							</svg>
-						</a>
-						<a
-							href={lastGameRematchUrl}
-							class="flex items-center justify-center gap-2 py-2.5 px-5 rounded-lg bg-accent-red text-white font-semibold text-sm hover:bg-accent-red/90 active:scale-[0.98] transition-all"
-						>
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-							</svg>
-							{$t("rematch.button")}
-						</a>
-					</div>
-				</div>
-			</div>
+		<FrankCard
+			{userName}
+			wins={weekStats.wins}
+			losses={weekStats.losses}
+			matches={weekStats.matches}
+			eloDelta={weekStats.eloDelta}
+			{kalenderwoche}
+		/>
+
+		<SectionHeader title={$t("home.sections.challenges")}>
+			{#snippet icon()}<CheckIcon size={11} strokeWidth={1.8} />{/snippet}
+		</SectionHeader>
+		<ActiveChallengesCard />
+
+		<SectionHeader title={$t("home.sections.talkrunde")}>
+			{#snippet icon()}<MicIcon size={11} strokeWidth={1.8} />{/snippet}
+		</SectionHeader>
+		<TalkrundeCard talkrunde={null} />
+
+		{#if series.length > 0}
+			<SectionHeader title={$t("home.sections.series")}>
+				{#snippet icon()}<LightningIcon size={11} strokeWidth={1.8} />{/snippet}
+			</SectionHeader>
+			<SeriesList {series} />
 		{/if}
 
-		<!-- Recent Games -->
-		<RecentGames {games} />
+		<SectionHeader
+			title={$t("home.sections.quick_stats")}
+			href={ROUTES.PROFILE}
+			actionLabel={$t("home.sections.action_profile")}
+		>
+			{#snippet icon()}<ClockIcon size={11} strokeWidth={1.8} />{/snippet}
+		</SectionHeader>
+		<QuickStats
+			elo={myCurrentElo}
+			eloDelta={weekStats.eloDelta}
+			lastFive={lastFiveResults}
+		/>
 
-		<!-- Leaderboard -->
-		<TopPlayers players={leaderboard} />
+		<SectionHeader
+			title={$t("home.sections.recent_matches")}
+			href={ROUTES.GAMES}
+			actionLabel={$t("home.sections.action_all")}
+		>
+			{#snippet icon()}<HistoryIcon size={11} strokeWidth={1.8} />{/snippet}
+		</SectionHeader>
+		<RecentMatchesList matches={recentMatches} />
 
-		<!-- Current Streaks -->
-		<StreakFeed streaks={activeStreaks} />
-
-		<!-- Recent Games (all players) -->
-		<ActivityFeed games={recentActivity} />
+		<SectionHeader
+			title={$t("home.sections.top3")}
+			href={ROUTES.LEADERBOARD}
+			actionLabel={$t("home.sections.action_ranking")}
+		>
+			{#snippet icon()}<TrophyIcon size={11} strokeWidth={1.8} />{/snippet}
+		</SectionHeader>
+		<Top3List {top3} />
 	{/if}
 </div>

@@ -26,7 +26,7 @@ export const EVENT_TYPE = Object.freeze({
 
 /** Goal-type values stored on a goal entry's `goal_type` field. */
 export const GOAL_TYPE = Object.freeze({
-	OPEN_PLAY: "open_play",
+	OPEN_PLAY: "play",
 	CORNER: "corner",
 	FREEKICK: "freekick",
 	PENALTY: "penalty",

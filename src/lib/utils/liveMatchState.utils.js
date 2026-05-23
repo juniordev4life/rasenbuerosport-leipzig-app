@@ -307,16 +307,16 @@ export function confirmEntry(state) {
 		const event = {
 			event_type: "goal",
 			scored_by: state.playerId,
-			assist_by: state.assisterId,
 			team: credit,
 			home: next.scoreHome,
 			away: next.scoreAway,
 			goal_type: state.goalType,
-			period: state.minute > 90 ? "extra_time" : "first_half",
+			period: state.minute > 90 ? "extra_time" : "regular",
 			minute: state.minute,
 			stoppage: state.stoppageMinutes ?? 0,
 			is_own_goal: state.isOwnGoal,
 		};
+		if (state.assisterId) event.assist_by = state.assisterId;
 		return clearEntry({ ...next, events: [...state.events, event] });
 	}
 
@@ -327,7 +327,7 @@ export function confirmEntry(state) {
 			card_type: state.pendingCardColor,
 			player_id: state.playerId,
 			team: state.playerSide,
-			period: state.minute > 90 ? "extra_time" : "first_half",
+			period: state.minute > 90 ? "extra_time" : "regular",
 			minute: state.minute,
 			stoppage: state.stoppageMinutes ?? 0,
 		};
@@ -338,12 +338,12 @@ export function confirmEntry(state) {
 		const event = {
 			event_type: "penalty_missed",
 			shooter_id: state.playerId,
-			keeper_id: state.keeperId,
 			team: state.playerSide,
-			period: state.minute > 90 ? "extra_time" : "first_half",
+			period: state.minute > 90 ? "extra_time" : "regular",
 			minute: state.minute,
 			stoppage: state.stoppageMinutes ?? 0,
 		};
+		if (state.keeperId) event.keeper_id = state.keeperId;
 		return clearEntry({ ...state, events: [...state.events, event] });
 	}
 

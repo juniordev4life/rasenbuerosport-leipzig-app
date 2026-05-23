@@ -256,11 +256,10 @@ function avatarGradient(id) {
 		</div>
 	</div>
 
-	<!-- Generation info below the pitch — keeps the screen above-fold
-	     focused on the teams and the kick-off CTA. -->
-	<div class="flex justify-center">
-		<span class="inline-flex items-center gap-2 text-[11px] text-text-muted bg-bg-input border border-border rounded-full px-3 py-1">
-			<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+	<!-- Generation info pill -->
+	<div class="generation-info-wrap">
+		<span class="generation-info">
+			<span class="generation-info-dot"></span>
 			{$t("new_game.poster.generation_info", { min: minStars, max: maxStars })}
 			{#if sameStars && homeTeamData}
 				· {$t("new_game.poster.balanced")}
@@ -272,50 +271,95 @@ function avatarGradient(id) {
 		type="button"
 		onclick={onAnpfiff}
 		disabled={!homeTeam || !awayTeam}
-		class="w-full rounded-xl bg-accent-red hover:bg-accent-red-hover text-white text-sm font-semibold px-5 py-3 shadow-lg shadow-accent-red/25 disabled:opacity-40 disabled:shadow-none transition-all flex items-center justify-center gap-2"
+		class="primary-btn"
 	>
-		<span aria-hidden="true">⚽</span>
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2.5"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			width="14"
+			height="14"
+			aria-hidden="true"
+		>
+			<circle cx="12" cy="12" r="9" />
+			<path d="M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13" />
+		</svg>
 		<span>{$t("new_game.poster.anpfiff_cta")}</span>
 	</button>
 
-	<!-- Secondary actions below the CTA, compact single-row layout. -->
-	<div class="grid grid-cols-3 gap-2">
+	<!-- Secondary actions row -->
+	<div class="btn-row">
 		<button
 			type="button"
 			onclick={roll}
 			disabled={rolling}
-			class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-bg-input px-2 py-2 text-[12px] font-semibold text-text-secondary hover:bg-bg-card disabled:opacity-50"
+			class="secondary-btn"
 		>
-			<span aria-hidden="true">🎲</span>
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				width="13"
+				height="13"
+				aria-hidden="true"
+			>
+				<polyline points="1 4 1 10 7 10" />
+				<path d="M3.51 9a9 9 0 0114.85-3.36L23 10" />
+			</svg>
 			<span>{$t("new_game.poster.action_roll")}</span>
 		</button>
 		<button
 			type="button"
 			onclick={() => (showAnpassen = true)}
-			class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-bg-input px-2 py-2 text-[12px] font-semibold text-text-secondary hover:bg-bg-card"
+			class="secondary-btn"
 		>
-			<span aria-hidden="true">⚙️</span>
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				width="13"
+				height="13"
+				aria-hidden="true"
+			>
+				<circle cx="12" cy="12" r="3" />
+				<path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+			</svg>
 			<span>{$t("new_game.poster.action_customize")}</span>
 		</button>
 		<button
 			type="button"
 			onclick={openManuell}
-			class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-bg-input px-2 py-2 text-[12px] font-semibold text-text-secondary hover:bg-bg-card"
+			class="secondary-btn"
 		>
-			<span aria-hidden="true">✋</span>
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				width="13"
+				height="13"
+				aria-hidden="true"
+			>
+				<path d="M18 11V6a2 2 0 00-2-2a2 2 0 00-2 2M14 10V4a2 2 0 00-2-2a2 2 0 00-2 2v2M10 10.5V6a2 2 0 00-2-2a2 2 0 00-2 2v8M18 8a2 2 0 114 0v6a8 8 0 01-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 012.83-2.82L7 15" />
+			</svg>
 			<span>{$t("new_game.poster.action_manual")}</span>
 		</button>
 	</div>
 
-	<div class="flex justify-center">
-		<button
-			type="button"
-			onclick={onBack}
-			class="text-xs text-text-muted hover:text-text-primary px-3 py-2 rounded-lg"
-		>
-			← {$t("new_game.back")}
-		</button>
-	</div>
+	<button type="button" onclick={onBack} class="text-btn">
+		← {$t("new_game.back")}
+	</button>
 </div>
 
 {#if showAnpassen}
@@ -377,3 +421,95 @@ function avatarGradient(id) {
 		</div>
 	</div>
 {/if}
+
+<style>
+.generation-info-wrap {
+	display: flex;
+	justify-content: center;
+}
+.generation-info {
+	background: rgba(0, 0, 0, 0.3);
+	border: 1px solid rgba(132, 204, 22, 0.2);
+	border-radius: 999px;
+	padding: 6px 14px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 11px;
+	color: #D1D5DB;
+	font-weight: 600;
+}
+.generation-info-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #84CC16;
+	box-shadow: 0 0 6px rgba(132, 204, 22, 0.6);
+}
+.primary-btn {
+	width: 100%;
+	background: linear-gradient(135deg, #E24B4A, #C73E3D);
+	color: white;
+	border: 0;
+	border-radius: 12px;
+	padding: 14px;
+	font-size: 14px;
+	font-weight: 800;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	box-shadow: 0 6px 18px rgba(226, 75, 74, 0.4);
+	transition: transform 0.15s, opacity 0.15s;
+}
+.primary-btn:not(:disabled):hover { transform: translateY(-1px); }
+.primary-btn:disabled {
+	background: rgba(226, 75, 74, 0.25);
+	color: rgba(255, 255, 255, 0.4);
+	box-shadow: none;
+	cursor: not-allowed;
+}
+.btn-row {
+	display: flex;
+	gap: 8px;
+}
+.secondary-btn {
+	flex: 1;
+	background: #131822;
+	color: #D1D5DB;
+	border: 1px solid #1F2937;
+	border-radius: 12px;
+	padding: 11px;
+	font-size: 12px;
+	font-weight: 700;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	transition: background-color 0.15s, border-color 0.15s, transform 0.1s;
+}
+.secondary-btn:hover:not(:disabled) {
+	background: #1A1F2A;
+	border-color: #2A3142;
+}
+.secondary-btn:active:not(:disabled) { transform: scale(0.98); }
+.secondary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.text-btn {
+	width: 100%;
+	background: none;
+	color: #6B7280;
+	border: 0;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 12px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+}
+.text-btn:hover { color: #D1D5DB; }
+</style>
+

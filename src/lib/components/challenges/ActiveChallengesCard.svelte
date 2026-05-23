@@ -3,8 +3,14 @@ import { getTranslate } from "@tolgee/svelte";
 import { tolgee } from "$lib/config/i18n.config.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { fetchActiveChallenges } from "$lib/services/challenges.services.js";
-import ChallengeProgressBar from "./ChallengeProgressBar.svelte";
-import ChallengeWeekCountdown from "./ChallengeWeekCountdown.svelte";
+
+/**
+ * Compact home-screen card for the active weekly challenges. Matches
+ * the V2 home design: a summary line at the top ("X von Y geschafft")
+ * followed by one row per challenge with name + progress bar +
+ * fraction. No leading row icons and no bonus-points pill per design
+ * direction — the action link to the full list lives at the bottom.
+ */
 
 const { t } = getTranslate();
 
@@ -36,68 +42,65 @@ async function loadActive() {
 	}
 }
 
-const teaser = $derived(active?.challenges?.slice(0, 2) ?? []);
+const challenges = $derived(active?.challenges ?? []);
 const completedCount = $derived(
-	active?.challenges?.filter((c) => c.progress.completed).length ?? 0,
+	challenges.filter((c) => c.progress.completed).length,
 );
+
+function progressPct(current, target) {
+	if (!target) return 0;
+	return Math.min(100, Math.round((current / target) * 100));
+}
 </script>
 
-<div class="bg-bg-secondary border border-border rounded-xl p-4 flex flex-col gap-3">
-	<div class="flex items-center justify-between gap-2">
-		<h3 class="text-sm font-bold text-text-primary">
-			🏅 {$t("challenges.dashboard_title")}
-		</h3>
-		{#if active}
-			<ChallengeWeekCountdown msRemaining={active.ms_remaining} />
-		{/if}
-	</div>
-
+<div class="bg-bg-card border border-border rounded-2xl p-3.5">
 	{#if loading}
 		<div class="flex justify-center py-4">
 			<div class="animate-spin h-5 w-5 border-2 border-accent-red border-t-transparent rounded-full"></div>
 		</div>
 	{:else if error}
 		<p class="text-xs text-text-secondary">{$t("challenges.dashboard_error")}</p>
-	{:else if !teaser.length}
+	{:else if challenges.length === 0}
 		<p class="text-xs text-text-secondary">{$t("challenges.dashboard_empty")}</p>
 	{:else}
-		<div class="flex flex-col gap-3">
-			{#each teaser as challenge (challenge.definition_id)}
-				<div class="flex items-start gap-2">
-					{#if challenge.emoji}
-						<span class="text-lg shrink-0" aria-hidden="true">{challenge.emoji}</span>
-					{/if}
-					<div class="flex-1 min-w-0 flex flex-col gap-1">
-						<p class="text-xs font-medium text-text-primary truncate">
-							{language === "de" ? challenge.label_de : challenge.label_en}
-						</p>
-						<ChallengeProgressBar
-							current={challenge.progress.current}
-							target={challenge.progress.target}
-							completed={challenge.progress.completed}
-							size="sm" />
-					</div>
-				</div>
-			{/each}
-		</div>
-
-		<div class="flex items-center justify-between pt-1">
-			<div class="flex items-center gap-2">
-				<span class="text-[11px] text-text-secondary">
-					{completedCount}/{active.challenges.length} {$t("challenges.completed_short")}
-				</span>
-				{#if active.reward_points_this_week > 0}
-					<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-warning/15 text-warning tabular-nums">
-						+{active.reward_points_this_week} {$t("challenges.bonus_points_short")}
-					</span>
-				{/if}
+		<div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-border">
+			<div class="text-[12px] font-bold text-text-secondary">
+				<strong class="text-success font-extrabold">{completedCount} {$t("challenges.dashboard_of")} {challenges.length}</strong>
+				{$t("challenges.completed_short")}
 			</div>
 			<a
 				href={ROUTES.CHALLENGES}
-				class="text-[11px] font-medium text-accent-red hover:underline"
+				class="text-[10px] font-bold text-text-muted hover:text-text-primary"
 			>
 				{$t("challenges.dashboard_open")} →
 			</a>
+		</div>
+
+		<div class="flex flex-col">
+			{#each challenges as challenge, i (challenge.definition_id)}
+				{@const done = challenge.progress.completed}
+				{@const pct = progressPct(challenge.progress.current, challenge.progress.target)}
+				<div class="flex items-center gap-3 py-2 {i > 0 ? 'border-t border-border' : ''}">
+					<div class="flex-1 min-w-0">
+						<div class="text-[12px] font-semibold text-text-primary mb-1.5 truncate">
+							{language === "de" ? challenge.label_de : challenge.label_en}
+						</div>
+						<div class="h-1 bg-white/5 rounded-full overflow-hidden">
+							<div
+								class="h-full rounded-full {done
+									? 'bg-gradient-to-r from-success to-success/80'
+									: 'bg-gradient-to-r from-warning to-warning/80'}"
+								style="width: {pct}%;"
+							></div>
+						</div>
+					</div>
+					<div
+						class="text-[11px] font-bold tabular-nums shrink-0 min-w-[36px] text-right {done ? 'text-success' : 'text-warning'}"
+					>
+						{challenge.progress.current} / {challenge.progress.target}
+					</div>
+				</div>
+			{/each}
 		</div>
 	{/if}
 </div>

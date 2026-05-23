@@ -150,7 +150,7 @@ async function saveGame() {
 			}
 		}
 
-		if (statsFiles.length > 0 && gameId) {
+		if (gameId) {
 			goto(`/app/games/${gameId}`);
 		} else {
 			goto(ROUTES.DASHBOARD);
@@ -184,55 +184,66 @@ function endLiveMatch({ scoreHome: sh, scoreAway: sa, scoreTimeline: st }) {
 	<title>RasenBürosport - {isRematch ? $t("rematch.title") : $t("new_game.title")}</title>
 </svelte:head>
 
-<div class="flex flex-col gap-5 lg:gap-7 max-w-4xl mx-auto w-full pt-8">
+{#if step === 1 || step === 2 || step === 3}
+	<div class="screen-banner">
+		{step === 1
+			? $t("new_game.banner.step_1")
+			: step === 2
+				? $t("new_game.banner.step_2")
+				: $t("new_game.banner.step_3")}
+	</div>
+{/if}
+
+<div class="flex flex-col gap-5 lg:gap-7 max-w-4xl mx-auto w-full pt-4">
 	{#if step !== 3}
 		<header class="text-center">
-			<h1 class="text-xl sm:text-2xl font-bold tracking-tight">
+			<h1 class="screen-hero-title">
 				{step === 1
 					? $t("new_game.lobby.page_title")
-					: step === 2
-						? $t("new_game.poster.page_title")
-						: $t("new_game.score.page_title")}
+					: $t("new_game.poster.page_title")}
 			</h1>
-			<p class="mt-1 text-sm text-text-secondary">
+			<p class="screen-hero-subtitle">
 				{step === 1
 					? $t("new_game.lobby.page_subtitle")
-					: step === 2
-						? $t("new_game.poster.page_subtitle")
-						: $t("new_game.score.page_subtitle")}
+					: $t("new_game.poster.page_subtitle")}
 			</p>
 		</header>
 	{/if}
 
 	<!-- 2-step indicator (hidden on live screen for screen real-estate) -->
 	{#if step !== 3}
-	<div class="flex items-start justify-center gap-3">
-		<div class="flex flex-col items-center gap-1.5">
-			<div class={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
-				visibleStep === 1
-					? "bg-accent-red text-white ring-4 ring-accent-red/20"
-					: "bg-success/15 text-success"
-			}`}>
-				{visibleStep === 1 ? "1" : "✓"}
+		<div style="max-width: 280px; margin: 0 auto; padding: 0 8px; width: 100%;">
+			<div style="display: flex; align-items: center; gap: 8px;">
+				<div
+					class="step-circle {visibleStep === 1 ? 'active' : 'complete'}"
+					style="flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; border: 2px solid; color: white; {visibleStep === 1 ? 'background: linear-gradient(135deg, #E24B4A, #C73E3D); border-color: rgba(226, 75, 74, 0.4); box-shadow: 0 4px 14px rgba(226, 75, 74, 0.35);' : 'background: linear-gradient(135deg, #84CC16, #65A30D); border-color: rgba(132, 204, 22, 0.4); box-shadow: 0 4px 14px rgba(132, 204, 22, 0.35);'}"
+				>
+					{#if visibleStep === 1}
+						1
+					{:else}
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true">
+							<polyline points="20 6 9 17 4 12" />
+						</svg>
+					{/if}
+				</div>
+				<div style="flex: 1; height: 2px; background: #1A1F2A; border-radius: 1px; overflow: hidden; position: relative;">
+					<div style="height: 100%; background: linear-gradient(90deg, #84CC16, #65A30D); border-radius: 1px; width: {visibleStep === 1 ? '0%' : '100%'}; transition: width 0.4s ease;"></div>
+				</div>
+				<div
+					style="flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; border: 2px solid; {visibleStep === 2 ? 'background: linear-gradient(135deg, #E24B4A, #C73E3D); border-color: rgba(226, 75, 74, 0.4); color: white; box-shadow: 0 4px 14px rgba(226, 75, 74, 0.35);' : 'background: #1A1F2A; border-color: #2A3142; color: #6B7280;'}"
+				>
+					2
+				</div>
 			</div>
-			<span class={`text-[10px] tracking-[0.05em] uppercase font-semibold ${visibleStep === 1 ? "text-text-primary" : "text-success"}`}>
-				{$t("new_game.lobby.step_label")}
-			</span>
-		</div>
-		<div class="flex-1 max-w-[120px] h-px bg-border mt-4"></div>
-		<div class="flex flex-col items-center gap-1.5">
-			<div class={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
-				visibleStep === 2
-					? "bg-accent-red text-white ring-4 ring-accent-red/20"
-					: "bg-bg-input border border-border text-text-muted"
-			}`}>
-				2
+			<div style="display: flex; justify-content: space-between; margin-top: 6px;">
+				<div style="width: 32px; text-align: center; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: {visibleStep === 1 ? '#E24B4A' : '#84CC16'};">
+					{$t("new_game.lobby.step_label")}
+				</div>
+				<div style="width: 32px; text-align: center; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: {visibleStep === 2 ? '#E24B4A' : '#6B7280'};">
+					{$t("new_game.poster.step_label")}
+				</div>
 			</div>
-			<span class={`text-[10px] tracking-[0.05em] uppercase font-semibold ${visibleStep === 2 ? "text-text-primary" : "text-text-muted"}`}>
-				{$t("new_game.poster.step_label")}
-			</span>
 		</div>
-	</div>
 	{/if}
 
 	{#if loading}
@@ -297,3 +308,30 @@ function endLiveMatch({ scoreHome: sh, scoreAway: sa, scoreTimeline: st }) {
 		/>
 	{/if}
 </div>
+
+<style>
+.screen-banner {
+	text-align: center;
+	font-size: 11px;
+	color: #9CA3AF;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	padding: 8px 0;
+	background: rgba(226, 75, 74, 0.08);
+	border-bottom: 1px solid rgba(226, 75, 74, 0.2);
+	margin: 0 -1rem;
+}
+.screen-hero-title {
+	font-size: 22px;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	margin: 0 0 4px;
+	color: #FFFFFF;
+}
+.screen-hero-subtitle {
+	font-size: 12px;
+	color: #9CA3AF;
+	margin: 0;
+}
+</style>

@@ -77,12 +77,15 @@
 	},
 	"nav": {
 		"dashboard": "Dashboard",
+		"home": "Home",
 		"leaderboard": "Rangliste",
 		"new_game": "Schnelles Spiel",
 		"games": "Spiele",
+		"history": "Historie",
 		"teams": "Teams",
 		"stats": "Statistiken",
 		"profile": "Profil",
+		"settings": "Einstellungen",
 		"wrapped": "Wrapped"
 	},
 	"common": {
@@ -91,6 +94,43 @@
 		"vs": "vs.",
 		"back": "Zurück",
 		"close": "Schließen"
+	},
+	"home": {
+		"frank": {
+			"role": "Deine Woche bisher",
+			"record": "Bilanz",
+			"matches": "Matches",
+			"positive": "{name}, was war das für eine Woche?! +{delta} ELO — wenn das so weitergeht, kommen wir noch ins Schwitzen!",
+			"negative": "{name}, das war zäh — aber so ist das, jeder hat mal ne durchwachsene Woche. Die nächste wird besser, ich seh's kommen!",
+			"neutral": "{name}, solide Bilanz — ein bisschen Hype geht aber noch, oder?",
+			"empty": "{name}, frische Woche, frische Chancen! Zeit für das erste Match!"
+		},
+		"sections": {
+			"challenges": "Wochen-Challenges",
+			"talkrunde": "Freitags-Talkrunde",
+			"series": "Aktuelle Serien",
+			"quick_stats": "Dein Stand",
+			"recent_matches": "Deine letzten Spiele",
+			"top3": "Top 3 der Liga",
+			"action_profile": "Profil →",
+			"action_all": "Alle →",
+			"action_ranking": "Rangliste →"
+		},
+		"talkrunde": {
+			"new": "Neu",
+			"placeholder_title": "Freitags-Talkrunde startet bald",
+			"placeholder_subtitle": "Erste Folge: Freitag 22:00",
+			"lineup_suffix": "diskutieren die KW",
+			"empty_state": "Die erste Talkrunde wird Freitag 22:00 Uhr generiert — bleib dran!"
+		},
+		"quick_stats": {
+			"this_week": "diese Woche",
+			"last_five": "Letzte 5",
+			"no_form": "Noch keine Spiele"
+		},
+		"recent_matches": {
+			"empty": "Noch keine Spiele — zeit für das erste!"
+		}
 	},
 	"push": {
 		"title": "Push-Benachrichtigungen",
@@ -116,30 +156,65 @@
 	},
 	"challenges": {
 		"title": "Wochen-Challenges",
-		"subtitle": "Schaffe die Aufgaben dieser Woche und sammle Bonuspunkte",
+		"subtitle": "Drei Aufgaben pro Woche — schaffe so viele wie möglich.",
+		"hero_tag": "Deine Challenges",
 		"tab_active": "Aktiv",
 		"tab_history": "Verlauf",
-		"tab_leaderboard": "Bonuspunkte",
+		"ends_in": "Endet in",
+		"done_label": "Geschafft",
+		"behind_label": "Knapp",
+		"remaining_label": "{count} fehlen",
+		"empty_active": "Diese Woche sind keine Challenges aktiv.",
+		"empty_history": "Noch keine abgeschlossenen Wochen.",
+		"error": "Challenges konnten nicht geladen werden.",
 		"completed_label": "Geschafft!",
 		"completed_short": "geschafft",
-		"bonus_points_short": "Bonus",
-		"bonus_this_week": "+{points} Bonus diese Woche",
+		"dashboard_of": "von",
 		"weeks_short": "Wochen",
 		"days_short": "T",
 		"hours_short": "Std",
 		"minutes_short": "Min",
-		"ends_in": "Endet in {duration}",
 		"dashboard_title": "Wochen-Challenges",
 		"dashboard_open": "Alle ansehen",
 		"dashboard_empty": "Keine Challenges aktiv",
 		"dashboard_error": "Fehler beim Laden",
 		"history_empty": "Noch keine abgeschlossenen Wochen",
-		"leaderboard_empty": "Noch keine Bonuspunkte vergeben",
 		"difficulty": {
 			"easy": "leicht",
 			"medium": "mittel",
-			"hard": "schwer"
-		}
+			"hard": "schwer",
+			"leicht": "Leicht",
+			"mittel": "Mittel",
+			"schwer": "Schwer"
+		},
+		"status": {
+			"headline_empty": "Noch keine Challenges",
+			"headline_empty_detail": "Schau später wieder rein.",
+			"headline_perfect": "Alle Challenges geschafft!",
+			"headline_perfect_detail": "Diese Woche perfekt abgeliefert — stark!",
+			"headline_last_chance": "Letzte Chance!",
+			"headline_last_chance_detail": "Noch keine Challenge erfüllt — die Zeit läuft.",
+			"headline_start": "Los geht's!",
+			"headline_start_detail": "Drei Challenges warten — pack die erste an.",
+			"headline_solid": "Solide Woche!",
+			"headline_solid_detail": "{remaining} Challenge(s) noch offen — du schaffst das.",
+			"headline_endspurt": "Endspurt!",
+			"headline_endspurt_detail": "{remaining} Challenges in {hours}h — Vollgas!",
+			"headline_keep_going": "Weiter so!",
+			"headline_keep_going_detail": "{completed} erfüllt, {remaining} fehlen noch."
+		},
+		"streak_empty": "Noch keine Erfolge",
+		"streak_empty_detail": "Die Challenges warten auf dich — pack eine an!",
+		"streak_perfect_streak": "{count} Perfect-Wochen in Folge!",
+		"streak_perfect_streak_detail": "Du bist auf einer Mission — weiter so!",
+		"streak_outstanding": "Außergewöhnliche Erfüllungs-Rate!",
+		"streak_outstanding_detail": "In den letzten Wochen {completed} von {total} Challenges geschafft.",
+		"streak_solid": "Solide Erfüllungs-Rate!",
+		"streak_solid_detail": "In den letzten Wochen {completed} von {total} Challenges geschafft.",
+		"streak_none_yet": "Noch keine Challenge erfüllt",
+		"streak_none_yet_detail": "Die ersten Erfolge kommen noch.",
+		"streak_keep_pushing": "Da geht noch was",
+		"streak_keep_pushing_detail": "{completed} von {total} in den letzten Wochen — mehr ist drin."
 	},
 	"wrapped": {
 		"title": "Diese Woche im Büro",
@@ -176,7 +251,7 @@
 		"title": "Rangliste",
 		"compare": "Vergleichen",
 		"no_data": "Noch keine Spieler",
-		"you": "Du",
+		"you": "Ich",
 		"w_short": "S",
 		"d_short": "U",
 		"l_short": "N",
@@ -188,7 +263,24 @@
 		"mode_all": "Alle",
 		"mode_1v1": "1v1",
 		"mode_2v2": "2v2",
-		"mode_duos": "Duos"
+		"mode_duos": "Duos",
+		"mode_skill": "Skill-Rating",
+		"mode_skill_sub": "ELO · live",
+		"mode_league": "Liga",
+		"mode_league_sub": "Saison-Tabelle",
+		"coming_soon": "Bald",
+		"team_size": "Spielmodus",
+		"sort": "Sortierung",
+		"sort_current": "Aktuell",
+		"sort_form": "Form",
+		"hero_label": "Spitzenreiter",
+		"this_week": "diese Woche",
+		"streak_suffix": "er-Streak",
+		"rookie": "Rookie",
+		"solo_section": "Einzelspieler",
+		"duo_section": "Stärkste Duos",
+		"win_rate_short": "Win-Rate",
+		"points_short": "Pkt"
 	},
 	"h2h": {
 		"title": "Direkter Vergleich",
@@ -213,6 +305,60 @@
 		"goals_total": "Tore gesamt",
 		"goals_avg": "Ø pro Spiel",
 		"goals_games": "aus {count} Spielen"
+	},
+	"awaiting_report": {
+		"status_waiting": "Wartet auf Statistiken",
+		"status_processing": "Liest {slot}-Screenshot aus …",
+		"status_done": "Bericht wird geschrieben",
+		"quote_initial": "Bevor ich euch das Spiel analysiere, brauche ich die drei Statistik-Screenshots aus FC26. Sobald alles da ist, schreibe ich euch den Bericht.",
+		"quote_partial": "Den ersten Screenshot hab ich. Sobald die anderen da sind, schreibe ich los.",
+		"quote_processing": "Ich lese den {slot}-Screenshot aus — bleib dran.",
+		"quote_done": "Alle Stats sind da — der Bericht entsteht gleich.",
+		"screenshots_label": "FC26 Screenshots",
+		"counter_suffix": "geladen",
+		"slots": {
+			"overview": { "label": "Übersicht" },
+			"passes": { "label": "Pässe" },
+			"defense": { "label": "Abwehr" }
+		},
+		"sub": {
+			"done": "erkannt",
+			"processing": "verarbeite",
+			"active": "offen",
+			"pending": "offen"
+		},
+		"cta_all": "Alle 3 jetzt fotografieren",
+		"cta_next": "{slot}-Screenshot hinzufügen",
+		"cta_done": "Bericht wird vorbereitet",
+		"secondary_gallery": "oder Screenshots einzeln aus Galerie laden",
+		"secondary_reupload": "Weitere Screenshots aus Galerie laden",
+		"toast_extracted": "ausgelesen",
+		"teaser_timeline": "Timeline · sichtbar nach Bericht",
+		"teaser_lineups": "Aufstellungen · sichtbar nach Bericht",
+		"teaser_stats": "Statistiken · sichtbar nach Bericht"
+	},
+	"match_hero": {
+		"home_label": "Heim",
+		"away_label": "Auswärts",
+		"wins": "Sieg",
+		"loses": "Niederlage",
+		"draw_label": "Unent.",
+		"rematch": "Rematch starten",
+		"rematch_hint": "Gleiche Teams · neues Spiel",
+		"goal": "Tor",
+		"goals": "Tore",
+		"assist": "Vorlage",
+		"assists": "Vorlagen",
+		"tags": {
+			"late_drama": "Spätes Drama",
+			"lucky_win": "Glücklicher Sieg",
+			"defensive_battle": "Defensiv-Krimi",
+			"penalty_decision": "Elfmeter-Entscheidung",
+			"goal_fest": "Torreich",
+			"clear_win": "Klare Sache",
+			"draw": "Unentschieden",
+			"comeback": "Comeback"
+		}
 	},
 	"game_detail": {
 		"title": "Spieldetails",
@@ -284,6 +430,49 @@
 	},
 	"profile": {
 		"title": "Profil",
+		"hero_tag": "Spielerprofil",
+		"rank_short": "Rang",
+		"games_short": "Spiele",
+		"this_week": "diese Woche",
+		"w_short": "S",
+		"d_short": "U",
+		"l_short": "N",
+		"character_section": "Spielercharakter",
+		"form_section": "Aktuelle Form · Letzte 5",
+		"relations_section": "Lieblingsgegner & Co",
+		"lifetime_section": "Karriere-Statistiken",
+		"awards_section": "Top-Auszeichnungen",
+		"awards_empty": "Noch keine Auszeichnung — spiel weiter, sie kommen!",
+		"awards_new": "Neu",
+		"awards_of": "von",
+		"awards_unlocked": "freigeschaltet",
+		"awards_view_all": "Alle ansehen →",
+		"league_average": "Liga-Durchschnitt",
+		"strengths": "Stärken",
+		"weaknesses": "Schwächen",
+		"playstyle": "Spielstil",
+		"elo_last_five": "ELO · Letzte 5 Spiele",
+		"archetype_placeholder": "Aufstrebend",
+		"relation_favorite": "Liebling",
+		"relation_nemesis": "Angstgegner",
+		"relation_partner": "Top Duo",
+		"marcel_fallback_character": "Solider Bestandteil der Liga.",
+		"marcel_fallback_form_empty": "Noch zu wenig Daten — die Form-Kurve wartet auf Futter.",
+		"marcel_fallback_form_up": "{wins} aus {total} — die Form zeigt klar nach oben.",
+		"marcel_fallback_form_down": "{wins} aus {total} — der Trend kippt, jetzt nicht weiter abrutschen.",
+		"marcel_fallback_form_flat": "{wins} aus {total} — solide Form, aber noch ohne Ausreißer.",
+		"lifetime": {
+			"total_goals": "Gesamttore",
+			"total_assists": "Vorlagen",
+			"per_game": "pro Spiel",
+			"longest_streak": "Längste Serie",
+			"streak_meta": "Siege in Folge",
+			"hattricks": "Hattricks",
+			"hattrick_meta": "3+ Tore / Spiel",
+			"highest_win": "Höchster Sieg",
+			"vs": "vs.",
+			"peak_elo": "Höchster ELO"
+		},
 		"email": "E-Mail",
 		"stats_games": "Spiele",
 		"stats_wins": "Siege",
@@ -425,6 +614,53 @@
 			"error_generic": "Fehler beim Speichern"
 		}
 	},
+	"historie": {
+		"title": "Historie",
+		"matches": "Matches",
+		"w_short": "S",
+		"d_short": "U",
+		"l_short": "N",
+		"load_more": "Weitere Matches laden",
+		"load_more_remaining": "{count} weitere laden",
+		"load_more_loading": "Lädt …",
+		"load_more_hint": "Tippen um zu laden",
+		"filter_who_title": "Wer hat gespielt?",
+		"filter_zeit_title": "Welcher Zeitraum?",
+		"filter_erg_title": "Welche Ergebnisse?",
+		"who": {
+			"all": "Alle Spiele",
+			"me": "Meine Spiele"
+		},
+		"zeit": {
+			"all": "Alle Zeit",
+			"today": "Heute",
+			"thisweek": "Diese Woche",
+			"thismonth": "Dieser Monat"
+		},
+		"erg": {
+			"all": "Alle Ergebnisse",
+			"wins": "Nur Siege",
+			"losses": "Nur Niederlagen",
+			"zunull": "Zu Null"
+		},
+		"markers": {
+			"comeback": "Comeback",
+			"hattrick": "Hattrick",
+			"klar": "Klare Sache",
+			"zunull": "Zu Null",
+			"torreich": "Torreich",
+			"krimi": "Krimi"
+		},
+		"empty": {
+			"default": "Keine Matches im aktuellen Filter.",
+			"today": "Heute noch nichts gespielt — die Liga ruht.",
+			"me_thisweek": "Diese Woche noch keine eigenen Matches — Zeit für ein Spiel!",
+			"me_default": "Noch keine eigenen Matches im Filter.",
+			"comebacks": "Noch keine Comebacks dokumentiert.",
+			"hattricks": "Noch kein Hattrick — wer schafft den ersten?",
+			"reset": "Filter zurücksetzen"
+		}
+	},
 	"games": {
 		"title": "Spiele",
 		"load_more": "Lade weitere Spiele...",
@@ -444,12 +680,13 @@
 			"label_goal": "Tor",
 			"label_own_goal": "Eigentor",
 			"stoppage_label": "Nachspiel",
-			"confirm": "Speichern"
+			"confirm": "Speichern",
+			"cancel": "Abbrechen"
 		},
 		"footer": {
 			"yellow": "Gelb",
 			"red": "Rot",
-			"penalty_missed": "Elfer verschossen",
+			"penalty_missed": "Elfer",
 			"end_match": "Spiel beenden"
 		},
 		"events": {
@@ -493,6 +730,11 @@
 		"score": {
 			"page_title": "Ergebnis eintragen",
 			"page_subtitle": "Trag das Endergebnis und Highlights ein"
+		},
+		"banner": {
+			"step_1": "1 · Mannschaftswahl",
+			"step_2": "2 · Anpfiff bereit",
+			"step_3": "3 · Live Match"
 		},
 		"home": "Heim",
 		"away": "Auswärts",
@@ -696,6 +938,63 @@
 		"penalties_conceded": "Elfmeter verursacht",
 		"red_cards": "Rote Karten"
 	},
+	"duo": {
+		"title": "Duo-Profil",
+		"team_identity": "Team-Identität",
+		"archetype_placeholder": "Aufstrebendes Duo",
+		"w_short": "S",
+		"d_short": "U",
+		"l_short": "N",
+		"invalid_id": "Ungültige Duo-ID",
+		"load_error": "Duo konnte nicht geladen werden.",
+		"last_month": "letzten Monat",
+		"chemistry_label": "Chemistry",
+		"chemistry_pending_sub": "Chemistry ab 10 gemeinsamen Spielen",
+		"league_average": "Liga-Durchschnitt",
+		"spider_section": "Spielstil als Duo",
+		"contribution_section": "Beitragsverteilung",
+		"recent_section": "Letzte gemeinsame Spiele",
+		"tentative_banner": "Werte stabilisieren sich mit mehr Spielen",
+		"onboarding_headline": "Noch {remaining} Spiele bis zum vollen Profil",
+		"onboarding_body": "Spielt mehr gemeinsame Matches, um Spielstil, Chemistry und Beitragsverteilung freizuschalten.",
+		"axes": {
+			"offensive": "Offensive",
+			"possession": "Ballbesitz",
+			"passing": "Passspiel",
+			"defending": "Defensive",
+			"pressing": "Pressing",
+			"efficiency": "Effizienz"
+		},
+		"kpi": {
+			"matches": "Spiele",
+			"win_rate": "Win-Rate",
+			"goals_per_game": "Tore / Spiel",
+			"goals_against": "Gegentore / Spiel",
+			"matches_meta_fresh": "Frische Konstellation",
+			"matches_meta_some": "{count} gemeinsame Matches",
+			"based_on_recent": "aus den letzten 5 Spielen"
+		},
+		"contrib": {
+			"wins": "Siege",
+			"matches": "Spiele",
+			"goals": "Tore",
+			"assists": "Vorlagen"
+		},
+		"archetypes": {
+			"fresh": "Frisches Duo",
+			"counter_kings": "Konter-Tandem",
+			"controllers": "Ballbesitz-Architekten",
+			"efficient": "Eiskaltes Duo",
+			"balanced": "Solides Team"
+		},
+		"sophie": {
+			"fresh": "Zu früh für eine Einschätzung — aber ich beobachte die zwei genau.",
+			"finding": "Erste Werte deuten auf ein Profil hin — wir brauchen noch mehr Datenpunkte.",
+			"mature_high": "Win-Rate {wr}% — eine der stärksten Konstellationen der Liga.",
+			"mature_mid": "Win-Rate {wr}% — solide Bilanz, klare Rollenverteilung erkennbar.",
+			"mature_low": "Win-Rate {wr}% — die Chemie stimmt noch nicht, da geht mehr."
+		}
+	},
 	"duos": {
 		"title": "Duo-Statistiken",
 		"total_games": "Spiele",
@@ -724,8 +1023,50 @@
 		"no_data": "Noch keine Duo-Daten"
 	},
 	"compare": {
-		"title": "Spieler-Vergleich",
-		"select_player": "Spieler wählen",
+		"title": "Vergleichen",
+		"h2h_title": "Direkter Vergleich",
+		"h2h_tag": "Direktes Duell",
+		"pick_title": "Wen möchtest du vergleichen?",
+		"pick_sub_empty": "Wähle deinen Gegner aus",
+		"pick_sub_ready": "{a} gegen {b} · direktes Duell",
+		"ready_title": "Bereit zum Vergleich?",
+		"mode_players": "Spieler",
+		"mode_players_sub": "Direktes Duell",
+		"mode_duos": "Duos",
+		"mode_duos_sub": "Duo gegen Duo",
+		"coming_soon": "Bald",
+		"duo_soon_toast": "Duo-Vergleich kommt bald — bleib dran!",
+		"slot_pick": "Spieler wählen",
+		"slot_you": "Du",
+		"slot_opponent": "Gegner",
+		"slot_clear": "Auswahl entfernen",
+		"you": "Du",
+		"grid_label": "Alle Spieler · nach ELO",
+		"start_btn": "Vergleich starten",
+		"start_btn_disabled": "Erst Gegner wählen",
+		"back_to_selection": "Zurück zur Auswahl",
+		"load_error": "Vergleich konnte nicht geladen werden.",
+		"empty_headline": "{a} und {b} haben noch nie direkt gegeneinander gespielt.",
+		"empty_body": "Spielt das nächste Match — und wir bauen euren Vergleich auf!",
+		"draws_short": "Unentschieden",
+		"in_a_row": "in Folge",
+		"elo_delta_section": "ELO-Differenz im Verlauf",
+		"character_section": "Spielercharakter im Vergleich",
+		"stat_section": "Stat-Vergleich",
+		"matches_section": "Letzte direkte Duelle",
+		"marcel_empty": "Noch keine Datenbasis — die Bilanz wartet auf das erste Duell.",
+		"marcel_dominance_a": "Klare Datenlage: {a} dominiert das Duell mit {winsA} zu {winsB}.",
+		"marcel_dominance_b": "Die Bilanz spricht für {b} — {winsB} zu {winsA}.",
+		"marcel_tied": "Ausgeglichene Bilanz — {winsA} zu {winsB}, kein Spieler setzt sich durch.",
+		"marcel_close": "Enges Profil — {winsA} zu {winsB}, jedes Detail kann den Ausschlag geben.",
+		"marcel_lead": "{leader} führt das Duell mit {winsA} zu {winsB}, der Rückstand ist aber aufholbar.",
+		"stats": {
+			"goals_per_game": "Tore / Spiel",
+			"assists_per_game": "Vorlagen / Spiel",
+			"win_rate": "Win-Rate",
+			"total_wins": "Siege gesamt",
+			"total_games": "Spiele gesamt"
+		},
 		"search_placeholder": "Suchen...",
 		"vs": "vs",
 		"select_two": "Wähle zwei Spieler zum Vergleichen",
@@ -733,7 +1074,6 @@
 		"wins": "Siege",
 		"losses": "Niederlagen",
 		"draws": "Unentschieden",
-		"win_rate": "Siegquote",
 		"career_stats": "Karriere-Statistiken",
 		"possession": "Ballbesitz",
 		"pass_accuracy": "Passgenauigkeit",
@@ -742,15 +1082,12 @@
 		"duels": "Zweikampfquote",
 		"mode_bilanz": "Modus-Bilanz",
 		"form": "Aktuelle Form",
-		"h2h_title": "Direkter Vergleich",
 		"h2h_no_games": "Noch keine Duelle",
 		"goals_title": "Tore",
 		"goals_total": "Tore gesamt",
 		"goals_avg": "Ø pro Spiel",
 		"no_stats": "Keine Statistiken",
 		"goals_per_game": "Tore pro Spiel",
-		"mode_players": "Spieler",
-		"mode_duos": "Duos",
 		"duo_1": "Duo 1",
 		"duo_2": "Duo 2",
 		"select_four": "Wähle je zwei Spieler pro Duo",
