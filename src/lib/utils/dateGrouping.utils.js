@@ -97,7 +97,7 @@ export function computeGroupEloDelta(games, playerId) {
 		);
 		if (entry?.delta != null) sum += entry.delta;
 	}
-	return sum;
+	return Math.round(sum);
 }
 
 function startOfDay(date) {

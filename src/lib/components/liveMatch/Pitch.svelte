@@ -1,7 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { isEntryMode } from "$lib/utils/liveMatchState.utils.js";
 import { MODE } from "$lib/constants/liveMatch.constants.js";
+import { isEntryMode } from "$lib/utils/liveMatchState.utils.js";
 import MinuteEditor from "./MinuteEditor.svelte";
 import PitchPlayer from "./PitchPlayer.svelte";
 

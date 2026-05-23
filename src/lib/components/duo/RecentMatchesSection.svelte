@@ -41,8 +41,9 @@ const { t } = getTranslate();
 						{m.score}
 					</div>
 					{#if m.eloDelta != null}
-						<div class="match-elo-mini {m.eloDelta > 0 ? 'up' : m.eloDelta < 0 ? 'down' : ''}">
-							{m.eloDelta > 0 ? `↑ +${m.eloDelta}` : m.eloDelta < 0 ? `↓ ${m.eloDelta}` : "± 0"}
+						{@const d = Math.round(m.eloDelta)}
+						<div class="match-elo-mini {d > 0 ? 'up' : d < 0 ? 'down' : ''}">
+							{d > 0 ? `↑ +${d}` : d < 0 ? `↓ ${d}` : "± 0"}
 						</div>
 					{/if}
 				</div>

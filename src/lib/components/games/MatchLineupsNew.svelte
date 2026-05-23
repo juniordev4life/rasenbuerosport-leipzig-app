@@ -88,7 +88,8 @@ function initial(name) {
 }
 
 function eloFor(playerId) {
-	return eloMap.get(playerId)?.delta ?? null;
+	const d = eloMap.get(playerId)?.delta;
+	return d != null ? Math.round(d) : null;
 }
 
 function isMe(playerId) {
