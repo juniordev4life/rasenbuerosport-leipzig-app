@@ -28,8 +28,9 @@ const COLOR_B = "#06B6D4";
 
 function deltaText(d) {
 	if (d == null) return "—";
-	if (d > 0) return `↑ +${d}`;
-	if (d < 0) return `↓ ${d}`;
+	const r = Math.round(d);
+	if (r > 0) return `↑ +${r}`;
+	if (r < 0) return `↓ ${r}`;
 	return "± 0";
 }
 

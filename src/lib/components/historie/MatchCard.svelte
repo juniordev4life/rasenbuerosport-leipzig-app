@@ -57,7 +57,9 @@ const eloEntry = $derived.by(() => {
 		(e) => e.playerId === currentUserId,
 	);
 });
-const eloDelta = $derived(eloEntry?.delta ?? null);
+const eloDelta = $derived(
+	eloEntry?.delta != null ? Math.round(eloEntry.delta) : null,
+);
 
 const special = $derived(
 	userInvolved && (marker?.type === "comeback" || marker?.type === "hattrick"),

@@ -107,8 +107,11 @@ export function buildEloHistory(games, opts = {}) {
 	for (const entry of map.values()) {
 		const tail = entry.ratings.slice(-FORM_WINDOW);
 		if (tail.length >= 2) {
-			entry.formDelta = tail[tail.length - 1] - tail[0];
+			entry.formDelta = Math.round(tail[tail.length - 1] - tail[0]);
 		}
+		// Floating-point sums of per-match deltas can drift (e.g. +90.60000000000001).
+		// ELO is conceptually integer-valued, so round once at the boundary.
+		entry.weekDelta = Math.round(entry.weekDelta);
 		entry.currentStreak = computeCurrentStreak(entry._outcomes);
 		entry._outcomes = undefined;
 	}

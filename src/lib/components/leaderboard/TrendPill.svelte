@@ -22,7 +22,7 @@ const symbol = $derived(
 
 const label = $derived.by(() => {
 	if (delta == null) return "—";
-	const abs = Math.abs(delta);
+	const abs = Math.round(Math.abs(delta));
 	const sign = direction === "up" ? "+" : direction === "down" ? "−" : "±";
 	return `${sign}${abs}`;
 });

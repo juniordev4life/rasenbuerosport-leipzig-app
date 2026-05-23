@@ -105,7 +105,12 @@ const weekStats = $derived.by(() => {
 			if (entry?.delta != null) eloDelta += entry.delta;
 		}
 	}
-	return { wins, losses, matches: myWeekGames.length, eloDelta };
+	return {
+		wins,
+		losses,
+		matches: myWeekGames.length,
+		eloDelta: Math.round(eloDelta),
+	};
 });
 
 /**

@@ -2,7 +2,10 @@
 import { getTranslate } from "@tolgee/svelte";
 import AxisInfoModal from "$lib/components/playerProfile/AxisInfoModal.svelte";
 import { get } from "$lib/services/api.services.js";
-import { getPlayerProfile } from "$lib/services/playerProfile.services.js";
+import {
+	getPlayerCareerStats,
+	getPlayerProfile,
+} from "$lib/services/playerProfile.services.js";
 import { buildEloHistory } from "$lib/utils/eloHistory.utils.js";
 import AwardsSection from "./AwardsSection.svelte";
 import FormSection from "./FormSection.svelte";
@@ -25,6 +28,7 @@ const { t } = getTranslate();
 
 let profile = $state(null);
 let games = $state([]);
+let careerStats = $state(null);
 let loading = $state(true);
 let errorMsg = $state(null);
 let activeAxis = $state(null);
@@ -37,13 +41,18 @@ $effect(() => {
 	errorMsg = null;
 	(async () => {
 		try {
-			const [profileData, gamesRes] = await Promise.all([
+			const [profileData, gamesRes, careerRes] = await Promise.all([
 				getPlayerProfile(id),
 				get("/v1/games?limit=200"),
+				getPlayerCareerStats(id).catch((err) => {
+					console.warn("Career stats unavailable:", err);
+					return null;
+				}),
 			]);
 			if (aborted) return;
 			profile = profileData;
 			games = gamesRes.data ?? [];
+			careerStats = careerRes ?? null;
 		} catch (err) {
 			if (aborted) return;
 			errorMsg = err?.message || $t("player_profile.error");
@@ -84,11 +93,20 @@ const formEloEnd = $derived(
 	formEloSeries.length > 0 ? formEloSeries[formEloSeries.length - 1] : null,
 );
 const formEloDelta = $derived(
-	formEloStart != null && formEloEnd != null ? formEloEnd - formEloStart : 0,
+	formEloStart != null && formEloEnd != null
+		? Math.round(formEloEnd - formEloStart)
+		: 0,
 );
 
+/**
+ * Lifetime stats come from `/v1/stats/:id` (server-side aggregation
+ * over the full history, no client-side window cap). The backend
+ * returns snake_case from the SQL aggregates — map it once here so the
+ * card stays clean.
+ */
 const lifetimeStats = $derived.by(() => {
-	if (!playerId || games.length === 0) {
+	const stats = careerStats;
+	if (!stats) {
 		return {
 			totalGoals: null,
 			goalsPerGame: null,
@@ -100,69 +118,26 @@ const lifetimeStats = $derived.by(() => {
 			peakElo: null,
 		};
 	}
-
-	let longest = 0;
-	let current = 0;
-	let highestDiff = -Infinity;
-	let highestWin = null;
-	let peak = -Infinity;
-	let peakDate = null;
-
-	const ordered = [...games].reverse();
-	for (const g of ordered) {
-		const gp = g.game_players?.find((p) => p.player_id === playerId);
-		if (!gp) continue;
-		const home = g.score_home ?? 0;
-		const away = g.score_away ?? 0;
-		const winSide = home === away ? null : home > away ? "home" : "away";
-		const won = winSide && gp.team === winSide;
-
-		if (won) {
-			current += 1;
-			if (current > longest) longest = current;
-			const my = gp.team === "home" ? home : away;
-			const opp = gp.team === "home" ? away : home;
-			const diff = my - opp;
-			if (diff > highestDiff) {
-				highestDiff = diff;
-				const opponents = g.game_players
-					.filter((p) => p.team !== gp.team)
-					.map((p) => p.profiles?.username ?? "?")
-					.join(" & ");
-				highestWin = {
-					score: `${my}:${opp}`,
-					opponentName: opponents || "—",
-					date: formatDateShort(g.played_at),
-				};
-			}
-		} else {
-			current = 0;
-		}
-
-		const snap = g.elo_snapshot;
-		if (snap) {
-			const entry = [...(snap.teamA ?? []), ...(snap.teamB ?? [])].find(
-				(e) => e.playerId === playerId,
-			);
-			if (entry?.ratingAfter != null && entry.ratingAfter > peak) {
-				peak = entry.ratingAfter;
-				peakDate = formatDateShort(g.played_at);
-			}
-		}
-	}
-
 	return {
-		totalGoals: null,
-		goalsPerGame: null,
-		totalAssists: null,
-		assistsPerGame: null,
-		longestWinStreak: longest > 0 ? longest : null,
-		hattricks: null,
-		highestWin: highestWin && highestDiff > 0 ? highestWin : null,
-		peakElo:
-			Number.isFinite(peak) && peak > 0
-				? { value: peak, date: peakDate }
-				: null,
+		totalGoals: stats.total_individual_goals ?? null,
+		goalsPerGame: stats.goals_per_game ?? null,
+		totalAssists: stats.total_assists ?? null,
+		assistsPerGame: stats.assists_per_game ?? null,
+		longestWinStreak: stats.longest_win_streak || null,
+		hattricks: stats.hattricks ?? null,
+		highestWin: stats.highest_win
+			? {
+					score: stats.highest_win.score,
+					opponentName: stats.highest_win.opponent_name ?? "—",
+					date: formatDateShort(stats.highest_win.played_at),
+				}
+			: null,
+		peakElo: stats.peak_elo
+			? {
+					value: stats.peak_elo.value,
+					date: formatDateShort(stats.peak_elo.played_at),
+				}
+			: null,
 	};
 });
 

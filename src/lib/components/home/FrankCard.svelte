@@ -44,8 +44,9 @@ const verdict = $derived.by(() => {
 });
 
 function formatDelta(n) {
-	if (n > 0) return `+${n}`;
-	if (n < 0) return `−${Math.abs(n)}`;
+	const r = Math.round(n ?? 0);
+	if (r > 0) return `+${r}`;
+	if (r < 0) return `−${Math.abs(r)}`;
 	return "±0";
 }
 </script>

@@ -24,8 +24,9 @@ const { t } = getTranslate();
 
 function formatDelta(n) {
 	if (n === null || n === undefined) return null;
-	if (n > 0) return `↑ +${n}`;
-	if (n < 0) return `↓ −${Math.abs(n)}`;
+	const r = Math.round(n);
+	if (r > 0) return `↑ +${r}`;
+	if (r < 0) return `↓ −${Math.abs(r)}`;
 	return "±0";
 }
 </script>
