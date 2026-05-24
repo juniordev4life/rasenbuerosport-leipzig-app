@@ -317,9 +317,15 @@
 		"screenshots_label": "FC26 Screenshots",
 		"counter_suffix": "geladen",
 		"slots": {
-			"overview": { "label": "Übersicht" },
-			"passes": { "label": "Pässe" },
-			"defense": { "label": "Abwehr" }
+			"overview": {
+				"label": "Übersicht"
+			},
+			"passes": {
+				"label": "Pässe"
+			},
+			"defense": {
+				"label": "Abwehr"
+			}
 		},
 		"sub": {
 			"done": "erkannt",
@@ -327,7 +333,7 @@
 			"active": "offen",
 			"pending": "offen"
 		},
-		"cta_all": "Alle 3 jetzt fotografieren",
+		"cta_all": "Alle 3 jetzt auswählen",
 		"cta_next": "{slot}-Screenshot hinzufügen",
 		"cta_done": "Bericht wird vorbereitet",
 		"secondary_gallery": "oder Screenshots einzeln aus Galerie laden",

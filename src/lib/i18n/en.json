@@ -315,9 +315,15 @@
 		"screenshots_label": "FC26 screenshots",
 		"counter_suffix": "loaded",
 		"slots": {
-			"overview": { "label": "Overview" },
-			"passes": { "label": "Passes" },
-			"defense": { "label": "Defence" }
+			"overview": {
+				"label": "Overview"
+			},
+			"passes": {
+				"label": "Passes"
+			},
+			"defense": {
+				"label": "Defence"
+			}
 		},
 		"sub": {
 			"done": "parsed",
@@ -325,7 +331,7 @@
 			"active": "open",
 			"pending": "open"
 		},
-		"cta_all": "Snap all three now",
+		"cta_all": "Add all three now",
 		"cta_next": "Add {slot} screenshot",
 		"cta_done": "Report incoming",
 		"secondary_gallery": "or pick them from your gallery",
