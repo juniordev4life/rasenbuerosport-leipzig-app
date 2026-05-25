@@ -6,6 +6,44 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v0.1.3
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.2...v0.1.3)
+
+### 🚀 Enhancements
+
+- Audio match report player + reporter persona label ([#17](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/17))
+- Pass-distribution tag pills in match detail ([#18](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/18))
+- **profile:** Player profile page with spider chart, archetype, relationships ([#19](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/19))
+- Player profile redesign + Spielbericht redesign with reporter personas ([#20](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/20))
+- **new-game:** 2-step wizard with console lobby + match poster ([#21](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/21))
+- **live-match:** Live event entry on the pitch + immersive wizard polish ([#22](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/22))
+- **push:** Service worker, opt-in settings tile and soft prompt ([#23](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/23))
+- Design system rollout across rangliste, home, profil, duo, h2h, history, challenges, match-detail and new-game ([#24](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/24))
+- **leaderboard:** Row click navigates to player profile instead of opening H2H ([#28](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/28))
+- **header:** Move back button into the mobile header to free up content area ([#29](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/29))
+- **history:** Swap emoji ball in empty state for the BallIcon SVG ([#30](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/30))
+- **h2h:** Swap emoji ball in H2H empty state for the BallIcon SVG ([#31](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/31))
+- **live-match:** Hold-to-talk voice button for event tracking ([#32](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/32))
+- **live-match:** Apply voice-recognized assister via the state machine ([#33](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/33))
+- **profile:** Editor + auth bootstrap for voice aliases ([#34](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/34))
+- **settings:** Keep profile editor always open ([#36](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/36))
+
+### 🩹 Fixes
+
+- Round ELO deltas everywhere + point career stats at correct API path ([#25](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/25))
+- **awaiting-card:** Soften CTA wording + drop capture hint on iOS ([#26](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/26))
+- **history,dashboard:** Hide W/L pill when the logged-in user wasn't in the match ([#27](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/27))
+- **account-menu:** Raise z-index above BottomNav + clear iOS safe area ([#35](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/35))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v0.1.2 ([a8dbc9b](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/a8dbc9b))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v0.1.2 (2026-05-18)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.1...v0.1.2)
