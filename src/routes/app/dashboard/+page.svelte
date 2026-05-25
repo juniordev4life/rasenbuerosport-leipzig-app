@@ -207,13 +207,20 @@ const recentMatches = $derived(
 	}),
 );
 
+// The /v1/leaderboard endpoint sorts by points, not ELO. For the
+// dashboard top-3 we want the actual ELO podium — so resolve each
+// player's latest ELO from the games window and sort by that.
+// Players whose ELO can't be resolved drop to the back.
 const top3 = $derived(
-	leaderboard.slice(0, 3).map((row) => ({
-		id: row.player_id,
-		name: row.username ?? "?",
-		elo: latestEloFor(row.player_id),
-		avatarUrl: row.avatar_url ?? null,
-	})),
+	leaderboard
+		.map((row) => ({
+			id: row.player_id,
+			name: row.username ?? "?",
+			elo: latestEloFor(row.player_id),
+			avatarUrl: row.avatar_url ?? null,
+		}))
+		.sort((a, b) => (b.elo ?? -Infinity) - (a.elo ?? -Infinity))
+		.slice(0, 3),
 );
 </script>
 
