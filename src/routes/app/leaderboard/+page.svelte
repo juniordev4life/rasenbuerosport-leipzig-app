@@ -3,7 +3,6 @@ import { getTranslate } from "@tolgee/svelte";
 import { untrack } from "svelte";
 import { goto, replaceState } from "$app/navigation";
 import DuoRow from "$lib/components/leaderboard/DuoRow.svelte";
-import H2HModal from "$lib/components/leaderboard/H2HModal.svelte";
 import ModeSwitch from "$lib/components/leaderboard/ModeSwitch.svelte";
 import PlayerRow from "$lib/components/leaderboard/PlayerRow.svelte";
 import RanglisteHero from "$lib/components/leaderboard/RanglisteHero.svelte";
@@ -23,8 +22,6 @@ let loading = $state(true);
 
 let teamSize = $state(initialTeamSize());
 let sort = $state(initialSort());
-
-let selectedPlayerId = $state(null);
 
 const userId = $derived($user?.uid ?? null);
 
@@ -123,8 +120,8 @@ const filteredDuos = $derived(
 );
 
 function handlePlayerClick(id) {
-	if (!id || id === userId) return;
-	selectedPlayerId = id;
+	if (!id) return;
+	goto(`/app/profile/${id}`);
 }
 
 function handleDuoClick(duo) {
@@ -201,10 +198,6 @@ function handleDuoClick(duo) {
 		{/if}
 	{/if}
 </div>
-
-{#if selectedPlayerId}
-	<H2HModal playerId={selectedPlayerId} onClose={() => (selectedPlayerId = null)} />
-{/if}
 
 <style>
 .section-header {
