@@ -1,6 +1,6 @@
 <script>
-import { page } from "$app/state";
 import { getTranslate } from "@tolgee/svelte";
+import { page } from "$app/state";
 import AccountMenu from "$lib/components/layout/AccountMenu.svelte";
 import { user } from "$lib/stores/auth.stores.js";
 

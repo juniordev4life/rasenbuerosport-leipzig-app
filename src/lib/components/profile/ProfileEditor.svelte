@@ -48,12 +48,14 @@ let avatarPreview = $state(currentAvatarUrl);
 
 /** Comma-separated → trimmed, deduped, capped at 10. */
 function parseAliases(raw) {
-	return [...new Set(
-		(raw ?? "")
-			.split(",")
-			.map((s) => s.trim())
-			.filter(Boolean),
-	)].slice(0, 10);
+	return [
+		...new Set(
+			(raw ?? "")
+				.split(",")
+				.map((s) => s.trim())
+				.filter(Boolean),
+		),
+	].slice(0, 10);
 }
 
 /** Handle file selection for avatar */
