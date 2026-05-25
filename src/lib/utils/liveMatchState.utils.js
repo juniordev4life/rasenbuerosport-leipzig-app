@@ -393,15 +393,6 @@ export function removeEventAt(state, index) {
 	};
 }
 
-/** Helper used by the page to decide whether an event is in progress. */
-export function isAwaitingPlayer(mode) {
-	return (
-		mode === MODE.CARD_AWAITING_PLAYER ||
-		mode === MODE.PENALTY_MISS_AWAITING_PLAYER ||
-		mode === MODE.PENALTY_MISS_AWAITING_KEEPER
-	);
-}
-
 export function isEntryMode(mode) {
 	return (
 		mode === MODE.GOAL_ENTRY ||
