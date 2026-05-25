@@ -25,6 +25,16 @@ let {
 	onSaved,
 } = $props();
 
+/**
+ * When the editor is permanently mounted (no separate open/close
+ * mode), the Cancel button has nothing meaningful to do — there's no
+ * "previous state" to revert to. Treat the absence of `onClose` as
+ * the signal to drop Cancel and keep only Save.
+ */
+const hasCancel = $derived(typeof onClose === "function");
+
+let savedHint = $state(false);
+
 const { t } = getTranslate();
 
 let username = $state(currentUsername);
@@ -116,6 +126,10 @@ async function handleSave() {
 		}));
 
 		onSaved?.();
+		savedHint = true;
+		setTimeout(() => {
+			savedHint = false;
+		}, 2000);
 	} catch (err) {
 		console.error("Profile update failed:", err);
 		error = err.message || $t("profile.edit.error_generic");
@@ -202,12 +216,17 @@ const initial = $derived(username?.charAt(0)?.toUpperCase() || "?");
 	{/if}
 
 	<!-- Buttons -->
-	<div class="flex gap-3">
-		<Button variant="secondary" onclick={onClose} class="flex-1">
-			{$t("profile.edit.cancel")}
-		</Button>
+	<div class="flex items-center gap-3">
+		{#if hasCancel}
+			<Button variant="secondary" onclick={onClose} class="flex-1">
+				{$t("profile.edit.cancel")}
+			</Button>
+		{/if}
 		<Button variant="primary" onclick={handleSave} loading={saving} class="flex-1">
 			{saving ? $t("profile.edit.saving") : $t("profile.edit.save")}
 		</Button>
+		{#if savedHint}
+			<span class="text-xs text-success font-semibold">{$t("profile.edit.saved")}</span>
+		{/if}
 	</div>
 </div>

@@ -618,7 +618,8 @@
 			"error_generic": "Failed to save",
 			"voice_aliases_label": "Voice synonyms",
 			"voice_aliases_placeholder": "e.g. Dirk, DBL",
-			"voice_aliases_hint": "Comma-separated. Lets the voice tracker recognise you by nickname."
+			"voice_aliases_hint": "Comma-separated. Lets the voice tracker recognise you by nickname.",
+			"saved": "Saved"
 		}
 	},
 	"historie": {
