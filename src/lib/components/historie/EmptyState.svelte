@@ -1,5 +1,6 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import BallIcon from "$lib/components/icons/BallIcon.svelte";
 
 /**
  * Empty state for the Historie page. Shows a context-aware headline
@@ -33,7 +34,9 @@ const canReset = $derived(
 </script>
 
 <div class="empty">
-	<div class="ball">⚽</div>
+	<div class="ball-icon" aria-hidden="true">
+		<BallIcon size={44} strokeWidth={1.6} />
+	</div>
 	<div class="headline">{headline}</div>
 	{#if canReset}
 		<button type="button" class="cta" onclick={onReset}>
@@ -54,7 +57,12 @@ const canReset = $derived(
 	gap: 12px;
 	margin-top: 8px;
 }
-.ball { font-size: 44px; }
+.ball-icon {
+	color: var(--color-text-muted);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
 .headline {
 	font-size: 13px;
 	color: #9CA3AF;
