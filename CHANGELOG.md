@@ -6,6 +6,22 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v0.1.4
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.3...v0.1.4)
+
+### 🩹 Fixes
+
+- Apply biome formatting to ProfileEditor parseAliases ([7367eb4](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/7367eb4))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v0.1.3 ([b8539f2](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/b8539f2))
+
+### ❤️ Contributors
+
+- Marco Slusalek <marco.slusalek@redbulls.com>
+
 ## v0.1.3 (2026-05-25)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.2...v0.1.3)
