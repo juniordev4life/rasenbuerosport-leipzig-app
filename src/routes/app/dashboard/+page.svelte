@@ -179,11 +179,16 @@ const recentMatches = $derived(
 		const awayScore = game.score_away ?? 0;
 		const isDraw = homeScore === awayScore;
 		const winnerSide = !isDraw && (homeScore > awayScore ? "home" : "away");
-		const result = isDraw
-			? "draw"
-			: player?.team === winnerSide
-				? "win"
-				: "loss";
+		// `null` when the logged-in user wasn't in the match — the pill
+		// is meaningful only relative to them, so the list should hide
+		// it rather than show the home-team perspective.
+		const result = !player
+			? null
+			: isDraw
+				? "draw"
+				: player.team === winnerSide
+					? "win"
+					: "loss";
 		const snap = game.elo_snapshot;
 		const eloEntry = snap
 			? [...(snap.teamA ?? []), ...(snap.teamB ?? [])].find(

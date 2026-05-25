@@ -33,11 +33,13 @@ const winnerSide = $derived(
 	isDraw ? null : homeScore > awayScore ? "home" : "away",
 );
 
+// Result pill is meaningful only for the logged-in user. When the user
+// wasn't part of the match (e.g. browsing "Alle Spiele" or a foreign
+// match from a comparison view), we return null so the pill is hidden
+// instead of showing the home-team perspective as if it were the user's.
 const result = $derived.by(() => {
+	if (!userInvolved) return null;
 	if (isDraw) return "D";
-	if (!userInvolved) {
-		return winnerSide === "home" ? "W" : "L";
-	}
 	return myEntry.team === winnerSide ? "W" : "L";
 });
 
@@ -99,9 +101,13 @@ const markerLabel = $derived.by(() => {
 	class:special
 	onclick={navigateToDetail}
 >
-	<div class="result-pill {result === 'W' ? 'win' : result === 'L' ? 'loss' : 'draw'}">
-		{result === "W" ? $t("historie.w_short") : result === "L" ? $t("historie.l_short") : $t("historie.d_short")}
-	</div>
+	{#if result}
+		<div class="result-pill {result === 'W' ? 'win' : result === 'L' ? 'loss' : 'draw'}">
+			{result === "W" ? $t("historie.w_short") : result === "L" ? $t("historie.l_short") : $t("historie.d_short")}
+		</div>
+	{:else}
+		<div class="result-pill-spacer" aria-hidden="true"></div>
+	{/if}
 
 	<div class="body">
 		<div class="line line-1">
@@ -187,6 +193,11 @@ const markerLabel = $derived.by(() => {
 	background: rgba(245, 158, 11, 0.15);
 	color: #F59E0B;
 	border: 1.5px solid rgba(245, 158, 11, 0.4);
+}
+.result-pill-spacer {
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
 }
 .body {
 	flex: 1; min-width: 0;
