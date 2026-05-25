@@ -1,9 +1,10 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import BallIcon from "$lib/components/icons/BallIcon.svelte";
 
 /**
  * Empty state shown when two players have never faced each other
- * directly. Big ⚽ icon, friendly headline, body text and a CTA back
+ * directly. BallIcon, friendly headline, body text and a CTA back
  * to the selection screen.
  *
  * @type {{
@@ -18,7 +19,9 @@ const { t } = getTranslate();
 </script>
 
 <div class="empty">
-	<div class="ball" aria-hidden="true">⚽</div>
+	<div class="ball-icon" aria-hidden="true">
+		<BallIcon size={56} strokeWidth={1.6} />
+	</div>
 	<div class="headline">
 		{$t("compare.empty_headline", { a: playerAName, b: playerBName })}
 	</div>
@@ -39,7 +42,12 @@ const { t } = getTranslate();
 	align-items: center;
 	gap: 12px;
 }
-.ball { font-size: 56px; }
+.ball-icon {
+	color: var(--color-text-muted);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
 .headline {
 	font-size: 16px;
 	font-weight: 800;
