@@ -149,7 +149,7 @@ function applyVoiceResult(result) {
 		voiceError = result?.reason ?? "";
 		return;
 	}
-	const { eventType, playerId, side, minute } = result;
+	const { eventType, playerId, side, minute, assisterId } = result;
 
 	// Arm the right entry mode first, then commit the player. The
 	// existing state machine already gates against half-finished
@@ -164,6 +164,13 @@ function applyVoiceResult(result) {
 	}
 	next = selectPlayer(next, { playerId, side });
 	next = setMinute(next, minute);
+	// A second selectPlayer with a same-team teammate gets routed by
+	// the state machine as the assister (see liveMatchState.utils:
+	// GOAL_ENTRY branch). Only attempted for goals — backend already
+	// nulls assisterId for cards / missed penalties.
+	if (eventType === "goal" && assisterId && assisterId !== playerId) {
+		next = selectPlayer(next, { playerId: assisterId, side });
+	}
 	state = next;
 }
 </script>
