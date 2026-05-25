@@ -173,13 +173,24 @@ function nodeState(slot) {
 function subLabel(state) {
 	return $t(`awaiting_report.sub.${state}`);
 }
+
+// iOS Safari forces the camera into the picker sheet when `capture` is
+// set, but its camera UI only takes ONE photo and then closes — so the
+// `multiple` attribute is effectively useless there, and users assume
+// they can only snap one shot. Drop `capture` on iOS so the native sheet
+// presents Camera / Photo Library / Files as equal options and the
+// gallery path can deliver up to three images at once. Android keeps the
+// hint because its camera UI can chain multiple captures.
+const isIOS =
+	typeof navigator !== "undefined" &&
+	/iPad|iPhone|iPod/.test(navigator.userAgent);
 </script>
 
 <input
 	bind:this={pickerEl}
 	type="file"
 	accept="image/*"
-	capture="environment"
+	capture={isIOS ? undefined : "environment"}
 	multiple
 	style="display: none;"
 	onchange={handleFiles}
