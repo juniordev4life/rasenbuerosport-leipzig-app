@@ -37,15 +37,19 @@ function formatDelta(n) {
 			href={`/app/games/${match.id}`}
 			class="bg-bg-card border border-border rounded-xl px-3 py-2.5 flex items-center gap-3 hover:bg-bg-input transition-colors"
 		>
-			<span
-				class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-extrabold border-[1.5px] {match.result === 'win'
-					? 'bg-success/15 text-success border-success/40'
-					: match.result === 'loss'
-						? 'bg-accent-red/15 text-accent-red border-accent-red/40'
-						: 'bg-warning/15 text-warning border-warning/40'}"
-			>
-				{match.result === "win" ? "S" : match.result === "loss" ? "N" : "U"}
-			</span>
+			{#if match.result}
+				<span
+					class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-extrabold border-[1.5px] {match.result === 'win'
+						? 'bg-success/15 text-success border-success/40'
+						: match.result === 'loss'
+							? 'bg-accent-red/15 text-accent-red border-accent-red/40'
+							: 'bg-warning/15 text-warning border-warning/40'}"
+				>
+					{match.result === "win" ? "S" : match.result === "loss" ? "N" : "U"}
+				</span>
+			{:else}
+				<span class="w-6 h-6 shrink-0" aria-hidden="true"></span>
+			{/if}
 			<div class="flex-1 min-w-0">
 				<div class="text-[12px] font-semibold text-text-primary truncate">
 					vs. {match.opponent}
@@ -59,7 +63,9 @@ function formatDelta(n) {
 					? 'text-success'
 					: match.result === 'loss'
 						? 'text-accent-red'
-						: 'text-warning'}"
+						: match.result === 'draw'
+							? 'text-warning'
+							: 'text-text-primary'}"
 			>
 				{match.score}
 			</div>
