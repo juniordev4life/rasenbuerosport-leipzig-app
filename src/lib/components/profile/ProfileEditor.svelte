@@ -8,15 +8,19 @@ import { patch } from "$lib/services/api.services.js";
 import { user } from "$lib/stores/auth.stores.js";
 
 /**
- * ProfileEditor - Inline edit form for username and avatar
+ * ProfileEditor - Inline edit form for username, avatar and the
+ * spoken-form synonyms used by the live-match voice tracker.
+ *
  * @param {string} currentUsername - Current username
  * @param {string|null} currentAvatarUrl - Current avatar URL
+ * @param {string[]} [currentVoiceAliases] - Existing voice aliases
  * @param {Function} onClose - Close editor callback
  * @param {Function} onSaved - Called after successful save
  */
 let {
 	currentUsername = "",
 	currentAvatarUrl = null,
+	currentVoiceAliases = [],
 	onClose,
 	onSaved,
 } = $props();
@@ -24,10 +28,23 @@ let {
 const { t } = getTranslate();
 
 let username = $state(currentUsername);
+let voiceAliasesInput = $state(
+	Array.isArray(currentVoiceAliases) ? currentVoiceAliases.join(", ") : "",
+);
 let saving = $state(false);
 let error = $state("");
 let avatarFile = $state(null);
 let avatarPreview = $state(currentAvatarUrl);
+
+/** Comma-separated → trimmed, deduped, capped at 10. */
+function parseAliases(raw) {
+	return [...new Set(
+		(raw ?? "")
+			.split(",")
+			.map((s) => s.trim())
+			.filter(Boolean),
+	)].slice(0, 10);
+}
 
 /** Handle file selection for avatar */
 function handleFileChange(e) {
@@ -78,10 +95,13 @@ async function handleSave() {
 			photoURL: avatarUrl,
 		});
 
+		const voiceAliases = parseAliases(voiceAliasesInput);
+
 		// Update profile in backend via API
 		await patch("/v1/auth/profile", {
 			username: username.trim(),
 			avatar_url: avatarUrl,
+			voice_aliases: voiceAliases,
 		});
 
 		// Refresh local user store with updated profile data
@@ -91,6 +111,7 @@ async function handleSave() {
 				...current?.user_metadata,
 				username: username.trim(),
 				avatar_url: avatarUrl,
+				voice_aliases: voiceAliases,
 			},
 		}));
 
@@ -157,6 +178,22 @@ const initial = $derived(username?.charAt(0)?.toUpperCase() || "?");
 			maxlength="30"
 			class="w-full bg-bg-input border border-border rounded-lg px-3 py-2.5 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-red"
 		/>
+	</div>
+
+	<!-- Voice aliases -->
+	<div class="flex flex-col gap-1">
+		<label for="voice-aliases-input" class="text-xs text-text-secondary font-medium">
+			{$t("profile.edit.voice_aliases_label")}
+		</label>
+		<input
+			id="voice-aliases-input"
+			type="text"
+			bind:value={voiceAliasesInput}
+			maxlength="200"
+			placeholder={$t("profile.edit.voice_aliases_placeholder")}
+			class="w-full bg-bg-input border border-border rounded-lg px-3 py-2.5 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-red"
+		/>
+		<p class="text-[10px] text-text-muted">{$t("profile.edit.voice_aliases_hint")}</p>
 	</div>
 
 	<!-- Error -->

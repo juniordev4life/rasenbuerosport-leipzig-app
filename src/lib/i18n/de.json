@@ -617,7 +617,10 @@
 			"error_username_empty": "Benutzername darf nicht leer sein",
 			"error_file_type": "Bitte ein Bild auswählen",
 			"error_file_size": "Bild darf max. 2 MB groß sein",
-			"error_generic": "Fehler beim Speichern"
+			"error_generic": "Fehler beim Speichern",
+			"voice_aliases_label": "Sprach-Synonyme",
+			"voice_aliases_placeholder": "z. B. Dirk, DBL",
+			"voice_aliases_hint": "Komma-getrennt. Damit erkennt der Voice-Tracker dich auch unter Spitznamen."
 		}
 	},
 	"historie": {

@@ -615,7 +615,10 @@
 			"error_username_empty": "Username cannot be empty",
 			"error_file_type": "Please select an image file",
 			"error_file_size": "Image must be less than 2 MB",
-			"error_generic": "Failed to save"
+			"error_generic": "Failed to save",
+			"voice_aliases_label": "Voice synonyms",
+			"voice_aliases_placeholder": "e.g. Dirk, DBL",
+			"voice_aliases_hint": "Comma-separated. Lets the voice tracker recognise you by nickname."
 		}
 	},
 	"historie": {
