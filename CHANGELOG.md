@@ -6,6 +6,22 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v0.1.5
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.4...v0.1.5)
+
+### 🩹 Fixes
+
+- **env:** Resilient PUBLIC_AUDIO_REPORT_ENABLED + wire it through Match Day ([37431ef](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/37431ef))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v0.1.4 ([bff53bb](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/bff53bb))
+
+### ❤️ Contributors
+
+- Marco Slusalek <marco.slusalek@redbulls.com>
+
 ## v0.1.4 (2026-05-25)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.3...v0.1.4)
