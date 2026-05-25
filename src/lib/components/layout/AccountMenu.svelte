@@ -42,7 +42,7 @@ function handleKeydown(event) {
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-end bg-black/60 sm:bg-black/40 sm:p-4"
+	class="fixed inset-0 z-[60] flex items-end sm:items-center sm:justify-end bg-black/60 sm:bg-black/40 sm:p-4 pb-[max(env(safe-area-inset-bottom),16px)] sm:pb-4"
 	onclick={onClose}
 	role="dialog"
 	aria-modal="true"
