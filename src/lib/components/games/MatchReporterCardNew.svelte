@@ -1,6 +1,6 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { PUBLIC_AUDIO_REPORT_ENABLED } from "$env/static/public";
+import { env as publicEnv } from "$env/dynamic/public";
 import ReporterBioModal from "$lib/components/games/ReporterBioModal.svelte";
 import { getReporter } from "$lib/constants/reporters.constants.js";
 import { post } from "$lib/services/api.services.js";
@@ -9,9 +9,13 @@ import MatchAudioPlayer from "./MatchAudioPlayer.svelte";
 /**
  * Feature flag for the TTS audio render. Off by default so test runs
  * don't burn through audio credits — set `PUBLIC_AUDIO_REPORT_ENABLED=true`
- * in `.env` to bring the auto-generation + player back.
+ * in `.env` (or as a Firebase Hosting build env) to bring the
+ * auto-generation + player back.
+ *
+ * Read via `$env/dynamic/public` so a missing var at build time
+ * doesn't crash the build — defaults to disabled.
  */
-const AUDIO_ENABLED = PUBLIC_AUDIO_REPORT_ENABLED === "true";
+const AUDIO_ENABLED = publicEnv.PUBLIC_AUDIO_REPORT_ENABLED === "true";
 
 /**
  * New Spielbericht reporter card. Border-left in the active reporter's
