@@ -4,6 +4,7 @@ import EventFooter from "$lib/components/liveMatch/EventFooter.svelte";
 import GoalTypeDialog from "$lib/components/liveMatch/GoalTypeDialog.svelte";
 import MatchHeader from "$lib/components/liveMatch/MatchHeader.svelte";
 import Pitch from "$lib/components/liveMatch/Pitch.svelte";
+import VoiceEventButton from "$lib/components/liveMatch/VoiceEventButton.svelte";
 import { getTeamByName } from "$lib/services/teams.services.js";
 import {
 	cancelEntry,
@@ -125,6 +126,46 @@ function handleEnd() {
 		scoreTimeline: state.events,
 	});
 }
+
+/**
+ * The voice button is only useful when the editor isn't already open;
+ * dispatching a second event mid-entry would silently overwrite the
+ * user's in-progress data.
+ */
+const voicePlayers = $derived([
+	...homePlayers.map((id) => ({ id, username: playerName(id), side: "home" })),
+	...awayPlayers.map((id) => ({ id, username: playerName(id), side: "away" })),
+]);
+let voiceError = $state("");
+
+/**
+ * Take the parsed voice event and replay it through the live-match
+ * state machine, leaving the editor open in exactly the same place
+ * the user would land if they'd tapped the avatar manually.
+ */
+function applyVoiceResult(result) {
+	voiceError = "";
+	if (!result?.ok) {
+		voiceError = result?.reason ?? "";
+		return;
+	}
+	const { eventType, playerId, side, minute } = result;
+
+	// Arm the right entry mode first, then commit the player. The
+	// existing state machine already gates against half-finished
+	// entries, so an in-progress edit is left alone.
+	let next = state;
+	if (eventType === "yellow_card") {
+		next = toggleCardMode(next, "yellow");
+	} else if (eventType === "red_card") {
+		next = toggleCardMode(next, "red");
+	} else if (eventType === "penalty_missed") {
+		next = togglePenaltyMissMode(next);
+	}
+	next = selectPlayer(next, { playerId, side });
+	next = setMinute(next, minute);
+	state = next;
+}
 </script>
 
 {#snippet deleteBtn(index)}
@@ -165,6 +206,16 @@ function handleEnd() {
 		onConfirm={() => (state = confirmEntry(state))}
 	/>
 	</div>
+
+	<VoiceEventButton
+		players={voicePlayers}
+		currentMinute={state.minute}
+		onResult={applyVoiceResult}
+	/>
+
+	{#if voiceError}
+		<div class="text-xs text-error self-center -mt-1">{voiceError}</div>
+	{/if}
 
 	{#if state.events.length > 0}
 		{@const reversed = state.events.toReversed()}

@@ -697,6 +697,17 @@
 			"delete_aria": "Remove event",
 			"delete_title": "Remove event?",
 			"delete_body": "This event will be removed and the score recalculated."
+		},
+		"voice": {
+			"aria_label": "Hold to talk — dictate event",
+			"label_idle": "Hold to talk",
+			"hint_idle": "e.g. \"Goal Marco minute 17\"",
+			"label_recording": "Listening …",
+			"hint_recording": "Release to confirm",
+			"label_processing": "Parsing …",
+			"hint_processing": "Recognising your input",
+			"error_no_speech": "No speech detected — please try again",
+			"error_generic": "Could not recognise — please try again"
 		}
 	},
 	"new_game": {
