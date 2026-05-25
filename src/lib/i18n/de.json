@@ -699,6 +699,17 @@
 			"delete_aria": "Ereignis entfernen",
 			"delete_title": "Ereignis löschen?",
 			"delete_body": "Das Ereignis wird entfernt und der Spielstand neu berechnet."
+		},
+		"voice": {
+			"aria_label": "Halten zum Sprechen — Event diktieren",
+			"label_idle": "Halten zum Sprechen",
+			"hint_idle": "z. B. „Tor Marco Minute 17\"",
+			"label_recording": "Hört zu …",
+			"hint_recording": "Loslassen zum Bestätigen",
+			"label_processing": "Wird ausgewertet …",
+			"hint_processing": "Spracheingabe wird erkannt",
+			"error_no_speech": "Keine Sprache erkannt — bitte erneut versuchen",
+			"error_generic": "Sprache nicht erkannt — bitte erneut versuchen"
 		}
 	},
 	"new_game": {
