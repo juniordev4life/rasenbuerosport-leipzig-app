@@ -19,15 +19,5 @@ function handleRelationSelect(rel) {
 </svelte:head>
 
 <div class="mx-auto max-w-3xl p-3">
-	<button
-		type="button"
-		onclick={() => history.back()}
-		class="flex items-center gap-1 text-text-secondary text-sm hover:text-text-primary transition-colors mb-2"
-	>
-		<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			<path d="M15 19l-7-7 7-7" />
-		</svg>
-		{$t("common.back")}
-	</button>
 	<ProfilePage {playerId} onSelectRelation={handleRelationSelect} />
 </div>

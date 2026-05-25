@@ -131,17 +131,6 @@ const allUploaded = $derived(hasOverview && hasPasses && hasDefense);
 </svelte:head>
 
 <div class="flex flex-col gap-3 max-w-5xl mx-auto px-1 pt-0 pb-8">
-	<button
-		type="button"
-		onclick={() => history.back()}
-		class="flex items-center gap-1 text-text-secondary text-sm hover:text-text-primary transition-colors self-start mb-1"
-	>
-		<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-		</svg>
-		{$t("common.back")}
-	</button>
-
 	{#if loading}
 		<div class="flex justify-center py-8">
 			<div class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"></div>
