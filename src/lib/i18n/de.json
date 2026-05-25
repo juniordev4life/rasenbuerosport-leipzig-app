@@ -620,7 +620,8 @@
 			"error_generic": "Fehler beim Speichern",
 			"voice_aliases_label": "Sprach-Synonyme",
 			"voice_aliases_placeholder": "z. B. Dirk, DBL",
-			"voice_aliases_hint": "Komma-getrennt. Damit erkennt der Voice-Tracker dich auch unter Spitznamen."
+			"voice_aliases_hint": "Komma-getrennt. Damit erkennt der Voice-Tracker dich auch unter Spitznamen.",
+			"saved": "Gespeichert"
 		}
 	},
 	"historie": {

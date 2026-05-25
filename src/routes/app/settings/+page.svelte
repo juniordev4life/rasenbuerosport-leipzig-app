@@ -11,8 +11,6 @@ import { user } from "$lib/stores/auth.stores.js";
 
 const { t } = getTranslate();
 
-let editing = $state(false);
-
 const username = $derived($user?.user_metadata?.username || "");
 const avatarUrl = $derived($user?.user_metadata?.avatar_url || null);
 const voiceAliases = $derived($user?.user_metadata?.voice_aliases ?? []);
@@ -37,19 +35,11 @@ async function handleLogout() {
 	</h1>
 
 	<section class="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 space-y-4">
-		{#if editing}
-			<ProfileEditor
-				currentUsername={username}
-				currentAvatarUrl={avatarUrl}
-				currentVoiceAliases={voiceAliases}
-				onClose={() => (editing = false)}
-				onSaved={() => (editing = false)}
-			/>
-		{:else}
-			<Button variant="ghost" onclick={() => (editing = true)}>
-				{$t("profile.edit.title")}
-			</Button>
-		{/if}
+		<ProfileEditor
+			currentUsername={username}
+			currentAvatarUrl={avatarUrl}
+			currentVoiceAliases={voiceAliases}
+		/>
 
 		<ThemeSelector />
 
