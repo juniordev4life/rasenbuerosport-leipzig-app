@@ -256,17 +256,6 @@ function goBack() {
 </svelte:head>
 
 <div class="mx-auto max-w-3xl px-3 pb-4 pt-0">
-	<button
-		type="button"
-		onclick={goBack}
-		class="flex items-center gap-1 text-text-secondary text-sm hover:text-text-primary transition-colors mb-1"
-	>
-		<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			<path d="M15 19l-7-7 7-7" />
-		</svg>
-		{$t("common.back")}
-	</button>
-
 	{#if loading}
 		<div class="flex justify-center py-12">
 			<div class="animate-spin h-8 w-8 border-2 border-warning border-t-transparent rounded-full"></div>

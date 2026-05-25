@@ -109,17 +109,6 @@ function startCompare() {
 </svelte:head>
 
 <div class="mx-auto max-w-3xl px-3 pb-48 pt-0">
-	<button
-		type="button"
-		onclick={() => goto("/app/leaderboard")}
-		class="flex items-center gap-1 text-text-secondary text-sm hover:text-text-primary transition-colors mb-1"
-	>
-		<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			<path d="M15 19l-7-7 7-7" />
-		</svg>
-		{$t("common.back")}
-	</button>
-
 	<header class="mb-2">
 		<h1 class="text-2xl font-extrabold tracking-tight text-text-primary whitespace-nowrap">{pageTitle}</h1>
 		<p class="text-xs text-text-secondary mt-1">{pageSub}</p>
