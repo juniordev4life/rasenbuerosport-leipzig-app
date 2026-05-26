@@ -6,6 +6,22 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v0.1.8
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.7...v0.1.8)
+
+### 🚀 Enhancements
+
+- **match-report:** Add retry buttons when report or audio generation fails ([#40](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/40))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v0.1.7 ([e79c9b8](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/e79c9b8))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v0.1.7 (2026-05-26)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.6...v0.1.7)
