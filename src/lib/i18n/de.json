@@ -826,6 +826,8 @@
 		"listen": "Anhören",
 		"generating_audio": "Audio-Bericht wird erzeugt...",
 		"audio_error": "Audio-Bericht konnte nicht erstellt werden",
+		"retry": "Erneut versuchen",
+		"audio_retry": "Audio erneut erzeugen",
 		"audio_label": "Audio-Spielbericht",
 		"reporter_label": "Reporter",
 		"reporter": {

@@ -168,7 +168,15 @@ async function generateAudio() {
 		<div class="text loading">{$t("match_report.generating")}</div>
 	{:else if reportError && !report}
 		<div class="text error">
-			{$t("match_report.error")}
+			<span>{$t("match_report.error")}</span>
+			<button
+				type="button"
+				class="retry"
+				onclick={() => { reportError = false; generateReport(); }}
+				disabled={generating}
+			>
+				{$t("match_report.retry")}
+			</button>
 		</div>
 	{:else if report}
 		<div class="text">{report}</div>
@@ -180,7 +188,17 @@ async function generateAudio() {
 		{:else if audioLoading}
 			<div class="audio-hint">{$t("match_report.generating_audio")}</div>
 		{:else if audioError}
-			<div class="audio-hint">{$t("match_report.audio_error")}</div>
+			<div class="audio-hint audio-error">
+				<span>{$t("match_report.audio_error")}</span>
+				<button
+					type="button"
+					class="retry"
+					onclick={() => { audioError = false; generateAudio(); }}
+					disabled={audioLoading}
+				>
+					{$t("match_report.audio_retry")}
+				</button>
+			</div>
 		{/if}
 	{/if}
 </div>
@@ -251,6 +269,10 @@ async function generateAudio() {
 	border-radius: 999px;
 	cursor: pointer;
 }
+.retry:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
 .audio-hint {
 	font-size: 11px;
 	color: #6B7280;
@@ -258,5 +280,13 @@ async function generateAudio() {
 	padding: 8px 12px;
 	background: rgba(0,0,0,0.2);
 	border-radius: 10px;
+}
+.audio-hint.audio-error {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	color: #E24B4A;
+	font-style: normal;
 }
 </style>
