@@ -57,6 +57,15 @@ function setOrDelete(url, key, value, fallback) {
 	else url.searchParams.set(key, value);
 }
 
+function buildGamesUrl(currentOffset) {
+	const params = new URLSearchParams({
+		limit: String(PAGE_SIZE),
+		offset: String(currentOffset),
+		mine: String(who === "me"),
+	});
+	return `/v1/games?${params.toString()}`;
+}
+
 $effect(() => {
 	const _ = `${who}|${zeit}|${erg}`;
 	void _;
@@ -67,7 +76,7 @@ $effect(() => {
 	let aborted = false;
 	(async () => {
 		try {
-			const res = await get(`/v1/games?limit=${PAGE_SIZE}&offset=0`);
+			const res = await get(buildGamesUrl(0));
 			if (aborted) return;
 			games = res.data ?? [];
 			offset = games.length;
@@ -87,7 +96,7 @@ async function loadMore() {
 	if (loadingMore || !hasMore) return;
 	loadingMore = true;
 	try {
-		const res = await get(`/v1/games?limit=${PAGE_SIZE}&offset=${offset}`);
+		const res = await get(buildGamesUrl(offset));
 		const next = res.data ?? [];
 		games = [...games, ...next];
 		offset += next.length;
