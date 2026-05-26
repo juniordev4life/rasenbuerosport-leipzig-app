@@ -6,6 +6,23 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v0.1.7
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.6...v0.1.7)
+
+### 🩹 Fixes
+
+- **history:** Show all games when 'Alle' chip is selected ([#39](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/39))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v0.1.6 ([6ff7d67](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/6ff7d67))
+- Remove 26 orphaned components + 1 dead utility export ([#38](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/38))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v0.1.6 (2026-05-25)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.5...v0.1.6)
