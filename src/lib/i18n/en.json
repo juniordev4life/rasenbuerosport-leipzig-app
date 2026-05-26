@@ -824,6 +824,8 @@
 		"listen": "Listen",
 		"generating_audio": "Generating audio report...",
 		"audio_error": "Failed to generate audio report",
+		"retry": "Retry",
+		"audio_retry": "Regenerate audio",
 		"audio_label": "Audio match report",
 		"reporter_label": "Reporter",
 		"reporter": {
