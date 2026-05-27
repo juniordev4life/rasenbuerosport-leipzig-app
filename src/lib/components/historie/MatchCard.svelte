@@ -23,6 +23,18 @@ const players = $derived(game.game_players ?? []);
 const homeScore = $derived(game.score_home ?? 0);
 const awayScore = $derived(game.score_away ?? 0);
 
+// Suffix the score with "n.V." / "n.E." (DE) or "AET" / "Pen." (EN)
+// when the match went to extra time or penalties — matches the
+// pattern used on the game-detail screen so users see the same
+// shorthand everywhere.
+const resultSuffix = $derived(
+	game.result_type === "penalty"
+		? $t("game_detail.penalty_short")
+		: game.result_type === "extra_time"
+			? $t("game_detail.extra_time_short")
+			: "",
+);
+
 const myEntry = $derived(
 	currentUserId ? players.find((p) => p.player_id === currentUserId) : null,
 );
@@ -129,7 +141,9 @@ const markerLabel = $derived.by(() => {
 		</div>
 
 		<div class="line line-2">
-			<span class="score {scoreClass}">{homeScore}:{awayScore}</span>
+			<span class="score {scoreClass}">
+				{homeScore}:{awayScore}{#if resultSuffix}<span class="result-suffix"> {resultSuffix}</span>{/if}
+			</span>
 			<span class="mode">{game.mode ?? "—"}</span>
 			{#if marker && markerLabel}
 				<span class="marker {marker.type}">{markerLabel}</span>
@@ -237,6 +251,16 @@ const markerLabel = $derived.by(() => {
 }
 .score.win { color: #84CC16; }
 .score.loss { color: #E24B4A; }
+.result-suffix {
+	/* Smaller and dimmer than the main score so the digits stay
+	 * dominant — keeps "7:4 n.E." readable without the suffix
+	 * stealing focus. */
+	font-size: 11px;
+	font-weight: 700;
+	color: #9CA3AF;
+	margin-left: 2px;
+	letter-spacing: 0.02em;
+}
 .mode {
 	background: rgba(255, 255, 255, 0.05);
 	color: #9CA3AF;
