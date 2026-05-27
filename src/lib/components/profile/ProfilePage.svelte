@@ -217,7 +217,7 @@ const relations = $derived({
 				avatarUrl: profile.relationships.lieblingsgegner.avatarUrl,
 				wins: profile.relationships.lieblingsgegner.wins ?? 0,
 				losses: profile.relationships.lieblingsgegner.losses ?? 0,
-				winRate: deriveWinRate(profile.relationships.lieblingsgegner),
+				winRate: relationCardWinRatePercent(profile.relationships.lieblingsgegner),
 			}
 		: null,
 	nemesis: profile?.relationships?.angstgegner
@@ -227,7 +227,7 @@ const relations = $derived({
 				avatarUrl: profile.relationships.angstgegner.avatarUrl,
 				wins: profile.relationships.angstgegner.wins ?? 0,
 				losses: profile.relationships.angstgegner.losses ?? 0,
-				winRate: deriveWinRate(profile.relationships.angstgegner),
+				winRate: relationCardWinRatePercent(profile.relationships.angstgegner),
 			}
 		: null,
 	topPartner: profile?.relationships?.topPartner
@@ -236,19 +236,16 @@ const relations = $derived({
 				name: profile.relationships.topPartner.username,
 				avatarUrl: profile.relationships.topPartner.avatarUrl,
 				matches: profile.relationships.topPartner.totalMatches ?? 0,
-				winRate: deriveWinRate(profile.relationships.topPartner),
+				winRate: relationCardWinRatePercent(profile.relationships.topPartner),
 			}
 		: null,
 });
 
-/**
- * Tiny wrapper that names what we're doing at the relations call
- * site. The actual contract conversion (API ratio `[0, 1]` → integer
- * percent `[0, 100]`, with fallback to recomputing from
- * wins/totalMatches when the field is missing) lives in
- * {@link relationCardWinRatePercent} so it stays in one place.
- */
-const deriveWinRate = relationCardWinRatePercent;
+// Win-rate conversion (API ratio [0, 1] → integer percent [0, 100],
+// with fallback to recomputing from wins/totalMatches when the field
+// is missing) lives in `relationCardWinRatePercent` so the math
+// stays in one place. Used directly above in the `relations`
+// $derived block.
 
 const awards = $derived(
 	(profile?.topBadges ?? []).map((b, idx) => ({
