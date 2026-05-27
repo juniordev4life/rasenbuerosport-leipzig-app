@@ -96,9 +96,6 @@ $effect(() => {
 				user_metadata: {
 					username: profile.username || firebaseUser.displayName,
 					avatar_url: profile.avatar_url || firebaseUser.photoURL,
-					voice_aliases: Array.isArray(profile.voice_aliases)
-						? profile.voice_aliases
-						: [],
 				},
 			});
 		} catch {

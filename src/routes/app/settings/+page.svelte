@@ -13,7 +13,6 @@ const { t } = getTranslate();
 
 const username = $derived($user?.user_metadata?.username || "");
 const avatarUrl = $derived($user?.user_metadata?.avatar_url || null);
-const voiceAliases = $derived($user?.user_metadata?.voice_aliases ?? []);
 
 async function handleLogout() {
 	try {
@@ -38,7 +37,6 @@ async function handleLogout() {
 		<ProfileEditor
 			currentUsername={username}
 			currentAvatarUrl={avatarUrl}
-			currentVoiceAliases={voiceAliases}
 		/>
 
 		<ThemeSelector />
