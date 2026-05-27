@@ -1,5 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
+import InfoTip from "$lib/components/ui/InfoTip.svelte";
 
 /**
  * Top-Auszeichnungen list with an icon-gradient per type and a
@@ -55,7 +57,15 @@ function defaultIcon(type) {
 
 <div class="section-card">
 	<div class="section-header">
-		<div class="section-label">{"\u{1F3C6}"} {$t("profile.awards_section")}</div>
+		<div class="section-label">
+			<TrophyIcon size={12} strokeWidth={1.8} />
+			<span>{$t("profile.awards_section")}</span>
+			<InfoTip
+				titleKey="info_tips.awards.title"
+				bodyKey="info_tips.awards.body"
+				size={13}
+			/>
+		</div>
 	</div>
 
 	{#if awards.length === 0}
@@ -108,6 +118,9 @@ function defaultIcon(type) {
 	text-transform: uppercase; letter-spacing: 0.1em;
 	color: #6B7280;
 	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
 }
 .awards-list { display: flex; flex-direction: column; gap: 8px; }
 .award-row {

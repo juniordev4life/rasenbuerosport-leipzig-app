@@ -4,6 +4,7 @@ import { env as publicEnv } from "$env/dynamic/public";
 import ReporterBioModal from "$lib/components/games/ReporterBioModal.svelte";
 import { getReporter } from "$lib/constants/reporters.constants.js";
 import { post } from "$lib/services/api.services.js";
+import InfoTip from "$lib/components/ui/InfoTip.svelte";
 import MatchAudioPlayer from "./MatchAudioPlayer.svelte";
 
 /**
@@ -150,7 +151,12 @@ async function generateAudio() {
 			<div class="info">
 				<div class="name">{reporter.name}</div>
 				<div class="role" style="color: {skin.role};">
-					{$t("game_detail.report.reporter_role")}
+					<span>{$t("game_detail.report.reporter_role")}</span>
+					<InfoTip
+						titleKey="info_tips.reporter.title"
+						bodyKey="info_tips.reporter.body"
+						size={12}
+					/>
 				</div>
 			</div>
 		{:else}
@@ -158,7 +164,12 @@ async function generateAudio() {
 			<div class="info">
 				<div class="name">{$t("game_detail.report.reporter_unknown")}</div>
 				<div class="role" style="color: {skin.role};">
-					{$t("game_detail.report.reporter_role")}
+					<span>{$t("game_detail.report.reporter_role")}</span>
+					<InfoTip
+						titleKey="info_tips.reporter.title"
+						bodyKey="info_tips.reporter.body"
+						size={12}
+					/>
 				</div>
 			</div>
 		{/if}
@@ -246,6 +257,9 @@ async function generateAudio() {
 .role {
 	font-size: 11px;
 	font-style: italic;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
 }
 .text {
 	font-size: 13px;

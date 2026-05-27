@@ -618,9 +618,6 @@
 			"error_file_type": "Bitte ein Bild auswählen",
 			"error_file_size": "Bild darf max. 2 MB groß sein",
 			"error_generic": "Fehler beim Speichern",
-			"voice_aliases_label": "Sprach-Synonyme",
-			"voice_aliases_placeholder": "z. B. Dirk, DBL",
-			"voice_aliases_hint": "Komma-getrennt. Damit erkennt der Voice-Tracker dich auch unter Spitznamen.",
 			"saved": "Gespeichert"
 		}
 	},
@@ -703,17 +700,6 @@
 			"delete_aria": "Ereignis entfernen",
 			"delete_title": "Ereignis löschen?",
 			"delete_body": "Das Ereignis wird entfernt und der Spielstand neu berechnet."
-		},
-		"voice": {
-			"aria_label": "Halten zum Sprechen — Event diktieren",
-			"label_idle": "Halten zum Sprechen",
-			"hint_idle": "z. B. „Tor Marco Minute 17\"",
-			"label_recording": "Hört zu …",
-			"hint_recording": "Loslassen zum Bestätigen",
-			"label_processing": "Wird ausgewertet …",
-			"hint_processing": "Spracheingabe wird erkannt",
-			"error_no_speech": "Keine Sprache erkannt — bitte erneut versuchen",
-			"error_generic": "Sprache nicht erkannt — bitte erneut versuchen"
 		}
 	},
 	"new_game": {
@@ -806,7 +792,74 @@
 		"random_confirm": "Bestätigen",
 		"random_cancel": "Abbrechen",
 		"random_no_teams": "Nicht genug gleich starke Teams im Sterne-Bereich",
-		"random_vs": "vs."
+		"random_vs": "vs.",
+		"onboarding": {
+			"cta_next": "Weiter",
+			"cta_done": "Los geht's",
+			"back": "Zurück",
+			"lobby": {
+				"tip_1_title": "Heim-Hälfte",
+				"tip_1_body": "Tipp einen Avatar in der oberen, roten Spielfeld-Hälfte an, um den Spieler ins Heim-Team zu setzen. Erneut tippen löst die Zuordnung wieder.",
+				"tip_2_title": "Auswärts-Hälfte",
+				"tip_2_body": "In der unteren, grünen Hälfte funktioniert es genauso fürs Auswärts-Team. Spieler, die schon auf der anderen Seite sind, erscheinen hier ausgegraut.",
+				"tip_3_title": "Gast-Slot",
+				"tip_3_body": "Pro Seite gibt es eine Gast-Kachel für Mitspielende ohne Account. Das Spiel zählt für sie nicht ins Profil, aber das Endergebnis bleibt korrekt erfasst."
+			},
+			"poster": {
+				"tip_1_title": "Vorgeschlagene Paarung",
+				"tip_1_body": "Beim Öffnen wird automatisch ein ausgeglichenes Team-Paar im 4–5★-Bereich gewürfelt. Stimmen die Sterne nicht überein, erscheint unten der Hinweis „Sterne ungleich\".",
+				"tip_2_title": "Würfeln, Anpassen, Manuell",
+				"tip_2_body": "„Würfeln\" rollt ein neues Paar im gleichen Bereich, „Anpassen\" öffnet die Sterne-Range, „Manuell\" lässt dich beide Team-Namen frei eintippen.",
+				"tip_3_title": "Anpfiff",
+				"tip_3_body": "Mit dem großen roten Button startet das Live-Tracking — dort werden Tore, Karten und Elfmeter direkt auf dem Spielfeld erfasst."
+			},
+			"live": {
+				"tip_1_title": "Dein Spielfeld",
+				"tip_1_body": "Heimteam oben, Auswärts unten. Über dem Pitch siehst du Teams und Live-Spielstand, darunter folgt der Aktions-Footer. Schau dir die Aufstellung kurz an — gleich erfassen wir das erste Tor.",
+				"tip_2_title": "Torschützen antippen",
+				"tip_2_body": "Wir tippen für die Demo direkt den ersten Heim-Spieler als Torschützen an. Die gegenüberliegende Spielfeld-Hälfte verwandelt sich gleich in den Editor.",
+				"tip_3_title": "Tor-Art ändern",
+				"tip_3_body": "Diese „Spiel\"-Pill im Editor ist tappbar — dahinter steckt der Dialog zum Wechseln zwischen Spiel, Elfmeter, Ecke oder Freistoß. Für unsere Demo bleibt sie auf Spiel.",
+				"tip_4_title": "Vorlagengeber tracken",
+				"tip_4_body": "Zweiter Tap auf einen Mitspieler aus derselben Mannschaft = Vorlagengeber. Optional bei jedem Tor — ohne zweiten Tap wird das Tor ohne Assist gespeichert.",
+				"tip_5_title": "Minute setzen",
+				"tip_5_body": "Der horizontale Scroll-Slider in der Mitte ist die Spielminute. Wir setzen sie für die Demo auf 45 — passend, um gleich die Nachspielzeit zu zeigen.",
+				"tip_6_title": "Nachspielzeit",
+				"tip_6_body": "Bei 45, 90 oder 120 wird der kleine Slider darunter aktiv — das ist die Nachspielzeit. Wir setzen sie hier auf +3, also Minute 45+3.",
+				"tip_7_title": "Bestätigen",
+				"tip_7_body": "Der grüne Haken speichert das Event. Der Editor schließt, und das Tor erscheint gleich unten als Pill in der Timeline.",
+				"tip_8_title": "Event entfernen",
+				"tip_8_body": "Verklickt? Tippe das × auf der Pill, bestätige die Sicherheitsabfrage — das Event ist sauber raus, Spielstand wird neu berechnet.",
+				"tip_9_title": "Karten & Elfer",
+				"tip_9_body": "Mit den Footer-Buttons aktivierst du gelb, rot oder verschossener Elfmeter. Danach den Spieler antippen — der Rest läuft wie beim Tor. Eigentore gibt's per langem Drücken auf einen Spieler. Über „Spiel beenden\" wird die Partie abgeschlossen.",
+				"tip_10_title": "Bereit?",
+				"tip_10_body": "Die Demo-Daten werden gleich gelöscht — du startest mit leerer Timeline. Wenn du Bock auf einen schnellen Rematch hast: Auf der Spielübersicht gibt es einen „Rematch starten\"-Button, der dich direkt wieder hierher bringt."
+			},
+			"dashboard": {
+				"tip_1_title": "Deine Woche",
+				"tip_1_body": "Hier siehst du deine Bilanz dieser Kalenderwoche: Spiele, Siege, Niederlagen und ELO-Veränderung. Updated sich automatisch nach jedem Spiel.",
+				"tip_2_title": "ELO & Form",
+				"tip_2_body": "Deine aktuelle ELO-Zahl plus die letzten 5 Ergebnisse als Pills. So siehst du auf einen Blick, in welcher Verfassung du gerade bist.",
+				"tip_3_title": "Letzte Spiele",
+				"tip_3_body": "Die drei jüngsten Partien, an denen du beteiligt warst. Tap auf eine Karte öffnet Spielbericht und Detail-Stats.",
+				"tip_4_title": "Top 3 der Liga",
+				"tip_4_body": "Die drei ELO-stärksten Spieler aktuell. Tap auf einen Eintrag bringt dich direkt zum Spielerprofil. Die vollständige Rangliste findest du in der Bottom-Nav unter „Rangliste\".",
+				"tip_5_title": "Bereit?",
+				"tip_5_body": "Über die Bottom-Navigation kommst du zu Spielen, Rangliste, History und Profil. Mit dem „+\" startest du ein neues Match."
+			},
+			"profile": {
+				"tip_1_title": "Dein Kopf",
+				"tip_1_body": "Avatar, Username, dein Archetyp, aktueller Rang, ELO und Bilanz (Siege/Unentschieden/Niederlagen). Die kleinen Kommentare oben kommen von Marcel — unserem AI-Reporter.",
+				"tip_2_title": "Deine Stärken",
+				"tip_2_body": "Spider-Chart mit deinen Stärken-Achsen — Offensive, Defensive, Chemistry und mehr. Tap auf eine Achse erklärt dir, wie sie berechnet wird.",
+				"tip_3_title": "Form & ELO-Verlauf",
+				"tip_3_body": "Deine letzten 5 Resultate plus ELO-Sparkline. So siehst du sofort, ob du gerade auf- oder absteigst.",
+				"tip_4_title": "Beziehungen",
+				"tip_4_body": "Favorit (gegen wen läufst du am besten), Nemesis (wer macht dir das Leben schwer) und bester Partner. Tap auf eine Karte öffnet das jeweilige Spielerprofil.",
+				"tip_5_title": "Achievements",
+				"tip_5_body": "Deine freigeschalteten Badges. Insgesamt gibt es 15 zu sammeln — manche bekommst du für Serien, andere für einzelne Glanzleistungen."
+			}
+		}
 	},
 	"minute_picker": {
 		"title": "In welcher Minute fiel das Tor?",
@@ -1186,6 +1239,14 @@
 			"discipline": "Weniger Rote Karten → höherer Wert. Inverses Perzentil.",
 			"winner": "Wie sehr deine Anwesenheit die Mitspieler besser macht."
 		},
+		"axis_type": {
+			"finisher": "Offensive · Tor-Quote",
+			"playmaker": "Offensive · Assist-Quote",
+			"clutch": "Special · Späte Spielminuten",
+			"consistency": "Mental · Form-Streuung",
+			"discipline": "Mental · Fair Play",
+			"winner": "Special · Team-Impact"
+		},
 		"relationships_title": "Mitspieler & Gegner",
 		"lieblingsgegner": "Lieblingsgegner",
 		"angstgegner": "Angstgegner",
@@ -1200,5 +1261,31 @@
 		"result_loss": "N",
 		"result_draw": "U",
 		"axis_modal_close": "Schließen"
+	},
+	"info_tips": {
+		"elo": {
+			"title": "ELO",
+			"body": "ELO ist deine Spielerstärke als Zahl. Startwert ist 1000.\n\nSie steigt nach Siegen — besonders gegen Stärkere — und fällt nach Niederlagen, besonders gegen Schwächere. Ein Sieg gegen eine deutlich stärkere Mannschaft bringt mehr Punkte als gegen einen Schwächeren.\n\nDie Berechnung läuft pro Spielmodus getrennt (1v1, 2v2). So polierst du nicht durch leichte 1v1-Siege deinen 2v2-Wert auf — und umgekehrt."
+		},
+		"archetype": {
+			"title": "Archetyp",
+			"body": "Dein Charakter-Typ wird automatisch aus deinen sechs Stärken-Achsen abgeleitet — Vollstrecker, Vorbereiter, Schlussphase, Konstanz, Disziplin und Sieger-Faktor.\n\nJe nachdem welche dominieren, bekommst du einen passenden Spieler-Stil. Verlässlich wird er nach ~5–10 Spielen. Bis dahin siehst du „Frischling\" oder „Im Aufbau\"."
+		},
+		"pass_network": {
+			"title": "Pass-Charakter",
+			"body": "Aus der Pässe-Statistik des Spiels wird ein kurzer Pass-Stil-Tag abgeleitet — z. B. „Tiki-Taka\" für viele kurze Pässe oder „Direktspiel\" für lange Bälle.\n\nDie Tags zeigen, wie ein Team sein Spiel aufgezogen hat. Quelle ist die Pass-Verteilung aus der hochgeladenen FC-Statistik. Ohne hochgeladene Stats keine Tags."
+		},
+		"awards": {
+			"title": "Achievements",
+			"body": "Es gibt 15 Badges zum Freischalten. Manche sind statistische Meilensteine (z. B. 50 Spiele, 10 Tore in einem Match), andere kommen für besondere Leistungen oder Serien — etwa eine Siegesserie über mehrere Wochen.\n\nDie Badges werden nach jedem Spiel automatisch geprüft und freigeschaltet. Die volle Liste mit Unlock-Bedingungen findest du auf der Achievement-Seite."
+		},
+		"relations": {
+			"title": "Beziehungen",
+			"body": "„Lieblingsgegner\" zeigt den Gegner, gegen den du am häufigsten gewinnst.\n„Angstgegner\" das Gegenteil — wer dir das Leben schwer macht.\n„Top-Partner\" ist der Teammate, mit dem du die beste gemeinsame Bilanz hast.\n\nDamit ein Spieler hier auftaucht, müssen mindestens 3 gemeinsame Spiele vorliegen. Sonst wäre die Statistik zu zufällig. Tap auf eine Karte öffnet das jeweilige Profil."
+		},
+		"reporter": {
+			"title": "Reporter-Persona",
+			"body": "Drei AI-Reporter erzählen den Spielbericht mit unterschiedlichem Stil:\n\n• Klassiker — sachlich, traditioneller Bericht\n• Analyst — taktisch, datenfokussiert\n• Euphoriker — emotional, überschwänglich\n\nWelcher Reporter ein Spiel übernimmt, wählt das System automatisch — basierend auf der Dramaturgie (knapp, eindeutig, viele Tore etc.)."
+		}
 	}
 }

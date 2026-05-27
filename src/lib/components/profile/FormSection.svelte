@@ -1,5 +1,6 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import HistoryIcon from "$lib/components/icons/HistoryIcon.svelte";
 import MarcelCard from "./MarcelCard.svelte";
 
 /**
@@ -63,7 +64,10 @@ const polyline = $derived(
 
 <div class="section-card">
 	<div class="section-header">
-		<div class="section-label">{"\u{1F4C8}"} {$t("profile.form_section")}</div>
+		<div class="section-label">
+			<HistoryIcon size={12} strokeWidth={1.8} />
+			<span>{$t("profile.form_section")}</span>
+		</div>
 	</div>
 
 	<div class="form-top">
@@ -131,6 +135,9 @@ const polyline = $derived(
 	text-transform: uppercase; letter-spacing: 0.1em;
 	color: #6B7280;
 	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
 }
 .form-top {
 	display: flex; align-items: center;

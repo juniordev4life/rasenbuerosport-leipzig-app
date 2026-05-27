@@ -71,3 +71,121 @@ body {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
+
+/* intro.js — dark theme override applied via `tooltipClass: "rbl-introjs"`
+ * in runOnboardingTour. Brings the tour tooltips in line with the app's
+ * dark surfaces and accent palette. */
+.introjs-tooltip.rbl-introjs {
+	background: #131822;
+	color: #f0f2f5;
+	border: 1px solid #1f2937;
+	border-radius: 14px;
+	box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+	/* Clamp to viewport so tooltips anchored to right-edge elements
+	 * (e.g. the guest avatar tile) can't spill outside the screen on
+	 * narrow mobile viewports. The 24px gutter leaves room on both
+	 * sides regardless of which way intro.js flips the arrow. */
+	max-width: min(320px, calc(100vw - 24px));
+	padding: 4px 4px 8px;
+}
+.introjs-tooltip.rbl-introjs .introjs-tooltiptext {
+	color: #d1d5db;
+	font-size: 13px;
+	line-height: 1.45;
+	padding: 12px 16px 4px;
+}
+.introjs-tooltip.rbl-introjs .introjs-tooltip-header {
+	padding: 12px 16px 0;
+}
+.introjs-tooltip.rbl-introjs .introjs-tooltip-title {
+	color: #ffffff;
+	font-size: 15px;
+	font-weight: 800;
+	letter-spacing: -0.01em;
+}
+.introjs-tooltip.rbl-introjs .introjs-skipbutton {
+	color: #6b7280;
+	font-size: 18px;
+}
+.introjs-tooltip.rbl-introjs .introjs-skipbutton:hover {
+	color: #f0f2f5;
+}
+.introjs-tooltip.rbl-introjs .introjs-tooltipbuttons {
+	border-top: 1px solid rgba(255, 255, 255, 0.06);
+	padding: 10px 12px;
+}
+.introjs-tooltip.rbl-introjs .introjs-button {
+	background: #1a1f2a;
+	color: #d1d5db;
+	border: 1px solid #2a3142;
+	border-radius: 10px;
+	padding: 7px 14px;
+	font-size: 12px;
+	font-weight: 700;
+	text-shadow: none;
+}
+.introjs-tooltip.rbl-introjs .introjs-button:hover,
+.introjs-tooltip.rbl-introjs .introjs-button:focus {
+	background: #232938;
+	color: #ffffff;
+	border-color: #3a4255;
+}
+.introjs-tooltip.rbl-introjs .introjs-nextbutton {
+	background: linear-gradient(135deg, #e24b4a, #c73e3d);
+	border-color: rgba(226, 75, 74, 0.4);
+	color: #ffffff;
+	box-shadow: 0 6px 18px rgba(226, 75, 74, 0.4);
+}
+.introjs-tooltip.rbl-introjs .introjs-nextbutton:hover,
+.introjs-tooltip.rbl-introjs .introjs-nextbutton:focus {
+	background: linear-gradient(135deg, #ef5e5d, #d04b4a);
+	border-color: rgba(226, 75, 74, 0.55);
+}
+.introjs-tooltip.rbl-introjs .introjs-disabled,
+.introjs-tooltip.rbl-introjs .introjs-disabled:hover {
+	background: #1a1f2a;
+	color: #4b5563;
+	border-color: #1f2937;
+	box-shadow: none;
+}
+.introjs-tooltip.rbl-introjs .introjs-progress {
+	background: rgba(255, 255, 255, 0.06);
+}
+.introjs-tooltip.rbl-introjs .introjs-progressbar {
+	background: linear-gradient(90deg, #84cc16, #65a30d);
+}
+.introjs-tooltip.rbl-introjs .introjs-arrow.top,
+.introjs-tooltip.rbl-introjs .introjs-arrow.top-right,
+.introjs-tooltip.rbl-introjs .introjs-arrow.top-middle {
+	border-bottom-color: #131822;
+}
+.introjs-tooltip.rbl-introjs .introjs-arrow.bottom,
+.introjs-tooltip.rbl-introjs .introjs-arrow.bottom-right,
+.introjs-tooltip.rbl-introjs .introjs-arrow.bottom-middle {
+	border-top-color: #131822;
+}
+.introjs-tooltip.rbl-introjs .introjs-arrow.left {
+	border-right-color: #131822;
+}
+.introjs-tooltip.rbl-introjs .introjs-arrow.right {
+	border-left-color: #131822;
+}
+/* Overlay dim — pushed close to opaque so the highlighted element pops
+ * clearly on top of the app's already-dark surfaces (the dark theme
+ * was eating the 0.65 backdrop). The huge outer box-shadow on the
+ * helperLayer is what actually paints the "rest of the screen is
+ * dimmed" area around the focused element; .introjs-overlay catches
+ * the brief moment before helperLayer mounts.
+ *
+ * `!important` is required because intro.js writes the shadow + the
+ * overlay background as inline styles from JS, which would otherwise
+ * win against our class rules. */
+.introjs-overlay {
+	background: rgba(0, 0, 0, 0.88) !important;
+}
+.introjs-helperLayer {
+	border-radius: 16px;
+	box-shadow:
+		rgba(0, 0, 0, 0.7) 0 0 1px 2px,
+		rgba(0, 0, 0, 0.88) 0 0 0 5000px !important;
+}

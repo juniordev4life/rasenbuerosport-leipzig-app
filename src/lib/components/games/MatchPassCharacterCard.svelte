@@ -1,5 +1,6 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import InfoTip from "$lib/components/ui/InfoTip.svelte";
 import ausgewogen from "$lib/assets/passCharacter/pass-character-ausgewogen.svg?raw";
 import fluegelspiel from "$lib/assets/passCharacter/pass-character-fluegelspiel.svg?raw";
 import linkslastig from "$lib/assets/passCharacter/pass-character-linkslastig.svg?raw";
@@ -120,8 +121,13 @@ function passCount(network) {
 
 {#if hasAnything}
 	<section class="rounded-2xl border border-border bg-bg-secondary p-4 sm:p-5">
-		<h3 class="text-[11px] tracking-[0.08em] uppercase text-text-muted font-semibold mb-3">
-			{$t("game_detail.section.pass_character")}
+		<h3 class="text-[11px] tracking-[0.08em] uppercase text-text-muted font-semibold mb-3 flex items-center gap-1.5">
+			<span>{$t("game_detail.section.pass_character")}</span>
+			<InfoTip
+				titleKey="info_tips.pass_network.title"
+				bodyKey="info_tips.pass_network.body"
+				size={13}
+			/>
 		</h3>
 		<div class="grid grid-cols-2 gap-3">
 			{@render pitch(homePassNetwork, "home", homeTeamName)}

@@ -4,6 +4,12 @@
  * Auto-scales the input series into the viewBox. A dashed grey line is
  * drawn when too few points are available (rookie / cold-start state).
  *
+ * `fluid` makes the SVG fill its container horizontally (`width: 100%`)
+ * — useful for the hero blocks on the profile + leaderboard pages
+ * where there's spare room beside the ELO number. The internal
+ * viewBox keeps using `width` so the geometry math is unchanged; the
+ * SVG just scales non-proportionally to fit the container width.
+ *
  * @type {{
  *   points?: number[],
  *   width?: number,
@@ -13,6 +19,7 @@
  *   dashed?: boolean,
  *   strokeWidth?: number,
  *   opacity?: number,
+ *   fluid?: boolean,
  * }}
  */
 let {
@@ -24,6 +31,7 @@ let {
 	dashed = false,
 	strokeWidth = 1.3,
 	opacity = 0.7,
+	fluid = false,
 } = $props();
 
 const geom = $derived.by(() => {
@@ -46,7 +54,7 @@ const geom = $derived.by(() => {
 <svg
 	viewBox="0 0 {width} {height}"
 	preserveAspectRatio="none"
-	style="width: {width}px; height: {height}px; opacity: {opacity};"
+	style="width: {fluid ? '100%' : `${width}px`}; height: {height}px; opacity: {opacity};"
 	aria-hidden="true"
 >
 	{#if geom}

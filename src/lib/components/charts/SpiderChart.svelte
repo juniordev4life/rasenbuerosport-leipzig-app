@@ -12,6 +12,8 @@
  *
  * @type {{
  *   axes: string[],
+ *   axisKeys?: string[]|null,
+ *   axisIcons?: Record<string, string>|null,
  *   datasets: Array<{
  *     id: string,
  *     label: string,
@@ -25,9 +27,26 @@
  *   gridLevels?: number,
  *   onAxisClick?: (key: string) => void,
  * }}
+ *
+ * When `axisKeys` is provided, it carries the raw identifiers (e.g.
+ * `"finisher"`) that align positionally with `axes` (the user-facing
+ * labels). The `onAxisClick` callback fires with the raw key in that
+ * case so consumers can look up i18n strings or metadata without
+ * round-tripping through the localised label. If `axisKeys` is null
+ * the callback falls back to the label, preserving the original
+ * single-arg behaviour for any caller that doesn't need raw keys.
+ *
+ * `axisIcons` is a `{ [rawKey]: <inline SVG children string> }` map.
+ * Whenever a key has an entry, the component renders the icon instead
+ * of the text label at that axis tip. The label string is still used
+ * as the `aria-label`/screen-reader text so keyboard users hear what
+ * the icon means. Icons are expected to be drawn against a `0 0 24 24`
+ * box; they're scaled down to fit the chart's coordinate space.
  */
 let {
 	axes,
+	axisKeys = null,
+	axisIcons = null,
 	datasets,
 	max = 100,
 	gridLevels = 4,
@@ -36,6 +55,11 @@ let {
 
 const RADIUS = 140;
 const LABEL_OFFSET = 18;
+// Icons sit closer to the chart than text labels — they're smaller
+// and don't need the breathing room a multi-character word demands.
+const ICON_OFFSET = 14;
+const ICON_HIT_RADIUS = 16;
+const ICON_SCALE = 0.9;
 const VIEWBOX = 180;
 
 const angles = $derived(
@@ -72,8 +96,12 @@ const axisLines = $derived(
 
 const labels = $derived(
 	angles.map((a, i) => {
-		const x = (RADIUS + LABEL_OFFSET) * Math.cos(a);
-		const y = (RADIUS + LABEL_OFFSET) * Math.sin(a);
+		const offset =
+			axisIcons && (axisKeys?.[i] ?? axes[i]) in (axisIcons ?? {})
+				? RADIUS + ICON_OFFSET
+				: RADIUS + LABEL_OFFSET;
+		const x = offset * Math.cos(a);
+		const y = offset * Math.sin(a);
 		let anchor = "middle";
 		if (x > 4) anchor = "start";
 		else if (x < -4) anchor = "end";
@@ -128,14 +156,47 @@ const renderedDatasets = $derived(
 	{/each}
 
 	{#each labels as label, i (i)}
-		{#if onAxisClick}
+		{@const rawKey = axisKeys?.[i] ?? axes[i]}
+		{@const iconMarkup = axisIcons?.[rawKey] ?? null}
+		{#if iconMarkup}
+			<!-- Icon mode: clickable group with an invisible hit-circle
+			     that's larger than the visual icon so the touch target
+			     is comfortable on mobile (~32 px diameter). -->
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<g
+				transform="translate({label.x}, {label.y})"
+				class="axis-marker"
+				class:clickable={!!onAxisClick}
+				role={onAxisClick ? "button" : null}
+				tabindex={onAxisClick ? 0 : null}
+				aria-label={label.text}
+				onclick={onAxisClick ? () => onAxisClick(rawKey) : null}
+				onkeydown={onAxisClick
+					? (e) => {
+							if (e.key === "Enter" || e.key === " ") {
+								e.preventDefault();
+								onAxisClick(rawKey);
+							}
+						}
+					: null}
+			>
+				<circle r={ICON_HIT_RADIUS} class="axis-hit" />
+				<g
+					transform="translate({-12 * ICON_SCALE}, {-12 * ICON_SCALE}) scale({ICON_SCALE})"
+					class="axis-icon"
+				>
+					<!-- eslint-disable-next-line -->
+					{@html iconMarkup}
+				</g>
+			</g>
+		{:else if onAxisClick}
 			<text
 				x={label.x}
 				y={label.y}
 				class="axis-label clickable"
 				text-anchor={label.anchor}
 				dominant-baseline="middle"
-				onclick={() => onAxisClick(axes[i])}
+				onclick={() => onAxisClick(rawKey)}
 			>{label.text}</text>
 		{:else}
 			<text
@@ -171,4 +232,30 @@ const renderedDatasets = $derived(
 }
 .axis-label.clickable { cursor: pointer; }
 .axis-label.clickable:hover { fill: #E5E7EB; }
+
+.axis-marker { outline: none; }
+.axis-marker.clickable { cursor: pointer; }
+.axis-hit {
+	/* Visible at 0 alpha so it still catches pointer events but doesn't
+	 * paint anything. `fill: transparent` would block pointer events in
+	 * some browsers when SVG hit-testing is set to "visiblePainted". */
+	fill: rgba(0, 0, 0, 0);
+}
+.axis-icon {
+	fill: none;
+	stroke: #9CA3AF;
+	stroke-width: 1.8;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	transition: stroke 0.15s;
+}
+.axis-marker.clickable:hover .axis-icon,
+.axis-marker.clickable:focus-visible .axis-icon {
+	stroke: #E5E7EB;
+}
+.axis-marker.clickable:focus-visible .axis-hit {
+	fill: rgba(226, 75, 74, 0.08);
+	stroke: rgba(226, 75, 74, 0.5);
+	stroke-width: 1;
+}
 </style>

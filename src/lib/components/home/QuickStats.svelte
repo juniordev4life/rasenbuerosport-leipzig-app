@@ -1,5 +1,6 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import InfoTip from "$lib/components/ui/InfoTip.svelte";
 
 /**
  * ELO + last-five form pills in one compact row.
@@ -34,8 +35,11 @@ const trendClass = $derived(
 <div class="bg-bg-card border border-border rounded-2xl px-4 py-3">
 	<div class="flex items-center gap-4">
 		<div class="flex flex-col gap-1">
-			<div class="text-[28px] font-extrabold leading-none tabular-nums -tracking-[0.02em]">
-				{elo ?? "—"}
+			<div class="flex items-baseline gap-1.5">
+				<span class="text-[28px] font-extrabold leading-none tabular-nums -tracking-[0.02em]">
+					{elo ?? "—"}
+				</span>
+				<InfoTip titleKey="info_tips.elo.title" bodyKey="info_tips.elo.body" />
 			</div>
 			{#if eloDelta != null}
 				<span class="inline-flex items-center gap-1 text-[10px] font-bold border rounded-full px-2 py-0.5 w-fit {trendClass}">

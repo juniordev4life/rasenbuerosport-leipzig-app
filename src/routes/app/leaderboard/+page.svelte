@@ -7,6 +7,7 @@ import ModeSwitch from "$lib/components/leaderboard/ModeSwitch.svelte";
 import PlayerRow from "$lib/components/leaderboard/PlayerRow.svelte";
 import RanglisteHero from "$lib/components/leaderboard/RanglisteHero.svelte";
 import SubSwitches from "$lib/components/leaderboard/SubSwitches.svelte";
+import InfoTip from "$lib/components/ui/InfoTip.svelte";
 import { get } from "$lib/services/api.services.js";
 import { user } from "$lib/stores/auth.stores.js";
 import { buildEloHistory } from "$lib/utils/eloHistory.utils.js";
@@ -136,9 +137,16 @@ function handleDuoClick(duo) {
 
 <div class="flex flex-col gap-3 pb-4">
 	<header class="flex items-end justify-between pt-1">
-		<h1 class="text-2xl font-extrabold tracking-tight text-text-primary">
-			{$t("leaderboard.title")}
-		</h1>
+		<div class="flex items-center gap-1.5">
+			<h1 class="text-2xl font-extrabold tracking-tight text-text-primary">
+				{$t("leaderboard.title")}
+			</h1>
+			<InfoTip
+				titleKey="info_tips.elo.title"
+				bodyKey="info_tips.elo.body"
+				size={16}
+			/>
+		</div>
 		<button
 			type="button"
 			onclick={() => goto("/app/compare")}

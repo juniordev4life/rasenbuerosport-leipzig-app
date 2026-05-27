@@ -7,6 +7,12 @@ import {
 	getPlayerProfile,
 } from "$lib/services/playerProfile.services.js";
 import { buildEloHistory } from "$lib/utils/eloHistory.utils.js";
+import {
+	ONBOARDING_KEYS,
+	isOnboardingDone,
+	runOnboardingTour,
+} from "$lib/utils/onboarding.utils.js";
+import { relationCardWinRatePercent } from "$lib/utils/winRate.utils.js";
 import AwardsSection from "./AwardsSection.svelte";
 import FormSection from "./FormSection.svelte";
 import LifetimeStatsSection from "./LifetimeStatsSection.svelte";
@@ -20,9 +26,13 @@ import RelationsSection from "./RelationsSection.svelte";
  * relationships and the games window (`/v1/games`) for ELO history,
  * derived lifetime stats and the form sparkline.
  *
- * @type {{ playerId: string|null, onSelectRelation?: (rel: {type:string, playerId:string}) => void }}
+ * `isOwnProfile=true` triggers the first-run onboarding tour once the
+ * page has loaded — the foreign-player view (`/app/profile/[id]`)
+ * passes `false` so we don't re-prompt the tour on every visit.
+ *
+ * @type {{ playerId: string|null, isOwnProfile?: boolean, onSelectRelation?: (rel: {type:string, playerId:string}) => void }}
  */
-let { playerId, onSelectRelation = null } = $props();
+let { playerId, isOwnProfile = false, onSelectRelation = null } = $props();
 
 const { t } = getTranslate();
 
@@ -63,6 +73,21 @@ $effect(() => {
 	return () => {
 		aborted = true;
 	};
+});
+
+// One-shot profile onboarding — fires after the sections render, but
+// only on the user's own profile (foreign-player view passes
+// `isOwnProfile=false`).
+let tourTriggered = false;
+$effect(() => {
+	if (!isOwnProfile || loading || !profile || tourTriggered) return;
+	if (isOnboardingDone(ONBOARDING_KEYS.PROFILE)) return;
+	tourTriggered = true;
+	requestAnimationFrame(() => {
+		requestAnimationFrame(() => {
+			runOnboardingTour(ONBOARDING_KEYS.PROFILE);
+		});
+	});
 });
 
 const eloEntry = $derived.by(() => {
@@ -175,10 +200,13 @@ const formMarcelQuote = $derived.by(() => {
 
 const archetypeLabel = $derived.by(() => {
 	if (!profile?.archetype) return null;
-	const adj = profile?.archetype?.adjective
-		? `${profile.archetype.adjective} `
-		: "";
-	return `${adj}${profile.archetype.label}`;
+	// Join adjective and label with a typographic en-dash ("solide – Der
+	// Zuverlässige") so the two halves read as separate concepts. When
+	// the adjective is absent we just show the label without a stray
+	// leading dash.
+	const adj = profile.archetype.adjective?.trim();
+	const label = profile.archetype.label ?? "";
+	return adj ? `${adj} – ${label}` : label;
 });
 
 const relations = $derived({
@@ -213,13 +241,14 @@ const relations = $derived({
 		: null,
 });
 
-function deriveWinRate(r) {
-	if (!r) return 0;
-	if (typeof r.winRate === "number") return r.winRate;
-	const total = (r.wins ?? 0) + (r.losses ?? 0);
-	if (total === 0) return 0;
-	return Math.round(((r.wins ?? 0) / total) * 100);
-}
+/**
+ * Tiny wrapper that names what we're doing at the relations call
+ * site. The actual contract conversion (API ratio `[0, 1]` → integer
+ * percent `[0, 100]`, with fallback to recomputing from
+ * wins/totalMatches when the field is missing) lives in
+ * {@link relationCardWinRatePercent} so it stays in one place.
+ */
+const deriveWinRate = relationCardWinRatePercent;
 
 const awards = $derived(
 	(profile?.topBadges ?? []).map((b, idx) => ({
@@ -255,56 +284,66 @@ const totalsLosses = $derived(profile?.player?.losses ?? eloEntry?.losses ?? 0);
 	</div>
 {:else if profile}
 	<div class="flex flex-col gap-3 pb-4">
-		<ProfileHero
-			playerId={profile.player.id ?? playerId}
-			username={profile.player.name}
-			initials={profile.player.initials ?? (profile.player.name ?? "?").charAt(0).toUpperCase()}
-			avatarUrl={profile.player.avatarUrl}
-			archetype={archetypeLabel}
-			rank={profile.player.rank ?? null}
-			matchCount={profile.player.matchCount ?? 0}
-			currentRating={eloEntry?.currentRating ?? profile.player.currentRating ?? null}
-			ratings={eloEntry?.ratings ?? []}
-			weekDelta={eloEntry?.weekDelta ?? 0}
-			wins={totalsWins}
-			draws={totalsDraws}
-			losses={totalsLosses}
-			marcelQuote={heroMarcelQuote}
-		/>
+		<div data-onboarding="profile-hero">
+			<ProfileHero
+				playerId={profile.player.id ?? playerId}
+				username={profile.player.name}
+				initials={profile.player.initials ?? (profile.player.name ?? "?").charAt(0).toUpperCase()}
+				avatarUrl={profile.player.avatarUrl}
+				archetype={archetypeLabel}
+				rank={profile.player.rank ?? null}
+				matchCount={profile.player.matchCount ?? 0}
+				currentRating={eloEntry?.currentRating ?? profile.player.currentRating ?? null}
+				ratings={eloEntry?.ratings ?? []}
+				weekDelta={eloEntry?.weekDelta ?? 0}
+				wins={totalsWins}
+				draws={totalsDraws}
+				losses={totalsLosses}
+				marcelQuote={heroMarcelQuote}
+			/>
+		</div>
 
 		{#if profile.axes}
-			<ProfileSpiderSection
-				axes={profile.axes}
-				playerName={profile.player.name}
-				onAxisClick={(key) => (activeAxis = key)}
-			/>
+			<div data-onboarding="profile-spider">
+				<ProfileSpiderSection
+					axes={profile.axes}
+					playerName={profile.player.name}
+					onAxisClick={(key) => (activeAxis = key)}
+				/>
+			</div>
 		{/if}
 
 		{#if recentResults.length > 0}
-			<FormSection
-				results={recentResults}
-				eloSeries={formEloSeries}
-				eloStart={formEloStart}
-				eloEnd={formEloEnd}
-				eloDelta={formEloDelta}
-				marcelQuote={formMarcelQuote}
-			/>
+			<div data-onboarding="profile-form">
+				<FormSection
+					results={recentResults}
+					eloSeries={formEloSeries}
+					eloStart={formEloStart}
+					eloEnd={formEloEnd}
+					eloDelta={formEloDelta}
+					marcelQuote={formMarcelQuote}
+				/>
+			</div>
 		{/if}
 
-		<RelationsSection
-			favorite={relations.favorite}
-			nemesis={relations.nemesis}
-			topPartner={relations.topPartner}
-			onSelect={onSelectRelation}
-		/>
+		<div data-onboarding="profile-relations">
+			<RelationsSection
+				favorite={relations.favorite}
+				nemesis={relations.nemesis}
+				topPartner={relations.topPartner}
+				onSelect={onSelectRelation}
+			/>
+		</div>
 
 		<LifetimeStatsSection stats={lifetimeStats} />
 
-		<AwardsSection
-			{awards}
-			totalCount={profile.totalBadges ?? null}
-			unlockedCount={awards.length}
-		/>
+		<div data-onboarding="profile-awards">
+			<AwardsSection
+				{awards}
+				totalCount={profile.totalBadges ?? null}
+				unlockedCount={awards.length}
+			/>
+		</div>
 	</div>
 
 	<AxisInfoModal

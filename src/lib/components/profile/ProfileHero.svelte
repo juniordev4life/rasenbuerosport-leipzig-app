@@ -2,6 +2,7 @@
 import { getTranslate } from "@tolgee/svelte";
 import Sparkline from "$lib/components/leaderboard/Sparkline.svelte";
 import TrendPill from "$lib/components/leaderboard/TrendPill.svelte";
+import InfoTip from "$lib/components/ui/InfoTip.svelte";
 import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
 import MarcelCard from "./MarcelCard.svelte";
 
@@ -75,28 +76,35 @@ const winRate = $derived(decided > 0 ? Math.round((wins / decided) * 100) : 0);
 		</div>
 		<div class="hero-identity">
 			<div class="hero-name">{username}</div>
-			{#if archetype}
-				<div class="hero-archetype">{archetype}</div>
-			{:else}
-				<div class="hero-archetype">{$t("profile.archetype_placeholder")}</div>
-			{/if}
+			<div class="hero-archetype-row">
+				{#if archetype}
+					<span class="hero-archetype">{archetype}</span>
+				{:else}
+					<span class="hero-archetype">{$t("profile.archetype_placeholder")}</span>
+				{/if}
+				<InfoTip titleKey="info_tips.archetype.title" bodyKey="info_tips.archetype.body" />
+			</div>
 		</div>
 	</div>
 
 	<div class="elo-row">
 		<div class="elo-left">
-			<div class="elo-value">{currentRating ?? "—"}</div>
+			<div class="elo-value-row">
+				<div class="elo-value">{currentRating ?? "—"}</div>
+				<InfoTip titleKey="info_tips.elo.title" bodyKey="info_tips.elo.body" />
+			</div>
 			<TrendPill delta={weekDelta} variant="pill" suffix={$t("profile.this_week")} />
 		</div>
 		<div class="hero-sparkline">
 			<Sparkline
 				points={ratings}
-				width={110}
+				width={220}
 				height={56}
 				stroke="#E24B4A"
 				fillId="profileHeroSpark"
 				strokeWidth={2}
 				opacity={1}
+				fluid
 			/>
 		</div>
 	</div>
@@ -183,6 +191,8 @@ const winRate = $derived(decided > 0 ? Math.round((wins / decided) * 100) : 0);
 	position: relative; z-index: 1;
 }
 .elo-left { display: flex; flex-direction: column; gap: 8px; }
+.elo-value-row { display: flex; align-items: baseline; gap: 6px; }
+.hero-archetype-row { display: flex; align-items: center; gap: 4px; }
 .elo-value {
 	font-size: 42px; font-weight: 800;
 	line-height: 1;
@@ -190,7 +200,11 @@ const winRate = $derived(decided > 0 ? Math.round((wins / decided) * 100) : 0);
 	font-variant-numeric: tabular-nums;
 	letter-spacing: -0.02em;
 }
-.hero-sparkline { flex-shrink: 0; width: 110px; height: 56px; }
+/* Sparkline fills the space between the ELO block and the card edge
+ * instead of clinging to a fixed 110 px. flex:1 lets it grow, the
+ * min/max bounds keep it sensible on very narrow or very wide screens.
+ * Trend graph reads better with more horizontal real-estate. */
+.hero-sparkline { flex: 1 1 auto; min-width: 110px; max-width: 240px; height: 56px; }
 .marcel-wrap { margin-top: 14px; }
 .hero-stats-row {
 	display: flex; gap: 8px;

@@ -17,6 +17,11 @@ import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get } from "$lib/services/api.services.js";
 import { user } from "$lib/stores/auth.stores.js";
+import {
+	ONBOARDING_KEYS,
+	isOnboardingDone,
+	runOnboardingTour,
+} from "$lib/utils/onboarding.utils.js";
 import { detectUserSeries } from "$lib/utils/series.utils.js";
 
 const { t } = getTranslate();
@@ -48,6 +53,21 @@ $effect(() => {
 	return () => {
 		aborted = true;
 	};
+});
+
+// One-shot dashboard onboarding — fires after the cards mount so the
+// tour anchors are real DOM nodes. Two rAFs let Svelte commit the
+// `loading = false` branch first.
+let tourTriggered = false;
+$effect(() => {
+	if (loading || tourTriggered) return;
+	if (isOnboardingDone(ONBOARDING_KEYS.DASHBOARD)) return;
+	tourTriggered = true;
+	requestAnimationFrame(() => {
+		requestAnimationFrame(() => {
+			runOnboardingTour(ONBOARDING_KEYS.DASHBOARD);
+		});
+	});
 });
 
 /** ISO week number (Mon–Sun) for the German UI. */
@@ -234,14 +254,16 @@ const top3 = $derived(
 			<div class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"></div>
 		</div>
 	{:else}
-		<FrankCard
-			{userName}
-			wins={weekStats.wins}
-			losses={weekStats.losses}
-			matches={weekStats.matches}
-			eloDelta={weekStats.eloDelta}
-			{kalenderwoche}
-		/>
+		<div data-onboarding="dashboard-week">
+			<FrankCard
+				{userName}
+				wins={weekStats.wins}
+				losses={weekStats.losses}
+				matches={weekStats.matches}
+				eloDelta={weekStats.eloDelta}
+				{kalenderwoche}
+			/>
+		</div>
 
 		<SectionHeader title={$t("home.sections.challenges")}>
 			{#snippet icon()}<CheckIcon size={11} strokeWidth={1.8} />{/snippet}
@@ -267,11 +289,13 @@ const top3 = $derived(
 		>
 			{#snippet icon()}<ClockIcon size={11} strokeWidth={1.8} />{/snippet}
 		</SectionHeader>
-		<QuickStats
-			elo={myCurrentElo}
-			eloDelta={weekStats.eloDelta}
-			lastFive={lastFiveResults}
-		/>
+		<div data-onboarding="dashboard-quickstats">
+			<QuickStats
+				elo={myCurrentElo}
+				eloDelta={weekStats.eloDelta}
+				lastFive={lastFiveResults}
+			/>
+		</div>
 
 		<SectionHeader
 			title={$t("home.sections.recent_matches")}
@@ -280,7 +304,9 @@ const top3 = $derived(
 		>
 			{#snippet icon()}<HistoryIcon size={11} strokeWidth={1.8} />{/snippet}
 		</SectionHeader>
-		<RecentMatchesList matches={recentMatches} />
+		<div data-onboarding="dashboard-recent">
+			<RecentMatchesList matches={recentMatches} />
+		</div>
 
 		<SectionHeader
 			title={$t("home.sections.top3")}
@@ -289,6 +315,8 @@ const top3 = $derived(
 		>
 			{#snippet icon()}<TrophyIcon size={11} strokeWidth={1.8} />{/snippet}
 		</SectionHeader>
-		<Top3List {top3} />
+		<div data-onboarding="dashboard-top3">
+			<Top3List {top3} />
+		</div>
 	{/if}
 </div>

@@ -4,7 +4,6 @@ import EventFooter from "$lib/components/liveMatch/EventFooter.svelte";
 import GoalTypeDialog from "$lib/components/liveMatch/GoalTypeDialog.svelte";
 import MatchHeader from "$lib/components/liveMatch/MatchHeader.svelte";
 import Pitch from "$lib/components/liveMatch/Pitch.svelte";
-import VoiceEventButton from "$lib/components/liveMatch/VoiceEventButton.svelte";
 import { getTeamByName } from "$lib/services/teams.services.js";
 import {
 	cancelEntry,
@@ -128,51 +127,65 @@ function handleEnd() {
 }
 
 /**
- * The voice button is only useful when the editor isn't already open;
- * dispatching a second event mid-entry would silently overwrite the
- * user's in-progress data.
+ * Demo bridge for the onboarding tour. Each action drives the same
+ * state machine real taps would, so the user sees the editor open,
+ * the minute slider scroll, the stoppage slider light up and the
+ * event pill appear — without touching the DOM. The tour calls these
+ * via `window.__rblLiveDemo` (set up below) so we don't have to
+ * plumb props or stores just for a first-run walkthrough.
+ *
+ * The demo intentionally lands on minute 45 + 3 of stoppage time so
+ * the tour can showcase the stoppage slider — that slider is only
+ * usable at the 45 / 90 / 120 boundaries. The goal-type pill is
+ * highlighted by the tour but left on the default ("Spiel"); a
+ * penalty + assist combo wouldn't make sense as a demo example.
+ *
+ * `reset` must run on every tour exit / completion so demo events
+ * never leak into the real `saveGame` payload.
+ *
+ * @param {"select-scorer"|"select-assister"|"set-minute"|"set-stoppage"|"confirm"|"remove-event"|"reset"} action
  */
-const voicePlayers = $derived([
-	...homePlayers.map((id) => ({ id, username: playerName(id), side: "home" })),
-	...awayPlayers.map((id) => ({ id, username: playerName(id), side: "away" })),
-]);
-let voiceError = $state("");
-
-/**
- * Take the parsed voice event and replay it through the live-match
- * state machine, leaving the editor open in exactly the same place
- * the user would land if they'd tapped the avatar manually.
- */
-function applyVoiceResult(result) {
-	voiceError = "";
-	if (!result?.ok) {
-		voiceError = result?.reason ?? "";
-		return;
+function runDemoAction(action) {
+	switch (action) {
+		case "select-scorer": {
+			const id = homePlayers[0];
+			if (id) state = selectPlayer(state, { playerId: id, side: "home" });
+			break;
+		}
+		case "select-assister": {
+			// Prefer a different teammate, fall back to the scorer for 1v1
+			// games — the state machine treats a second tap on the scorer
+			// as a no-op, so the editor still shows the right end state.
+			const id = homePlayers[1] ?? homePlayers[0];
+			if (id) state = selectPlayer(state, { playerId: id, side: "home" });
+			break;
+		}
+		case "set-minute":
+			// 45 lets the next step (stoppage) showcase the slider — only
+			// 45 / 90 / 120 unlock the stoppage row.
+			state = setMinute(state, 45);
+			break;
+		case "set-stoppage":
+			state = setStoppage(state, 3);
+			break;
+		case "confirm":
+			state = confirmEntry(state);
+			break;
+		case "remove-event":
+			if (state.events.length > 0) state = removeEventAt(state, 0);
+			break;
+		case "reset":
+			state = initialLiveMatchState();
+			break;
 	}
-	const { eventType, playerId, side, minute, assisterId } = result;
-
-	// Arm the right entry mode first, then commit the player. The
-	// existing state machine already gates against half-finished
-	// entries, so an in-progress edit is left alone.
-	let next = state;
-	if (eventType === "yellow_card") {
-		next = toggleCardMode(next, "yellow");
-	} else if (eventType === "red_card") {
-		next = toggleCardMode(next, "red");
-	} else if (eventType === "penalty_missed") {
-		next = togglePenaltyMissMode(next);
-	}
-	next = selectPlayer(next, { playerId, side });
-	next = setMinute(next, minute);
-	// A second selectPlayer with a same-team teammate gets routed by
-	// the state machine as the assister (see liveMatchState.utils:
-	// GOAL_ENTRY branch). Only attempted for goals — backend already
-	// nulls assisterId for cards / missed penalties.
-	if (eventType === "goal" && assisterId && assisterId !== playerId) {
-		next = selectPlayer(next, { playerId: assisterId, side });
-	}
-	state = next;
 }
+
+$effect(() => {
+	window.__rblLiveDemo = runDemoAction;
+	return () => {
+		if (window.__rblLiveDemo === runDemoAction) delete window.__rblLiveDemo;
+	};
+});
 </script>
 
 {#snippet deleteBtn(index)}
@@ -192,7 +205,7 @@ function applyVoiceResult(result) {
 		scoreAway={state.scoreAway}
 	/>
 
-	<div class="my-3">
+	<div class="my-3" data-onboarding="live-pitch">
 		<Pitch
 		homePlayers={homePitchPlayers}
 		awayPlayers={awayPitchPlayers}
@@ -214,19 +227,17 @@ function applyVoiceResult(result) {
 	/>
 	</div>
 
-	<VoiceEventButton
-		players={voicePlayers}
-		currentMinute={state.minute}
-		onResult={applyVoiceResult}
-	/>
-
-	{#if voiceError}
-		<div class="text-xs text-error self-center -mt-1">{voiceError}</div>
-	{/if}
-
-	{#if state.events.length > 0}
-		{@const reversed = state.events.toReversed()}
-		<div class="flex items-center gap-2 overflow-x-auto whitespace-nowrap px-2 py-1 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+	<!-- Container is always rendered so the onboarding tour can attach
+	     its `live-event-pill` anchor at tour-start time, even before
+	     the demo `confirm` action inserts the first event. Padding +
+	     margin are toggled with the events count so an empty strip
+	     collapses to 0 px height and doesn't add visible whitespace. -->
+	<div
+		data-onboarding="live-event-pill"
+		class="flex items-center gap-2 overflow-x-auto whitespace-nowrap [&::-webkit-scrollbar]:hidden [scrollbar-width:none] {state.events.length > 0 ? 'px-2 py-1' : ''}"
+	>
+		{#if state.events.length > 0}
+			{@const reversed = state.events.toReversed()}
 			{#each reversed as e, i (i)}
 				{@const originalIndex = state.events.length - 1 - i}
 				{@const minLabel = (e.stoppage ?? 0) > 0
@@ -264,17 +275,19 @@ function applyVoiceResult(result) {
 					</span>
 				{/if}
 			{/each}
-		</div>
-	{/if}
+		{/if}
+	</div>
 
-	<EventFooter
-		mode={state.mode}
-		pendingCardColor={state.pendingCardColor}
-		{ending}
-		onToggleCard={(color) => (state = toggleCardMode(state, color))}
-		onTogglePenaltyMiss={() => (state = togglePenaltyMissMode(state))}
-		onEndMatch={handleEnd}
-	/>
+	<div data-onboarding="live-footer">
+		<EventFooter
+			mode={state.mode}
+			pendingCardColor={state.pendingCardColor}
+			{ending}
+			onToggleCard={(color) => (state = toggleCardMode(state, color))}
+			onTogglePenaltyMiss={() => (state = togglePenaltyMissMode(state))}
+			onEndMatch={handleEnd}
+		/>
+	</div>
 
 	<button
 		type="button"

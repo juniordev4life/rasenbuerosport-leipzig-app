@@ -23,5 +23,5 @@ function handleRelationSelect(rel) {
 </svelte:head>
 
 <div class="mx-auto max-w-3xl p-3">
-	<ProfilePage {playerId} onSelectRelation={handleRelationSelect} />
+	<ProfilePage {playerId} isOwnProfile onSelectRelation={handleRelationSelect} />
 </div>

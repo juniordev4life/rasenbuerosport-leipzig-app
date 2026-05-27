@@ -1,9 +1,19 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
+import InfoTip from "$lib/components/ui/InfoTip.svelte";
 import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
 
 /**
  * "Lieblingsgegner & Co" — three optional relation rows.
+ *
+ * All three card objects are expected to come pre-converted: the
+ * `winRate` field is an integer **percent** in `[0, 100]`, not the
+ * `[0, 1]` ratio that the API ships. The parent (ProfilePage.svelte)
+ * runs the conversion through `relationCardWinRatePercent` so this
+ * component can render the value directly. Keeping the percent
+ * conversion at the page level avoids accidentally double-converting
+ * if the cards are ever fed by a different upstream.
  *
  * @type {{
  *   favorite?: { playerId: string, name: string, avatarUrl: string|null, wins: number, losses: number, winRate: number }|null,
@@ -50,7 +60,15 @@ function metaLabel(r) {
 {#if items.length > 0}
 	<div class="section-card">
 		<div class="section-header">
-			<div class="section-label">⚔ {$t("profile.relations_section")}</div>
+			<div class="section-label">
+				<UsersIcon size={12} strokeWidth={1.8} />
+				<span>{$t("profile.relations_section")}</span>
+				<InfoTip
+					titleKey="info_tips.relations.title"
+					bodyKey="info_tips.relations.body"
+					size={13}
+				/>
+			</div>
 		</div>
 		<div class="relations-list">
 			{#each items as r (r.type)}
@@ -92,6 +110,9 @@ function metaLabel(r) {
 	text-transform: uppercase; letter-spacing: 0.1em;
 	color: #6B7280;
 	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
 }
 .relations-list { display: flex; flex-direction: column; gap: 8px; }
 .relation-row {

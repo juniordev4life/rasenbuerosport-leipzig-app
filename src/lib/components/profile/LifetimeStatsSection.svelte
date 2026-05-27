@@ -1,5 +1,6 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import BarChartIcon from "$lib/components/icons/BarChartIcon.svelte";
 
 /**
  * 2×3 KPI grid of career-wide stats. Missing values are rendered as
@@ -34,7 +35,10 @@ function fmtNum(v, digits = 2) {
 
 <div class="section-card">
 	<div class="section-header">
-		<div class="section-label">{"\u{1F4CA}"} {$t("profile.lifetime_section")}</div>
+		<div class="section-label">
+			<BarChartIcon size={12} strokeWidth={1.8} />
+			<span>{$t("profile.lifetime_section")}</span>
+		</div>
 	</div>
 
 	<div class="kpi-row">
@@ -100,6 +104,9 @@ function fmtNum(v, digits = 2) {
 	text-transform: uppercase; letter-spacing: 0.1em;
 	color: #6B7280;
 	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
 }
 .kpi-row {
 	display: grid;

@@ -1,6 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import SpiderChart from "$lib/components/charts/SpiderChart.svelte";
+import TargetIcon from "$lib/components/icons/TargetIcon.svelte";
 import { generatePlayerTags } from "$lib/utils/profileTags.utils.js";
 import TagsList from "./TagsList.svelte";
 
@@ -35,6 +36,55 @@ const axisOrder = [
 	"winner",
 ];
 
+/**
+ * Inline-SVG children for each spider axis, drawn against a `0 0 24 24`
+ * coordinate box. Replaces the truncated text labels with universally
+ * understandable icons and acts as a stronger tap-target hint. The
+ * label text remains available as `aria-label` on the marker group
+ * for screen-reader users.
+ *
+ * Style notes: paths are stroke-only (`fill="none"`) so the chart's
+ * existing `.axis-icon` rule colours them via the global `stroke`
+ * property — no per-icon `fill` overrides needed.
+ */
+const AXIS_ICONS = {
+	// Vollstrecker — crosshair / target (finishing)
+	finisher: `
+		<circle cx="12" cy="12" r="9" fill="none"/>
+		<circle cx="12" cy="12" r="4" fill="none"/>
+		<line x1="12" y1="1" x2="12" y2="5"/>
+		<line x1="12" y1="19" x2="12" y2="23"/>
+		<line x1="1" y1="12" x2="5" y2="12"/>
+		<line x1="19" y1="12" x2="23" y2="12"/>
+	`,
+	// Vorbereiter — arrow / pass setup
+	playmaker: `
+		<line x1="3" y1="12" x2="19" y2="12"/>
+		<polyline points="12 5 19 12 12 19"/>
+	`,
+	// Schlussphase — clock (late-game minutes)
+	clutch: `
+		<circle cx="12" cy="12" r="10" fill="none"/>
+		<polyline points="12 6 12 12 16 14"/>
+	`,
+	// Konstanz — flat-ish sparkline (low variance)
+	consistency: `
+		<polyline points="3 16 8 11 12 14 16 8 21 12"/>
+	`,
+	// Disziplin — shield (fair play)
+	discipline: `
+		<path d="M12 2 L20 5 V12 C20 17 16 21 12 22 C8 21 4 17 4 12 V5 Z" fill="none"/>
+	`,
+	// Sieger-Faktor — trophy
+	winner: `
+		<path d="M6 4 H18 V9 A6 6 0 0 1 6 9 Z" fill="none"/>
+		<path d="M6 6 H3 V8 A3 3 0 0 0 6 11" fill="none"/>
+		<path d="M18 6 H21 V8 A3 3 0 0 1 18 11" fill="none"/>
+		<line x1="12" y1="15" x2="12" y2="19"/>
+		<line x1="8" y1="21" x2="16" y2="21"/>
+	`,
+};
+
 const labels = $derived(axisOrder.map((k) => $t(`player_profile.axes.${k}`)));
 
 const playerValues = $derived(axisOrder.map((k) => axes?.[k] ?? 0));
@@ -68,11 +118,20 @@ const tags = $derived(
 
 <div class="section-card">
 	<div class="section-header">
-		<div class="section-label">{"\u{1F3AF}"} {$t("profile.character_section")}</div>
+		<div class="section-label">
+			<TargetIcon size={12} strokeWidth={1.8} />
+			<span>{$t("profile.character_section")}</span>
+		</div>
 	</div>
 
 	<div class="spider-wrap">
-		<SpiderChart axes={labels} {datasets} {onAxisClick} />
+		<SpiderChart
+			axes={labels}
+			axisKeys={axisOrder}
+			axisIcons={AXIS_ICONS}
+			{datasets}
+			{onAxisClick}
+		/>
 	</div>
 
 	<div class="spider-legend">
@@ -109,6 +168,9 @@ const tags = $derived(
 	text-transform: uppercase; letter-spacing: 0.1em;
 	color: #6B7280;
 	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
 }
 .spider-wrap {
 	position: relative;

@@ -114,6 +114,7 @@ const goalTypeLabel = $derived.by(() => {
 			<button
 				type="button"
 				onclick={onGoalTypeClick}
+				data-onboarding="live-goaltype-pill"
 				class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-bg-input border border-border text-[11px] font-semibold whitespace-nowrap"
 				aria-label={$t("new_game.goal_type_title")}
 			>

@@ -616,9 +616,6 @@
 			"error_file_type": "Please select an image file",
 			"error_file_size": "Image must be less than 2 MB",
 			"error_generic": "Failed to save",
-			"voice_aliases_label": "Voice synonyms",
-			"voice_aliases_placeholder": "e.g. Dirk, DBL",
-			"voice_aliases_hint": "Comma-separated. Lets the voice tracker recognise you by nickname.",
 			"saved": "Saved"
 		}
 	},
@@ -701,17 +698,6 @@
 			"delete_aria": "Remove event",
 			"delete_title": "Remove event?",
 			"delete_body": "This event will be removed and the score recalculated."
-		},
-		"voice": {
-			"aria_label": "Hold to talk — dictate event",
-			"label_idle": "Hold to talk",
-			"hint_idle": "e.g. \"Goal Marco minute 17\"",
-			"label_recording": "Listening …",
-			"hint_recording": "Release to confirm",
-			"label_processing": "Parsing …",
-			"hint_processing": "Recognising your input",
-			"error_no_speech": "No speech detected — please try again",
-			"error_generic": "Could not recognise — please try again"
 		}
 	},
 	"new_game": {
@@ -804,7 +790,74 @@
 		"random_confirm": "Confirm",
 		"random_cancel": "Cancel",
 		"random_no_teams": "Not enough equally rated teams in star range",
-		"random_vs": "vs."
+		"random_vs": "vs.",
+		"onboarding": {
+			"cta_next": "Next",
+			"cta_done": "Let's go",
+			"back": "Back",
+			"lobby": {
+				"tip_1_title": "Home half",
+				"tip_1_body": "Tap an avatar in the upper, red pitch half to put that player on the home side. Tap again to un-assign.",
+				"tip_2_title": "Away half",
+				"tip_2_body": "The lower, green half works the same way for the away side. Players already assigned on the opposite side appear dimmed here.",
+				"tip_3_title": "Guest slot",
+				"tip_3_body": "Each side has a guest tile for players without an account. The match doesn't count toward their profile, but the final score is still recorded correctly."
+			},
+			"poster": {
+				"tip_1_title": "Suggested pairing",
+				"tip_1_body": "On open a balanced 4–5★ team pair is rolled automatically. If the star ratings don't match you'll see a small \"stars uneven\" hint underneath.",
+				"tip_2_title": "Roll, adjust, manual",
+				"tip_2_body": "\"Roll\" rolls a new pair in the same range, \"Adjust\" opens the star-range picker, \"Manual\" lets you type both team names yourself.",
+				"tip_3_title": "Kick-off",
+				"tip_3_body": "The big red button starts live tracking — goals, cards and missed penalties are entered right on the pitch from there."
+			},
+			"live": {
+				"tip_1_title": "Your pitch",
+				"tip_1_body": "Home up top, Away down below. The header above the pitch tracks the live score, the footer below holds the action buttons. Take a moment to read the line-up — we'll record the first goal next.",
+				"tip_2_title": "Tap the scorer",
+				"tip_2_body": "For this demo we'll tap the first home player as the scorer. The opposite half of the pitch will turn into the editor in a moment.",
+				"tip_3_title": "Change the goal type",
+				"tip_3_body": "This \"Open play\" pill in the editor is tappable — it opens the dialog to switch between open play, penalty, corner or free-kick. For our demo we leave it on Open play.",
+				"tip_4_title": "Tag the assister",
+				"tip_4_body": "A second tap on a teammate from the same side records the assist. Optional on every goal — skip the second tap and the goal is saved without one.",
+				"tip_5_title": "Pick the minute",
+				"tip_5_body": "The horizontal scroll-slider in the middle is the match minute. We're setting it to 45 for the demo — handy because we can show stoppage time next.",
+				"tip_6_title": "Stoppage time",
+				"tip_6_body": "At 45, 90 or 120 the small slider underneath unlocks — that's stoppage time. We're setting it to +3 here, so minute 45+3.",
+				"tip_7_title": "Confirm",
+				"tip_7_body": "The green check saves the event. The editor closes and the goal appears just below as a pill on the timeline.",
+				"tip_8_title": "Remove an event",
+				"tip_8_body": "Mis-tapped? Hit the × on the pill, confirm the prompt — the event is cleanly removed and the score recalculated.",
+				"tip_9_title": "Cards & misses",
+				"tip_9_body": "Use the footer buttons to arm yellow, red or missed-penalty mode, then tap the player — the rest works just like a goal. Own goals are recorded with a long-press on the scorer. \"End match\" finishes the game.",
+				"tip_10_title": "Ready?",
+				"tip_10_body": "The demo data is wiped in a moment — you start with an empty timeline. If you want a quick rematch later, the match summary has a \"Start rematch\" button that jumps straight back here."
+			},
+			"dashboard": {
+				"tip_1_title": "Your week",
+				"tip_1_body": "This is your record for the current ISO week: matches, wins, losses and ELO change. Auto-updates after every game.",
+				"tip_2_title": "ELO & form",
+				"tip_2_body": "Your current ELO plus the last 5 results as pills. One glance and you know what shape you're in.",
+				"tip_3_title": "Recent matches",
+				"tip_3_body": "The three most recent matches you played in. Tap a card to open the match report and the detailed stats.",
+				"tip_4_title": "League top 3",
+				"tip_4_body": "Today's three top-ELO players. Tap a row to open that player's profile. Full standings live under \"Leaderboard\" in the bottom nav.",
+				"tip_5_title": "Ready?",
+				"tip_5_body": "The bottom nav takes you to games, leaderboard, history and your profile. Hit \"+\" to start a new match."
+			},
+			"profile": {
+				"tip_1_title": "Header",
+				"tip_1_body": "Avatar, username, archetype, current rank, ELO and lifetime record (wins / draws / losses). The little quote above comes from Marcel — our AI reporter.",
+				"tip_2_title": "Your strengths",
+				"tip_2_body": "Spider chart showing your strength axes — offense, defense, chemistry and more. Tap an axis to see how it's calculated.",
+				"tip_3_title": "Form & ELO trend",
+				"tip_3_body": "Last 5 results plus an ELO sparkline. Instant feedback on whether you're trending up or down.",
+				"tip_4_title": "Relationships",
+				"tip_4_body": "Favorite (who you beat most), Nemesis (who's tough on you), best partner. Tap a card to open that player's profile.",
+				"tip_5_title": "Achievements",
+				"tip_5_body": "Your unlocked badges. There are 15 total — some come from streaks, others from one-off performances."
+			}
+		}
 	},
 	"minute_picker": {
 		"title": "What minute was the goal scored?",
@@ -1184,6 +1237,14 @@
 			"discipline": "Fewer red cards → higher score. Inverse percentile.",
 			"winner": "How much your presence lifts your teammates."
 		},
+		"axis_type": {
+			"finisher": "Offense · Goal rate",
+			"playmaker": "Offense · Assist rate",
+			"clutch": "Special · Late-game minutes",
+			"consistency": "Mental · Form variance",
+			"discipline": "Mental · Fair play",
+			"winner": "Special · Team impact"
+		},
 		"relationships_title": "Teammates & Opponents",
 		"lieblingsgegner": "Favourite opponent",
 		"angstgegner": "Nemesis",
@@ -1198,5 +1259,31 @@
 		"result_loss": "L",
 		"result_draw": "D",
 		"axis_modal_close": "Close"
+	},
+	"info_tips": {
+		"elo": {
+			"title": "ELO",
+			"body": "ELO is your player strength expressed as a number. Starting value is 1000.\n\nIt rises after wins — especially against stronger opponents — and falls after losses, particularly against weaker ones. Beating a much stronger team earns more points than beating a weaker one.\n\nThe calculation is done separately per game mode (1v1, 2v2), so easy 1v1 wins don't inflate your 2v2 rating and vice versa."
+		},
+		"archetype": {
+			"title": "Archetype",
+			"body": "Your character type is derived automatically from your six strength axes — Finisher, Playmaker, Clutch, Consistency, Discipline and Winner.\n\nDepending on which dominate, you get a matching player style. It becomes reliable after about 5–10 matches. Until then you'll see \"Freshman\" or \"Developing\"."
+		},
+		"pass_network": {
+			"title": "Pass character",
+			"body": "From the match's passing stats we derive a short pass-style tag — e.g. \"Tiki-Taka\" for lots of short passes or \"Direct play\" for long balls.\n\nThe tags show how a team built up their game. Source is the pass distribution from the uploaded FC stats. No uploaded stats means no tags."
+		},
+		"awards": {
+			"title": "Achievements",
+			"body": "There are 15 badges to unlock. Some are statistical milestones (50 matches, 10 goals in a single game), others reward special performances or streaks — like winning across several weeks.\n\nBadges are checked and unlocked automatically after every match. The full list with unlock conditions is on the Achievements page."
+		},
+		"relations": {
+			"title": "Relationships",
+			"body": "\"Favourite opponent\" shows the rival you beat most often.\n\"Nemesis\" is the opposite — the one giving you a hard time.\n\"Top partner\" is the teammate you share the best combined record with.\n\nA player only shows up here once you've played at least 3 matches together — otherwise the stat would be too random. Tap a card to open that player's profile."
+		},
+		"reporter": {
+			"title": "Reporter persona",
+			"body": "Three AI reporters narrate the match report in distinct styles:\n\n• Klassiker — straightforward, traditional commentary\n• Analyst — tactical, data-focused\n• Euphoriker — emotional, over-the-top\n\nThe system picks which reporter covers a match automatically — based on the drama (close, lopsided, lots of goals, etc.)."
+		}
 	}
 }

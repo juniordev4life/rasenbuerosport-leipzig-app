@@ -60,12 +60,13 @@ const winStreak = $derived(
 		<div class="hero-sparkline">
 			<Sparkline
 				points={player.ratings}
-				width={100}
+				width={220}
 				height={56}
 				stroke="#84CC16"
 				fillId="ranglisteHeroSpark"
 				strokeWidth={2}
 				opacity={1}
+				fluid
 			/>
 		</div>
 	</div>
@@ -152,7 +153,10 @@ const winStreak = $derived(
 	font-variant-numeric: tabular-nums;
 	letter-spacing: -0.02em;
 }
-.hero-sparkline { flex-shrink: 0; width: 100px; height: 56px; }
+/* Sparkline grows to fill the gap between the headline ELO and the
+ * card edge — was previously clipped to 100 px, leaving a lot of
+ * empty space. Bounds keep it readable across breakpoints. */
+.hero-sparkline { flex: 1 1 auto; min-width: 100px; max-width: 240px; height: 56px; }
 .hero-bottom-row {
 	margin-top: 10px;
 	padding-top: 10px;

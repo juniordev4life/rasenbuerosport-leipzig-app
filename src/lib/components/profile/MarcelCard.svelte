@@ -15,7 +15,6 @@ const isCompact = $derived(variant === "compact");
 <div class="marcel-card" class:compact={isCompact}>
 	<div class="marcel-avatar">
 		<img src="/images/reporter/marcel.webp" alt="Marcel" />
-		<span class="marcel-mic" aria-hidden="true">{"\u{1F399}"}</span>
 	</div>
 	<div class="marcel-quote">{quote}</div>
 </div>
@@ -45,18 +44,6 @@ const isCompact = $derived(variant === "compact");
 	border-radius: 50%;
 	object-fit: cover;
 }
-.marcel-mic {
-	position: absolute;
-	bottom: -2px; right: -2px;
-	width: 14px; height: 14px;
-	background: #E24B4A;
-	border-radius: 50%;
-	border: 1.5px solid #131822;
-	display: flex; align-items: center; justify-content: center;
-	font-size: 8px;
-	line-height: 1;
-}
-.marcel-card.compact .marcel-mic { width: 12px; height: 12px; font-size: 6px; }
 .marcel-quote {
 	font-size: 12px;
 	color: #D1D5DB;

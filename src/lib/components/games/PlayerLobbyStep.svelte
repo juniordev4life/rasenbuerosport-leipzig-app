@@ -83,9 +83,45 @@ function avatarGradient(id) {
 }
 
 const GUEST_GRADIENT = "linear-gradient(135deg, #6B7280, #4B5563)";
+
+/**
+ * Whether each side's avatar strip is currently overflowing its
+ * viewport horizontally. Drives the right-edge swipe hint — we only
+ * show it when there's actually more to scroll to, so 4–6 player
+ * cases stay free of misleading indicators.
+ */
+let homePickerOverflow = $state(false);
+let awayPickerOverflow = $state(false);
+
+/**
+ * Svelte action: reports whether `node` has horizontal overflow via
+ * the supplied callback. Watches geometry (ResizeObserver) and
+ * child-list changes (MutationObserver) so the hint stays in sync
+ * with viewport rotation, new players landing, and the like.
+ *
+ * @param {HTMLElement} node
+ * @param {(canScroll: boolean) => void} onChange
+ * @returns {{ destroy: () => void }}
+ * @example
+ * <div use:trackHorizontalOverflow={(can) => (overflow = can)}>…</div>
+ */
+function trackHorizontalOverflow(node, onChange) {
+	const check = () => onChange(node.scrollWidth - node.clientWidth > 1);
+	const ro = new ResizeObserver(check);
+	const mo = new MutationObserver(check);
+	ro.observe(node);
+	mo.observe(node, { childList: true, subtree: false });
+	check();
+	return {
+		destroy() {
+			ro.disconnect();
+			mo.disconnect();
+		},
+	};
+}
 </script>
 
-{#snippet avatarTile(id, name, gradient, side)}
+{#snippet avatarTile(id, name, gradient, side, avatarUrl, onboardingId)}
 	{@const currentSide = getPlayerSide(id)}
 	{@const onThisSide = currentSide === side}
 	{@const onOtherSide = currentSide !== null && currentSide !== side}
@@ -94,6 +130,7 @@ const GUEST_GRADIENT = "linear-gradient(135deg, #6B7280, #4B5563)";
 		type="button"
 		disabled={onOtherSide}
 		onclick={() => toggleOnSide(id, side)}
+		data-onboarding={onboardingId ?? null}
 		class="flex flex-col items-center justify-end gap-1.5 h-full select-none transition-all focus:outline-none {onOtherSide
 			? 'opacity-25 cursor-not-allowed'
 			: 'active:scale-95'}"
@@ -101,12 +138,16 @@ const GUEST_GRADIENT = "linear-gradient(135deg, #6B7280, #4B5563)";
 		aria-label={name}
 	>
 		<span
-			class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-base sm:text-lg font-bold text-white {onThisSide
+			class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-base sm:text-lg font-bold text-white overflow-hidden {onThisSide
 				? `ring-4 ${accent} shadow-lg`
 				: `ring-2 ring-border`} transition-all"
-			style="background: {gradient};"
+			style={avatarUrl ? "" : `background: ${gradient};`}
 		>
-			{name.charAt(0).toUpperCase()}
+			{#if avatarUrl}
+				<img src={avatarUrl} alt={name} class="w-full h-full rounded-full object-cover" />
+			{:else}
+				{name.charAt(0).toUpperCase()}
+			{/if}
 		</span>
 		<span class="text-[10px] sm:text-[11px] font-semibold text-text-primary max-w-[80px] truncate">
 			{name}
@@ -125,45 +166,46 @@ const GUEST_GRADIENT = "linear-gradient(135deg, #6B7280, #4B5563)";
 		content` (`content-start` on home, `content-end` on away) so
 		the avatar block hugs the outer pitch edge instead of sitting
 		next to the centre-line hint.
+
+		`auto-cols` is sized just under 1/3 of the visible width so a
+		7th-player column peeks ~10 % into the viewport — a stronger
+		swipe cue than relying on the scroll-hint alone.
 	-->
 	<div
-		class="relative h-full grid [grid-template-rows:auto_auto] grid-flow-col auto-cols-[calc((100%-2rem)/3)] gap-x-3 gap-y-4 overflow-x-auto px-3 py-4 {contentAlign} [&::-webkit-scrollbar]:hidden [scrollbar-width:none]"
+		data-onboarding={side === "home" ? "lobby-home" : "lobby-away"}
+		use:trackHorizontalOverflow={(can) => {
+			if (side === "home") homePickerOverflow = can;
+			else awayPickerOverflow = can;
+		}}
+		class="relative h-full grid [grid-template-rows:auto_auto] grid-flow-col auto-cols-[calc((100%-2rem)/3.3)] gap-x-3 gap-y-4 overflow-x-auto px-3 py-4 {contentAlign} [&::-webkit-scrollbar]:hidden [scrollbar-width:none]"
 	>
-		{#each allPlayers as player (player.id)}
-			{@const currentSide = getPlayerSide(player.id)}
-			{@const onThisSide = currentSide === side}
-			{@const onOtherSide = currentSide !== null && currentSide !== side}
-			{@const accent = side === "home" ? "ring-accent-red" : "ring-success"}
-			<button
-				type="button"
-				disabled={onOtherSide}
-				onclick={() => toggleOnSide(player.id, side)}
-				class="flex flex-col items-center justify-end gap-1.5 h-full select-none transition-all focus:outline-none {onOtherSide
-					? 'opacity-25 cursor-not-allowed'
-					: 'active:scale-95'}"
-				aria-pressed={onThisSide}
-				aria-label={player.username}
-			>
-				<span
-					class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-base sm:text-lg font-bold text-white {onThisSide
-						? `ring-4 ${accent} shadow-lg`
-						: `ring-2 ring-border`} transition-all"
-					style={player.avatar_url ? "" : `background: ${avatarGradient(player.id)};`}
-				>
-					{#if player.avatar_url}
-						<img src={player.avatar_url} alt={player.username} class="w-full h-full rounded-full object-cover" />
-					{:else}
-						{player.username.charAt(0).toUpperCase()}
-					{/if}
-				</span>
-				<span class="text-[10px] sm:text-[11px] font-semibold text-text-primary max-w-[80px] truncate">
-					{player.username}
-				</span>
-			</button>
-		{/each}
+		<!-- Guest tile is rendered FIRST so it always sits in the
+		     visible viewport, even when the roster overflows on
+		     mobile. Pinning it to the front guarantees the onboarding
+		     hint can attach to it without being scrolled out of view,
+		     and matches the mental model of "ad-hoc guest slot before
+		     the real squad". The home guest doubles as the onboarding
+		     anchor; the away copy passes `null` so the tour has a
+		     single, unambiguous target. -->
+		{@render avatarTile(
+			guestId,
+			$t("new_game.guest"),
+			GUEST_GRADIENT,
+			side,
+			null,
+			side === "home" ? "lobby-guest" : null,
+		)}
 
-		<!-- Guest tile is unique per side: a home guest never appears on away. -->
-		{@render avatarTile(guestId, $t("new_game.guest"), GUEST_GRADIENT, side)}
+		{#each allPlayers as player (player.id)}
+			{@render avatarTile(
+				player.id,
+				player.username,
+				avatarGradient(player.id),
+				side,
+				player.avatar_url ?? null,
+				null,
+			)}
+		{/each}
 	</div>
 {/snippet}
 
@@ -201,11 +243,25 @@ const GUEST_GRADIENT = "linear-gradient(135deg, #6B7280, #4B5563)";
 		<div class="relative grid grid-cols-1 lg:grid-cols-2 grid-rows-2 lg:grid-rows-1 h-[460px] lg:h-[440px]">
 			<div class="relative min-h-0 overflow-hidden">
 				{@render pickerSide("home")}
+				{#if homePickerOverflow}
+					<span class="scroll-hint" aria-hidden="true">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+							<polyline points="9 18 15 12 9 6" />
+						</svg>
+					</span>
+				{/if}
 			</div>
 			<div class="absolute inset-x-0 top-1/2 h-px bg-white/10 lg:hidden" aria-hidden="true"></div>
 			<div class="hidden lg:block absolute inset-y-0 left-1/2 w-px bg-white/10" aria-hidden="true"></div>
 			<div class="relative min-h-0 overflow-hidden">
 				{@render pickerSide("away")}
+				{#if awayPickerOverflow}
+					<span class="scroll-hint" aria-hidden="true">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+							<polyline points="9 18 15 12 9 6" />
+						</svg>
+					</span>
+				{/if}
 			</div>
 
 			<!--
@@ -233,9 +289,47 @@ const GUEST_GRADIENT = "linear-gradient(135deg, #6B7280, #4B5563)";
 			type="button"
 			onclick={onNext}
 			disabled={!isValid}
+			data-onboarding="lobby-next"
 			class="flex-1 px-5 py-3 rounded-xl bg-accent-red text-white text-sm font-semibold shadow-lg shadow-accent-red/25 disabled:opacity-40 disabled:shadow-none hover:bg-accent-red-hover transition-all"
 		>
 			{$t("new_game.next")} →
 		</button>
 	</div>
 </div>
+
+<style>
+/* Right-edge swipe hint shown only when the picker strip is actually
+ * scrollable (toggled from the `trackHorizontalOverflow` action). The
+ * gradient softens the cut-off avatar peeking in from the right, the
+ * chevron tells the user the gesture is horizontal, and the gentle
+ * bob keeps the cue alive without being noisy. */
+.scroll-hint {
+	position: absolute;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	width: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	padding-right: 6px;
+	pointer-events: none;
+	z-index: 10;
+	background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.55));
+	color: rgba(255, 255, 255, 0.9);
+	animation: scroll-hint-bob 1.8s ease-in-out infinite;
+}
+.scroll-hint :global(svg) {
+	filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.7));
+}
+@keyframes scroll-hint-bob {
+	0%, 100% {
+		opacity: 0.55;
+		transform: translateX(0);
+	}
+	50% {
+		opacity: 1;
+		transform: translateX(3px);
+	}
+}
+</style>
