@@ -6,6 +6,32 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v0.1.9
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.8...v0.1.9)
+
+### 🚀 Enhancements
+
+- **profile,new-game,dashboard,leaderboard:** Onboarding tours, info sheets, profile polish ([917c51c](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/917c51c))
+
+### 🩹 Fixes
+
+- **live-match:** Stop minute scroller fighting user drag ([164062d](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/164062d))
+- **history:** Show n.V./n.E. suffix for extra-time and penalty matches ([02fd5a7](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/02fd5a7))
+
+### 💅 Refactors
+
+- **new-game:** Rematch routes to live wizard, drop legacy score UI ([1440b3b](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/1440b3b))
+- Remove voice tracker from live match + profile ([7579ccb](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/7579ccb))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v0.1.8 ([5556dbf](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/5556dbf))
+
+### ❤️ Contributors
+
+- Marco Slusalek <marco.slusalek@redbulls.com>
+
 ## v0.1.8 (2026-05-26)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.7...v0.1.8)
