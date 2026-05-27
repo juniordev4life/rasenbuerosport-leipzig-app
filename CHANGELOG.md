@@ -6,6 +6,26 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v0.1.10
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.9...v0.1.10)
+
+### 🩹 Fixes
+
+- **profile:** Inline relationCardWinRatePercent to satisfy noInvalidUseBeforeDeclaration ([222a13c](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/222a13c))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v0.1.9 ([056bd92](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/056bd92))
+
+### 🎨 Styles
+
+- Wrap relationCardWinRatePercent calls per Biome format ([dca33ce](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/dca33ce))
+
+### ❤️ Contributors
+
+- Marco Slusalek <marco.slusalek@redbulls.com>
+
 ## v0.1.9 (2026-05-27)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.8...v0.1.9)
