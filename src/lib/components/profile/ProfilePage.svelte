@@ -217,7 +217,9 @@ const relations = $derived({
 				avatarUrl: profile.relationships.lieblingsgegner.avatarUrl,
 				wins: profile.relationships.lieblingsgegner.wins ?? 0,
 				losses: profile.relationships.lieblingsgegner.losses ?? 0,
-				winRate: relationCardWinRatePercent(profile.relationships.lieblingsgegner),
+				winRate: relationCardWinRatePercent(
+					profile.relationships.lieblingsgegner,
+				),
 			}
 		: null,
 	nemesis: profile?.relationships?.angstgegner
