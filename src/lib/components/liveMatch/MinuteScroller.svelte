@@ -46,6 +46,10 @@ let scrollerEl = $state(null);
  *  the strip (otherwise external value changes feed back as fresh
  *  user-driven changes and we get a reactive loop). */
 let suppressEvents = $state(false);
+/** First-mount instant-positioning latch — flipped once after the
+ *  initial layout pass so subsequent external value changes can
+ *  smooth-scroll. */
+let didInitialPosition = false;
 
 /** Inclusive [min..max] stepped numbers, rounded to absorb float drift. */
 const numbers = $derived.by(() => {
@@ -128,16 +132,38 @@ function handleScroll() {
 }
 
 onMount(() => {
-	requestAnimationFrame(() => scrollToValue(value, false));
 	return () => {
 		if (rafId) cancelAnimationFrame(rafId);
 	};
 });
 
-// External value changes — keep scroll in sync without re-firing onChange.
+// Keep scroll in sync with the bound value.
+//
+// The guard against `activeValueFromScroll` is what stops the picker
+// from "hanging" mid-drag: every onscroll updates `value`, but the
+// scroll position is *already* at the new value's slot — re-calling
+// `scrollTo` with smooth behaviour would launch a competing animation
+// back to that same spot and fight the user's finger. We skip that
+// case and only re-centre for genuine external changes (e.g. floor
+// rises after a new event lifts `min` above the current pick, or the
+// parent overwrites `value` directly).
 $effect(() => {
 	const v = value;
-	untrack(() => scrollToValue(v));
+	untrack(() => {
+		if (!scrollerEl) return;
+		if (!didInitialPosition) {
+			didInitialPosition = true;
+			// rAF lets the browser lay out the strip (padding: 0 50 %
+			// depends on container width) before we measure scrollLeft.
+			requestAnimationFrame(() => {
+				if (scrollerEl) scrollToValue(v, false);
+			});
+			return;
+		}
+		const currentFromScroll = activeValueFromScroll();
+		if (Math.abs(currentFromScroll - v) < EPS) return;
+		scrollToValue(v);
+	});
 });
 
 // If `min` rises above the current value (e.g. new event lifted the
