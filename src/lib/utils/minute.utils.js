@@ -5,7 +5,7 @@
 const STOPPAGE_ENDPOINTS = Object.freeze([45, 90, 105, 120]);
 
 /**
- * Maximum stoppage value at any single endpoint (matches `MinutePicker`).
+ * Maximum stoppage value at any single endpoint.
  * @type {number}
  */
 const MAX_STOPPAGE = 5;

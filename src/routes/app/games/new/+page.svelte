@@ -1,26 +1,25 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { goto } from "$app/navigation";
 import { page } from "$app/state";
 import MatchPosterStep from "$lib/components/games/MatchPosterStep.svelte";
-import MatchPrediction from "$lib/components/games/MatchPrediction.svelte";
 import PlayerLobbyStep from "$lib/components/games/PlayerLobbyStep.svelte";
-import ScoreStep from "$lib/components/games/ScoreStep.svelte";
 import LiveMatchStep from "$lib/components/liveMatch/LiveMatchStep.svelte";
-import { storage } from "$lib/config/firebase.config.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get, post } from "$lib/services/api.services.js";
-import { resizeImage } from "$lib/utils/image.utils.js";
+import {
+	isOnboardingDone,
+	ONBOARDING_KEYS,
+	runOnboardingTour,
+} from "$lib/utils/onboarding.utils.js";
 import { parseRematchParams } from "$lib/utils/rematch.utils.js";
 
 const { t } = getTranslate();
 
 const GUEST_ID = "__guest__";
 
-// Wizard step. 1 = Lobby, 2 = Match poster, 3 = Live-match event entry,
-// 4 = Score (only reached via the rematch shortcut). The visible
-// stepper stops at "Anpfiff" — 3 and 4 are linear follow-ups.
+// Wizard step. 1 = Lobby, 2 = Match poster, 3 = Live-match event entry.
+// The visible stepper stops at "Anpfiff" — step 3 is a linear follow-up.
 let step = $state(1);
 
 let homePlayers = $state([]);
@@ -28,14 +27,6 @@ let awayPlayers = $state([]);
 
 let homeTeam = $state("");
 let awayTeam = $state("");
-
-let scoreHome = $state(0);
-let scoreAway = $state(0);
-let scoreTimeline = $state([]);
-let resultType = $state("regular");
-let statsOverview = $state(null);
-let statsPasses = $state(null);
-let statsDefense = $state(null);
 
 let saving = $state(false);
 
@@ -52,17 +43,20 @@ const mode = $derived.by(() => {
 
 const isRematch = $derived(page.url.searchParams.has("hp"));
 
+// Seed wizard state synchronously from the URL *before* loadData
+// fires — this way the onboarding effect (gated by `loading`) only
+// sees the final `step` value and avoids a brief LOBBY-onboarding
+// flash before jumping to LIVE on the rematch path.
 $effect(() => {
-	loadData().then(() => {
-		const rematch = parseRematchParams(page.url.searchParams);
-		if (rematch) {
-			homePlayers = rematch.homePlayers;
-			awayPlayers = rematch.awayPlayers;
-			homeTeam = rematch.homeTeam;
-			awayTeam = rematch.awayTeam;
-			step = 4;
-		}
-	});
+	const rematch = parseRematchParams(page.url.searchParams);
+	if (rematch) {
+		homePlayers = rematch.homePlayers;
+		awayPlayers = rematch.awayPlayers;
+		homeTeam = rematch.homeTeam;
+		awayTeam = rematch.awayTeam;
+		step = 3;
+	}
+	loadData();
 });
 
 async function loadData() {
@@ -88,7 +82,7 @@ function cancel() {
 	goto(ROUTES.DASHBOARD);
 }
 
-async function saveGame() {
+async function saveGame({ scoreHome, scoreAway, scoreTimeline }) {
 	saving = true;
 	try {
 		const players = [
@@ -114,42 +108,10 @@ async function saveGame() {
 			score_away: scoreAway,
 			players,
 			score_timeline: scoreTimeline.length > 0 ? scoreTimeline : undefined,
-			result_type: resultType,
+			result_type: "regular",
 		});
 
 		const gameId = res.data?.id;
-
-		const statsFiles = [
-			{ file: statsOverview, type: "overview" },
-			{ file: statsPasses, type: "passes" },
-			{ file: statsDefense, type: "defense" },
-		].filter((s) => s.file);
-
-		if (statsFiles.length > 0 && gameId) {
-			for (const { file, type } of statsFiles) {
-				try {
-					const resized = await resizeImage(file);
-					const storageRef = ref(storage, `match-stats/${gameId}/${type}.jpg`);
-
-					await uploadBytes(storageRef, resized);
-					const imageUrl = await getDownloadURL(storageRef);
-
-					await post(`/v1/games/${gameId}/match-stats`, {
-						imageUrl,
-						type,
-					});
-				} catch (statsErr) {
-					console.error(`Stats extraction failed (${type}):`, statsErr);
-				}
-			}
-
-			try {
-				await post(`/v1/games/${gameId}/match-report`);
-			} catch (reportErr) {
-				console.error("Match report generation failed:", reportErr);
-			}
-		}
-
 		if (gameId) {
 			goto(`/app/games/${gameId}`);
 		} else {
@@ -162,22 +124,38 @@ async function saveGame() {
 	}
 }
 
-/** Index of the active stepper dot. Steps 3 + 4 still highlight "Anpfiff". */
+/** Index of the active stepper dot. Step 3 still highlights "Anpfiff". */
 const visibleStep = $derived(step >= 2 ? 2 : 1);
 
 /**
- * Bridge from the live-match step to the existing save pipeline. The
- * live step hands the user's accumulated score + timeline back; we
- * push them into the wizard's bound state and run the standard
- * `saveGame` (no stats screenshots — those are uploaded later on the
- * game-detail page).
+ * Per-step onboarding tour driven by intro.js. Each wizard step has
+ * its own storage flag (lobby / poster / live), so a user who lands
+ * directly on the live step via the rematch shortcut still sees the
+ * lobby + poster tours the next time they go through the regular
+ * flow. The tour helper imports intro.js + its CSS lazily so the
+ * bundle stays slim for return visits where nothing fires.
  */
-function endLiveMatch({ scoreHome: sh, scoreAway: sa, scoreTimeline: st }) {
-	scoreHome = sh;
-	scoreAway = sa;
-	scoreTimeline = st;
-	saveGame();
-}
+const ONBOARDING_BY_STEP = {
+	1: ONBOARDING_KEYS.NEW_GAME_LOBBY,
+	2: ONBOARDING_KEYS.NEW_GAME_POSTER,
+	3: ONBOARDING_KEYS.NEW_GAME_LIVE,
+};
+const triggeredTours = new Set();
+
+$effect(() => {
+	if (loading) return;
+	const key = ONBOARDING_BY_STEP[step];
+	if (!key || triggeredTours.has(key) || isOnboardingDone(key)) return;
+	triggeredTours.add(key);
+	// Two rAFs: the first lets Svelte commit the step swap, the second
+	// gives the freshly mounted step's children (e.g. the live pitch's
+	// team logos) a tick to layout before intro.js measures anchors.
+	requestAnimationFrame(() => {
+		requestAnimationFrame(() => {
+			runOnboardingTour(key);
+		});
+	});
+});
 </script>
 
 <svelte:head>
@@ -276,34 +254,7 @@ function endLiveMatch({ scoreHome: sh, scoreAway: sa, scoreTimeline: st }) {
 			{homeTeam}
 			{awayTeam}
 			ending={saving}
-			onEndMatch={endLiveMatch}
-			onBack={goBack}
-		/>
-	{:else if step === 4}
-		<MatchPrediction
-			{homePlayers}
-			{awayPlayers}
-			{homeTeam}
-			{awayTeam}
-			{mode}
-			{allPlayers}
-		/>
-
-		<ScoreStep
-			{homeTeam}
-			{awayTeam}
-			{homePlayers}
-			{awayPlayers}
-			{allPlayers}
-			bind:scoreHome
-			bind:scoreAway
-			bind:scoreTimeline
-			bind:resultType
-			bind:statsOverview
-			bind:statsPasses
-			bind:statsDefense
-			{saving}
-			onSave={saveGame}
+			onEndMatch={saveGame}
 			onBack={goBack}
 		/>
 	{/if}

@@ -14,8 +14,8 @@ import TeamAutocomplete from "./TeamAutocomplete.svelte";
  * pair (4–5★ default); the three action buttons re-roll, open the
  * star-range dialog or fall back to the manual TeamSelectionStep
  * (autocomplete fields). The big red CTA forwards to onAnpfiff,
- * which transitions the wizard into the ScoreStep without bumping
- * the visible stepper.
+ * which transitions the wizard into the live-match step without
+ * bumping the visible stepper.
  *
  * @type {{
  *   homePlayers: string[],
@@ -216,6 +216,7 @@ function avatarGradient(id) {
 	<!-- Pitch with the two teams in their respective halves — same
 	     visual as the player lobby and live-match screens. -->
 	<div
+		data-onboarding="poster-teams"
 		class="relative rounded-2xl border-2 border-border overflow-hidden"
 		style="background: linear-gradient(135deg, #0d3320 0%, #0a2516 100%);"
 	>
@@ -271,6 +272,7 @@ function avatarGradient(id) {
 		type="button"
 		onclick={onAnpfiff}
 		disabled={!homeTeam || !awayTeam}
+		data-onboarding="poster-anpfiff"
 		class="primary-btn"
 	>
 		<svg
@@ -291,7 +293,7 @@ function avatarGradient(id) {
 	</button>
 
 	<!-- Secondary actions row -->
-	<div class="btn-row">
+	<div class="btn-row" data-onboarding="poster-actions">
 		<button
 			type="button"
 			onclick={roll}
