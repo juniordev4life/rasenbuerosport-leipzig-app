@@ -8,8 +8,8 @@ import {
 } from "$lib/services/playerProfile.services.js";
 import { buildEloHistory } from "$lib/utils/eloHistory.utils.js";
 import {
-	ONBOARDING_KEYS,
 	isOnboardingDone,
+	ONBOARDING_KEYS,
 	runOnboardingTour,
 } from "$lib/utils/onboarding.utils.js";
 import { relationCardWinRatePercent } from "$lib/utils/winRate.utils.js";
