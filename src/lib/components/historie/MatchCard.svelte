@@ -23,26 +23,45 @@ const players = $derived(game.game_players ?? []);
 const homeScore = $derived(game.score_home ?? 0);
 const awayScore = $derived(game.score_away ?? 0);
 
-// Suffix the score with "n.V." / "n.E." (DE) or "AET" / "Pen." (EN)
-// when the match went to extra time or penalties — matches the
-// pattern used on the game-detail screen so users see the same
-// shorthand everywhere.
-const resultSuffix = $derived(
-	game.result_type === "penalty"
-		? $t("game_detail.penalty_short")
-		: game.result_type === "extra_time"
-			? $t("game_detail.extra_time_short")
-			: "",
-);
+const penaltyShootout = $derived(game.penalty_shootout ?? null);
+const penaltyWinner = $derived(penaltyShootout?.winner_side ?? null);
+
+// Suffix the score after the regular result. Three cases:
+//   - shootout: show "i.E. 5:6" with the actual penalty score so the
+//     full result is visible at a glance (the "n.E." flag is implied
+//     by the i.E. notation, no need to print both);
+//   - extra time without shootout: classic "n.V." short tag;
+//   - everything else: no suffix.
+const resultSuffix = $derived.by(() => {
+	if (penaltyShootout) {
+		return $t("game_detail.penalty_score_label", {
+			home: penaltyShootout.final_score?.home ?? 0,
+			away: penaltyShootout.final_score?.away ?? 0,
+		});
+	}
+	if (game.result_type === "penalty") return $t("game_detail.penalty_short");
+	if (game.result_type === "extra_time")
+		return $t("game_detail.extra_time_short");
+	return "";
+});
 
 const myEntry = $derived(
 	currentUserId ? players.find((p) => p.player_id === currentUserId) : null,
 );
 const userInvolved = $derived(Boolean(myEntry));
 
-const isDraw = $derived(homeScore === awayScore);
+// Penalty winner overrides the regular-time draw — without this, a
+// 1:1 (5:6 i.E.) shows up as "U" (draw pill) and the loser team
+// looks like it tied, even though it lost the shootout.
+const isDraw = $derived(penaltyWinner ? false : homeScore === awayScore);
 const winnerSide = $derived(
-	isDraw ? null : homeScore > awayScore ? "home" : "away",
+	penaltyWinner
+		? penaltyWinner
+		: isDraw
+			? null
+			: homeScore > awayScore
+				? "home"
+				: "away",
 );
 
 // Result pill is meaningful only for the logged-in user. When the user

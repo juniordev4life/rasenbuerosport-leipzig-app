@@ -42,12 +42,20 @@ const userTeam = $derived(
 	game.game_players?.find((p) => p.player_id === userId)?.team || "home",
 );
 
+// Penalty winner overrides the regular-time tie so the W/D/L pill
+// matches the actual outcome the shootout produced.
+const penaltyWinner = $derived(game.penalty_shootout?.winner_side ?? null);
+
 const isWin = $derived(
-	userTeam === "home"
-		? game.score_home > game.score_away
-		: game.score_away > game.score_home,
+	penaltyWinner
+		? penaltyWinner === userTeam
+		: userTeam === "home"
+			? game.score_home > game.score_away
+			: game.score_away > game.score_home,
 );
-const isDraw = $derived(game.score_home === game.score_away);
+const isDraw = $derived(
+	penaltyWinner ? false : game.score_home === game.score_away,
+);
 
 const resultBgColor = $derived(
 	isDraw ? "bg-warning" : isWin ? "bg-success" : "bg-error",
@@ -67,14 +75,23 @@ function getInitial(player) {
 	return name?.charAt(0)?.toUpperCase() || "?";
 }
 
-/** Result type suffix (n.V. / n.E.) */
-const resultSuffix = $derived(
-	game.result_type === "penalty"
-		? $t("game_detail.penalty_short")
-		: game.result_type === "extra_time"
-			? $t("game_detail.extra_time_short")
-			: "",
-);
+/**
+ * Score suffix. Shootouts get the actual i.E. score (so the full
+ * result is visible without drilling into the match), extra-time
+ * games stick with the classic short tag.
+ */
+const resultSuffix = $derived.by(() => {
+	if (game.penalty_shootout) {
+		return $t("game_detail.penalty_score_label", {
+			home: game.penalty_shootout.final_score?.home ?? 0,
+			away: game.penalty_shootout.final_score?.away ?? 0,
+		});
+	}
+	if (game.result_type === "penalty") return $t("game_detail.penalty_short");
+	if (game.result_type === "extra_time")
+		return $t("game_detail.extra_time_short");
+	return "";
+});
 
 const formattedDate = $derived(
 	new Date(game.played_at).toLocaleDateString("de-DE", {
