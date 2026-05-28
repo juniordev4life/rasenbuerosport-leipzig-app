@@ -5,6 +5,7 @@ import { page } from "$app/state";
 import MatchPosterStep from "$lib/components/games/MatchPosterStep.svelte";
 import PlayerLobbyStep from "$lib/components/games/PlayerLobbyStep.svelte";
 import LiveMatchStep from "$lib/components/liveMatch/LiveMatchStep.svelte";
+import PenaltyStep from "$lib/components/penaltyShootout/PenaltyStep.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get, post } from "$lib/services/api.services.js";
 import {
@@ -18,8 +19,10 @@ const { t } = getTranslate();
 
 const GUEST_ID = "__guest__";
 
-// Wizard step. 1 = Lobby, 2 = Match poster, 3 = Live-match event entry.
-// The visible stepper stops at "Anpfiff" — step 3 is a linear follow-up.
+// Wizard step. 1 = Lobby, 2 = Match poster, 3 = Live-match event entry,
+// 4 = Penalty shootout. The visible stepper stops at "Anpfiff" —
+// step 3 + 4 are linear follow-ups, and step 4 only fires when the
+// user taps the 11m button in the live step.
 let step = $state(1);
 
 let homePlayers = $state([]);
@@ -29,6 +32,18 @@ let homeTeam = $state("");
 let awayTeam = $state("");
 
 let saving = $state(false);
+
+/**
+ * Snapshot captured at the moment the user taps "11m" in the live
+ * step. The penalty step renders against this, and we forward it
+ * verbatim into `saveGame` once the shootout completes — the
+ * regular-time score never changes.
+ */
+let preShootout = $state(
+	/** @type {{ scoreHome: number, scoreAway: number, scoreTimeline: object[] } | null} */ (
+		null
+	),
+);
 
 let allPlayers = $state([]);
 let loading = $state(true);
@@ -79,18 +94,46 @@ function goBack() {
 }
 
 /**
- * Etappe-1 placeholder. The real penalty-shootout flow lands in the
- * next iteration — see roadmap/elfmeterschiessen. This handler keeps
- * the 11m action-row button wired end-to-end so the UX is testable
- * today, and so the prop chain doesn't need to change when the real
- * flow ships.
+ * User tapped "11m" in the live step. Capture the regular-time
+ * snapshot and advance to the penalty step. The shootout itself is
+ * driven by `PenaltyStep` — see `handlePenaltyComplete` for the
+ * exit path back into `saveGame`.
  *
- * @param {{ scoreHome: number, scoreAway: number, scoreTimeline: object[] }} _payload
+ * @param {{ scoreHome: number, scoreAway: number, scoreTimeline: object[] }} payload
  */
-function handleStartPenaltyShootout(_payload) {
-	if (typeof window !== "undefined") {
-		window.alert($t("live_match.penalty_shootout_coming_soon"));
-	}
+function handleStartPenaltyShootout(payload) {
+	preShootout = payload;
+	step = 4;
+}
+
+/**
+ * Hand the shootout result back to `saveGame`. The actual shots +
+ * winner aren't persisted yet — that wiring lands together with the
+ * matching backend endpoints. For now we log them so the user can
+ * verify the flow locally, and we forward the regular-time score
+ * untouched so the match is recorded as a draw at the end of extra
+ * time (penalty winner gets stitched on by the backend etappe).
+ *
+ * @param {{ shots: object[], finalPenaltyScore: { home: number, away: number }, winnerSide: 'home' | 'away' }} result
+ */
+function handlePenaltyComplete(result) {
+	if (!preShootout) return;
+	console.info("Penalty shootout result", result);
+	saveGame({
+		scoreHome: preShootout.scoreHome,
+		scoreAway: preShootout.scoreAway,
+		scoreTimeline: preShootout.scoreTimeline,
+	});
+}
+
+/**
+ * Aborting from the penalty step drops the shootout state and goes
+ * back to the live match — same as the in-step "letzten Schuss
+ * korrigieren" but for the whole sequence.
+ */
+function handlePenaltyAbort() {
+	preShootout = null;
+	step = 3;
 }
 
 function cancel() {
@@ -318,6 +361,19 @@ function replayTourForCurrentStep() {
 			onEndMatch={saveGame}
 			onStartPenaltyShootout={handleStartPenaltyShootout}
 			onBack={goBack}
+		/>
+	{:else if step === 4 && preShootout}
+		<PenaltyStep
+			{homeTeam}
+			{awayTeam}
+			{homePlayers}
+			{awayPlayers}
+			{allPlayers}
+			scoreHome={preShootout.scoreHome}
+			scoreAway={preShootout.scoreAway}
+			ending={saving}
+			onComplete={handlePenaltyComplete}
+			onAbort={handlePenaltyAbort}
 		/>
 	{/if}
 </div>

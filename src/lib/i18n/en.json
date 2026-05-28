@@ -695,7 +695,6 @@
 			"penalty_shootout_aria": "Start penalty shootout",
 			"end_match": "End match"
 		},
-		"penalty_shootout_coming_soon": "Penalty-shootout workflow ships in the next version. You'll soon be able to track every shot individually.",
 		"events": {
 			"delete_aria": "Remove event",
 			"delete_title": "Remove event?",
@@ -1318,5 +1317,54 @@
 		"settings_section_body": "Got an idea, spotted a bug, or just want to say hi? Let us know.",
 		"settings_button": "Send feedback",
 		"menu_item": "Send feedback"
+	},
+	"penalty_shootout": {
+		"cell": {
+			"label_pending": "open",
+			"label_active": "Pick",
+			"label_goal": "Goal",
+			"label_skipped": "n/a"
+		},
+		"board": {
+			"title": "Sequence",
+			"round_progress": "Round {current} of {total}",
+			"scroll_hint": "← swipe left for more shots"
+		},
+		"hero": {
+			"title": "Penalty shootout",
+			"decided": "Decided",
+			"subtitle_after_extra": "Final after extra time · {scoreHome}:{scoreAway}"
+		},
+		"active": {
+			"shot_header": "Shot {shotNumber} · {team}",
+			"shot_header_with_name": "Shot {shotNumber} · {shooter}",
+			"who_shoots": "Who's shooting?",
+			"result_prompt": "Result?",
+			"goal": "Goal",
+			"missed": "Missed",
+			"change_shooter": "Change shooter"
+		},
+		"keeper": {
+			"title": "Who saved it?",
+			"subtitle": "{shooter} missed — the keeper gets an ELO bonus.",
+			"no_keeper": "Post / wide / no save",
+			"elo_preview": "ELO: {shooter} {shooterDelta} · keeper +{keeperDelta}",
+			"back_to_result": "Edit result"
+		},
+		"end": {
+			"title": "Shootout decided",
+			"subtitle": "{winner} wins the shootout {penaltyHome}:{penaltyAway}.",
+			"cta": "End match"
+		},
+		"footer": {
+			"correct_last": "Undo last shot",
+			"abort": "Cancel penalty shootout"
+		},
+		"abort": {
+			"title": "Cancel penalty shootout?",
+			"body": "Shots so far will be discarded. The match score stays at {scoreHome}:{scoreAway}.",
+			"cancel": "Keep shooting",
+			"confirm": "Yes, cancel"
+		}
 	}
 }

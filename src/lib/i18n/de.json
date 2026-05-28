@@ -697,7 +697,6 @@
 			"penalty_shootout_aria": "Elfmeterschießen starten",
 			"end_match": "Spiel beenden"
 		},
-		"penalty_shootout_coming_soon": "Elfmeterschießen-Workflow folgt in der nächsten Version. Schon bald kannst du jeden Schuss einzeln tracken.",
 		"events": {
 			"delete_aria": "Ereignis entfernen",
 			"delete_title": "Ereignis löschen?",
@@ -1320,5 +1319,54 @@
 		"settings_section_body": "Du hast eine Idee, einen Fehler entdeckt oder willst Lob loswerden? Sag uns Bescheid.",
 		"settings_button": "Feedback geben",
 		"menu_item": "Feedback geben"
+	},
+	"penalty_shootout": {
+		"cell": {
+			"label_pending": "offen",
+			"label_active": "Wählen",
+			"label_goal": "Tor",
+			"label_skipped": "unnötig"
+		},
+		"board": {
+			"title": "Sequenz",
+			"round_progress": "Runde {current} von {total}",
+			"scroll_hint": "← nach links wischen für mehr Schüsse"
+		},
+		"hero": {
+			"title": "Elfmeterschießen",
+			"decided": "Entschieden",
+			"subtitle_after_extra": "Endstand n.V. · {scoreHome}:{scoreAway}"
+		},
+		"active": {
+			"shot_header": "Schuss {shotNumber} · {team}",
+			"shot_header_with_name": "Schuss {shotNumber} · {shooter}",
+			"who_shoots": "Wer schießt?",
+			"result_prompt": "Ergebnis?",
+			"goal": "Tor",
+			"missed": "Verschossen",
+			"change_shooter": "Schütze ändern"
+		},
+		"keeper": {
+			"title": "Wer hat gehalten?",
+			"subtitle": "{shooter} verschossen — der Torhüter bekommt einen ELO-Bonus.",
+			"no_keeper": "Pfosten / vorbei / kein Halten",
+			"elo_preview": "ELO: {shooter} {shooterDelta} · Halter +{keeperDelta}",
+			"back_to_result": "Ergebnis korrigieren"
+		},
+		"end": {
+			"title": "Elferkrimi entschieden",
+			"subtitle": "{winner} gewinnt {penaltyHome}:{penaltyAway} im Elfmeterschießen.",
+			"cta": "Spiel beenden"
+		},
+		"footer": {
+			"correct_last": "Letzten Schuss korrigieren",
+			"abort": "Elfmeterschießen abbrechen"
+		},
+		"abort": {
+			"title": "Elfmeterschießen abbrechen?",
+			"body": "Bisherige Schüsse werden verworfen. Der Spielstand bleibt bei {scoreHome}:{scoreAway}.",
+			"cancel": "Doch weiterschießen",
+			"confirm": "Ja, abbrechen"
+		}
 	}
 }
