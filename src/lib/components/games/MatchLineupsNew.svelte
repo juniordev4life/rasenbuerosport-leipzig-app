@@ -30,9 +30,22 @@ const { t } = getTranslate();
 
 const homeScore = $derived(game?.score_home ?? 0);
 const awayScore = $derived(game?.score_away ?? 0);
-const homeWins = $derived(homeScore > awayScore);
-const awayWins = $derived(awayScore > homeScore);
-const isDraw = $derived(homeScore === awayScore);
+
+/**
+ * Penalty-shootout winner overrides the regular-time score for
+ * the per-side W/D/L tag in the lineup section. Without this, a
+ * 1:1 (5:6 i.E.) renders both sides as "Unentschieden" even though
+ * the shootout settled the match.
+ */
+const penaltyWinner = $derived(game?.penalty_shootout?.winner_side ?? null);
+
+const homeWins = $derived(
+	penaltyWinner ? penaltyWinner === "home" : homeScore > awayScore,
+);
+const awayWins = $derived(
+	penaltyWinner ? penaltyWinner === "away" : awayScore > homeScore,
+);
+const isDraw = $derived(!homeWins && !awayWins);
 
 const eloMap = $derived.by(() => {
 	const map = new Map();
