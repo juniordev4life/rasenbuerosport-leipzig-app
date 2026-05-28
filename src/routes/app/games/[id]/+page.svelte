@@ -106,13 +106,16 @@ $effect(() => {
 	}
 });
 
-const resultSuffix = $derived(
-	game?.result_type === "penalty"
-		? $t("game_detail.penalty_short")
-		: game?.result_type === "extra_time"
-			? $t("game_detail.extra_time_short")
-			: "",
-);
+const resultSuffix = $derived.by(() => {
+	// When the match ended on penalties we render the actual shootout
+	// score ("i.E. 5:6") in the hero — printing "n.E." on top of that
+	// is redundant, so the suffix is suppressed for shootouts.
+	if (game?.penalty_shootout) return "";
+	if (game?.result_type === "penalty") return $t("game_detail.penalty_short");
+	if (game?.result_type === "extra_time")
+		return $t("game_detail.extra_time_short");
+	return "";
+});
 
 /** Lookup profile for any player in the game by player_id. */
 function getProfile(playerId) {

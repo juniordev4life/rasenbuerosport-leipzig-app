@@ -7,7 +7,7 @@
  * are not stored or used for ranking.
  */
 
-/** @typedef {"late_drama"|"lucky_win"|"defensive_battle"|"penalty_decision"|"goal_fest"|"clear_win"|"draw"|"comeback"} CharacterTagId */
+/** @typedef {"late_drama"|"lucky_win"|"defensive_battle"|"penalty_decision"|"goal_fest"|"clear_win"|"draw"|"comeback"|"elferkrimi"} CharacterTagId */
 
 /** @typedef {{ id: CharacterTagId, variant: "warning"|"red"|"success"|"info" }} CharacterTag */
 
@@ -50,7 +50,13 @@ export function getMatchCharacterTags(game) {
 	const lastGoalMinute =
 		typeof lastGoal?.minute === "number" ? lastGoal.minute : null;
 
-	if (home === away && total > 0) {
+	// Penalty shootout overrides the "draw" tag — a shootout match
+	// is by definition tied in regular time, so labelling it as
+	// "Unentschieden" misreads as a real draw. The Elferkrimi tag
+	// carries the story instead.
+	if (game.penalty_shootout) {
+		tags.push({ id: "elferkrimi", variant: "warning" });
+	} else if (home === away && total > 0) {
 		tags.push({ id: "draw", variant: "info" });
 	}
 
