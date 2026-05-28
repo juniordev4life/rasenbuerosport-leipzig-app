@@ -1288,5 +1288,35 @@
 			"title": "Reporter-Persona",
 			"body": "Drei AI-Reporter erzählen den Spielbericht mit unterschiedlichem Stil:\n\n• Klassiker — sachlich, traditioneller Bericht\n• Analyst — taktisch, datenfokussiert\n• Euphoriker — emotional, überschwänglich\n\nWelcher Reporter ein Spiel übernimmt, wählt das System automatisch — basierend auf der Dramaturgie (knapp, eindeutig, viele Tore etc.)."
 		}
+	},
+	"feedback": {
+		"title": "Feedback geben",
+		"intro": "Was ist dir aufgefallen? Allgemeines Feedback geht direkt an mich, Bugs und Feature-Wünsche werden als GitHub-Issue angelegt.",
+		"close": "Schließen",
+		"kind_general": "Allgemein",
+		"kind_bug": "Bug",
+		"kind_feature": "Wunsch",
+		"label_title": "Titel",
+		"label_description": "Beschreibung",
+		"placeholder_title_general": "z. B. Idee, kurze Rückmeldung …",
+		"placeholder_title_bug": "Kurzer Titel — was geht nicht?",
+		"placeholder_title_feature": "Kurzer Titel — was wünschst du dir?",
+		"placeholder_body_general": "Was möchtest du loswerden? Lob, Kritik, Ideen — alles willkommen.",
+		"placeholder_body_bug": "Was hast du getan? Was sollte passieren? Was ist passiert? Reproduktionsschritte helfen am meisten.",
+		"placeholder_body_feature": "Was wünschst du dir? Welches Problem würde das lösen? Wie würdest du es nutzen?",
+		"route_hint": "Wir senden den Pfad „{route}\" und deinen Browser-User-Agent mit — das hilft beim Nachstellen.",
+		"submit_general": "Feedback senden",
+		"submit_bug": "Bug melden",
+		"submit_feature": "Wunsch einreichen",
+		"submitting": "Wird gesendet …",
+		"success_general": "Danke! Dein Feedback ist unterwegs.",
+		"success_bug": "Danke! Dein Bug-Report wurde als GitHub-Issue angelegt.",
+		"success_feature": "Danke! Dein Wunsch wurde als GitHub-Issue angelegt.",
+		"error_title": "Senden fehlgeschlagen",
+		"error_generic": "Bitte später nochmal versuchen.",
+		"settings_section_title": "Feedback",
+		"settings_section_body": "Du hast eine Idee, einen Fehler entdeckt oder willst Lob loswerden? Sag uns Bescheid.",
+		"settings_button": "Feedback geben",
+		"menu_item": "Feedback geben"
 	}
 }
