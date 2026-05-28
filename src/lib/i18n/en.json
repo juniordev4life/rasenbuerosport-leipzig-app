@@ -373,6 +373,8 @@
 		"timeline_title": "Score progression",
 		"extra_time_short": "AET",
 		"penalty_short": "Pen.",
+		"penalty_score_label": "Pen. {home}:{away}",
+		"penalty_score_aria": "Penalty shootout final score",
 		"event_red_card": "Red card",
 		"event_yellow_card": "Yellow card",
 		"event_penalty_missed": "Missed penalty",
@@ -1365,6 +1367,15 @@
 			"body": "Shots so far will be discarded. The match score stays at {scoreHome}:{scoreAway}.",
 			"cancel": "Keep shooting",
 			"confirm": "Yes, cancel"
+		},
+		"summary": {
+			"badge": "Penalty thriller",
+			"winner_line": "{winner} wins the shootout.",
+			"home_fallback": "Home",
+			"away_fallback": "Away",
+			"result_goal": "Goal",
+			"result_saved": "saved · {keeper}",
+			"result_off_target": "Post / wide"
 		}
 	}
 }

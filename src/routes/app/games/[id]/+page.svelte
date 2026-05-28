@@ -11,6 +11,7 @@ import MatchReporterAwaitingCard from "$lib/components/games/MatchReporterAwaiti
 import MatchReporterCardNew from "$lib/components/games/MatchReporterCardNew.svelte";
 import MatchTeaserPlaceholder from "$lib/components/games/MatchTeaserPlaceholder.svelte";
 import MatchTimelineNew from "$lib/components/games/MatchTimelineNew.svelte";
+import PenaltyShootoutSummary from "$lib/components/penaltyShootout/PenaltyShootoutSummary.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { del, get } from "$lib/services/api.services.js";
 import { getTeamByName } from "$lib/services/teams.services.js";
@@ -152,6 +153,15 @@ const allUploaded = $derived(hasOverview && hasPasses && hasDefense);
 			{resultSuffix}
 			{rematchUrl}
 		/>
+
+		{#if game.penalty_shootout}
+			<PenaltyShootoutSummary
+				penaltyShootout={game.penalty_shootout}
+				gamePlayers={game.game_players ?? []}
+				{homeTeamName}
+				{awayTeamName}
+			/>
+		{/if}
 
 		{#if allUploaded}
 			<MatchReporterCardNew
