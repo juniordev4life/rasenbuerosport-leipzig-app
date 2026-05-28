@@ -741,6 +741,7 @@
 			"step_2": "2 · Ready to kick off",
 			"step_3": "3 · Live match"
 		},
+		"replay_tour": "Replay the onboarding tour for this step",
 		"home": "Home",
 		"away": "Away",
 		"select_team": "Select team",

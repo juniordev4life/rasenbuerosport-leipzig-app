@@ -156,6 +156,22 @@ $effect(() => {
 		});
 	});
 });
+
+/**
+ * Manually re-trigger the current step's onboarding tour. Useful when
+ * someone comes back to the app after a longer break and wants to
+ * see the explanation again — the persisted "done" flag would
+ * otherwise suppress the auto-trigger. We bypass `isOnboardingDone`
+ * by calling `runOnboardingTour` directly, and drop the per-session
+ * `triggeredTours` guard so the auto-effect could fire it again if
+ * the user navigates back to this step later.
+ */
+function replayTourForCurrentStep() {
+	const key = ONBOARDING_BY_STEP[step];
+	if (!key) return;
+	triggeredTours.delete(key);
+	runOnboardingTour(key);
+}
 </script>
 
 <svelte:head>
@@ -164,11 +180,41 @@ $effect(() => {
 
 {#if step === 1 || step === 2 || step === 3}
 	<div class="screen-banner">
-		{step === 1
-			? $t("new_game.banner.step_1")
-			: step === 2
-				? $t("new_game.banner.step_2")
-				: $t("new_game.banner.step_3")}
+		<!-- Invisible spacer matches the button's width so the centred
+		     label is geometrically balanced between the left and right
+		     edges. Without it the label would lean right because the
+		     button takes up real space on the right but not the left. -->
+		<span class="screen-banner-spacer" aria-hidden="true"></span>
+		<span class="screen-banner-label">
+			{step === 1
+				? $t("new_game.banner.step_1")
+				: step === 2
+					? $t("new_game.banner.step_2")
+					: $t("new_game.banner.step_3")}
+		</span>
+		<button
+			type="button"
+			class="replay-tour-btn"
+			onclick={replayTourForCurrentStep}
+			aria-label={$t("new_game.replay_tour")}
+			title={$t("new_game.replay_tour")}
+		>
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				width="14"
+				height="14"
+				aria-hidden="true"
+			>
+				<circle cx="12" cy="12" r="10" />
+				<path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4" />
+				<line x1="12" y1="17" x2="12" y2="17.01" />
+			</svg>
+		</button>
 	</div>
 {/if}
 
@@ -262,16 +308,58 @@ $effect(() => {
 
 <style>
 .screen-banner {
-	text-align: center;
+	/* Step label sits dead-centre between the spacer (left) and the
+	 * replay button (right), both 28 px wide. Tap-target on the
+	 * button is intentionally larger than the 14 px icon for mobile
+	 * reachability.
+	 *
+	 * `padding-top` includes `env(safe-area-inset-top)` because this
+	 * page runs in the app layout's "immersive" mode where the
+	 * regular Header (which normally owns the iOS status-bar inset)
+	 * is hidden. Without this padding the banner slides under the
+	 * notch / status bar on iOS PWAs. Negative horizontal margin
+	 * keeps the band edge-to-edge against the page padding. */
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px 8px;
+	background: rgba(226, 75, 74, 0.08);
+	border-bottom: 1px solid rgba(226, 75, 74, 0.2);
+	margin: 0 -1rem;
+}
+.screen-banner-spacer {
+	width: 28px;
+	flex-shrink: 0;
+}
+.screen-banner-label {
 	font-size: 11px;
 	color: #9CA3AF;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.1em;
-	padding: 8px 0;
-	background: rgba(226, 75, 74, 0.08);
-	border-bottom: 1px solid rgba(226, 75, 74, 0.2);
-	margin: 0 -1rem;
+	text-align: center;
+	flex: 1;
+}
+.replay-tour-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
+	border: 0;
+	background: none;
+	color: rgba(255, 255, 255, 0.4);
+	cursor: pointer;
+	border-radius: 50%;
+	transition: color 0.15s, background-color 0.15s;
+}
+.replay-tour-btn:hover,
+.replay-tour-btn:focus-visible {
+	color: rgba(255, 255, 255, 0.95);
+	background: rgba(255, 255, 255, 0.06);
+	outline: none;
 }
 .screen-hero-title {
 	font-size: 22px;
