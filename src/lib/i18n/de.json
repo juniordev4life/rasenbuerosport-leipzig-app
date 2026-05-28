@@ -375,6 +375,8 @@
 		"timeline_title": "Spielverlauf",
 		"extra_time_short": "n.V.",
 		"penalty_short": "n.E.",
+		"penalty_score_label": "i.E. {home}:{away}",
+		"penalty_score_aria": "Elfmeterschießen-Endstand",
 		"event_red_card": "Rote Karte",
 		"event_yellow_card": "Gelbe Karte",
 		"event_penalty_missed": "Elfmeter verschossen",
@@ -1367,6 +1369,15 @@
 			"body": "Bisherige Schüsse werden verworfen. Der Spielstand bleibt bei {scoreHome}:{scoreAway}.",
 			"cancel": "Doch weiterschießen",
 			"confirm": "Ja, abbrechen"
+		},
+		"summary": {
+			"badge": "Elferkrimi",
+			"winner_line": "{winner} gewinnt im Elfmeterschießen.",
+			"home_fallback": "Heim",
+			"away_fallback": "Auswärts",
+			"result_goal": "Tor",
+			"result_saved": "gehalten · {keeper}",
+			"result_off_target": "Pfosten / vorbei"
 		}
 	}
 }

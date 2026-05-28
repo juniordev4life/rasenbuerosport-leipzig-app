@@ -44,9 +44,24 @@ const { t } = getTranslate();
 
 const homeScore = $derived(game?.score_home ?? 0);
 const awayScore = $derived(game?.score_away ?? 0);
-const homeWins = $derived(homeScore > awayScore);
-const awayWins = $derived(awayScore > homeScore);
-const isDraw = $derived(homeScore === awayScore);
+
+/**
+ * Penalty shootout reshapes "who won": regular score is a draw but
+ * the shootout settles it. Treat `penalty_shootout.winner_side` as
+ * the authoritative winner whenever the JSONB blob is present, so
+ * winner glow + side tags read penalties correctly without touching
+ * the score numbers themselves.
+ */
+const penaltyShootout = $derived(game?.penalty_shootout ?? null);
+const penaltyWinner = $derived(penaltyShootout?.winner_side ?? null);
+
+const homeWins = $derived(
+	penaltyWinner ? penaltyWinner === "home" : homeScore > awayScore,
+);
+const awayWins = $derived(
+	penaltyWinner ? penaltyWinner === "away" : awayScore > homeScore,
+);
+const isDraw = $derived(!homeWins && !awayWins);
 const winnerSide = $derived(homeWins ? "home" : awayWins ? "away" : "draw");
 
 const palette = {
@@ -172,6 +187,14 @@ const userAccent = $derived(
 			</div>
 			{#if resultSuffix}
 				<div class="result-suffix">{resultSuffix}</div>
+			{/if}
+			{#if penaltyShootout}
+				<div class="penalty-score" aria-label={$t("game_detail.penalty_score_aria")}>
+					{$t("game_detail.penalty_score_label", {
+						home: penaltyShootout.final_score?.home ?? 0,
+						away: penaltyShootout.final_score?.away ?? 0,
+					})}
+				</div>
 			{/if}
 		</div>
 		<div class="logo-col">
@@ -316,6 +339,14 @@ const userAccent = $derived(
 	color: var(--line);
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
+}
+.penalty-score {
+	margin-top: 4px;
+	font-size: 11px;
+	font-weight: 700;
+	color: #FBBF24;
+	letter-spacing: 0.04em;
+	font-variant-numeric: tabular-nums;
 }
 .teams-row {
 	display: grid;
