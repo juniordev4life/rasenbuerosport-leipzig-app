@@ -1,11 +1,11 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import InfoTip from "$lib/components/ui/InfoTip.svelte";
 import ausgewogen from "$lib/assets/passCharacter/pass-character-ausgewogen.svg?raw";
 import fluegelspiel from "$lib/assets/passCharacter/pass-character-fluegelspiel.svg?raw";
 import linkslastig from "$lib/assets/passCharacter/pass-character-linkslastig.svg?raw";
 import rechtslastig from "$lib/assets/passCharacter/pass-character-rechtslastig.svg?raw";
 import zentral from "$lib/assets/passCharacter/pass-character-zentral.svg?raw";
+import InfoTip from "$lib/components/ui/InfoTip.svelte";
 
 /**
  * Pass-character panel — one mini-pitch per team using the prebuilt

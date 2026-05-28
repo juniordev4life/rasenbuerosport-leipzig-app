@@ -2,6 +2,7 @@
 import { getTranslate } from "@tolgee/svelte";
 import { goto } from "$app/navigation";
 import LogoutIcon from "$lib/components/icons/LogoutIcon.svelte";
+import MessageIcon from "$lib/components/icons/MessageIcon.svelte";
 import SettingsIcon from "$lib/components/icons/SettingsIcon.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { logout } from "$lib/services/auth.services.js";
@@ -9,11 +10,11 @@ import { logout } from "$lib/services/auth.services.js";
 /**
  * Bottom-sheet (mobile) / popover (desktop) opened from the avatar
  * tap in the top bar. Carries the actions that used to live inside
- * the profile page: open Settings or log out.
+ * the profile page: open Settings, send feedback, or log out.
  *
- * @type {{ onClose: () => void }}
+ * @type {{ onClose: () => void, onOpenFeedback?: () => void }}
  */
-let { onClose } = $props();
+let { onClose, onOpenFeedback } = $props();
 
 const { t } = getTranslate();
 
@@ -30,6 +31,11 @@ async function handleLogout() {
 function openSettings() {
 	onClose();
 	goto(ROUTES.SETTINGS);
+}
+
+function handleFeedback() {
+	if (onOpenFeedback) onOpenFeedback();
+	else onClose();
 }
 
 function handleKeydown(event) {
@@ -58,6 +64,14 @@ function handleKeydown(event) {
 		>
 			<span class="text-text-secondary"><SettingsIcon size={18} /></span>
 			<span class="text-sm font-semibold">{$t("nav.settings")}</span>
+		</button>
+		<button
+			type="button"
+			onclick={handleFeedback}
+			class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left text-text-primary hover:bg-bg-input transition-colors"
+		>
+			<span class="text-text-secondary"><MessageIcon size={18} /></span>
+			<span class="text-sm font-semibold">{$t("feedback.menu_item")}</span>
 		</button>
 		<button
 			type="button"

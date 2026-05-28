@@ -2,11 +2,25 @@
 import { getTranslate } from "@tolgee/svelte";
 import { page } from "$app/state";
 import AccountMenu from "$lib/components/layout/AccountMenu.svelte";
+import FeedbackSheet from "$lib/components/ui/FeedbackSheet.svelte";
 import { user } from "$lib/stores/auth.stores.js";
 
 const { t } = getTranslate();
 
 let menuOpen = $state(false);
+let feedbackOpen = $state(false);
+
+/**
+ * Close the AccountMenu first, then open the FeedbackSheet on the next
+ * tick. The pause prevents the two overlays from animating in/out at
+ * the same time, which looks janky on slow devices.
+ */
+function openFeedback() {
+	menuOpen = false;
+	setTimeout(() => {
+		feedbackOpen = true;
+	}, 80);
+}
 
 /**
  * Top-level routes from BottomNav — these are the four "home" tabs, so
@@ -85,5 +99,9 @@ function goBack() {
 </header>
 
 {#if menuOpen}
-	<AccountMenu onClose={() => (menuOpen = false)} />
+	<AccountMenu onClose={() => (menuOpen = false)} onOpenFeedback={openFeedback} />
+{/if}
+
+{#if feedbackOpen}
+	<FeedbackSheet onClose={() => (feedbackOpen = false)} />
 {/if}

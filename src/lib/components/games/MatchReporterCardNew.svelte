@@ -2,9 +2,9 @@
 import { getTranslate } from "@tolgee/svelte";
 import { env as publicEnv } from "$env/dynamic/public";
 import ReporterBioModal from "$lib/components/games/ReporterBioModal.svelte";
+import InfoTip from "$lib/components/ui/InfoTip.svelte";
 import { getReporter } from "$lib/constants/reporters.constants.js";
 import { post } from "$lib/services/api.services.js";
-import InfoTip from "$lib/components/ui/InfoTip.svelte";
 import MatchAudioPlayer from "./MatchAudioPlayer.svelte";
 
 /**

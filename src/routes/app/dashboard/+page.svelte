@@ -18,8 +18,8 @@ import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get } from "$lib/services/api.services.js";
 import { user } from "$lib/stores/auth.stores.js";
 import {
-	ONBOARDING_KEYS,
 	isOnboardingDone,
+	ONBOARDING_KEYS,
 	runOnboardingTour,
 } from "$lib/utils/onboarding.utils.js";
 import { detectUserSeries } from "$lib/utils/series.utils.js";
