@@ -78,6 +78,21 @@ function goBack() {
 	step = Math.max(1, step - 1);
 }
 
+/**
+ * Etappe-1 placeholder. The real penalty-shootout flow lands in the
+ * next iteration — see roadmap/elfmeterschiessen. This handler keeps
+ * the 11m action-row button wired end-to-end so the UX is testable
+ * today, and so the prop chain doesn't need to change when the real
+ * flow ships.
+ *
+ * @param {{ scoreHome: number, scoreAway: number, scoreTimeline: object[] }} _payload
+ */
+function handleStartPenaltyShootout(_payload) {
+	if (typeof window !== "undefined") {
+		window.alert($t("live_match.penalty_shootout_coming_soon"));
+	}
+}
+
 function cancel() {
 	goto(ROUTES.DASHBOARD);
 }
@@ -301,6 +316,7 @@ function replayTourForCurrentStep() {
 			{awayTeam}
 			ending={saving}
 			onEndMatch={saveGame}
+			onStartPenaltyShootout={handleStartPenaltyShootout}
 			onBack={goBack}
 		/>
 	{/if}

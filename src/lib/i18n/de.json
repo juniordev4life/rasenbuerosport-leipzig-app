@@ -691,11 +691,13 @@
 			"cancel": "Abbrechen"
 		},
 		"footer": {
-			"yellow": "Gelb",
 			"red": "Rot",
 			"penalty_missed": "Elfer",
+			"penalty_shootout": "11m",
+			"penalty_shootout_aria": "Elfmeterschießen starten",
 			"end_match": "Spiel beenden"
 		},
+		"penalty_shootout_coming_soon": "Elfmeterschießen-Workflow folgt in der nächsten Version. Schon bald kannst du jeden Schuss einzeln tracken.",
 		"events": {
 			"delete_aria": "Ereignis entfernen",
 			"delete_title": "Ereignis löschen?",
@@ -832,7 +834,7 @@
 				"tip_8_title": "Event entfernen",
 				"tip_8_body": "Verklickt? Tippe das × auf der Pill, bestätige die Sicherheitsabfrage — das Event ist sauber raus, Spielstand wird neu berechnet.",
 				"tip_9_title": "Karten & Elfer",
-				"tip_9_body": "Mit den Footer-Buttons aktivierst du gelb, rot oder verschossener Elfmeter. Danach den Spieler antippen — der Rest läuft wie beim Tor. Eigentore gibt's per langem Drücken auf einen Spieler. Über „Spiel beenden\" wird die Partie abgeschlossen.",
+				"tip_9_body": "Mit den Footer-Buttons aktivierst du rote Karte oder verschossener Elfer — danach den Spieler antippen, der Rest läuft wie beim Tor. Eigentore gibt's per langem Drücken auf einen Spieler. Der 11m-Button startet das Elfmeterschießen nach Unentschieden in der Verlängerung. Über „Spiel beenden\" wird die Partie abgeschlossen.",
 				"tip_10_title": "Bereit?",
 				"tip_10_body": "Die Demo-Daten werden gleich gelöscht — du startest mit leerer Timeline. Wenn du Bock auf einen schnellen Rematch hast: Auf der Spielübersicht gibt es einen „Rematch starten\"-Button, der dich direkt wieder hierher bringt."
 			},
