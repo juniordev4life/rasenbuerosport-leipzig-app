@@ -689,11 +689,13 @@
 			"cancel": "Cancel"
 		},
 		"footer": {
-			"yellow": "Yellow",
 			"red": "Red",
 			"penalty_missed": "Penalty",
+			"penalty_shootout": "11m",
+			"penalty_shootout_aria": "Start penalty shootout",
 			"end_match": "End match"
 		},
+		"penalty_shootout_coming_soon": "Penalty-shootout workflow ships in the next version. You'll soon be able to track every shot individually.",
 		"events": {
 			"delete_aria": "Remove event",
 			"delete_title": "Remove event?",
@@ -830,7 +832,7 @@
 				"tip_8_title": "Remove an event",
 				"tip_8_body": "Mis-tapped? Hit the × on the pill, confirm the prompt — the event is cleanly removed and the score recalculated.",
 				"tip_9_title": "Cards & misses",
-				"tip_9_body": "Use the footer buttons to arm yellow, red or missed-penalty mode, then tap the player — the rest works just like a goal. Own goals are recorded with a long-press on the scorer. \"End match\" finishes the game.",
+				"tip_9_body": "Use the footer buttons to arm red-card or missed-penalty mode, then tap the player — the rest works just like a goal. Own goals are recorded with a long-press on the scorer. The 11m button starts a penalty shootout after a draw in extra time. \"End match\" finishes the game.",
 				"tip_10_title": "Ready?",
 				"tip_10_body": "The demo data is wiped in a moment — you start with an empty timeline. If you want a quick rematch later, the match summary has a \"Start rematch\" button that jumps straight back here."
 			},

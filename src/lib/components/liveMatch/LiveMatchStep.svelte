@@ -25,6 +25,11 @@ import {
  * beenden" it forwards the accumulated score + score_timeline through
  * `onEndMatch` so the parent page can POST the game in one call.
  *
+ * The 11m button bubbles via `onStartPenaltyShootout` so the parent
+ * page can decide where the penalty-shootout flow lives — either as
+ * another wizard step or a separate route. Kept here as a bubbled
+ * event so this component stays oblivious to navigation.
+ *
  * @type {{
  *   homePlayers: string[],
  *   awayPlayers: string[],
@@ -33,6 +38,7 @@ import {
  *   awayTeam: string,
  *   ending?: boolean,
  *   onEndMatch: (payload: { scoreHome: number, scoreAway: number, scoreTimeline: object[] }) => void,
+ *   onStartPenaltyShootout?: (payload: { scoreHome: number, scoreAway: number, scoreTimeline: object[] }) => void,
  *   onBack: () => void,
  * }}
  */
@@ -44,6 +50,7 @@ let {
 	awayTeam,
 	ending = false,
 	onEndMatch,
+	onStartPenaltyShootout,
 	onBack,
 } = $props();
 
@@ -120,6 +127,20 @@ function gradientFor(id) {
 
 function handleEnd() {
 	onEndMatch?.({
+		scoreHome: state.scoreHome,
+		scoreAway: state.scoreAway,
+		scoreTimeline: state.events,
+	});
+}
+
+/**
+ * Hand the current match state up to the parent so it can route into
+ * the penalty-shootout flow with the pre-shootout score intact.
+ * Parent decides whether that's a new wizard step, a route push or
+ * an overlay — this component stays unopinionated.
+ */
+function handleStartPenaltyShootout() {
+	onStartPenaltyShootout?.({
 		scoreHome: state.scoreHome,
 		scoreAway: state.scoreAway,
 		scoreTimeline: state.events,
@@ -285,6 +306,7 @@ $effect(() => {
 			{ending}
 			onToggleCard={(color) => (state = toggleCardMode(state, color))}
 			onTogglePenaltyMiss={() => (state = togglePenaltyMissMode(state))}
+			onStartPenaltyShootout={handleStartPenaltyShootout}
 			onEndMatch={handleEnd}
 		/>
 	</div>

@@ -3,9 +3,18 @@ import { getTranslate } from "@tolgee/svelte";
 import { CARD_COLOR, MODE } from "$lib/constants/liveMatch.constants.js";
 
 /**
- * Sticky bottom strip with the card toggle, missed-penalty button and
- * "Spiel beenden". Mirrors the mockup's two-row layout (event row +
- * end-match row) on every breakpoint.
+ * Sticky bottom strip with the red-card toggle, missed-penalty toggle,
+ * a "Start penalty shootout" CTA and the "Spiel beenden" primary button.
+ *
+ * Yellow cards used to live here too but were dropped — the volume in
+ * a real match was too high to track manually, and they barely move
+ * the needle statistically. Red cards stay because they're rarer and
+ * carry an ELO consequence.
+ *
+ * The 11m button is highlighted with a static golden glow (no pulse)
+ * to flag it as a special action without screaming at every match.
+ * It only fires `onStartPenaltyShootout` — the destination route is
+ * the parent's responsibility.
  *
  * @type {{
  *   mode: string,
@@ -13,6 +22,7 @@ import { CARD_COLOR, MODE } from "$lib/constants/liveMatch.constants.js";
  *   ending?: boolean,
  *   onToggleCard: (color: string) => void,
  *   onTogglePenaltyMiss: () => void,
+ *   onStartPenaltyShootout: () => void,
  *   onEndMatch: () => void,
  * }}
  */
@@ -22,6 +32,7 @@ let {
 	ending = false,
 	onToggleCard,
 	onTogglePenaltyMiss,
+	onStartPenaltyShootout,
 	onEndMatch,
 } = $props();
 
@@ -33,9 +44,6 @@ const otherModeBlocking = $derived(
 	mode !== MODE.IDLE && !cardModeActive && !penaltyMissActive,
 );
 
-const yellowActive = $derived(
-	cardModeActive && pendingCardColor === CARD_COLOR.YELLOW,
-);
 const redActive = $derived(
 	cardModeActive && pendingCardColor === CARD_COLOR.RED,
 );
@@ -44,16 +52,6 @@ const redActive = $derived(
 <div class="event-footer">
 	<div class="action-card">
 		<div class="action-row">
-			<button
-				type="button"
-				class="pill yellow"
-				class:active={yellowActive}
-				disabled={otherModeBlocking || penaltyMissActive}
-				onclick={() => onToggleCard(CARD_COLOR.YELLOW)}
-			>
-				<span class="card-icon-yellow"></span>
-				{$t("live_match.footer.yellow")}
-			</button>
 			<button
 				type="button"
 				class="pill red"
@@ -86,6 +84,30 @@ const redActive = $derived(
 					<line x1="6" y1="6" x2="18" y2="18" />
 				</svg>
 				{$t("live_match.footer.penalty_missed")}
+			</button>
+			<button
+				type="button"
+				class="pill penalty-shootout"
+				disabled={otherModeBlocking}
+				onclick={onStartPenaltyShootout}
+				aria-label={$t("live_match.footer.penalty_shootout_aria")}
+			>
+				<span class="pill-glow" aria-hidden="true"></span>
+				<svg
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="#FBBF24"
+					stroke-width="2.5"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					width="11"
+					height="11"
+					aria-hidden="true"
+				>
+					<circle cx="12" cy="12" r="9" />
+					<circle cx="12" cy="12" r="1.4" fill="#FBBF24" />
+				</svg>
+				{$t("live_match.footer.penalty_shootout")}
 			</button>
 		</div>
 	</div>
@@ -147,16 +169,12 @@ const redActive = $derived(
 	align-items: center;
 	justify-content: center;
 	gap: 5px;
+	position: relative;
+	overflow: hidden;
 	transition: background-color 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
 }
 .pill:active:not(:disabled) { transform: scale(0.98); }
 .pill:disabled { opacity: 0.4; cursor: not-allowed; }
-.pill.yellow { border-color: rgba(245, 158, 11, 0.25); }
-.pill.yellow.active {
-	background: rgba(245, 158, 11, 0.16);
-	border-color: rgba(245, 158, 11, 0.6);
-	color: #F59E0B;
-}
 .pill.red { border-color: rgba(226, 75, 74, 0.25); }
 .pill.red.active {
 	background: rgba(226, 75, 74, 0.16);
@@ -169,13 +187,29 @@ const redActive = $derived(
 	border-color: rgba(226, 75, 74, 0.45);
 	color: #E24B4A;
 }
-.card-icon-yellow {
-	width: 11px;
-	height: 14px;
-	background: #F59E0B;
-	border-radius: 2px;
-	display: inline-block;
+
+/* Penalty-shootout pill: static gold glow (no pulse). Visually marks
+   the button as a "special" action without nagging the user every
+   match — most matches never reach a shootout. */
+.pill.penalty-shootout {
+	border-color: rgba(245, 158, 11, 0.32);
+	color: #FBBF24;
 }
+.pill.penalty-shootout .pill-glow {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background: radial-gradient(
+		ellipse at top,
+		rgba(245, 158, 11, 0.22) 0%,
+		transparent 70%
+	);
+}
+.pill.penalty-shootout:hover:not(:disabled) {
+	border-color: rgba(245, 158, 11, 0.55);
+	background: rgba(245, 158, 11, 0.08);
+}
+
 .card-icon-red {
 	width: 11px;
 	height: 14px;
