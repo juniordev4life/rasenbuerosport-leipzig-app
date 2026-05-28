@@ -126,6 +126,42 @@ function shotToWire(shot) {
 }
 
 /**
+ * Project the converted shoot-by-shoot record into the regular
+ * `score_timeline` shape so the timeline view, the per-player goals
+ * tally and the AI match-report prompt all see the shootout as
+ * first-class goal events. Only converted shots become entries —
+ * misses stay in the `penalty_shootout` JSONB only.
+ *
+ * `home` / `away` track the SHOOTOUT score (not combined with
+ * regular time), and `period: "penalty"` disambiguates the entries
+ * from in-game penalties (which keep `period: "regular"` /
+ * `"extra_time"`). The schema already supports this shape — see
+ * `goalEntrySchema` in the backend's games schema.
+ *
+ * @param {Array<{ team: string, result: string, shooterId: string }>} shots
+ * @returns {Array<object>}
+ */
+function buildPenaltyTimelineEntries(shots) {
+	const entries = [];
+	let home = 0;
+	let away = 0;
+	for (const shot of shots) {
+		if (shot.result !== "goal") continue;
+		if (shot.team === "home") home += 1;
+		else if (shot.team === "away") away += 1;
+		entries.push({
+			event_type: "goal",
+			home,
+			away,
+			period: "penalty",
+			scored_by: shot.shooterId,
+			goal_type: "penalty",
+		});
+	}
+	return entries;
+}
+
+/**
  * Hand the shootout result back to `saveGame`. Regular-time score
  * stays the source of truth on `score_home` / `score_away`; the
  * shoot-by-shoot record + winner side ride along in the new
@@ -133,14 +169,20 @@ function shotToWire(shot) {
  * flips to "penalty" so downstream consumers (history badge,
  * match-detail hero) can render the i.E. decoration.
  *
+ * Converted shootout goals are also appended to `score_timeline`
+ * with `period: "penalty"` so the timeline view and the reporter
+ * prompt pick them up alongside the regular goals — without this
+ * the reporter narrates the match as if it had ended in a draw.
+ *
  * @param {{ shots: object[], finalPenaltyScore: { home: number, away: number }, winnerSide: 'home' | 'away' }} result
  */
 function handlePenaltyComplete(result) {
 	if (!preShootout) return;
+	const penaltyTimelineEntries = buildPenaltyTimelineEntries(result.shots);
 	saveGame({
 		scoreHome: preShootout.scoreHome,
 		scoreAway: preShootout.scoreAway,
-		scoreTimeline: preShootout.scoreTimeline,
+		scoreTimeline: [...preShootout.scoreTimeline, ...penaltyTimelineEntries],
 		resultType: "penalty",
 		penaltyShootout: {
 			triggered_at: new Date().toISOString(),

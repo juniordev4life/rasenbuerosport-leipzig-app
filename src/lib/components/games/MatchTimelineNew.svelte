@@ -30,6 +30,7 @@ const events = $derived.by(() => {
 	const rows = [];
 	let prevHome = 0;
 	let prevAway = 0;
+	let prevPeriod = null;
 	for (const e of timeline) {
 		if (
 			!e ||
@@ -39,6 +40,16 @@ const events = $derived.by(() => {
 				e.away == null)
 		) {
 			continue;
+		}
+		// When the period flips (regular → extra_time → penalty), the
+		// score resets to the shootout-only count for that segment.
+		// Reset the running baseline so the side-detection below works
+		// for the first shootout entry — without this, a 1:1 going into
+		// a 1:0 first penalty would look like the home count went DOWN
+		// and the entry would be silently dropped.
+		if (prevPeriod && e.period && e.period !== prevPeriod) {
+			prevHome = 0;
+			prevAway = 0;
 		}
 		const homeChanged = (e.home ?? prevHome) > prevHome;
 		const awayChanged = (e.away ?? prevAway) > prevAway;
@@ -56,6 +67,7 @@ const events = $derived.by(() => {
 		}
 		prevHome = e.home ?? prevHome;
 		prevAway = e.away ?? prevAway;
+		prevPeriod = e.period ?? prevPeriod;
 	}
 	return rows.reverse();
 });
