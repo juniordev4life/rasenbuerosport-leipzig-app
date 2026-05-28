@@ -107,22 +107,51 @@ function handleStartPenaltyShootout(payload) {
 }
 
 /**
- * Hand the shootout result back to `saveGame`. The actual shots +
- * winner aren't persisted yet — that wiring lands together with the
- * matching backend endpoints. For now we log them so the user can
- * verify the flow locally, and we forward the regular-time score
- * untouched so the match is recorded as a draw at the end of extra
- * time (penalty winner gets stitched on by the backend etappe).
+ * Translate a single shot from the in-component camelCase shape into
+ * the snake-case wire format the backend stores in `penalty_shootout`.
+ *
+ * @param {{ order: number, round: number, team: string, shooterId: string, result: string, keeperId: string | null, eloDeltas: Record<string, number> }} shot
+ * @returns {object}
+ */
+function shotToWire(shot) {
+	return {
+		order: shot.order,
+		round: shot.round,
+		team: shot.team,
+		shooter_id: shot.shooterId,
+		result: shot.result,
+		keeper_id: shot.keeperId ?? null,
+		elo_deltas: shot.eloDeltas ?? {},
+	};
+}
+
+/**
+ * Hand the shootout result back to `saveGame`. Regular-time score
+ * stays the source of truth on `score_home` / `score_away`; the
+ * shoot-by-shoot record + winner side ride along in the new
+ * `penalty_shootout` payload and the match-level `result_type`
+ * flips to "penalty" so downstream consumers (history badge,
+ * match-detail hero) can render the i.E. decoration.
  *
  * @param {{ shots: object[], finalPenaltyScore: { home: number, away: number }, winnerSide: 'home' | 'away' }} result
  */
 function handlePenaltyComplete(result) {
 	if (!preShootout) return;
-	console.info("Penalty shootout result", result);
 	saveGame({
 		scoreHome: preShootout.scoreHome,
 		scoreAway: preShootout.scoreAway,
 		scoreTimeline: preShootout.scoreTimeline,
+		resultType: "penalty",
+		penaltyShootout: {
+			triggered_at: new Date().toISOString(),
+			score_before: {
+				home: preShootout.scoreHome,
+				away: preShootout.scoreAway,
+			},
+			final_score: result.finalPenaltyScore,
+			winner_side: result.winnerSide,
+			shots: result.shots.map(shotToWire),
+		},
 	});
 }
 
@@ -140,7 +169,13 @@ function cancel() {
 	goto(ROUTES.DASHBOARD);
 }
 
-async function saveGame({ scoreHome, scoreAway, scoreTimeline }) {
+async function saveGame({
+	scoreHome,
+	scoreAway,
+	scoreTimeline,
+	resultType = "regular",
+	penaltyShootout = null,
+}) {
 	saving = true;
 	try {
 		const players = [
@@ -166,7 +201,8 @@ async function saveGame({ scoreHome, scoreAway, scoreTimeline }) {
 			score_away: scoreAway,
 			players,
 			score_timeline: scoreTimeline.length > 0 ? scoreTimeline : undefined,
-			result_type: "regular",
+			result_type: resultType,
+			...(penaltyShootout && { penalty_shootout: penaltyShootout }),
 		});
 
 		const gameId = res.data?.id;
