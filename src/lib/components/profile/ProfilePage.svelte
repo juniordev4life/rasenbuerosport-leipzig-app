@@ -286,6 +286,11 @@ const awards = $derived.by(() => {
 			description: trophy.description,
 			type: trophy.rarity === "diamond" ? "gold" : trophy.rarity,
 			icon: null,
+			// `category` is the bridge to the trophy room's icon glyphs —
+			// when present, AwardsSection renders the matching
+			// TrophyCategoryIcon SVG instead of a generic emoji so the
+			// profile mirrors what the user sees in the Trophäenraum.
+			category: trophy.category ?? null,
 			unlockedAt: trophy.unlockedAt ?? null,
 		}));
 });
