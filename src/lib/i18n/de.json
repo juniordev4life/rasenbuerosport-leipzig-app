@@ -1380,5 +1380,54 @@
 			"result_saved": "gehalten · {keeper}",
 			"result_off_target": "Pfosten / vorbei"
 		}
+	},
+	"trophies": {
+		"hero": {
+			"tag": "Deine Sammlung",
+			"title": "Trophäenraum",
+			"of": "von",
+			"total_label": "Trophäen",
+			"percent_complete": "% komplett"
+		},
+		"featured": {
+			"tag": "Zuletzt erhalten",
+			"earned_on": "Erhalten am"
+		},
+		"shelf": {
+			"progress_separator": "von",
+			"progress_suffix": "erreicht"
+		},
+		"category": {
+			"win": "Sieg-Trophäen",
+			"streak": "Serien-Trophäen",
+			"goal": "Tor-Trophäen",
+			"defense": "Defensiv-Trophäen",
+			"special": "Spezial-Trophäen",
+			"duo": "Duo-Trophäen",
+			"rivalry": "Rivalitäts-Trophäen",
+			"meta": "Meta-Trophäen",
+			"hidden": "Versteckte Trophäen"
+		},
+		"rarity": {
+			"bronze": "Bronze",
+			"silver": "Silber",
+			"gold": "Gold",
+			"diamond": "Diamant"
+		},
+		"masked": {
+			"name": "???",
+			"description": "Versteckte Trophäe",
+			"description_long": "Entdecke diese Trophäe, indem du etwas Besonderes auf dem Platz schaffst."
+		},
+		"detail": {
+			"earned_on": "Erhalten am",
+			"progress": "Fortschritt",
+			"locked_hint": "Noch nicht freigeschaltet — bleib dran.",
+			"close": "Schließen"
+		},
+		"error": {
+			"load_failed": "Trophäen konnten nicht geladen werden."
+		},
+		"profile_link": "Trophäenraum"
 	}
 }
