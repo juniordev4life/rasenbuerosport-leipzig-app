@@ -92,26 +92,40 @@ function handleKey(event) {
 	<div class="trophy-desc">{descText}</div>
 	<div class="trophy-rarity-pill">{$t(rarityMeta?.i18nKey)}</div>
 
-	{#if unlocked && dateText}
-		<div class="trophy-date">{dateText}</div>
-	{:else if progress}
-		<div class="trophy-progress">
-			<div class="trophy-progress-bar">
-				<div
-					class="trophy-progress-fill"
-					style:width="{progress.percent}%"
-				></div>
+	<!--
+		Footer slot — same min-height regardless of which child renders.
+		Keeps every card the same overall height so a row of mixed
+		earned / locked / masked tiles doesn't look jagged.
+	-->
+	<div class="trophy-footer">
+		{#if unlocked && dateText}
+			<div class="trophy-date">{dateText}</div>
+		{:else if progress}
+			<div class="trophy-progress">
+				<div class="trophy-progress-bar">
+					<div
+						class="trophy-progress-fill"
+						style:width="{progress.percent}%"
+					></div>
+				</div>
+				<div class="trophy-progress-text">
+					{progress.current} / {progress.target}
+				</div>
 			</div>
-			<div class="trophy-progress-text">
-				{progress.current} / {progress.target}
-			</div>
-		</div>
-	{/if}
+		{/if}
+	</div>
 </button>
 
 <style>
 	.trophy {
 		flex: 0 0 130px;
+		/* Stretch to the row's tallest card so a mixed row of
+		 * earned / locked / masked tiles stays uniform. The row sets
+		 * `align-items: stretch` (the flex default) — this `height`
+		 * just opts each card into the stretching instead of sizing
+		 * to its own content. */
+		height: 100%;
+		min-height: 220px;
 		background: var(--color-bg-card);
 		border: 1px solid var(--color-border);
 		border-radius: 14px;
@@ -241,15 +255,26 @@ function handleKey(event) {
 		color: var(--color-text-muted);
 		border-color: color-mix(in srgb, var(--color-border) 50%, transparent);
 	}
+	/* Footer slot always claims the same vertical space — date OR
+	 * progress OR nothing, every card ends at the same bottom line.
+	 * `margin-top: auto` pins it to the bottom so the icon + name
+	 * stack stays anchored at the top. */
+	.trophy-footer {
+		width: 100%;
+		min-height: 22px;
+		margin-top: auto;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: flex-end;
+	}
 	.trophy-date {
 		font-size: 8px;
 		color: var(--color-text-muted);
-		margin-top: 2px;
 		letter-spacing: 0.04em;
 	}
 	.trophy-progress {
 		width: 100%;
-		margin-top: 2px;
 	}
 	.trophy-progress-bar {
 		height: 3px;
