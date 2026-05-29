@@ -6,6 +6,25 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v1.1.0
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.0.0...v1.1.0)
+
+### 🚀 Enhancements
+
+- **trophies:** Trophäenraum page + profile entry point ([#52](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/52))
+
+### 🩹 Fixes
+
+- **trophies:** Use \$t store auto-subscribe (was calling t as a function) ([#53](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/53))
+- **profile:** Top-3 awards reads the trophy room, not legacy badges ([#57](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/57))
+- **profile:** Render trophy category icons in awards section ([#58](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/58))
+- **reporter-bio:** Clear iOS status bar / notch in PWA mode ([#59](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/59))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v1.0.0 (2026-05-29)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.11...v1.0.0)
