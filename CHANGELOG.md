@@ -6,6 +6,32 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v0.1.11
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.10...v0.1.11)
+
+### 🚀 Enhancements
+
+- **new-game:** Replay-onboarding button + iOS safe-area fix on the wizard banner ([286ac14](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/286ac14))
+- **live-match:** Swap yellow card for penalty-shootout 11m button ([#44](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/44))
+- **penalty-shootout:** Full UI flow with local mock state ([#45](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/45))
+- **penalty-shootout:** Persist shootout result on match save ([#46](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/46))
+- **match-detail:** Show penalty winner + shoot-by-shoot summary ([#47](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/47))
+- **live-match:** Auto-detect extra time from goal minutes ([#50](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/50))
+
+### 🩹 Fixes
+
+- **penalty-shootout:** Clean up display redundancy across surfaces ([#48](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/48))
+- **penalty-shootout:** Fold shootout goals into score_timeline + lineup ([#49](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/49))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v0.1.10 ([64b4bb9](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/64b4bb9))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v0.1.10 (2026-05-27)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.9...v0.1.10)
