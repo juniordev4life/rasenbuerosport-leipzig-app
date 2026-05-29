@@ -48,7 +48,7 @@ const dateText = $derived(
 					points="12 2 15 8.5 22 9.3 17 14 18.2 21 12 17.8 5.8 21 7 14 2 9.3 9 8.5 12 2"
 				/>
 			</svg>
-			{t("trophies.featured.tag")}
+			{$t("trophies.featured.tag")}
 		</div>
 	</header>
 	<div
@@ -73,7 +73,7 @@ const dateText = $derived(
 				>
 					<polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8" />
 				</svg>
-				{t(rarityMeta?.i18nKey)}
+				{$t(rarityMeta?.i18nKey)}
 			</div>
 			<div class="featured-name">{latest.name}</div>
 			{#if trophyDef?.description}
@@ -96,7 +96,7 @@ const dateText = $derived(
 					<line x1="8" y1="2" x2="8" y2="6" />
 					<line x1="3" y1="10" x2="21" y2="10" />
 				</svg>
-				{t("trophies.featured.earned_on")}
+				{$t("trophies.featured.earned_on")}
 				{dateText}
 			</div>
 		</div>

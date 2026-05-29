@@ -27,9 +27,9 @@ const unlocked = $derived(trophy.unlocked === true);
 const masked = $derived(trophy.masked === true);
 const progress = $derived(trophy.progress ?? null);
 
-const titleText = $derived(masked ? t("trophies.masked.name") : trophy.name);
+const titleText = $derived(masked ? $t("trophies.masked.name") : trophy.name);
 const descText = $derived(
-	masked ? t("trophies.masked.description") : trophy.description,
+	masked ? $t("trophies.masked.description") : trophy.description,
 );
 
 const dateText = $derived(
@@ -90,7 +90,7 @@ function handleKey(event) {
 
 	<div class="trophy-name">{titleText}</div>
 	<div class="trophy-desc">{descText}</div>
-	<div class="trophy-rarity-pill">{t(rarityMeta?.i18nKey)}</div>
+	<div class="trophy-rarity-pill">{$t(rarityMeta?.i18nKey)}</div>
 
 	{#if unlocked && dateText}
 		<div class="trophy-date">{dateText}</div>

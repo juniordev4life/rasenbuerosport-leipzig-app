@@ -57,12 +57,12 @@ const sorted = $derived.by(() => {
 				<TrophyCategoryIcon {category} size={16} />
 			</div>
 			<div class="regal-title-text">
-				<div class="regal-name">{t(meta?.i18nKey)}</div>
+				<div class="regal-name">{$t(meta?.i18nKey)}</div>
 				<div class="regal-progress">
 					<strong>{unlockedCount}</strong>
-					{t("trophies.shelf.progress_separator")}
+					{$t("trophies.shelf.progress_separator")}
 					{trophies.length}
-					{t("trophies.shelf.progress_suffix")}
+					{$t("trophies.shelf.progress_suffix")}
 				</div>
 			</div>
 		</div>
