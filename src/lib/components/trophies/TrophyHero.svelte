@@ -38,18 +38,18 @@ const rarityOrder = ["bronze", "silver", "gold", "diamond"];
 				d="M8 21h8M12 17v4M7 4h10v3a5 5 0 01-10 0V4zM7 4H4v2a3 3 0 003 3M17 4h3v2a3 3 0 01-3 3"
 			/>
 		</svg>
-		{t("trophies.hero.tag")}
+		{$t("trophies.hero.tag")}
 	</div>
-	<div class="hero-title">{t("trophies.hero.title")}</div>
+	<div class="hero-title">{$t("trophies.hero.title")}</div>
 	<div class="hero-subtitle">
 		<span class="count-current">{summary?.unlocked ?? 0}</span>
 		<span class="count-total">
-			{t("trophies.hero.of")}
+			{$t("trophies.hero.of")}
 			{summary?.total ?? 0}
-			{t("trophies.hero.total_label")}
+			{$t("trophies.hero.total_label")}
 		</span>
 		<span class="dot">·</span>
-		<span class="percent">{percent}{t("trophies.hero.percent_complete")}</span>
+		<span class="percent">{percent}{$t("trophies.hero.percent_complete")}</span>
 	</div>
 	<div class="hero-progress-section">
 		<div class="hero-progress-row">
@@ -62,7 +62,7 @@ const rarityOrder = ["bronze", "silver", "gold", "diamond"];
 						{summary?.byRarity?.[rarity] ?? 0}
 					</div>
 					<div class="rarity-stat-label">
-						{t(RARITY_META[rarity].i18nKey)}
+						{$t(RARITY_META[rarity].i18nKey)}
 					</div>
 				</div>
 			{/each}

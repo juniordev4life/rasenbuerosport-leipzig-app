@@ -87,7 +87,7 @@ function handleClose() {
 	</div>
 {:else if errorMessage}
 	<div class="error">
-		<p>{t("trophies.error.load_failed")}</p>
+		<p>{$t("trophies.error.load_failed")}</p>
 		<p class="error-detail">{errorMessage}</p>
 	</div>
 {:else if payload}
