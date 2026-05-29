@@ -6,6 +6,14 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v1.0.0 (2026-05-29)
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.11...v1.0.0)
+
+### 🎉 Milestone
+
+Stable production release. The Striker now ships the in-app feedback form, the complete penalty-shootout workflow (Live-Match action row, sequence board, shoot-by-shoot summary, match-detail integration) and auto-detected extra time — promoting to v1.0.0 marks the app as feature-complete for the office-foosball loop. No code changes since v0.1.11; this tag anchors the milestone.
+
 ## v0.1.11 (2026-05-29)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v0.1.10...v0.1.11)
