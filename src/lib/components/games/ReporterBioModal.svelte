@@ -31,14 +31,21 @@ function handleKeydown(event) {
 	aria-modal="true"
 	aria-labelledby="reporter-bio-name"
 >
+	<!--
+		Padding bakes in the iOS safe-area insets on mobile so the
+		dialog content (and the close button) clears the notch /
+		status bar when the app runs as a standalone PWA. On desktop
+		(`sm:`) the safe-area values are 0 and `sm:p-7` overrides
+		anyway, so nothing changes there.
+	-->
 	<div
-		class="relative w-full h-full sm:h-auto sm:max-w-md sm:max-h-[90vh] sm:rounded-2xl border-0 sm:border sm:border-border bg-bg-secondary overflow-y-auto p-6 sm:p-7"
+		class="relative w-full h-full sm:h-auto sm:max-w-md sm:max-h-[90vh] sm:rounded-2xl border-0 sm:border sm:border-border bg-bg-secondary overflow-y-auto px-6 pt-[max(env(safe-area-inset-top),1.5rem)] pb-[max(env(safe-area-inset-bottom),1.5rem)] sm:p-7"
 		onclick={(e) => e.stopPropagation()}
 	>
 		<button
 			type="button"
 			onclick={onClose}
-			class="absolute top-3 right-3 w-8 h-8 rounded-full bg-bg-input/80 hover:bg-bg-input text-text-secondary text-lg flex items-center justify-center"
+			class="absolute right-3 top-[max(env(safe-area-inset-top),0.75rem)] w-8 h-8 rounded-full bg-bg-input/80 hover:bg-bg-input text-text-secondary text-lg flex items-center justify-center"
 			aria-label={$t("common.close")}
 		>×</button>
 
