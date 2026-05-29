@@ -1,5 +1,6 @@
 import { sveltekit } from "@sveltejs/kit/vite";
 import tailwindcss from "@tailwindcss/vite";
+import { svelteTesting } from "@testing-library/svelte/vite";
 import { defineConfig } from "vitest/config";
 
 /**
@@ -7,9 +8,14 @@ import { defineConfig } from "vitest/config";
  *
  * Coverage thresholds: 80% for utils/services (pure logic), 60% for components
  * and overall branches. Static assets and the SvelteKit shell are excluded.
+ *
+ * The `svelteTesting()` plugin flips Vite into browser-resolution mode for
+ * test runs so `@testing-library/svelte`'s `mount(...)` resolves the
+ * client-side build of Svelte 5 instead of the server build (which would
+ * throw `lifecycle_function_unavailable`).
  */
 export default defineConfig({
-	plugins: [tailwindcss(), sveltekit()],
+	plugins: [tailwindcss(), sveltekit(), svelteTesting()],
 	test: {
 		environment: "jsdom",
 		globals: false,
