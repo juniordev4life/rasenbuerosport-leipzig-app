@@ -211,14 +211,39 @@ function cancel() {
 	goto(ROUTES.DASHBOARD);
 }
 
+/**
+ * Derive the match-level `result_type` from the timeline + penalty
+ * payload. Replaces the old explicit "Verlängerung starten" button —
+ * a goal recorded with `minute > 90` (which already lands with
+ * `period: "extra_time"` from the live-match state machine) is now
+ * enough to flag the match as having gone into extra time.
+ *
+ * Priority order: penalty > extra_time > regular. A shootout always
+ * implies extra time was played, so we don't need to also check the
+ * timeline in that case.
+ *
+ * @param {object[]} timeline - score_timeline entries (snake_case)
+ * @param {object|null} penaltyShootout - present iff a shootout happened
+ * @returns {"regular" | "extra_time" | "penalty"}
+ */
+function deriveResultType(timeline, penaltyShootout) {
+	if (penaltyShootout) return "penalty";
+	const hasExtraTimeEvent = (timeline ?? []).some(
+		(e) => e?.period === "extra_time",
+	);
+	return hasExtraTimeEvent ? "extra_time" : "regular";
+}
+
 async function saveGame({
 	scoreHome,
 	scoreAway,
 	scoreTimeline,
-	resultType = "regular",
+	resultType,
 	penaltyShootout = null,
 }) {
 	saving = true;
+	const effectiveResultType =
+		resultType ?? deriveResultType(scoreTimeline, penaltyShootout);
 	try {
 		const players = [
 			...homePlayers
@@ -243,7 +268,7 @@ async function saveGame({
 			score_away: scoreAway,
 			players,
 			score_timeline: scoreTimeline.length > 0 ? scoreTimeline : undefined,
-			result_type: resultType,
+			result_type: effectiveResultType,
 			...(penaltyShootout && { penalty_shootout: penaltyShootout }),
 		});
 
