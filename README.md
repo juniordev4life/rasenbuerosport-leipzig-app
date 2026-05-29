@@ -161,6 +161,8 @@ The profile is the heart of your foosball career — everything you've ever done
 
 **Liga-Statistiken**: 86% Siegquote in La Liga, 71% in der Bundesliga.
 
+**Trophäenraum** (`/app/profile/trophies`) — 64 Trophäen verteilt auf 9 Kategorien (Sieg, Serie, Tor, Defensiv, Spezial, Duo, Rivalität, Meta, Versteckt). Earned-Trophäen tragen Rarity-Farbe + Datum, gesperrte Threshold-Trophäen zeigen `current / target`-Progress, versteckte Trophäen bleiben maskiert bis sie freigeschaltet sind. Erreichbar über den "Alle ansehen →"-Link in der Auszeichnungen-Section.
+
 [More about the profile →](docs/features/PROFILE.md)
 
 ---

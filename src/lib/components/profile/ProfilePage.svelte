@@ -1,5 +1,6 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import { goto } from "$app/navigation";
 import AxisInfoModal from "$lib/components/playerProfile/AxisInfoModal.svelte";
 import { get } from "$lib/services/api.services.js";
 import {
@@ -341,6 +342,12 @@ const totalsLosses = $derived(profile?.player?.losses ?? eloEntry?.losses ?? 0);
 				{awards}
 				totalCount={profile.totalBadges ?? null}
 				unlockedCount={awards.length}
+				onViewAll={() =>
+					goto(
+						isOwnProfile
+							? "/app/profile/trophies"
+							: `/app/profile/${playerId}/trophies`,
+					)}
 			/>
 		</div>
 	</div>

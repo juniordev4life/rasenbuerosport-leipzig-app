@@ -1378,5 +1378,54 @@
 			"result_saved": "saved · {keeper}",
 			"result_off_target": "Post / wide"
 		}
+	},
+	"trophies": {
+		"hero": {
+			"tag": "Your collection",
+			"title": "Trophy Room",
+			"of": "of",
+			"total_label": "trophies",
+			"percent_complete": "% complete"
+		},
+		"featured": {
+			"tag": "Most recent",
+			"earned_on": "Earned on"
+		},
+		"shelf": {
+			"progress_separator": "of",
+			"progress_suffix": "earned"
+		},
+		"category": {
+			"win": "Win Trophies",
+			"streak": "Streak Trophies",
+			"goal": "Goal Trophies",
+			"defense": "Defensive Trophies",
+			"special": "Special Trophies",
+			"duo": "Duo Trophies",
+			"rivalry": "Rivalry Trophies",
+			"meta": "Meta Trophies",
+			"hidden": "Hidden Trophies"
+		},
+		"rarity": {
+			"bronze": "Bronze",
+			"silver": "Silver",
+			"gold": "Gold",
+			"diamond": "Diamond"
+		},
+		"masked": {
+			"name": "???",
+			"description": "Hidden trophy",
+			"description_long": "Discover this trophy by pulling off something special on the pitch."
+		},
+		"detail": {
+			"earned_on": "Earned on",
+			"progress": "Progress",
+			"locked_hint": "Not unlocked yet — keep at it.",
+			"close": "Close"
+		},
+		"error": {
+			"load_failed": "Failed to load trophies."
+		},
+		"profile_link": "Trophy Room"
 	}
 }
