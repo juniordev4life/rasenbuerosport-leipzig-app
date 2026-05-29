@@ -95,9 +95,9 @@ function defaultIcon(type) {
 		</div>
 	{/if}
 
-	{#if totalCount != null && unlockedCount != null}
+	{#if totalCount != null && totalCount > 0}
 		<div class="awards-footer">
-			{unlockedCount} {$t("profile.awards_of")} {totalCount} {$t("profile.awards_unlocked")}
+			{$t("profile.awards_unlocked_count", { count: totalCount })}
 			{#if onViewAll}
 				· <button type="button" class="link" onclick={onViewAll}>{$t("profile.awards_view_all")}</button>
 			{/if}
