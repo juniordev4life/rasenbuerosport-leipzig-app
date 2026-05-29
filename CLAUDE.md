@@ -244,7 +244,11 @@ The repo currently has unit tests under `tests/unit/utils/` but Vitest is not ye
 
 - Tolgee config in `src/lib/config/i18n.config.js`
 - Translation files: `src/lib/i18n/de.json`, `src/lib/i18n/en.json`
-- In components: `const { t } = getTranslate(); … {$t('key')}`
+- `getTranslate()` returns a Svelte STORE — the destructured `t` is a `Readable`, NOT a callable function. ALWAYS use the auto-subscribe `$t(...)` prefix:
+  - Template: `{$t('key')}`
+  - Script (must be reactive): `const label = $derived($t('key'))`
+  - With placeholders: `$t('key', { count: n })` against an i18n value like `"You have {count} items"`
+- DO NOT write `t('key')` — it throws `TypeError: t is not a function` at the first render. This regression has shipped twice in the trophy room; both times by reaching for the destructured `t` directly inside `$derived(...)` blocks. Patterns to compare against when unsure: `ProfileSpiderSection.svelte` (`$derived(...map(k => $t(...)))`) and `ProfilePage.svelte` (template `{$t(...)}`).
 - Keep keys flat or shallowly nested by domain (`game.create.title`, `stats.label.winRate`)
 - Add both `de` and `en` for every new key
 
