@@ -453,6 +453,7 @@
 		"awards_new": "New",
 		"awards_of": "of",
 		"awards_unlocked": "unlocked",
+		"awards_unlocked_count": "You've unlocked {count} awards",
 		"awards_view_all": "View all →",
 		"league_average": "League average",
 		"strengths": "Strengths",
@@ -1279,8 +1280,8 @@
 			"body": "From the match's passing stats we derive a short pass-style tag — e.g. \"Tiki-Taka\" for lots of short passes or \"Direct play\" for long balls.\n\nThe tags show how a team built up their game. Source is the pass distribution from the uploaded FC stats. No uploaded stats means no tags."
 		},
 		"awards": {
-			"title": "Achievements",
-			"body": "There are 15 badges to unlock. Some are statistical milestones (50 matches, 10 goals in a single game), others reward special performances or streaks — like winning across several weeks.\n\nBadges are checked and unlocked automatically after every match. The full list with unlock conditions is on the Achievements page."
+			"title": "Awards",
+			"body": "There are 64 trophies to unlock across 9 categories — wins, streaks, goals, defense, special, duo, rivalry, meta, and hidden trophies. Rarity ranges from bronze through silver and gold to diamond.\n\nTrophies are checked automatically after every match. This block shows your top awards — the full collection with progress lives in the Trophy Room."
 		},
 		"relations": {
 			"title": "Relationships",

@@ -455,6 +455,7 @@
 		"awards_new": "Neu",
 		"awards_of": "von",
 		"awards_unlocked": "freigeschaltet",
+		"awards_unlocked_count": "Du hast {count} Auszeichnungen freigeschaltet",
 		"awards_view_all": "Alle ansehen →",
 		"league_average": "Liga-Durchschnitt",
 		"strengths": "Stärken",
@@ -1281,8 +1282,8 @@
 			"body": "Aus der Pässe-Statistik des Spiels wird ein kurzer Pass-Stil-Tag abgeleitet — z. B. „Tiki-Taka\" für viele kurze Pässe oder „Direktspiel\" für lange Bälle.\n\nDie Tags zeigen, wie ein Team sein Spiel aufgezogen hat. Quelle ist die Pass-Verteilung aus der hochgeladenen FC-Statistik. Ohne hochgeladene Stats keine Tags."
 		},
 		"awards": {
-			"title": "Achievements",
-			"body": "Es gibt 15 Badges zum Freischalten. Manche sind statistische Meilensteine (z. B. 50 Spiele, 10 Tore in einem Match), andere kommen für besondere Leistungen oder Serien — etwa eine Siegesserie über mehrere Wochen.\n\nDie Badges werden nach jedem Spiel automatisch geprüft und freigeschaltet. Die volle Liste mit Unlock-Bedingungen findest du auf der Achievement-Seite."
+			"title": "Auszeichnungen",
+			"body": "Es gibt 64 Trophäen zum Freischalten, verteilt auf 9 Kategorien — Siege, Serien, Tore, Defensive, Spezial, Duo, Rivalitäten, Meta und versteckte Trophäen. Die Rarität reicht von Bronze über Silber und Gold bis Diamant.\n\nDie Trophäen werden nach jedem Spiel automatisch geprüft. Hier siehst du deine Top-Auszeichnungen — die volle Sammlung mit Fortschritt findest du im Trophäenraum."
 		},
 		"relations": {
 			"title": "Beziehungen",
