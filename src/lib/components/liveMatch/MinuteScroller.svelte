@@ -68,10 +68,18 @@ function fmt(n) {
 }
 
 function classFor(n) {
-	if (n < min - EPS) return "locked";
-	if (Math.abs(n - value) < EPS) return "active";
-	if (Math.abs(Math.abs(n - value) - step) < EPS) return "near";
-	return "";
+	const classes = [];
+	if (n < min - EPS) classes.push("locked");
+	else if (Math.abs(n - value) < EPS) classes.push("active");
+	else if (Math.abs(Math.abs(n - value) - step) < EPS) classes.push("near");
+
+	// Mark the extra-time band (minutes 91..120) with a gold accent so
+	// the user sees at a glance that scrolling past 90 means they're
+	// recording a goal during Verlängerung. Only applies to the primary
+	// minute scroller; the stoppage picker has max=10 and never trips
+	// this branch.
+	if (n > 90 + EPS) classes.push("extra-time");
+	return classes.join(" ");
 }
 
 /** Look up the array index of `target`; defaults to 0 when unknown. */
@@ -323,5 +331,20 @@ function handleKeydown(event) {
 .picker-number.locked {
 	color: #3A3D45;
 	opacity: 0.5;
+}
+
+/* Extra-time band (minutes 91..120). The accent stays subtle when the
+   number isn't selected so a scroll past 90 reads as "you're now in
+   Verlängerung" without screaming. When the user lands on an
+   extra-time number, the active style still wins on weight + size,
+   but the gold tint persists so it's unambiguous in the editor. */
+.picker-number.extra-time {
+	color: #D4A437;
+}
+.picker-number.extra-time.near {
+	color: #FBBF24;
+}
+.picker-number.extra-time.active {
+	color: #FCD34D;
 }
 </style>
