@@ -1,6 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
+import TrophyCategoryIcon from "$lib/components/trophies/TrophyCategoryIcon.svelte";
 import InfoTip from "$lib/components/ui/InfoTip.svelte";
 
 /**
@@ -14,6 +15,7 @@ import InfoTip from "$lib/components/ui/InfoTip.svelte";
  *     description: string,
  *     type?: "gold"|"silver"|"bronze"|"spark",
  *     icon?: string|null,
+ *     category?: string|null,
  *     unlockedAt?: string|null,
  *   }>,
  *   totalCount?: number,
@@ -79,7 +81,15 @@ function defaultIcon(type) {
 				{@const fresh = isFresh(award)}
 				<div class="award-row" class:fresh>
 					<div class="award-icon {awardTypeClass(award.type)}">
-						{award.icon ?? defaultIcon(award.type)}
+						{#if award.category}
+							<TrophyCategoryIcon
+								category={award.category}
+								size={22}
+								strokeWidth={2}
+							/>
+						{:else}
+							{award.icon ?? defaultIcon(award.type)}
+						{/if}
 					</div>
 					<div class="award-info">
 						<div class="award-name-row">
@@ -140,6 +150,11 @@ function defaultIcon(type) {
 	font-size: 18px;
 	flex-shrink: 0;
 	box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+	/* White current-color so embedded SVGs from `<TrophyCategoryIcon>`
+	 * inherit a visible stroke on top of the bronze/silver/gold/spark
+	 * gradient circle. Emoji fallback still renders fine — emojis carry
+	 * their own colour. */
+	color: white;
 }
 .award-icon.gold   { background: linear-gradient(135deg, #FFD700, #DAA520); }
 .award-icon.silver { background: linear-gradient(135deg, #C0C0C0, #808080); }
