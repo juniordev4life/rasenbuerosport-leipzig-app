@@ -7,6 +7,7 @@ import {
 	getPlayerCareerStats,
 	getPlayerProfile,
 } from "$lib/services/playerProfile.services.js";
+import { getPlayerTrophies } from "$lib/services/trophies.services.js";
 import { buildEloHistory } from "$lib/utils/eloHistory.utils.js";
 import {
 	isOnboardingDone,
@@ -40,6 +41,7 @@ const { t } = getTranslate();
 let profile = $state(null);
 let games = $state([]);
 let careerStats = $state(null);
+let trophyPayload = $state(null);
 let loading = $state(true);
 let errorMsg = $state(null);
 let activeAxis = $state(null);
@@ -52,11 +54,19 @@ $effect(() => {
 	errorMsg = null;
 	(async () => {
 		try {
-			const [profileData, gamesRes, careerRes] = await Promise.all([
+			const [profileData, gamesRes, careerRes, trophyRes] = await Promise.all([
 				getPlayerProfile(id),
 				get("/v1/games?limit=200"),
 				getPlayerCareerStats(id).catch((err) => {
 					console.warn("Career stats unavailable:", err);
+					return null;
+				}),
+				// Trophies feed the "Top-Auszeichnungen" section as of Etappe B;
+				// the section now mirrors the trophy room instead of the legacy
+				// computeBadges output. Failures here downgrade gracefully —
+				// the section just shows no awards until the API answers.
+				getPlayerTrophies(id).catch((err) => {
+					console.warn("Trophies unavailable:", err);
 					return null;
 				}),
 			]);
@@ -64,6 +74,7 @@ $effect(() => {
 			profile = profileData;
 			games = gamesRes.data ?? [];
 			careerStats = careerRes ?? null;
+			trophyPayload = trophyRes ?? null;
 		} catch (err) {
 			if (aborted) return;
 			errorMsg = err?.message || $t("player_profile.error");
@@ -250,24 +261,35 @@ const relations = $derived({
 // stays in one place. Used directly above in the `relations`
 // $derived block.
 
-const awards = $derived(
-	(profile?.topBadges ?? []).map((b, idx) => ({
-		id: b.type ?? `badge-${idx}`,
-		name: $t(`profile.badges.${b.type}`) ?? b.type,
-		description: b.unlockedAt ? formatDateShort(b.unlockedAt) : "",
-		type: deriveBadgeType(b.type),
-		icon: b.emoji ?? null,
-		unlockedAt: b.unlockedAt ?? null,
-	})),
-);
-
-function deriveBadgeType(type) {
-	if (!type) return "gold";
-	if (type.endsWith("_gold")) return "gold";
-	if (type.endsWith("_silber") || type.endsWith("_silver")) return "silver";
-	if (type.endsWith("_bronze")) return "bronze";
-	return "spark";
-}
+// Top-3 picker for the awards section, fed by the trophy room API.
+// Sort by rarity tier first (diamond > gold > silver > bronze), break
+// ties by most-recent unlock — same intent the legacy backend
+// `loadTopBadges()` used, just over the new 64-trophy catalogue. Awards
+// section currently understands `bronze | silver | gold | spark`, so
+// `diamond` collapses to `gold` for now; a proper diamond style lands
+// when the section is rewritten on top of the trophy data model.
+const RARITY_WEIGHT = { diamond: 4, gold: 3, silver: 2, bronze: 1 };
+const awards = $derived.by(() => {
+	const trophies = trophyPayload?.trophies ?? [];
+	return trophies
+		.filter((trophy) => trophy.unlocked)
+		.sort((a, b) => {
+			const weightA = RARITY_WEIGHT[a.rarity] ?? 0;
+			const weightB = RARITY_WEIGHT[b.rarity] ?? 0;
+			if (weightA !== weightB) return weightB - weightA;
+			return (b.unlockedAt ?? "").localeCompare(a.unlockedAt ?? "");
+		})
+		.slice(0, 3)
+		.map((trophy) => ({
+			id: trophy.id,
+			name: trophy.name,
+			description: trophy.description,
+			type: trophy.rarity === "diamond" ? "gold" : trophy.rarity,
+			icon: null,
+			unlockedAt: trophy.unlockedAt ?? null,
+		}));
+});
+const trophyTotalCount = $derived(trophyPayload?.summary?.unlocked ?? null);
 
 const totalsWins = $derived(profile?.player?.wins ?? eloEntry?.wins ?? 0);
 const totalsDraws = $derived(profile?.player?.draws ?? eloEntry?.draws ?? 0);
@@ -340,7 +362,7 @@ const totalsLosses = $derived(profile?.player?.losses ?? eloEntry?.losses ?? 0);
 		<div data-onboarding="profile-awards">
 			<AwardsSection
 				{awards}
-				totalCount={profile.totalBadges ?? null}
+				totalCount={trophyTotalCount}
 				unlockedCount={awards.length}
 				onViewAll={() =>
 					goto(
