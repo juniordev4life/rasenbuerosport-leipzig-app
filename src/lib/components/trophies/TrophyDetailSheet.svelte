@@ -28,9 +28,9 @@ const categoryMeta = $derived(CATEGORY_META[trophy.category]);
 const masked = $derived(trophy.masked === true);
 const unlocked = $derived(trophy.unlocked === true);
 
-const titleText = $derived(masked ? t("trophies.masked.name") : trophy.name);
+const titleText = $derived(masked ? $t("trophies.masked.name") : trophy.name);
 const descText = $derived(
-	masked ? t("trophies.masked.description_long") : (trophy.description ?? ""),
+	masked ? $t("trophies.masked.description_long") : (trophy.description ?? ""),
 );
 
 const dateText = $derived(
@@ -103,7 +103,7 @@ function handleKey(event) {
 				style:border-color="color-mix(in srgb, {rarityMeta?.colorHex} 40%, transparent)"
 				style:background="color-mix(in srgb, {rarityMeta?.colorHex} 15%, transparent)"
 			>
-				{t(rarityMeta?.i18nKey)}
+				{$t(rarityMeta?.i18nKey)}
 			</span>
 			{#if !masked && categoryMeta}
 				<span
@@ -112,7 +112,7 @@ function handleKey(event) {
 					style:border-color={categoryMeta.borderRgba}
 					style:background={categoryMeta.bgRgba}
 				>
-					{t(categoryMeta.i18nKey)}
+					{$t(categoryMeta.i18nKey)}
 				</span>
 			{/if}
 		</div>
@@ -135,13 +135,13 @@ function handleKey(event) {
 				>
 					<polyline points="20 6 9 17 4 12" />
 				</svg>
-				{t("trophies.detail.earned_on")}
+				{$t("trophies.detail.earned_on")}
 				{dateText}
 			</div>
 		{:else if trophy.progress}
 			<div class="status progress-block">
 				<div class="progress-label">
-					{t("trophies.detail.progress")}
+					{$t("trophies.detail.progress")}
 				</div>
 				<div class="progress-bar">
 					<div
@@ -156,12 +156,12 @@ function handleKey(event) {
 			</div>
 		{:else if !unlocked}
 			<div class="status locked-hint">
-				{t("trophies.detail.locked_hint")}
+				{$t("trophies.detail.locked_hint")}
 			</div>
 		{/if}
 
 		<button type="button" class="close-btn" onclick={onClose}>
-			{t("trophies.detail.close")}
+			{$t("trophies.detail.close")}
 		</button>
 	</div>
 </div>
