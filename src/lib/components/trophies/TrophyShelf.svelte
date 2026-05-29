@@ -137,6 +137,12 @@ const sorted = $derived.by(() => {
 	}
 	.regal-row {
 		display: flex;
+		/* Explicit `stretch` so every card in the row matches the
+		 * tallest one — `<TrophyCard>` uses `height: 100%` to opt in.
+		 * Without this every card sizes to its own content and a
+		 * mixed row (earned with a date, locked with a progress bar,
+		 * masked with nothing) looks jagged. */
+		align-items: stretch;
 		gap: 12px;
 		padding: 0 4px 4px;
 	}
