@@ -1,19 +1,30 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import MatchAudioPlayer from "$lib/components/games/MatchAudioPlayer.svelte";
 import MicIcon from "$lib/components/icons/MicIcon.svelte";
-import PlayIcon from "$lib/components/icons/PlayIcon.svelte";
 import { REPORTERS } from "$lib/constants/reporters.constants.js";
 
 /**
- * Talkrunde audio card. V1 only renders the placeholder state because
- * the audio-generation pipeline is its own follow-up spec.
+ * Friday-talkshow card. When a persisted episode is available
+ * (`talkrunde.audioUrl` set) the card renders the shared
+ * `<MatchAudioPlayer>` with the klassiker palette so Marcel's
+ * accent-red carries the talkshow brand. Otherwise the empty-state
+ * copy is shown — the placeholder the dashboard had since the very
+ * first version.
  *
  * Reporter avatars use the persona photos shared with the Frank card
  * and the match-report header. They are intentionally NOT clickable
  * here — the bio dialog is reserved for the contexts where the
  * reporter is the lead voice on the card.
  *
- * @type {{ talkrunde?: object|null }}
+ * @type {{
+ *   talkrunde?: {
+ *     title?: string,
+ *     subtitle?: string,
+ *     audioUrl?: string|null,
+ *     isFresh?: boolean,
+ *   } | null,
+ * }}
  */
 let { talkrunde = null } = $props();
 
@@ -64,20 +75,7 @@ const lineup = [
 	</div>
 
 	{#if talkrunde?.audioUrl}
-		<div class="flex items-center gap-2.5">
-			<button type="button" class="play-btn">
-				<PlayIcon size={18} />
-			</button>
-			<div class="flex-1">
-				<div class="h-1 bg-white/8 rounded-full overflow-hidden">
-					<div class="h-full w-0 bg-gradient-to-r from-accent-red to-warning rounded-full"></div>
-				</div>
-				<div class="flex justify-between text-[10px] text-text-muted tabular-nums mt-1">
-					<span>0:00</span>
-					<span>{talkrunde.duration ?? "—"}</span>
-				</div>
-			</div>
-		</div>
+		<MatchAudioPlayer audioUrl={talkrunde.audioUrl} reporterId="klassiker" />
 	{:else}
 		<p class="text-[11px] text-text-muted italic">
 			{$t("home.talkrunde.empty_state")}
@@ -130,18 +128,4 @@ const lineup = [
 .reporter-avatar-photo.marcel { box-shadow: 0 0 0 1px rgba(226, 75, 74, 0.4); }
 .reporter-avatar-photo.sophie { box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.4); }
 .reporter-avatar-photo.frank { box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.4); }
-.play-btn {
-	width: 44px;
-	height: 44px;
-	border-radius: 50%;
-	background: linear-gradient(135deg, #E24B4A, #C73E3D);
-	border: none;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: white;
-	cursor: pointer;
-	box-shadow: 0 4px 12px rgba(226, 75, 74, 0.4);
-	flex-shrink: 0;
-}
 </style>

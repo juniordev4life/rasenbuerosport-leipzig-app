@@ -16,6 +16,7 @@ import MicIcon from "$lib/components/icons/MicIcon.svelte";
 import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get } from "$lib/services/api.services.js";
+import { getLatestTalkshowEpisode } from "$lib/services/talkshow.services.js";
 import { user } from "$lib/stores/auth.stores.js";
 import {
 	isOnboardingDone,
@@ -28,6 +29,7 @@ const { t } = getTranslate();
 
 let games = $state([]);
 let leaderboard = $state([]);
+let talkshowEpisode = $state(null);
 let loading = $state(true);
 
 const userId = $derived($user?.uid ?? null);
@@ -37,13 +39,21 @@ $effect(() => {
 	let aborted = false;
 	(async () => {
 		try {
-			const [gamesRes, lbRes] = await Promise.all([
+			const [gamesRes, lbRes, episode] = await Promise.all([
 				get("/v1/games?limit=20"),
 				get("/v1/leaderboard?limit=10"),
+				// Talkshow is non-critical for the dashboard — if the
+				// endpoint is slow or the episode doesn't exist yet, the
+				// card just falls back to its empty-state placeholder.
+				getLatestTalkshowEpisode().catch((err) => {
+					console.warn("Talkshow load failed:", err);
+					return null;
+				}),
 			]);
 			if (aborted) return;
 			games = gamesRes.data || [];
 			leaderboard = lbRes.data || [];
+			talkshowEpisode = episode;
 		} catch (err) {
 			console.error("Home load failed:", err);
 		} finally {
@@ -182,6 +192,34 @@ const lastFiveResults = $derived.by(() => {
 
 const series = $derived(detectUserSeries(myGames, userId, userName));
 
+/**
+ * Project the latest talkshow episode into the shape TalkrundeCard
+ * consumes. `isFresh` is true when the episode is younger than
+ * 7 days — drives the "Neu" ribbon on the card. Returns null when
+ * no episode has been generated yet so the card falls back to its
+ * placeholder copy.
+ */
+const talkrunde = $derived.by(() => {
+	if (!talkshowEpisode) return null;
+	const start = new Date(`${talkshowEpisode.week_start}T00:00:00`);
+	const end = new Date(`${talkshowEpisode.week_end}T00:00:00`);
+	const dayMonth = { day: "2-digit", month: "long" };
+	const dayMonthYear = { day: "2-digit", month: "long", year: "numeric" };
+	const rangeLabel = `${start.toLocaleDateString("de-DE", dayMonth)} – ${end.toLocaleDateString("de-DE", dayMonthYear)}`;
+
+	const generatedAt = new Date(talkshowEpisode.generated_at);
+	const ageMs = Date.now() - generatedAt.getTime();
+	const FRESH_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+	const isFresh = ageMs < FRESH_WINDOW_MS;
+
+	return {
+		title: $t("home.talkrunde.active_title"),
+		subtitle: rangeLabel,
+		audioUrl: talkshowEpisode.audio_url ?? null,
+		isFresh,
+	};
+});
+
 function formatMatchDate(iso) {
 	const d = new Date(iso);
 	return d.toLocaleDateString("de-DE", { day: "2-digit", month: "short" });
@@ -273,7 +311,7 @@ const top3 = $derived(
 		<SectionHeader title={$t("home.sections.talkrunde")}>
 			{#snippet icon()}<MicIcon size={11} strokeWidth={1.8} />{/snippet}
 		</SectionHeader>
-		<TalkrundeCard talkrunde={null} />
+		<TalkrundeCard {talkrunde} />
 
 		{#if series.length > 0}
 			<SectionHeader title={$t("home.sections.series")}>

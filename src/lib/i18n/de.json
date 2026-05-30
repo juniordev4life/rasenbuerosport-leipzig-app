@@ -118,6 +118,7 @@
 		},
 		"talkrunde": {
 			"new": "Neu",
+			"active_title": "Bürowoche",
 			"placeholder_title": "Freitags-Talkrunde startet bald",
 			"placeholder_subtitle": "Erste Folge: Freitag 22:00",
 			"lineup_suffix": "diskutieren die KW",
