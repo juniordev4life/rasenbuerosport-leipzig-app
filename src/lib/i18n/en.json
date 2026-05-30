@@ -116,6 +116,7 @@
 		},
 		"talkrunde": {
 			"new": "New",
+			"active_title": "Office week",
 			"placeholder_title": "Friday talk show coming soon",
 			"placeholder_subtitle": "First episode: Friday 22:00",
 			"lineup_suffix": "discuss the week",
