@@ -6,6 +6,22 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v1.2.0
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.1.0...v1.2.0)
+
+### 🚀 Enhancements
+
+- **talkshow:** Wire dashboard card to live episode + audio player ([#60](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/60))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v1.1.0 ([adaa208](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/adaa208))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v1.1.0 (2026-05-29)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.0.0...v1.1.0)
