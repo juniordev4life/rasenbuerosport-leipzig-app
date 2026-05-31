@@ -61,12 +61,24 @@ function goNewer() {
 }
 
 /**
- * Format an ISO date (YYYY-MM-DD) as "25. Mai 2026". Anchored at
- * midnight in local time so the day doesn't shift across timezones.
+ * Format a wrapped row's week boundary as "25. Mai 2026".
+ *
+ * The backend returns Postgres `DATE` columns as full ISO timestamps
+ * (`2026-05-25T00:00:00.000Z`) when they ride through `pg` + `JSON.
+ * stringify`, but it CAN also be a plain `YYYY-MM-DD` string if the
+ * column was selected as text or the row came from a local Docker
+ * snapshot with a different pg setup. The formatter accepts both
+ * and falls back to an empty string on garbage rather than rendering
+ * "Invalid Date" to the user.
  */
-function formatDate(iso) {
-	if (!iso) return "";
-	const d = new Date(`${iso}T00:00:00`);
+function formatDate(value) {
+	if (!value) return "";
+	const iso =
+		typeof value === "string" && value.length === 10
+			? `${value}T00:00:00`
+			: value;
+	const d = new Date(iso);
+	if (Number.isNaN(d.getTime())) return "";
 	return d.toLocaleDateString("de-DE", {
 		day: "2-digit",
 		month: "long",
