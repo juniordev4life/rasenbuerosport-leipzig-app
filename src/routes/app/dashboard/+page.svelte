@@ -308,7 +308,11 @@ const top3 = $derived(
 		</SectionHeader>
 		<ActiveChallengesCard />
 
-		<SectionHeader title={$t("home.sections.talkrunde")}>
+		<SectionHeader
+			title={$t("home.sections.talkrunde")}
+			href={ROUTES.WRAPPED}
+			actionLabel={$t("home.sections.talkrunde_action")}
+		>
 			{#snippet icon()}<MicIcon size={11} strokeWidth={1.8} />{/snippet}
 		</SectionHeader>
 		<TalkrundeCard {talkrunde} />

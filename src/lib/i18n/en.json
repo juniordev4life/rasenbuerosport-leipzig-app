@@ -106,6 +106,7 @@
 		"sections": {
 			"challenges": "Weekly challenges",
 			"talkrunde": "Friday talk show",
+			"talkrunde_action": "Open recap →",
 			"series": "Current streaks",
 			"quick_stats": "Your standing",
 			"recent_matches": "Your last matches",
