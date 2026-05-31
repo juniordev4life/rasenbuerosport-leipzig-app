@@ -216,27 +216,69 @@
 		"streak_keep_pushing_detail": "{completed} of {total} in the last weeks — more is possible."
 	},
 	"wrapped": {
-		"title": "This Week at the Office",
-		"subtitle": "Wrapped",
-		"this_week": "This week",
-		"games": "Games",
-		"goals": "Goals",
-		"mvp_title": "MVP of the Week",
-		"mvp_subtitle": "{count} wins",
-		"topscorer_title": "Top Scorer",
-		"topscorer_subtitle": "{count} goals",
-		"most_active_title": "Most Active Player",
-		"most_active_subtitle": "{count} games",
-		"top_duo_title": "Top Duo",
-		"top_duo_subtitle": "{wins}/{games} wins ({rate}%)",
-		"empty_title": "No wrapped yet",
-		"empty_subtitle": "The first wrapped will be generated on Friday at 22:00.",
-		"prev_week": "Previous week",
-		"next_week": "Next week",
-		"latest_label": "Current week",
-		"archive_position": "{current} of {total}",
-		"match_of_the_week_title": "Match of the Week",
-		"match_of_the_week_open": "Open game"
+		"nav": {
+			"supertitle": "Wrapped",
+			"title": "The Weeks at the Office",
+			"older": "Older week",
+			"newer": "Newer week"
+		},
+		"hero": {
+			"label": "This week",
+			"games": "Games",
+			"goals": "Goals"
+		},
+		"talkrunde": {
+			"tag": "Talk Show",
+			"lineup_suffix": "discuss the week",
+			"pending_title": "Generated on Friday",
+			"pending_body": "Marcel, Sophie and Frank discuss the week as soon as it wraps up.",
+			"pending_title_generating": "Recording right now",
+			"pending_body_generating": "Script is in, voices are being recorded — should be live in a moment.",
+			"pending_title_failed": "Recording failed",
+			"pending_body_failed": "The talk show couldn't be generated this week. We'll try again on the next run."
+		},
+		"section": {
+			"details": "The week in detail"
+		},
+		"mvp": {
+			"category": "MVP of the Week",
+			"detail": "{wins} wins this week"
+		},
+		"match_of_the_week": {
+			"category": "Match of the Week",
+			"fallback_detail": "Highest drama score of the week"
+		},
+		"topscorer": {
+			"category": "Top Scorer"
+		},
+		"most_active": {
+			"category": "Most Active Player"
+		},
+		"biggest_riser": {
+			"category": "Riser of the Week"
+		},
+		"biggest_loser": {
+			"category": "Unlucky one of the Week"
+		},
+		"hottest_streak": {
+			"category": "Hottest Streak",
+			"detail": "{count} wins in a row"
+		},
+		"top_duo": {
+			"category": "Top Duo",
+			"detail": "{wins}/{games} wins ({percent}%)"
+		},
+		"trophies": {
+			"category": "Trophies this week",
+			"count": "{count} new trophies"
+		},
+		"error": {
+			"load_failed": "Failed to load wrapped."
+		},
+		"empty": {
+			"title": "No wrapped yet",
+			"body": "The first wrapped will be generated on Friday at 22:00."
+		}
 	},
 	"recap": {
 		"title": "Your week so far",
