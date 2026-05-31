@@ -248,6 +248,13 @@
 			"category": "Match of the Week",
 			"fallback_detail": "Highest drama score of the week"
 		},
+		"match": {
+			"home_fallback": "Home",
+			"away_fallback": "Away",
+			"result_extra": "ET",
+			"result_penalty": "Pens",
+			"open_report": "Open match report"
+		},
 		"topscorer": {
 			"category": "Top Scorer"
 		},

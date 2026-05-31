@@ -250,6 +250,13 @@
 			"category": "Spiel der Woche",
 			"fallback_detail": "Höchster Drama-Score der Woche"
 		},
+		"match": {
+			"home_fallback": "Heim",
+			"away_fallback": "Auswärts",
+			"result_extra": "n.V.",
+			"result_penalty": "i.E.",
+			"open_report": "Zum Spielbericht"
+		},
 		"topscorer": {
 			"category": "Torschützenkönig"
 		},
