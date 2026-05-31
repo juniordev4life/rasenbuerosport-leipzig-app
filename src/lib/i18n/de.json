@@ -218,27 +218,69 @@
 		"streak_keep_pushing_detail": "{completed} von {total} in den letzten Wochen — mehr ist drin."
 	},
 	"wrapped": {
-		"title": "Diese Woche im Büro",
-		"subtitle": "Wrapped",
-		"this_week": "Diese Woche",
-		"games": "Spiele",
-		"goals": "Tore",
-		"mvp_title": "MVP der Woche",
-		"mvp_subtitle": "{count} Siege",
-		"topscorer_title": "Torschützenkönig",
-		"topscorer_subtitle": "{count} Tore",
-		"most_active_title": "Aktivster Spieler",
-		"most_active_subtitle": "{count} Spiele",
-		"top_duo_title": "Top Duo",
-		"top_duo_subtitle": "{wins}/{games} Siege ({rate}%)",
-		"empty_title": "Noch kein Wrapped",
-		"empty_subtitle": "Das erste Wrapped wird Freitag um 22:00 Uhr generiert.",
-		"prev_week": "Vorherige Woche",
-		"next_week": "Nächste Woche",
-		"latest_label": "Aktuelle Woche",
-		"archive_position": "{current} von {total}",
-		"match_of_the_week_title": "Spiel der Woche",
-		"match_of_the_week_open": "Spiel ansehen"
+		"nav": {
+			"supertitle": "Wrapped",
+			"title": "Die Wochen im Büro",
+			"older": "Ältere Woche",
+			"newer": "Neuere Woche"
+		},
+		"hero": {
+			"label": "Diese Woche",
+			"games": "Spiele",
+			"goals": "Tore"
+		},
+		"talkrunde": {
+			"tag": "Talkrunde",
+			"lineup_suffix": "besprechen die Woche",
+			"pending_title": "Wird Freitag generiert",
+			"pending_body": "Marcel, Sophie und Frank besprechen die Woche, sobald sie abgeschlossen ist.",
+			"pending_title_generating": "Wird gerade generiert",
+			"pending_body_generating": "Das Drehbuch steht, die Stimmen werden aufgenommen — gleich verfügbar.",
+			"pending_title_failed": "Aufnahme fehlgeschlagen",
+			"pending_body_failed": "Die Talkrunde konnte nicht erzeugt werden. Wir versuchen es beim nächsten Lauf wieder."
+		},
+		"section": {
+			"details": "Die Woche im Detail"
+		},
+		"mvp": {
+			"category": "MVP der Woche",
+			"detail": "{wins} Siege diese Woche"
+		},
+		"match_of_the_week": {
+			"category": "Spiel der Woche",
+			"fallback_detail": "Höchster Drama-Score der Woche"
+		},
+		"topscorer": {
+			"category": "Torschützenkönig"
+		},
+		"most_active": {
+			"category": "Aktivster Spieler"
+		},
+		"biggest_riser": {
+			"category": "Aufsteiger der Woche"
+		},
+		"biggest_loser": {
+			"category": "Pechvogel der Woche"
+		},
+		"hottest_streak": {
+			"category": "Heißeste Serie",
+			"detail": "{count} Siege in Folge"
+		},
+		"top_duo": {
+			"category": "Top Duo",
+			"detail": "{wins}/{games} Siege ({percent}%)"
+		},
+		"trophies": {
+			"category": "Trophäen diese Woche",
+			"count": "{count} neue Trophäen"
+		},
+		"error": {
+			"load_failed": "Wrapped konnte nicht geladen werden."
+		},
+		"empty": {
+			"title": "Noch kein Wrapped",
+			"body": "Das erste Wrapped wird Freitag um 22:00 Uhr generiert."
+		}
 	},
 	"recap": {
 		"title": "Deine Woche bisher",
