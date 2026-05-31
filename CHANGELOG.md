@@ -6,6 +6,22 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v1.3.0
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.2.0...v1.3.0)
+
+### 🚀 Enhancements
+
+- **wrapped:** Redesign /app/wrapped per the wrapped-talkrunde spec ([#61](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/61))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v1.2.0 ([4058d30](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/4058d30))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v1.2.0 (2026-05-30)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.1.0...v1.2.0)
