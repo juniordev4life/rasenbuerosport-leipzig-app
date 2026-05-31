@@ -35,8 +35,6 @@ export async function listWrapped(limit = 20) {
  * @returns {Promise<object|null>}
  */
 export async function getWrappedByWeekStart(weekStart) {
-	const response = await get(
-		`/v1/wrapped/${encodeURIComponent(weekStart)}`,
-	);
+	const response = await get(`/v1/wrapped/${encodeURIComponent(weekStart)}`);
 	return response.data ?? null;
 }

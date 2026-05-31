@@ -15,13 +15,15 @@ let { status = "pending" } = $props();
 const { t } = getTranslate();
 
 const titleKey = $derived.by(() => {
-	if (status === "generating") return "wrapped.talkrunde.pending_title_generating";
+	if (status === "generating")
+		return "wrapped.talkrunde.pending_title_generating";
 	if (status === "failed") return "wrapped.talkrunde.pending_title_failed";
 	return "wrapped.talkrunde.pending_title";
 });
 
 const bodyKey = $derived.by(() => {
-	if (status === "generating") return "wrapped.talkrunde.pending_body_generating";
+	if (status === "generating")
+		return "wrapped.talkrunde.pending_body_generating";
 	if (status === "failed") return "wrapped.talkrunde.pending_body_failed";
 	return "wrapped.talkrunde.pending_body";
 });
