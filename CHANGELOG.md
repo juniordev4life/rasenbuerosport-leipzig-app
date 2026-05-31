@@ -6,6 +6,23 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v1.6.0
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.5.0...v1.6.0)
+
+### 🚀 Enhancements
+
+- **feedback:** Screenshot attachment on bug reports ([#65](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/65))
+- **feedback:** Screenshot attachment on bug reports ([#66](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/66))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v1.5.0 ([e3cd883](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/e3cd883))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v1.5.0 (2026-05-31)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.4.0...v1.5.0)
