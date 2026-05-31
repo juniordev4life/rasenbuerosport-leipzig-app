@@ -32,6 +32,21 @@ let title = $state("");
 let description = $state("");
 
 /**
+ * Optional screenshot for bug reports. Stored as a `data:image/...;
+ * base64,...` URL so it slots straight into the JSON post body the
+ * backend already validates.
+ *
+ * Hard cap matches the backend's ~5 MB binary ceiling (the schema's
+ * `screenshot.maxLength` is the inner gate; we surface the limit to
+ * the user up front so they don't waste an upload trip).
+ */
+const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
+let screenshotDataUrl = $state(null);
+let screenshotName = $state("");
+let screenshotError = $state("");
+let fileInputEl;
+
+/**
  * Submission lifecycle:
  *   - "idle"        → form is editable
  *   - "submitting"  → request in flight, button shows spinner
@@ -45,6 +60,44 @@ function handleKeydown(event) {
 	if (event.key === "Escape") onClose();
 }
 
+/**
+ * Read the picked file as a base64 data URL into local state.
+ * Validates MIME (image/*) and size (≤5 MB) up front so the user
+ * gets immediate feedback instead of a backend rejection later.
+ */
+function handleFileChange(event) {
+	const input = /** @type {HTMLInputElement} */ (event.target);
+	const file = input.files?.[0];
+	if (!file) return;
+	if (!file.type.startsWith("image/")) {
+		screenshotError = $t("feedback.screenshot_error_type");
+		input.value = "";
+		return;
+	}
+	if (file.size > MAX_SCREENSHOT_BYTES) {
+		screenshotError = $t("feedback.screenshot_error_size");
+		input.value = "";
+		return;
+	}
+	screenshotError = "";
+	const reader = new FileReader();
+	reader.onload = () => {
+		screenshotDataUrl = String(reader.result ?? "");
+		screenshotName = file.name;
+	};
+	reader.onerror = () => {
+		screenshotError = $t("feedback.screenshot_error_read");
+	};
+	reader.readAsDataURL(file);
+}
+
+function removeScreenshot() {
+	screenshotDataUrl = null;
+	screenshotName = "";
+	screenshotError = "";
+	if (fileInputEl) fileInputEl.value = "";
+}
+
 async function handleSubmit() {
 	if (!canSubmit || submitState === "submitting") return;
 	submitState = "submitting";
@@ -56,6 +109,11 @@ async function handleSubmit() {
 			title: title.trim() || undefined,
 			description: description.trim(),
 			route: page.url?.pathname ?? undefined,
+			// Only bug reports carry a screenshot — the backend ignores
+			// the field on the other kinds anyway, but skipping it here
+			// keeps the JSON body smaller and the contract obvious.
+			screenshot:
+				kind === "bug" && screenshotDataUrl ? screenshotDataUrl : undefined,
 		});
 		submitState = "success";
 		setTimeout(() => {
@@ -234,6 +292,67 @@ const successMessageKey = $derived(
 					)}
 				></textarea>
 			</label>
+
+			{#if kind === "bug"}
+				<div class="feedback-field">
+					<span class="feedback-label">
+						{$t("feedback.label_screenshot")}
+					</span>
+
+					{#if screenshotDataUrl}
+						<div class="screenshot-preview">
+							<img
+								src={screenshotDataUrl}
+								alt={screenshotName}
+								class="screenshot-thumb"
+							/>
+							<div class="screenshot-meta">
+								<span class="screenshot-name">{screenshotName}</span>
+								<button
+									type="button"
+									class="screenshot-remove"
+									onclick={removeScreenshot}
+									aria-label={$t("feedback.screenshot_remove")}
+								>
+									{$t("feedback.screenshot_remove")}
+								</button>
+							</div>
+						</div>
+					{:else}
+						<label class="screenshot-picker">
+							<input
+								type="file"
+								accept="image/png,image/jpeg,image/webp,image/heic"
+								bind:this={fileInputEl}
+								onchange={handleFileChange}
+								class="screenshot-input"
+							/>
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								width="14"
+								height="14"
+								aria-hidden="true"
+							>
+								<rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+								<circle cx="8.5" cy="8.5" r="1.5" />
+								<polyline points="21 15 16 10 5 21" />
+							</svg>
+							<span>{$t("feedback.screenshot_add")}</span>
+						</label>
+					{/if}
+
+					{#if screenshotError}
+						<p class="screenshot-error" role="alert">{screenshotError}</p>
+					{:else}
+						<p class="screenshot-hint">{$t("feedback.screenshot_hint")}</p>
+					{/if}
+				</div>
+			{/if}
 
 			<p class="feedback-route-hint">
 				{$t("feedback.route_hint", {
@@ -472,6 +591,87 @@ const successMessageKey = $derived(
 	to {
 		transform: rotate(360deg);
 	}
+}
+
+.screenshot-picker {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px dashed rgba(255, 255, 255, 0.18);
+	border-radius: 10px;
+	padding: 10px 14px;
+	font-size: 12px;
+	font-weight: 700;
+	color: #d1d5db;
+	cursor: pointer;
+	transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.screenshot-picker:hover {
+	background: rgba(255, 255, 255, 0.06);
+	border-color: rgba(255, 255, 255, 0.3);
+	color: #f0f2f5;
+}
+.screenshot-input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+}
+.screenshot-preview {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	background: #1a1f2a;
+	border: 1px solid #2a3142;
+	border-radius: 10px;
+	padding: 8px;
+}
+.screenshot-thumb {
+	width: 56px;
+	height: 56px;
+	border-radius: 8px;
+	object-fit: cover;
+	flex-shrink: 0;
+}
+.screenshot-meta {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.screenshot-name {
+	font-size: 12px;
+	color: #f0f2f5;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.screenshot-remove {
+	background: none;
+	border: 0;
+	font-size: 11px;
+	font-weight: 700;
+	color: #e24b4a;
+	padding: 0;
+	cursor: pointer;
+	text-align: left;
+	align-self: flex-start;
+}
+.screenshot-remove:hover {
+	color: #fca5a5;
+}
+.screenshot-hint {
+	font-size: 10px;
+	color: #6b7280;
+	margin: 6px 0 0;
+}
+.screenshot-error {
+	font-size: 11px;
+	color: #fca5a5;
+	margin: 6px 0 0;
 }
 
 .feedback-success {
