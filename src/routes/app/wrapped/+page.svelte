@@ -1,5 +1,6 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import MatchOfTheWeekCard from "$lib/components/wrapped/MatchOfTheWeekCard.svelte";
 import TalkrundePending from "$lib/components/wrapped/TalkrundePending.svelte";
 import TalkrundePlayer from "$lib/components/wrapped/TalkrundePlayer.svelte";
 import WrappedAvatar from "$lib/components/wrapped/WrappedAvatar.svelte";
@@ -33,6 +34,43 @@ const weekLabel = $derived.by(() => {
 	if (!current?.week_start || !current?.week_end) return "";
 	return `${formatDate(current.week_start)} – ${formatDate(current.week_end)}`;
 });
+
+/**
+ * The Friday cron only generates a Talkrunde once per week, so older
+ * weeks will always have `status: "pending"` and a stale "Wird Freitag
+ * generiert" placeholder. That's confusing — for past weeks the talk
+ * show simply never existed. Show the pending placeholder ONLY when
+ * the wrapped row belongs to the current Berlin week; otherwise let
+ * the slot stay empty.
+ */
+const isCurrentWeek = $derived.by(() => {
+	if (!current?.week_start) return false;
+	const wrappedMonday = isoWeekStart(current.week_start);
+	const todayMonday = isoWeekStart(new Date());
+	return wrappedMonday === todayMonday;
+});
+
+/**
+ * Resolve any wrapped-row date input ("YYYY-MM-DD" string, full ISO
+ * timestamp, Date object, or anything coercible) to the Monday of
+ * its ISO week as a "YYYY-MM-DD" string. Used to compare a wrapped
+ * row's week against today's week.
+ */
+function isoWeekStart(value) {
+	const raw =
+		typeof value === "string" && value.length === 10
+			? `${value}T00:00:00`
+			: value;
+	const d = new Date(raw);
+	if (Number.isNaN(d.getTime())) return "";
+	const dayNum = (d.getDay() + 6) % 7; // 0 = Monday
+	d.setDate(d.getDate() - dayNum);
+	d.setHours(0, 0, 0, 0);
+	const year = d.getFullYear();
+	const month = String(d.getMonth() + 1).padStart(2, "0");
+	const day = String(d.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+}
 
 $effect(() => {
 	loadWraps();
@@ -134,7 +172,12 @@ function formatDate(value) {
 
 		{#if talkrunde?.status === "ready" && talkrunde.audio_url}
 			<TalkrundePlayer audioUrl={talkrunde.audio_url} />
-		{:else}
+		{:else if isCurrentWeek}
+			<!--
+				Pending fallback only renders for the current week — older
+				weeks where the talkrunde never existed get the slot empty
+				instead of a stale "Wird Freitag generiert" line.
+			-->
 			<TalkrundePending status={talkrunde?.status ?? "pending"} />
 		{/if}
 
@@ -160,36 +203,9 @@ function formatDate(value) {
 			</WrappedHighlightCard>
 		{/if}
 
-		<!-- Match of the Week -->
+		<!-- Match of the Week — dedicated hero card with lineups + link to full report -->
 		{#if payload.match_of_the_week}
-			<WrappedHighlightCard
-				variant="match"
-				categoryLabel={$t("wrapped.match_of_the_week.category")}
-				title={payload.match_of_the_week.score}
-				detail={payload.match_of_the_week.report ??
-					$t("wrapped.match_of_the_week.fallback_detail")}
-				href={`/app/games/${payload.match_of_the_week.game_id}`}
-			>
-				{#snippet visual()}
-					<div class="match-icon">
-						<svg
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							width="28"
-							height="28"
-							aria-hidden="true"
-						>
-							<polygon
-								points="12 2 15 8.5 22 9.3 17 14 18.2 21 12 17.8 5.8 21 7 14 2 9.3 9 8.5 12 2"
-							/>
-						</svg>
-					</div>
-				{/snippet}
-			</WrappedHighlightCard>
+			<MatchOfTheWeekCard match={payload.match_of_the_week} />
 		{/if}
 
 		<!-- Topscorer -->
@@ -465,22 +481,6 @@ function formatDate(value) {
 		letter-spacing: 0.12em;
 		padding: 4px 4px 10px;
 		margin-top: 8px;
-	}
-	.match-icon {
-		width: 56px;
-		height: 56px;
-		border-radius: 50%;
-		background: radial-gradient(
-			circle,
-			rgba(168, 85, 247, 0.32) 0%,
-			rgba(168, 85, 247, 0.16) 70%
-		);
-		border: 2px solid rgba(168, 85, 247, 0.45);
-		color: #a855f7;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		box-shadow: 0 4px 18px rgba(168, 85, 247, 0.25);
 	}
 	.duo-pair {
 		display: flex;
