@@ -630,12 +630,35 @@ function replayTourForCurrentStep() {
 	{/if}
 
 	{#if recordingStatus === "starting"}
+		<!-- Blocking connect overlay: stops players from logging goals before we
+		     know the capture box is actually recording. Clears itself once the
+		     agent confirms 'recording'; on failure/timeout the error dialog takes
+		     over. The skip button avoids having to wait out the offline timeout. -->
 		<div
-			class="fixed top-3 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full bg-bg-card border border-border px-3.5 py-1.5 text-xs text-text-secondary shadow-lg"
+			class="fixed inset-0 z-[90] flex flex-col items-center justify-center gap-5 bg-bg-primary/95 backdrop-blur-sm px-8 text-center"
 			transition:fade
+			role="status"
+			aria-live="polite"
 		>
-			<span class="h-2 w-2 rounded-full bg-accent-red animate-pulse" aria-hidden="true"></span>
-			{$t("new_game.recording_starting")}
+			<div
+				class="h-11 w-11 animate-spin rounded-full border-[3px] border-accent-red border-t-transparent"
+				aria-hidden="true"
+			></div>
+			<div>
+				<p class="text-base font-semibold text-text-primary">
+					{$t("new_game.recording_connecting")}
+				</p>
+				<p class="mt-1.5 text-sm text-text-secondary">
+					{$t("new_game.recording_connecting_hint")}
+				</p>
+			</div>
+			<button
+				type="button"
+				onclick={playWithoutRecording}
+				class="mt-1 text-sm font-medium text-text-secondary underline underline-offset-4 hover:text-text-primary"
+			>
+				{$t("new_game.recording_skip")}
+			</button>
 		</div>
 	{/if}
 
