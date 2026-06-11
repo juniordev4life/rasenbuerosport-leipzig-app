@@ -9,6 +9,10 @@ import PenaltyStep from "$lib/components/penaltyShootout/PenaltyStep.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get, post } from "$lib/services/api.services.js";
 import {
+	requestRecordingStart,
+	requestRecordingStop,
+} from "$lib/services/recording.services.js";
+import {
 	isOnboardingDone,
 	ONBOARDING_KEYS,
 	runOnboardingTour,
@@ -32,6 +36,13 @@ let homeTeam = $state("");
 let awayTeam = $state("");
 
 let saving = $state(false);
+
+// Office capture: provisional recording id, generated once on kickoff.
+// The real game id only exists after saving (see saveGame). Plain lets —
+// never rendered. `recordingClosed` marks that the final stop command
+// went out, so the unmount cleanup below must not send another one.
+let recordingId = null;
+let recordingClosed = false;
 
 /**
  * Snapshot captured at the moment the user taps "11m" in the live
@@ -92,6 +103,35 @@ function goToStep(n) {
 function goBack() {
 	step = Math.max(1, step - 1);
 }
+
+/**
+ * Generates the provisional recording id and sends the start command —
+ * exactly once per page visit. Guarded so re-entering the live step
+ * (back from poster, return from the penalty step) keeps the running
+ * recording instead of starting a second one.
+ */
+function ensureRecordingStarted() {
+	if (recordingId) return;
+	recordingId = crypto.randomUUID();
+	requestRecordingStart(recordingId);
+}
+
+// Kickoff trigger: fires on every path into the live step — "Anpfiff"
+// from the poster, the rematch shortcut, and the penalty-abort return.
+$effect(() => {
+	if (step === 3) ensureRecordingStarted();
+});
+
+// Abandon cleanup: the user left /games/new without saving (back to
+// dashboard, navigation away). Stop the recording under the provisional
+// id — the agent keeps the footage, it just never gets linked to a game.
+$effect(() => {
+	return () => {
+		if (recordingId && !recordingClosed) {
+			requestRecordingStop(recordingId);
+		}
+	};
+});
 
 /**
  * User tapped "11m" in the live step. Capture the regular-time
@@ -270,9 +310,19 @@ async function saveGame({
 			score_timeline: scoreTimeline.length > 0 ? scoreTimeline : undefined,
 			result_type: effectiveResultType,
 			...(penaltyShootout && { penalty_shootout: penaltyShootout }),
+			...(recordingId && { recording_id: recordingId }),
 		});
 
 		const gameId = res.data?.id;
+
+		// Stop the office recording under the REAL game id — the agent
+		// uploads and reports video_status against this row. Fire-and-
+		// forget: a failed stop must never block the save flow.
+		if (recordingId) {
+			recordingClosed = true;
+			requestRecordingStop(gameId || recordingId);
+		}
+
 		if (gameId) {
 			goto(`/app/games/${gameId}`);
 		} else {
