@@ -424,6 +424,12 @@
 		"home_team": "Heim",
 		"away_team": "Auswärts",
 		"not_found": "Spiel nicht gefunden",
+		"highlights": {
+			"title": "Highlights",
+			"processing_title": "Highlights werden erstellt…",
+			"processing_hint": "Das dauert ein paar Minuten — die Seite aktualisiert sich von selbst.",
+			"failed": "Für dieses Spiel sind keine Highlights verfügbar."
+		},
 		"timeline_title": "Spielverlauf",
 		"extra_time_short": "n.V.",
 		"penalty_short": "n.E.",

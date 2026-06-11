@@ -4,6 +4,7 @@ import { goto } from "$app/navigation";
 import { page } from "$app/state";
 import MatchDetailStatsNew from "$lib/components/games/MatchDetailStatsNew.svelte";
 import MatchHeroNew from "$lib/components/games/MatchHeroNew.svelte";
+import MatchHighlightReel from "$lib/components/games/MatchHighlightReel.svelte";
 import MatchKeyStatsNew from "$lib/components/games/MatchKeyStatsNew.svelte";
 import MatchLineupsNew from "$lib/components/games/MatchLineupsNew.svelte";
 import MatchPassCharacterCard from "$lib/components/games/MatchPassCharacterCard.svelte";
@@ -31,6 +32,14 @@ const isAdmin = $derived($user?.role === "admin");
 
 $effect(() => {
 	if (gameId) loadGame();
+});
+
+// While the office pipeline builds the reel (video_status "processing"),
+// poll the game so the player appears as soon as it flips to "ready".
+$effect(() => {
+	if (game?.video_status !== "processing") return;
+	const id = setInterval(loadGame, 8000);
+	return () => clearInterval(id);
 });
 
 async function loadGame() {
@@ -165,6 +174,11 @@ const allUploaded = $derived(hasOverview && hasPasses && hasDefense);
 				{awayTeamName}
 			/>
 		{/if}
+
+		<MatchHighlightReel
+			videoStatus={game.video_status}
+			highlightUrl={game.highlight_url}
+		/>
 
 		{#if allUploaded}
 			<MatchReporterCardNew

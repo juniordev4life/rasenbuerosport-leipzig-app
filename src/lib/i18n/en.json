@@ -422,6 +422,12 @@
 		"home_team": "Home",
 		"away_team": "Away",
 		"not_found": "Game not found",
+		"highlights": {
+			"title": "Highlights",
+			"processing_title": "Highlights are being created…",
+			"processing_hint": "This takes a few minutes — the page refreshes itself.",
+			"failed": "No highlights available for this game."
+		},
 		"timeline_title": "Score progression",
 		"extra_time_short": "AET",
 		"penalty_short": "Pen.",
