@@ -1,14 +1,18 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import { fade } from "svelte/transition";
 import { goto } from "$app/navigation";
 import { page } from "$app/state";
 import MatchPosterStep from "$lib/components/games/MatchPosterStep.svelte";
 import PlayerLobbyStep from "$lib/components/games/PlayerLobbyStep.svelte";
 import LiveMatchStep from "$lib/components/liveMatch/LiveMatchStep.svelte";
 import PenaltyStep from "$lib/components/penaltyShootout/PenaltyStep.svelte";
+import ConfirmDialog from "$lib/components/ui/ConfirmDialog.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get, post } from "$lib/services/api.services.js";
 import {
+	fetchRecordingStatus,
+	requestRecordingAbort,
 	requestRecordingStart,
 	requestRecordingStop,
 } from "$lib/services/recording.services.js";
@@ -43,6 +47,18 @@ let saving = $state(false);
 // went out, so the unmount cleanup below must not send another one.
 let recordingId = null;
 let recordingClosed = false;
+// User chose "play without recording" — don't auto-restart on step re-entry.
+let recordingDeclined = false;
+// Live recording status for the UI: idle | starting | recording | failed.
+let recordingStatus = $state("idle");
+let showCancelConfirm = $state(false);
+let showRecordingError = $state(false);
+// Status poll handle + the window after which silence counts as failure
+// (agent offline / wedged). The agent confirms within ~grace + one poll.
+let pollTimer = null;
+let pollStartedAt = 0;
+const RECORDING_POLL_MS = 2000;
+const RECORDING_TIMEOUT_MS = 12000;
 
 /**
  * Snapshot captured at the moment the user taps "11m" in the live
@@ -105,15 +121,96 @@ function goBack() {
 }
 
 /**
- * Generates the provisional recording id and sends the start command —
- * exactly once per page visit. Guarded so re-entering the live step
- * (back from poster, return from the penalty step) keeps the running
- * recording instead of starting a second one.
+ * Generates the provisional recording id, sends the start command and begins
+ * polling the agent's status — once per recording. Guarded so re-entering the
+ * live step (back from poster, return from the penalty step) keeps the running
+ * recording, and so "play without recording" is not undone on re-entry.
  */
 function ensureRecordingStarted() {
-	if (recordingId) return;
+	if (recordingId || recordingDeclined) return;
 	recordingId = crypto.randomUUID();
+	recordingClosed = false; // fresh recording — re-arm the abandon cleanup
+	recordingStatus = "starting";
 	requestRecordingStart(recordingId);
+	startStatusPolling();
+}
+
+function startStatusPolling() {
+	stopStatusPolling();
+	pollStartedAt = Date.now();
+	pollTimer = setInterval(pollRecordingStatus, RECORDING_POLL_MS);
+}
+
+function stopStatusPolling() {
+	if (pollTimer) {
+		clearInterval(pollTimer);
+		pollTimer = null;
+	}
+}
+
+/**
+ * One status poll: confirms capture, surfaces a failure, or — after the
+ * timeout window with no answer (agent offline / wedged) — treats the
+ * silence as a failure so the user is never left waiting forever.
+ */
+async function pollRecordingStatus() {
+	if (!recordingId) return stopStatusPolling();
+	const status = await fetchRecordingStatus(recordingId);
+	if (!recordingId) return stopStatusPolling(); // cleared mid-request (cancel)
+	if (status === "recording") {
+		recordingStatus = "recording";
+		stopStatusPolling(); // start confirmed
+	} else if (status === "failed") {
+		failRecording();
+	} else if (Date.now() - pollStartedAt > RECORDING_TIMEOUT_MS) {
+		failRecording();
+	}
+}
+
+function failRecording() {
+	recordingStatus = "failed";
+	stopStatusPolling();
+	showRecordingError = true;
+}
+
+/** Live-step back button: confirm before discarding match + recording. */
+function requestCancel() {
+	showCancelConfirm = true;
+}
+
+/**
+ * Discard the running recording (abort = stop + delete on the agent), drop the
+ * provisional id and return to the poster step. Shared by the cancel
+ * confirmation and the recording-error "try again" action.
+ */
+function discardRecordingAndLeave() {
+	showCancelConfirm = false;
+	showRecordingError = false;
+	recordingDeclined = false; // a fresh kickoff from the poster may record again
+	stopStatusPolling();
+	if (recordingId) {
+		requestRecordingAbort(recordingId);
+		recordingId = null;
+	}
+	recordingClosed = true;
+	recordingStatus = "idle";
+	goBack();
+}
+
+/**
+ * Recording-error "play without recording": discard any partial capture but
+ * stay in the live step so the match can be finished without a video.
+ */
+function playWithoutRecording() {
+	showRecordingError = false;
+	recordingDeclined = true;
+	stopStatusPolling();
+	if (recordingId) {
+		requestRecordingAbort(recordingId);
+		recordingId = null;
+	}
+	recordingClosed = true;
+	recordingStatus = "idle";
 }
 
 // Kickoff trigger: fires on every path into the live step — "Anpfiff"
@@ -123,12 +220,13 @@ $effect(() => {
 });
 
 // Abandon cleanup: the user left /games/new without saving (back to
-// dashboard, navigation away). Stop the recording under the provisional
-// id — the agent keeps the footage, it just never gets linked to a game.
+// dashboard, navigation away). Abort the recording under the provisional
+// id — leaving without saving discards the capture (stop + delete).
 $effect(() => {
 	return () => {
+		stopStatusPolling();
 		if (recordingId && !recordingClosed) {
-			requestRecordingStop(recordingId);
+			requestRecordingAbort(recordingId);
 		}
 	};
 });
@@ -318,6 +416,7 @@ async function saveGame({
 		// Stop the office recording under the REAL game id — the agent
 		// uploads and reports video_status against this row. Fire-and-
 		// forget: a failed stop must never block the save flow.
+		stopStatusPolling();
 		if (recordingId) {
 			recordingClosed = true;
 			requestRecordingStop(gameId || recordingId);
@@ -513,7 +612,7 @@ function replayTourForCurrentStep() {
 			ending={saving}
 			onEndMatch={saveGame}
 			onStartPenaltyShootout={handleStartPenaltyShootout}
-			onBack={goBack}
+			onBack={requestCancel}
 		/>
 	{:else if step === 4 && preShootout}
 		<PenaltyStep
@@ -529,6 +628,37 @@ function replayTourForCurrentStep() {
 			onAbort={handlePenaltyAbort}
 		/>
 	{/if}
+
+	{#if recordingStatus === "starting"}
+		<div
+			class="fixed top-3 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full bg-bg-card border border-border px-3.5 py-1.5 text-xs text-text-secondary shadow-lg"
+			transition:fade
+		>
+			<span class="h-2 w-2 rounded-full bg-accent-red animate-pulse" aria-hidden="true"></span>
+			{$t("new_game.recording_starting")}
+		</div>
+	{/if}
+
+	<ConfirmDialog
+		open={showCancelConfirm}
+		title={$t("new_game.cancel_match_title")}
+		message={$t("new_game.cancel_match_message")}
+		actions={[
+			{ label: $t("new_game.cancel_match_keep"), variant: "primary", onClick: () => (showCancelConfirm = false) },
+			{ label: $t("new_game.cancel_match_discard"), variant: "ghost", onClick: discardRecordingAndLeave },
+		]}
+		onDismiss={() => (showCancelConfirm = false)}
+	/>
+
+	<ConfirmDialog
+		open={showRecordingError}
+		title={$t("new_game.recording_error_title")}
+		message={$t("new_game.recording_error_message")}
+		actions={[
+			{ label: $t("new_game.recording_error_retry"), variant: "primary", onClick: discardRecordingAndLeave },
+			{ label: $t("new_game.recording_error_continue"), variant: "ghost", onClick: playWithoutRecording },
+		]}
+	/>
 </div>
 
 <style>

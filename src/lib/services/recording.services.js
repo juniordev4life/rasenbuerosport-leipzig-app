@@ -1,9 +1,11 @@
-import { post } from "./api.services.js";
+import { get, post } from "./api.services.js";
 
 /**
- * Office recording agent commands. Both calls are fire-and-forget: capture
- * is a nice-to-have running on a separate box — a failed command must never
- * block or break the match flow, so errors are logged and swallowed.
+ * Office recording agent calls. The command calls (start/stop/abort) are
+ * fire-and-forget: capture is a nice-to-have running on a separate box — a
+ * failed command must never block or break the match flow, so errors are
+ * logged and swallowed. fetchRecordingStatus returns a value but swallows
+ * errors the same way (returns null).
  */
 
 /**
@@ -34,4 +36,42 @@ export function requestRecordingStop(gameId) {
 		action: "stop",
 		game_id: gameId,
 	}).catch((err) => console.warn("recording stop command failed:", err));
+}
+
+/**
+ * Asks the office agent to abort recording: stop AND discard the file (vs.
+ * stop, which keeps it for the highlight pipeline). Sent when the user backs
+ * out of the live step or dismisses the recording-error dialog.
+ * @param {string} recordingId - Provisional recording id to discard
+ * @returns {Promise<void>}
+ * @example
+ * requestRecordingAbort(recordingId);
+ */
+export function requestRecordingAbort(recordingId) {
+	return post("/v1/recording/command", {
+		action: "abort",
+		game_id: recordingId,
+	}).catch((err) => console.warn("recording abort command failed:", err));
+}
+
+/**
+ * Polls the agent-reported capture status for a recording id during the live
+ * step. Swallows errors (returns null) so a flaky poll never breaks the match
+ * flow — the caller's own timeout decides when an absent status means failure.
+ * @param {string} recordingId - The provisional recording id being polled
+ * @returns {Promise<"recording"|"failed"|"stopped"|"aborted"|null>} Reported
+ *   status, or null when not yet reported / unknown / the request failed
+ * @example
+ * if ((await fetchRecordingStatus(recordingId)) === "failed") showError();
+ */
+export async function fetchRecordingStatus(recordingId) {
+	try {
+		const res = await get(
+			`/v1/recording/status?recording_id=${encodeURIComponent(recordingId)}`,
+		);
+		return res.data?.status ?? null;
+	} catch (err) {
+		console.warn("recording status poll failed:", err);
+		return null;
+	}
 }
