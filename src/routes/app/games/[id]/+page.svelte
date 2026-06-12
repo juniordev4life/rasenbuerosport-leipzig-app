@@ -79,8 +79,14 @@ function getSideTeamName(players) {
 	return null;
 }
 
-const homeTeamName = $derived(getSideTeamName(homePlayers));
-const awayTeamName = $derived(getSideTeamName(awayPlayers));
+// game_players.team_name first; the game-row name is the fallback for sides
+// without players (CPU opponents) — set by the app at creation time.
+const homeTeamName = $derived(
+	getSideTeamName(homePlayers) || game?.home_team_name || null,
+);
+const awayTeamName = $derived(
+	getSideTeamName(awayPlayers) || game?.away_team_name || null,
+);
 
 const homePlayerIds = $derived(homePlayers.map((p) => p.player_id));
 const awayPlayerIds = $derived(awayPlayers.map((p) => p.player_id));

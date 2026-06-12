@@ -15,8 +15,14 @@ const awayPlayers = $derived(
 	game.game_players?.filter((p) => p.team === "away") || [],
 );
 
-const homeTeamName = $derived(homePlayers.find((p) => p.team_name)?.team_name);
-const awayTeamName = $derived(awayPlayers.find((p) => p.team_name)?.team_name);
+// game_players.team_name first; the game-row name is the fallback for sides
+// without players (CPU opponents) — set by the app at creation time.
+const homeTeamName = $derived(
+	homePlayers.find((p) => p.team_name)?.team_name || game.home_team_name,
+);
+const awayTeamName = $derived(
+	awayPlayers.find((p) => p.team_name)?.team_name || game.away_team_name,
+);
 
 /** @type {import('$lib/services/teams.services.js').TeamData|null} */
 let homeTeamData = $state(null);

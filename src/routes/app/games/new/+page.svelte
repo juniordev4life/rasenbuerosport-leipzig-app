@@ -413,6 +413,11 @@ async function saveGame({
 			// PENDING (0:0, no ELO). The capture pipeline extracts the real
 			// timeline from the recording and finalizes the game.
 			...(recordingId && scoreTimeline.length === 0 && { pending: true }),
+			// Both poster-step teams travel with the game — the only carrier
+			// for sides without players (CPU opponents), where
+			// game_players.team_name does not exist.
+			...(homeTeam && { home_team_name: homeTeam }),
+			...(awayTeam && { away_team_name: awayTeam }),
 		});
 
 		const gameId = res.data?.id;
