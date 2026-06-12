@@ -422,6 +422,10 @@
 		"home_team": "Home",
 		"away_team": "Away",
 		"not_found": "Game not found",
+		"pending": {
+			"title": "Determining the result from the recording…",
+			"hint": "Goals, scorers and ELO are filled in automatically once the analysis is done."
+		},
 		"highlights": {
 			"title": "Highlights",
 			"processing_title": "Highlights are being created…",

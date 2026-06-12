@@ -409,6 +409,10 @@ async function saveGame({
 			result_type: effectiveResultType,
 			...(penaltyShootout && { penalty_shootout: penaltyShootout }),
 			...(recordingId && { recording_id: recordingId }),
+			// Zero-tracking: nobody tapped, but a recording ran — save as
+			// PENDING (0:0, no ELO). The capture pipeline extracts the real
+			// timeline from the recording and finalizes the game.
+			...(recordingId && scoreTimeline.length === 0 && { pending: true }),
 		});
 
 		const gameId = res.data?.id;

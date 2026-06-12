@@ -34,10 +34,11 @@ $effect(() => {
 	if (gameId) loadGame();
 });
 
-// While the office pipeline builds the reel (video_status "processing"),
-// poll the game so the player appears as soon as it flips to "ready".
+// While the office pipeline works, poll the game so updates appear live:
+// "processing" -> highlight reel, `pending` -> the zero-tracking result
+// (score + timeline backfilled from the recording).
 $effect(() => {
-	if (game?.video_status !== "processing") return;
+	if (game?.video_status !== "processing" && !game?.pending) return;
 	const id = setInterval(loadGame, 8000);
 	return () => clearInterval(id);
 });
@@ -173,6 +174,25 @@ const allUploaded = $derived(hasOverview && hasPasses && hasDefense);
 				{homeTeamName}
 				{awayTeamName}
 			/>
+		{/if}
+
+		{#if game.pending}
+			<section
+				class="rounded-xl border border-border bg-bg-card px-4 py-4 flex items-center gap-3"
+			>
+				<div
+					class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-accent-red border-t-transparent"
+					aria-hidden="true"
+				></div>
+				<div>
+					<div class="text-sm font-semibold text-text-primary">
+						{$t("game_detail.pending.title")}
+					</div>
+					<div class="text-xs text-text-secondary mt-0.5">
+						{$t("game_detail.pending.hint")}
+					</div>
+				</div>
+			</section>
 		{/if}
 
 		<MatchHighlightReel
