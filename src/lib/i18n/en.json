@@ -426,6 +426,11 @@
 			"title": "Determining the result from the recording…",
 			"hint": "Goals, scorers and ELO are filled in automatically once the analysis is done."
 		},
+		"report_preparing": {
+			"title": "Match report is being prepared …",
+			"hint": "Result, goals and statistics are read automatically from the recording.",
+			"manual_toggle": "Upload statistics manually"
+		},
 		"highlights": {
 			"title": "Highlights",
 			"processing_title": "Highlights are being created…",
@@ -687,6 +692,7 @@
 	"historie": {
 		"title": "History",
 		"matches": "matches",
+		"analyzing": "analyzing",
 		"w_short": "W",
 		"d_short": "D",
 		"l_short": "L",

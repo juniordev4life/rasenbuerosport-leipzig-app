@@ -144,6 +144,16 @@ const hasOverview = $derived(!!game?.stats_image_url);
 const hasPasses = $derived(!!game?.passes_image_url);
 const hasDefense = $derived(!!game?.defense_image_url);
 const allUploaded = $derived(hasOverview && hasPasses && hasDefense);
+
+// Recorded games get their stats from the capture pipeline automatically, so
+// the photo upload is hidden behind a collapsed fallback (used only if a
+// recording fails). Purely manual games (no recording) still show the upload
+// directly — there is nothing auto-analyzing them.
+const isAutoAnalyzed = $derived(
+	Boolean(game?.recording_id) ||
+		game?.pending ||
+		game?.video_status === "processing",
+);
 </script>
 
 <svelte:head>
@@ -250,6 +260,56 @@ const allUploaded = $derived(hasOverview && hasPasses && hasDefense);
 					awayTeamLabel={awayTeamName}
 				/>
 			{/if}
+		{:else if isAutoAnalyzed}
+			<!-- Recorded game: stats arrive from the pipeline. No photo prompt;
+			     a clean notice plus a collapsed manual fallback for the rare
+			     case a recording fails. The pending notice above already
+			     conveys "in progress", so the headline is suppressed then. -->
+			{#if !game.pending}
+				<section
+					class="rounded-xl border border-border bg-bg-card px-4 py-4 flex items-center gap-3"
+				>
+					<div
+						class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-accent-red border-t-transparent"
+						aria-hidden="true"
+					></div>
+					<div>
+						<div class="text-sm font-semibold text-text-primary">
+							{$t("game_detail.report_preparing.title")}
+						</div>
+						<div class="text-xs text-text-secondary mt-0.5">
+							{$t("game_detail.report_preparing.hint")}
+						</div>
+					</div>
+				</section>
+			{/if}
+
+			<details class="rounded-xl border border-border bg-bg-card overflow-hidden">
+				<summary
+					class="cursor-pointer select-none px-4 py-3 text-sm text-text-secondary flex items-center gap-2 hover:text-text-primary transition-colors"
+				>
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true">
+						<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+						<polyline points="17 8 12 3 7 8" />
+						<line x1="12" x2="12" y1="3" y2="15" />
+					</svg>
+					{$t("game_detail.report_preparing.manual_toggle")}
+				</summary>
+				<div class="px-1 pb-1">
+					<MatchReporterAwaitingCard
+						{gameId}
+						{hasOverview}
+						{hasPasses}
+						{hasDefense}
+						onStatsExtracted={() => loadGame()}
+						onAllUploaded={() => loadGame()}
+					/>
+				</div>
+			</details>
+
+			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_timeline")} />
+			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_lineups")} />
+			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_stats")} />
 		{:else}
 			<MatchReporterAwaitingCard
 				{gameId}
