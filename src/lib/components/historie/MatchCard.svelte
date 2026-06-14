@@ -110,8 +110,14 @@ const scoreClass = $derived.by(() => {
 
 const meTeamSide = $derived(myEntry?.team ?? null);
 
-function teamLabel(entries) {
-	return entries.map((p) => p.profiles?.username ?? "?").join(" & ");
+// Player usernames when a side has human players; otherwise the in-game team
+// preset in the app (home_team_name / away_team_name) — so a CPU/no-human side
+// shows e.g. "Lombardia FC" instead of a blank or "?". There is no CPU mode;
+// solo test matches simply leave one side without a human player.
+function teamLabel(entries, fallbackName) {
+	const names = entries.map((p) => p.profiles?.username).filter(Boolean);
+	if (names.length) return names.join(" & ");
+	return fallbackName || "?";
 }
 
 function navigateToDetail() {
@@ -156,14 +162,14 @@ const markerLabel = $derived.by(() => {
 					class:me={meTeamSide === "home"}
 					class:winner={!meTeamSide && winnerSide === "home"}
 					style:--accent={userAccent}
-				>{teamLabel(team1)}</span>
+				>{teamLabel(team1, game.home_team_name)}</span>
 				<span class="vs-divider">vs</span>
 				<span
 					class="team-name"
 					class:me={meTeamSide === "away"}
 					class:winner={!meTeamSide && winnerSide === "away"}
 					style:--accent={userAccent}
-				>{teamLabel(team2)}</span>
+				>{teamLabel(team2, game.away_team_name)}</span>
 			</span>
 		</div>
 
