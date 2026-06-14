@@ -23,6 +23,11 @@ const players = $derived(game.game_players ?? []);
 const homeScore = $derived(game.score_home ?? 0);
 const awayScore = $derived(game.score_away ?? 0);
 
+// Zero-tracking: the result is still being extracted from the recording.
+// Checked before `result`/score so a pending 0:0 never renders as a real
+// goalless draw — it shows a spinner and a "wird analysiert" badge instead.
+const analyzing = $derived(Boolean(game.pending));
+
 const penaltyShootout = $derived(game.penalty_shootout ?? null);
 const penaltyWinner = $derived(penaltyShootout?.winner_side ?? null);
 
@@ -105,8 +110,14 @@ const scoreClass = $derived.by(() => {
 
 const meTeamSide = $derived(myEntry?.team ?? null);
 
-function teamLabel(entries) {
-	return entries.map((p) => p.profiles?.username ?? "?").join(" & ");
+// Player usernames when a side has human players; otherwise the in-game team
+// preset in the app (home_team_name / away_team_name) — so a CPU/no-human side
+// shows e.g. "Lombardia FC" instead of a blank or "?". There is no CPU mode;
+// solo test matches simply leave one side without a human player.
+function teamLabel(entries, fallbackName) {
+	const names = entries.map((p) => p.profiles?.username).filter(Boolean);
+	if (names.length) return names.join(" & ");
+	return fallbackName || "?";
 }
 
 function navigateToDetail() {
@@ -130,9 +141,12 @@ const markerLabel = $derived.by(() => {
 	class="card"
 	class:user-involved={userInvolved}
 	class:special
+	class:analyzing
 	onclick={navigateToDetail}
 >
-	{#if result}
+	{#if analyzing}
+		<div class="analyze-spinner" aria-hidden="true"></div>
+	{:else if result}
 		<div class="result-pill {result === 'W' ? 'win' : result === 'L' ? 'loss' : 'draw'}">
 			{result === "W" ? $t("historie.w_short") : result === "L" ? $t("historie.l_short") : $t("historie.d_short")}
 		</div>
@@ -148,23 +162,29 @@ const markerLabel = $derived.by(() => {
 					class:me={meTeamSide === "home"}
 					class:winner={!meTeamSide && winnerSide === "home"}
 					style:--accent={userAccent}
-				>{teamLabel(team1)}</span>
+				>{teamLabel(team1, game.home_team_name)}</span>
 				<span class="vs-divider">vs</span>
 				<span
 					class="team-name"
 					class:me={meTeamSide === "away"}
 					class:winner={!meTeamSide && winnerSide === "away"}
 					style:--accent={userAccent}
-				>{teamLabel(team2)}</span>
+				>{teamLabel(team2, game.away_team_name)}</span>
 			</span>
 		</div>
 
 		<div class="line line-2">
-			<span class="score {scoreClass}">
-				{homeScore}:{awayScore}{#if resultSuffix}<span class="result-suffix"> {resultSuffix}</span>{/if}
-			</span>
+			{#if analyzing}
+				<span class="score analyzing-score">–:–</span>
+			{:else}
+				<span class="score {scoreClass}">
+					{homeScore}:{awayScore}{#if resultSuffix}<span class="result-suffix"> {resultSuffix}</span>{/if}
+				</span>
+			{/if}
 			<span class="mode">{game.mode ?? "—"}</span>
-			{#if marker && markerLabel}
+			{#if analyzing}
+				<span class="analyze-tag"><span class="analyze-dot" aria-hidden="true"></span>{$t("historie.analyzing")}</span>
+			{:else if marker && markerLabel}
 				<span class="marker {marker.type}">{markerLabel}</span>
 			{/if}
 		</div>
@@ -204,6 +224,38 @@ const markerLabel = $derived.by(() => {
 .card.special {
 	border-color: rgba(245, 158, 11, 0.3);
 	background: linear-gradient(180deg, rgba(245, 158, 11, 0.04), #131822);
+}
+.card.analyzing {
+	border-color: rgba(245, 158, 11, 0.28);
+	background: linear-gradient(180deg, rgba(245, 158, 11, 0.05), #131822);
+}
+.analyze-spinner {
+	width: 28px; height: 28px;
+	border-radius: 50%;
+	border: 2px solid rgba(245, 158, 11, 0.25);
+	border-top-color: #F59E0B;
+	flex-shrink: 0;
+	animation: analyze-spin 0.8s linear infinite;
+}
+@keyframes analyze-spin { to { transform: rotate(360deg); } }
+.analyzing-score { color: #4B5563; letter-spacing: 0.05em; }
+.analyze-tag {
+	display: inline-flex; align-items: center; gap: 5px;
+	font-size: 9px; font-weight: 700;
+	padding: 1px 6px; border-radius: 4px;
+	background: rgba(245, 158, 11, 0.12);
+	border: 1px solid rgba(245, 158, 11, 0.4);
+	color: #F59E0B;
+	text-transform: uppercase; letter-spacing: 0.04em;
+}
+.analyze-dot {
+	width: 5px; height: 5px; border-radius: 50%;
+	background: #F59E0B;
+	animation: analyze-pulse 1.2s ease-in-out infinite;
+}
+@keyframes analyze-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@media (prefers-reduced-motion: reduce) {
+	.analyze-spinner, .analyze-dot { animation: none; }
 }
 .result-pill {
 	width: 28px; height: 28px;

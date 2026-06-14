@@ -428,6 +428,11 @@
 			"title": "Ergebnis wird aus der Aufnahme ermittelt…",
 			"hint": "Tore, Schützen und ELO werden automatisch nachgetragen, sobald die Auswertung durch ist."
 		},
+		"report_preparing": {
+			"title": "Spielbericht wird vorbereitet …",
+			"hint": "Ergebnis, Tore und Statistiken werden automatisch aus der Aufnahme ausgelesen.",
+			"manual_toggle": "Statistiken manuell hochladen"
+		},
 		"highlights": {
 			"title": "Highlights",
 			"processing_title": "Highlights werden erstellt…",
@@ -689,6 +694,7 @@
 	"historie": {
 		"title": "Historie",
 		"matches": "Matches",
+		"analyzing": "wird analysiert",
 		"w_short": "S",
 		"d_short": "U",
 		"l_short": "N",
