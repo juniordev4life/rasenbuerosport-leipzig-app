@@ -63,8 +63,8 @@ $effect(() => {
 
 <div class="flex flex-col gap-5 pb-4">
 	<!-- Header -->
-	<div class="flex items-center justify-between">
-		<h1 class="text-xl font-bold text-text-primary">{$t("stats_dashboard.page_title")}</h1>
+	<div class="flex items-center justify-between lg:justify-end">
+		<h1 class="text-xl font-bold text-text-primary lg:hidden">{$t("stats_dashboard.page_title")}</h1>
 		<SeasonSelector />
 	</div>
 

@@ -238,6 +238,8 @@ RasenBürosport is a **Progressive Web App** — no app store required.
 
 Works on **iOS**, **Android** and **Desktop**.
 
+On **Desktop** the app has its own dedicated layout — a fixed left side navigation, a top bar (page title, theme toggle, quick "new match" action, account menu) and a wider content area. Instead of a scaled-up phone screen, cards are rearranged per page: multi-column "bento" grids on the Dashboard and Wrapped, and a primary column with a context side-rail on the Match details, Leaderboard, Profile and History screens. Match **highlight reels** get a cinema-style player next to the key stats on the match page, plus a "Recent highlights" list on the Dashboard — made for watching on a laptop.
+
 ---
 
 ## Match History

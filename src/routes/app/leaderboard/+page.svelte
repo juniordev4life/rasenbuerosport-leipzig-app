@@ -120,6 +120,9 @@ const filteredDuos = $derived(
 		: [],
 );
 
+// Desktop renders the duo ranking in a right rail; only when there is one.
+const hasDuoRail = $derived(teamSize === "2v2" && filteredDuos.length > 0);
+
 function handlePlayerClick(id) {
 	if (!id) return;
 	goto(`/app/profile/${id}`);
@@ -136,8 +139,8 @@ function handleDuoClick(duo) {
 </svelte:head>
 
 <div class="flex flex-col gap-3 pb-4">
-	<header class="flex items-end justify-between pt-1">
-		<div class="flex items-center gap-1.5">
+	<header class="flex items-end justify-between pt-1 lg:justify-end">
+		<div class="flex items-center gap-1.5 lg:hidden">
 			<h1 class="text-2xl font-extrabold tracking-tight text-text-primary">
 				{$t("leaderboard.title")}
 			</h1>
@@ -177,33 +180,53 @@ function handleDuoClick(duo) {
 			<RanglisteHero player={hero} />
 		{/if}
 
-		<div class="section-header">
-			<h3 class="section-title">{$t("leaderboard.solo_section")} · {teamSize}</h3>
-		</div>
+		<!-- Desktop: solo ranking in the primary column, duo ranking + an
+		     ELO explainer in the right rail. `contents` keeps the mobile
+		     single-column order untouched. -->
+		<div class="contents lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6 lg:items-start">
+			<div class="contents lg:block lg:min-w-0">
+				<div class="section-header">
+					<h3 class="section-title">{$t("leaderboard.solo_section")} · {teamSize}</h3>
+				</div>
 
-		<div class="list">
-			{#each ranked as p, i (p.id)}
-				<PlayerRow
-					rank={i + 1}
-					player={p}
-					{sort}
-					isCurrentUser={p.id === userId}
-					dimmed={i === 0}
-					onClick={handlePlayerClick}
-				/>
-			{/each}
-		</div>
+				<div class="list">
+					{#each ranked as p, i (p.id)}
+						<PlayerRow
+							rank={i + 1}
+							player={p}
+							{sort}
+							isCurrentUser={p.id === userId}
+							dimmed={i === 0}
+							onClick={handlePlayerClick}
+						/>
+					{/each}
+				</div>
+			</div>
 
-		{#if teamSize === "2v2" && filteredDuos.length > 0}
-			<div class="section-header">
-				<h3 class="section-title">{"⚡"} {$t("leaderboard.duo_section")} · 2v2</h3>
+			<div class="contents lg:flex lg:flex-col lg:gap-3">
+				<div class="hidden lg:block rounded-xl border border-border bg-bg-card p-4">
+					<div class="text-[11px] font-bold uppercase tracking-[0.1em] text-text-secondary mb-1.5">
+						{$t("info_tips.elo.title")}
+					</div>
+					<p class="text-[12px] leading-relaxed text-text-secondary">
+						{$t("info_tips.elo.body")}
+					</p>
+				</div>
+
+				{#if hasDuoRail}
+					<div class="contents lg:block">
+						<div class="section-header">
+							<h3 class="section-title">{"⚡"} {$t("leaderboard.duo_section")} · 2v2</h3>
+						</div>
+						<div class="list">
+							{#each filteredDuos as duo, i (duo.duo_id)}
+								<DuoRow rank={i + 1} {duo} onClick={handleDuoClick} />
+							{/each}
+						</div>
+					</div>
+				{/if}
 			</div>
-			<div class="list">
-				{#each filteredDuos as duo, i (duo.duo_id)}
-					<DuoRow rank={i + 1} {duo} onClick={handleDuoClick} />
-				{/each}
-			</div>
-		{/if}
+		</div>
 	{/if}
 </div>
 

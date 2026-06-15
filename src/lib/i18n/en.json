@@ -84,14 +84,16 @@
 		"stats": "Statistics",
 		"profile": "Profile",
 		"settings": "Settings",
-		"wrapped": "Wrapped"
+		"wrapped": "Wrapped",
+		"seasons": "Seasons"
 	},
 	"common": {
 		"loading": "Loading...",
 		"error": "Error",
 		"vs": "vs.",
 		"back": "Back",
-		"close": "Close"
+		"close": "Close",
+		"toggle_theme": "Toggle theme"
 	},
 	"home": {
 		"frank": {
@@ -111,6 +113,7 @@
 			"quick_stats": "Your standing",
 			"recent_matches": "Your last matches",
 			"top3": "Top 3 of the league",
+			"highlights": "Recent highlights",
 			"action_profile": "Profile →",
 			"action_all": "All →",
 			"action_ranking": "Ranking →"
@@ -130,6 +133,9 @@
 		},
 		"recent_matches": {
 			"empty": "No games yet — time for the first!"
+		},
+		"highlights": {
+			"empty": "No highlight clips yet."
 		}
 	},
 	"push": {

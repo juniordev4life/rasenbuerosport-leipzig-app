@@ -310,7 +310,10 @@ const totalsLosses = $derived(profile?.player?.losses ?? eloEntry?.losses ?? 0);
 		{errorMsg}
 	</div>
 {:else if profile}
-	<div class="flex flex-col gap-3 pb-4">
+	<div class="flex flex-col gap-3 pb-4 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6 lg:items-start">
+		<!-- Primary column: hero, spider, form, relations. `contents` keeps
+		     the mobile single-column order untouched. -->
+		<div class="contents lg:flex lg:flex-col lg:gap-3 lg:min-w-0">
 		<div data-onboarding="profile-hero">
 			<ProfileHero
 				playerId={profile.player.id ?? playerId}
@@ -361,7 +364,10 @@ const totalsLosses = $derived(profile?.player?.losses ?? eloEntry?.losses ?? 0);
 				onSelect={onSelectRelation}
 			/>
 		</div>
+		</div>
 
+		<!-- Right info-rail: career totals + top awards. -->
+		<div class="contents lg:flex lg:flex-col lg:gap-3">
 		<LifetimeStatsSection stats={lifetimeStats} />
 
 		<div data-onboarding="profile-awards">
@@ -376,6 +382,7 @@ const totalsLosses = $derived(profile?.player?.losses ?? eloEntry?.losses ?? 0);
 							: `/app/profile/${playerId}/trophies`,
 					)}
 			/>
+		</div>
 		</div>
 	</div>
 

@@ -108,16 +108,18 @@ function startCompare() {
 	<title>RasenBürosport - {$t("compare.title")}</title>
 </svelte:head>
 
-<div class="mx-auto max-w-3xl px-3 pb-48 pt-0">
-	<header class="mb-2">
+<div class="mx-auto max-w-3xl lg:max-w-none xl:max-w-[1100px] px-3 lg:px-0 pb-48 lg:pb-8 pt-0 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-x-6 lg:items-start">
+	<header class="mb-2 lg:hidden">
 		<h1 class="text-2xl font-extrabold tracking-tight text-text-primary whitespace-nowrap">{pageTitle}</h1>
 		<p class="text-xs text-text-secondary mt-1">{pageSub}</p>
 	</header>
 
-	<div class="mb-3">
+	<div class="mb-3 lg:mb-0 lg:col-start-1 lg:row-start-1">
 		<ModeTabs value={mode} onSelect={(v) => (mode = v)} onDuoTap={showSoonToast} />
 	</div>
 
+	<!-- Rail (desktop): VS pairing + start CTA, sticky beside the picker. -->
+	<div class="lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-20 lg:flex lg:flex-col lg:gap-3">
 	<div class="slots">
 		<PlayerSlot
 			state="locked"
@@ -148,7 +150,16 @@ function startCompare() {
 			onClear={clearOpponent}
 		/>
 	</div>
+		<button type="button" class="cta hidden lg:block" disabled={!opponentId} onclick={startCompare}>
+			{#if opponentId}
+				⚔ {$t("compare.start_btn")}
+			{:else}
+				{$t("compare.start_btn_disabled")}
+			{/if}
+		</button>
+	</div>
 
+	<div class="lg:col-start-1 lg:row-start-2">
 	{#if loading}
 		<div class="flex justify-center py-12">
 			<div class="animate-spin h-8 w-8 border-2 border-warning border-t-transparent rounded-full"></div>
@@ -161,9 +172,10 @@ function startCompare() {
 			onSelect={pickOpponent}
 		/>
 	{/if}
+	</div>
 </div>
 
-<div class="cta-bar">
+<div class="cta-bar lg:hidden">
 	<button
 		type="button"
 		class="cta"

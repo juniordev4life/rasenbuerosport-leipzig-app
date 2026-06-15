@@ -212,15 +212,45 @@ const ergOptions = $derived([
 	{ value: "losses", label: $t("historie.erg.losses") },
 	{ value: "zunull", label: $t("historie.erg.zunull") },
 ]);
+
+/** Apply a filter from the desktop rail — same state the mobile sheet writes. */
+function setFilter(key, value) {
+	if (key === "who") who = value;
+	else if (key === "zeit") zeit = value;
+	else if (key === "erg") erg = value;
+}
+
+const filterGroups = $derived([
+	{
+		key: "who",
+		titleKey: "historie.filter_who_title",
+		options: whoOptions,
+		current: who,
+	},
+	{
+		key: "zeit",
+		titleKey: "historie.filter_zeit_title",
+		options: zeitOptions,
+		current: zeit,
+	},
+	{
+		key: "erg",
+		titleKey: "historie.filter_erg_title",
+		options: ergOptions,
+		current: erg,
+	},
+]);
 </script>
 
 <svelte:head>
 	<title>RasenBürosport - {$t("historie.title")}</title>
 </svelte:head>
 
-<div class="page">
+<div class="page lg:grid lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-6 lg:items-start">
+	<!-- Primary column. `contents` keeps the mobile single-column layout. -->
+	<div class="contents lg:block lg:min-w-0">
 	<header class="head">
-		<h1 class="title">{$t("historie.title")}</h1>
+		<h1 class="title lg:hidden">{$t("historie.title")}</h1>
 		<div class="subtitle">
 			<strong>{totalCount} {$t("historie.matches")}</strong>
 			<span class="divider">·</span>
@@ -228,7 +258,7 @@ const ergOptions = $derived([
 		</div>
 	</header>
 
-	<div class="chip-row">
+	<div class="chip-row lg:hidden">
 		<FilterChip
 			label={$t(`historie.who.${who}`)}
 			active={who !== "all"}
@@ -276,6 +306,40 @@ const ergOptions = $derived([
 			/>
 		{/if}
 	{/if}
+	</div>
+
+	<!-- Persistent filter rail (desktop only); reuses the same setters as
+	     the mobile filter sheet, so there is no duplicated filter logic. -->
+	<aside class="hidden lg:flex lg:flex-col lg:gap-4 lg:sticky lg:top-20">
+		<div class="rounded-xl border border-border bg-bg-card p-4 flex flex-col gap-4">
+			<div>
+				<div class="text-[22px] font-extrabold tabular-nums text-text-primary leading-none">
+					{totalCount}
+				</div>
+				<div class="text-[11px] text-text-secondary mt-1">{$t("historie.matches")}</div>
+			</div>
+			{#each filterGroups as group (group.key)}
+				<div>
+					<div class="text-[10px] font-bold uppercase tracking-[0.1em] text-text-muted mb-1.5">
+						{$t(group.titleKey)}
+					</div>
+					<div class="flex flex-wrap gap-1.5">
+						{#each group.options as opt (opt.value)}
+							<button
+								type="button"
+								onclick={() => setFilter(group.key, opt.value)}
+								class="px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors {group.current === opt.value
+									? 'bg-accent-red/10 text-accent-red border-accent-red/30'
+									: 'bg-bg-input text-text-secondary border-border hover:text-text-primary'}"
+							>
+								{opt.label}
+							</button>
+						{/each}
+					</div>
+				</div>
+			{/each}
+		</div>
+	</aside>
 </div>
 
 {#if activeSheet === "who"}
@@ -331,6 +395,10 @@ const ergOptions = $derived([
 }
 .chip-row::-webkit-scrollbar { display: none; }
 .list { display: flex; flex-direction: column; gap: 7px; }
+/* Two-up match cards once there is room on desktop. */
+@media (min-width: 1280px) {
+	.list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+}
 .loading {
 	display: flex; justify-content: center;
 	padding: 48px 0;

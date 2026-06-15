@@ -129,7 +129,7 @@ function formatDate(value) {
 	<title>RasenBürosport - {$t("wrapped.nav.title")}</title>
 </svelte:head>
 
-<div class="mx-auto max-w-3xl pb-4">
+<div class="mx-auto max-w-3xl lg:max-w-none pb-4">
 	{#if loading}
 		<div class="flex justify-center py-16">
 			<div
@@ -183,6 +183,8 @@ function formatDate(value) {
 
 		<div class="section-label">{$t("wrapped.section.details")}</div>
 
+		<!-- Feature recap tiles: MVP + Match of the Week side by side on desktop. -->
+		<div class="contents lg:grid lg:grid-cols-2 lg:gap-4 lg:auto-rows-min lg:items-start">
 		<!-- MVP block -->
 		{#if payload.mvp}
 			<WrappedHighlightCard
@@ -207,7 +209,10 @@ function formatDate(value) {
 		{#if payload.match_of_the_week}
 			<MatchOfTheWeekCard match={payload.match_of_the_week} />
 		{/if}
+		</div>
 
+		<!-- Stat tiles: 2–3 column bento of the weekly superlatives on desktop. -->
+		<div class="contents lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-4 lg:auto-rows-min lg:items-start">
 		<!-- Topscorer -->
 		{#if payload.topscorer}
 			<WrappedCompactCard
@@ -469,6 +474,7 @@ function formatDate(value) {
 				{/snippet}
 			</WrappedCompactCard>
 		{/if}
+		</div>
 	{/if}
 </div>
 
