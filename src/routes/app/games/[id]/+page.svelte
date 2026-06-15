@@ -17,6 +17,7 @@ import { ROUTES } from "$lib/constants/routes.constants.js";
 import { del, get } from "$lib/services/api.services.js";
 import { getTeamByName } from "$lib/services/teams.services.js";
 import { user } from "$lib/stores/auth.stores.js";
+import { hasHighlight } from "$lib/utils/highlights.utils.js";
 import { buildRematchUrl } from "$lib/utils/rematch.utils.js";
 
 const { t } = getTranslate();
@@ -154,13 +155,17 @@ const isAutoAnalyzed = $derived(
 		game?.pending ||
 		game?.video_status === "processing",
 );
+
+// Drives the desktop "cinema" layout: a ready reel renders large with
+// the key stats beside it. Shared predicate with the dashboard tile.
+const hasHighlightGame = $derived(hasHighlight(game));
 </script>
 
 <svelte:head>
 	<title>RasenBürosport - {$t("game_detail.title")}</title>
 </svelte:head>
 
-<div class="flex flex-col gap-3 max-w-5xl mx-auto px-1 pt-0 pb-8">
+<div class="flex flex-col gap-3 max-w-5xl lg:max-w-none xl:max-w-[1280px] mx-auto px-1 pt-0 pb-8">
 	{#if loading}
 		<div class="flex justify-center py-8">
 			<div class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"></div>
@@ -211,10 +216,24 @@ const isAutoAnalyzed = $derived(
 			</section>
 		{/if}
 
-		<MatchHighlightReel
-			videoStatus={game.video_status}
-			highlightUrl={game.highlight_url}
-		/>
+		{#if hasHighlightGame}
+			<!-- Cinema theater on desktop: the highlight reel goes large with
+			     the key stats beside it; stacks to one column on mobile. -->
+			<div class="lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(300px,1fr)] lg:gap-6 lg:items-start">
+				<MatchHighlightReel
+					videoStatus={game.video_status}
+					highlightUrl={game.highlight_url}
+				/>
+				{#if game.match_stats}
+					<MatchKeyStatsNew matchStats={game.match_stats} />
+				{/if}
+			</div>
+		{:else}
+			<MatchHighlightReel
+				videoStatus={game.video_status}
+				highlightUrl={game.highlight_url}
+			/>
+		{/if}
 
 		{#if allUploaded}
 			<MatchReporterCardNew
@@ -242,7 +261,7 @@ const isAutoAnalyzed = $derived(
 				currentUserId={$user?.uid ?? null}
 			/>
 
-			{#if game.match_stats}
+			{#if game.match_stats && !hasHighlightGame}
 				<MatchKeyStatsNew matchStats={game.match_stats} />
 			{/if}
 

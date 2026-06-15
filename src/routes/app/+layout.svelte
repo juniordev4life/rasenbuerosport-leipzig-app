@@ -5,6 +5,7 @@ import { page } from "$app/state";
 import BottomNav from "$lib/components/layout/BottomNav.svelte";
 import Header from "$lib/components/layout/Header.svelte";
 import Sidebar from "$lib/components/layout/Sidebar.svelte";
+import Topbar from "$lib/components/layout/Topbar.svelte";
 import PushSoftPrompt from "$lib/components/profile/PushSoftPrompt.svelte";
 import { auth } from "$lib/config/firebase.config.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
@@ -61,8 +62,9 @@ $effect(() => {
 		<div class="flex flex-col flex-1 {isImmersive ? '' : 'pb-16 lg:pb-0'}">
 			{#if !isImmersive}
 				<Header />
+				<Topbar />
 			{/if}
-			<main class="flex-1 px-4 lg:px-8 py-2 lg:py-6 max-w-lg lg:max-w-4xl mx-auto w-full">
+			<main class="flex-1 px-4 lg:px-10 xl:px-12 py-2 lg:py-8 max-w-lg lg:max-w-none xl:max-w-[1400px] 2xl:max-w-[1600px] mx-auto w-full">
 				{@render children()}
 			</main>
 		</div>

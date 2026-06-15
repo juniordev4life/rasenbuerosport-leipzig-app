@@ -91,7 +91,7 @@ const streakDetail = $derived(
 	<title>RasenBürosport - {$t("challenges.title")}</title>
 </svelte:head>
 
-<div class="page">
+<div class="page lg:max-w-5xl lg:mx-auto">
 	{#if loading}
 		<div class="loading">
 			<div class="spinner"></div>
@@ -156,6 +156,13 @@ const streakDetail = $derived(
 .list {
 	display: flex; flex-direction: column;
 	gap: 8px;
+}
+/* Tile challenge / week cards on desktop instead of one tall column. */
+@media (min-width: 1024px) {
+	.list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+}
+@media (min-width: 1280px) {
+	.list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 .loading {
 	display: flex; justify-content: center;

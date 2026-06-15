@@ -29,7 +29,7 @@ async function loadArchive() {
 </svelte:head>
 
 <div class="flex flex-col gap-4">
-	<h1 class="text-xl font-bold text-text-primary">{$t("season.archive_title")}</h1>
+	<h1 class="text-xl font-bold text-text-primary lg:hidden">{$t("season.archive_title")}</h1>
 
 	{#if loading}
 		<div class="flex justify-center py-8">
@@ -40,8 +40,11 @@ async function loadArchive() {
 	{:else if archive.length === 0}
 		<p class="text-text-secondary text-center py-8">{$t("season.no_completed")}</p>
 	{:else}
-		{#each archive as season (season.season)}
-			<SeasonPodium {season} />
-		{/each}
+		<!-- `contents` keeps the mobile stack; tiles the podiums on desktop. -->
+		<div class="contents lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-4">
+			{#each archive as season (season.season)}
+				<SeasonPodium {season} />
+			{/each}
+		</div>
 	{/if}
 </div>

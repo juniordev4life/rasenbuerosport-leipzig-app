@@ -52,7 +52,7 @@ const filteredTeams = $derived.by(() => {
 </svelte:head>
 
 <div class="flex flex-col gap-4">
-	<h1 class="text-xl font-bold">{$t("teams.title")}</h1>
+	<h1 class="text-xl font-bold lg:hidden">{$t("teams.title")}</h1>
 
 	<!-- Filters -->
 	<div class="flex flex-col gap-2">
@@ -110,7 +110,7 @@ const filteredTeams = $derived.by(() => {
 			<p class="text-text-secondary">{$t("teams.no_results")}</p>
 		</div>
 	{:else}
-		<div class="flex flex-col gap-1 lg:grid lg:grid-cols-2 lg:gap-3">
+		<div class="flex flex-col gap-1 lg:grid lg:grid-cols-3 xl:grid-cols-4 lg:gap-3">
 			{#each filteredTeams as team (team.id)}
 				<div class="flex items-center gap-3 bg-bg-secondary border border-border rounded-lg px-3 py-2.5 hover:bg-bg-input transition-colors">
 					<!-- Logo -->

@@ -86,14 +86,16 @@
 		"stats": "Statistiken",
 		"profile": "Profil",
 		"settings": "Einstellungen",
-		"wrapped": "Wrapped"
+		"wrapped": "Wrapped",
+		"seasons": "Saisons"
 	},
 	"common": {
 		"loading": "Laden...",
 		"error": "Fehler",
 		"vs": "vs.",
 		"back": "Zurück",
-		"close": "Schließen"
+		"close": "Schließen",
+		"toggle_theme": "Design wechseln"
 	},
 	"home": {
 		"frank": {
@@ -113,6 +115,7 @@
 			"quick_stats": "Dein Stand",
 			"recent_matches": "Deine letzten Spiele",
 			"top3": "Top 3 der Liga",
+			"highlights": "Neueste Highlights",
 			"action_profile": "Profil →",
 			"action_all": "Alle →",
 			"action_ranking": "Rangliste →"
@@ -132,6 +135,9 @@
 		},
 		"recent_matches": {
 			"empty": "Noch keine Spiele — zeit für das erste!"
+		},
+		"highlights": {
+			"empty": "Noch keine Highlight-Videos."
 		}
 	},
 	"push": {
