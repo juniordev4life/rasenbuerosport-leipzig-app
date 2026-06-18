@@ -159,6 +159,18 @@ const isAutoAnalyzed = $derived(
 // Drives the desktop "cinema" layout: a ready reel renders large with
 // the key stats beside it. Shared predicate with the dashboard tile.
 const hasHighlightGame = $derived(hasHighlight(game));
+
+// The reporter narrates the finished match, so the text must wait for the
+// real result: never while the game is pending, and for recorded games not
+// until the analysis pipeline has finished (the API generates it once
+// video_status flips to ready/failed). Until then the score is 0:0 with an
+// empty timeline — generating would persist a wrong report.
+const reportBlocked = $derived(
+	Boolean(game?.pending) ||
+		(Boolean(game?.recording_id) &&
+			game?.video_status !== "ready" &&
+			game?.video_status !== "failed"),
+);
 </script>
 
 <svelte:head>
@@ -236,15 +248,39 @@ const hasHighlightGame = $derived(hasHighlight(game));
 		{/if}
 
 		{#if allUploaded}
-			<MatchReporterCardNew
-				{gameId}
-				existingReport={game.match_report}
-				existingAudioUrl={game.match_report_audio_url}
-				existingReporterId={game.reporter_id}
-				onReportGenerated={(report) => { game = { ...game, match_report: report, match_report_audio_url: null }; }}
-				onAudioGenerated={(url) => { game = { ...game, match_report_audio_url: url }; }}
-				onReporterAssigned={(rid) => { game = { ...game, reporter_id: rid }; }}
-			/>
+			{#if !game.match_report && reportBlocked}
+				<!-- Recorded game still analyzing: result/stats are not final yet,
+				     so the reporter text must NOT be generated (it would narrate a
+				     0:0 with an empty timeline). The API generates it once the
+				     pipeline finishes (video_status ready/failed); until then show
+				     a preparing notice — same cue as the other analysis placeholders. -->
+				<section
+					class="rounded-xl border border-border bg-bg-card px-4 py-4 flex items-center gap-3"
+				>
+					<div
+						class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-accent-red border-t-transparent"
+						aria-hidden="true"
+					></div>
+					<div>
+						<div class="text-sm font-semibold text-text-primary">
+							{$t("game_detail.report_preparing.title")}
+						</div>
+						<div class="text-xs text-text-secondary mt-0.5">
+							{$t("game_detail.report_preparing.hint")}
+						</div>
+					</div>
+				</section>
+			{:else}
+				<MatchReporterCardNew
+					{gameId}
+					existingReport={game.match_report}
+					existingAudioUrl={game.match_report_audio_url}
+					existingReporterId={game.reporter_id}
+					onReportGenerated={(report) => { game = { ...game, match_report: report, match_report_audio_url: null }; }}
+					onAudioGenerated={(url) => { game = { ...game, match_report_audio_url: url }; }}
+					onReporterAssigned={(rid) => { game = { ...game, reporter_id: rid }; }}
+				/>
+			{/if}
 
 			<MatchTimelineNew
 				timeline={game.score_timeline || []}
