@@ -109,13 +109,16 @@ const eloEntry = $derived.by(() => {
 });
 
 const recentResults = $derived.by(() => {
-	const recent = profile?.recentForm ?? [];
-	return recent.slice(0, 5).map((r) => {
-		const code = (r.result ?? r.type ?? "").toLowerCase();
-		if (code === "win" || code === "w" || code === "s") return "W";
-		if (code === "loss" || code === "l" || code === "n") return "L";
-		return "D";
-	});
+	// Derive the form pills from the SAME oldest-first, ELO-rated series the
+	// sparkline plots — eloEntry.ratings and .ratingOutcomes are pushed in
+	// lockstep, so slicing both to the last 5 keeps pills, curve points and
+	// dot colours aligned to the same matches in the same left→right order.
+	// Sourcing the pills from profile.recentForm (newest-first, all games)
+	// instead made the pills run opposite the curve and inverted the dots.
+	const outcomes = eloEntry?.ratingOutcomes ?? [];
+	return outcomes
+		.slice(-5)
+		.map((o) => (o === "win" ? "W" : o === "loss" ? "L" : "D"));
 });
 
 const formEloSeries = $derived.by(() => {
