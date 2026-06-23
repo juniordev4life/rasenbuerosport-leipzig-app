@@ -8,6 +8,10 @@ import MarcelCard from "./MarcelCard.svelte";
  * card-styled ELO sparkline with green/red point dots per match
  * outcome and a compact Marcel quote.
  *
+ * INVARIANT: `results` and `eloSeries` must describe the same matches in
+ * the same order (oldest-first, left→right). The sparkline point at index
+ * `i` is coloured by `results[i]`, so a mismatched order inverts the dots.
+ *
  * @type {{
  *   results: Array<"W"|"L"|"D">,
  *   eloSeries: number[],

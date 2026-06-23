@@ -7,6 +7,10 @@
  *       The games array is assumed to be newest-first (matching the
  *       /v1/games response). Per-player series are returned
  *       oldest-first so they can be fed straight to a sparkline.
+ *       `ratingOutcomes` is pushed in lockstep with `ratings`, so
+ *       `ratings[k]` and `ratingOutcomes[k]` describe the same match —
+ *       letting a consumer colour each sparkline point by its outcome
+ *       without a second, possibly differently-ordered data source.
  */
 
 const FORM_WINDOW = 10;
@@ -24,6 +28,7 @@ const FORM_WINDOW = 10;
  *   username: string|null,
  *   avatarUrl: string|null,
  *   ratings: number[],
+ *   ratingOutcomes: Array<"win"|"draw"|"loss">,
  *   currentRating: number|null,
  *   formDelta: number|null,
  *   weekDelta: number,
@@ -66,6 +71,7 @@ export function buildEloHistory(games, opts = {}) {
 				username: gp.profiles?.username ?? null,
 				avatarUrl: gp.profiles?.avatar_url ?? null,
 				ratings: [],
+				ratingOutcomes: [],
 				currentRating: null,
 				formDelta: null,
 				weekDelta: 0,
@@ -94,6 +100,7 @@ export function buildEloHistory(games, opts = {}) {
 			const eloEntry = entries.find((e) => e.playerId === gp.player_id);
 			if (eloEntry?.ratingAfter != null) {
 				entry.ratings.push(eloEntry.ratingAfter);
+				entry.ratingOutcomes.push(outcome);
 				entry.currentRating = eloEntry.ratingAfter;
 				if (playedAtMs >= weekStart && eloEntry.delta != null) {
 					entry.weekDelta += eloEntry.delta;
