@@ -6,6 +6,37 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v1.7.0
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.6.1...v1.7.0)
+
+### 🚀 Enhancements
+
+- **recording:** Trigger office capture on kickoff and save ([#68](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/68))
+- **recording:** Cancel-with-confirm and recording-error handling ([#69](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/69))
+- **recording:** Blocking connect overlay while the agent confirms ([#70](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/70))
+- **highlights:** Show highlight reel on the game detail page ([#71](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/71))
+- **games:** Save untracked recorded matches as pending ([#73](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/73))
+- **games:** Send both team names at save, fall back to them for display ([#74](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/74))
+- **games:** Send both team names at save, fall back to them for display ([#75](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/75))
+- **games:** Analyzing state in history + drop photo upload from report ([#76](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/76))
+- **ui:** Dedicated desktop layout with bento grids, info-rails and highlight cinema ([#77](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/77))
+- **nav:** Align desktop sidebar with mobile nav + secondary links group ([#78](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/78))
+
+### 🩹 Fixes
+
+- **report:** Defer the reporter card until analysis is done ([#80](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/80))
+- **profile:** Align form pills with the ELO curve and fix dot colours ([#81](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/81))
+- **ui:** Load team logos with referrerpolicy=no-referrer ([#82](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/82))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v1.6.1 ([4db235e](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/4db235e))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v1.6.1 (2026-05-31)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.6.0...v1.6.1)
