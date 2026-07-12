@@ -27,6 +27,7 @@ $effect(() => {
 		alt="{teamName} logo"
 		class="{sizeClass} object-contain shrink-0"
 		loading="lazy"
+		referrerpolicy="no-referrer"
 		onerror={() => {
 			imgError = true;
 		}}
