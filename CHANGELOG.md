@@ -6,6 +6,22 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v1.7.2
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.7.1...v1.7.2)
+
+### 🩹 Fixes
+
+- **games:** Show the report when a capture left no stats ([#85](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/85))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v1.7.1 ([22062c6](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/22062c6))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v1.7.1 (2026-08-20)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.7.0...v1.7.1)
