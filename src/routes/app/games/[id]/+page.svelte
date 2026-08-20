@@ -315,11 +315,15 @@ const reportBlocked = $derived(isReportBlocked(game));
 				/>
 			{/if}
 		{:else if isAutoAnalyzed}
-			<!-- Recorded game: stats arrive from the pipeline. No photo prompt;
-			     a clean notice plus a collapsed manual fallback for the rare
-			     case a recording fails. The pending notice above already
-			     conveys "in progress", so the headline is suppressed then. -->
-			{#if !game.pending}
+			<!-- Recorded game whose stats never arrived. While the pipeline is
+			     genuinely still running, the preparing notice is right. Once it
+			     reached a terminal status the stats will NEVER arrive — a failed
+			     capture has no post-match screens to read — so claiming
+			     "preparing" would be a spinner that spins forever. Show the
+			     report instead: the API generates it on that final status, and it
+			     narrates the tapped timeline, which does not need stats images.
+			     The collapsed fallback below stays for adding stats by hand. -->
+			{#if reportBlocked}
 				<section
 					class="rounded-xl border border-border bg-bg-card px-4 py-4 flex items-center gap-3"
 				>
@@ -336,6 +340,16 @@ const reportBlocked = $derived(isReportBlocked(game));
 						</div>
 					</div>
 				</section>
+			{:else}
+				<MatchReporterCardNew
+					{gameId}
+					existingReport={game.match_report}
+					existingAudioUrl={game.match_report_audio_url}
+					existingReporterId={game.reporter_id}
+					onReportGenerated={(report) => { game = { ...game, match_report: report, match_report_audio_url: null }; }}
+					onAudioGenerated={(url) => { game = { ...game, match_report_audio_url: url }; }}
+					onReporterAssigned={(rid) => { game = { ...game, reporter_id: rid }; }}
+				/>
 			{/if}
 
 			<details class="rounded-xl border border-border bg-bg-card overflow-hidden">
