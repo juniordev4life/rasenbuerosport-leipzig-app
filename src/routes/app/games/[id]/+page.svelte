@@ -18,6 +18,7 @@ import { del, get } from "$lib/services/api.services.js";
 import { getTeamByName } from "$lib/services/teams.services.js";
 import { user } from "$lib/stores/auth.stores.js";
 import { hasHighlight } from "$lib/utils/highlights.utils.js";
+import { isReportBlocked } from "$lib/utils/matchReport.utils.js";
 import { buildRematchUrl } from "$lib/utils/rematch.utils.js";
 
 const { t } = getTranslate();
@@ -164,13 +165,11 @@ const hasHighlightGame = $derived(hasHighlight(game));
 // real result: never while the game is pending, and for recorded games not
 // until the analysis pipeline has finished (the API generates it once
 // video_status flips to ready/failed). Until then the score is 0:0 with an
-// empty timeline — generating would persist a wrong report.
-const reportBlocked = $derived(
-	Boolean(game?.pending) ||
-		(Boolean(game?.recording_id) &&
-			game?.video_status !== "ready" &&
-			game?.video_status !== "failed"),
-);
+// empty timeline — generating would persist a wrong report. The wait for the
+// pipeline is time-bounded (see isReportBlocked): a capture that died before
+// reporting any status left this blocked forever, showing a spinner that
+// never resolved.
+const reportBlocked = $derived(isReportBlocked(game));
 </script>
 
 <svelte:head>
