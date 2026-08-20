@@ -246,6 +246,28 @@ const reportBlocked = $derived(isReportBlocked(game));
 			/>
 		{/if}
 
+		{#snippet timelineAndLineups()}
+			<!-- Timeline and lineups come from the game row itself (tapped
+			     score_timeline, game_players) — they never needed the stats
+			     screenshots. Gating them behind those hid real match data, and
+			     permanently so for a game whose capture failed: no screens to
+			     read means the gate never opens. Rendered in every branch. -->
+			<MatchTimelineNew
+				timeline={game.score_timeline || []}
+				gamePlayers={game.game_players ?? []}
+				currentUserId={$user?.uid ?? null}
+			/>
+
+			<MatchLineupsNew
+				{game}
+				{homePlayers}
+				{awayPlayers}
+				{homeTeamName}
+				{awayTeamName}
+				currentUserId={$user?.uid ?? null}
+			/>
+		{/snippet}
+
 		{#if allUploaded}
 			{#if !game.match_report && reportBlocked}
 				<!-- Recorded game still analyzing: result/stats are not final yet,
@@ -281,20 +303,7 @@ const reportBlocked = $derived(isReportBlocked(game));
 				/>
 			{/if}
 
-			<MatchTimelineNew
-				timeline={game.score_timeline || []}
-				gamePlayers={game.game_players ?? []}
-				currentUserId={$user?.uid ?? null}
-			/>
-
-			<MatchLineupsNew
-				{game}
-				{homePlayers}
-				{awayPlayers}
-				{homeTeamName}
-				{awayTeamName}
-				currentUserId={$user?.uid ?? null}
-			/>
+			{@render timelineAndLineups()}
 
 			{#if game.match_stats && !hasHighlightGame}
 				<MatchKeyStatsNew matchStats={game.match_stats} />
@@ -375,8 +384,8 @@ const reportBlocked = $derived(isReportBlocked(game));
 				</div>
 			</details>
 
-			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_timeline")} />
-			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_lineups")} />
+			{@render timelineAndLineups()}
+
 			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_stats")} />
 		{:else}
 			<MatchReporterAwaitingCard
@@ -388,8 +397,8 @@ const reportBlocked = $derived(isReportBlocked(game));
 				onAllUploaded={() => loadGame()}
 			/>
 
-			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_timeline")} />
-			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_lineups")} />
+			{@render timelineAndLineups()}
+
 			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_stats")} />
 		{/if}
 
