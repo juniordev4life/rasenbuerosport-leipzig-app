@@ -6,6 +6,22 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v1.7.1
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.7.0...v1.7.1)
+
+### 🩹 Fixes
+
+- **games:** Stop blocking the match report forever ([#84](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/84))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v1.7.0 ([8e2e7bd](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/8e2e7bd))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v1.7.0 (2026-07-12)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.6.1...v1.7.0)
