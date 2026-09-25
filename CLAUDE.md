@@ -129,6 +129,8 @@ Auth is Firebase Authentication via Google Sign-In:
 - The current user is exposed via `firebase/auth`'s `auth.currentUser` and via the `auth.stores.js` store
 - Protected routes live under `/app/*` — the layout (`/app/+layout.svelte`) redirects unauthenticated users to `/auth/login`
 - Each API call attaches a fresh ID token (Firebase SDK handles refresh)
+- The API only admits verified `@redbulls.com` accounts and answers everyone else with 403 `User not authorized` (the app matches on that exact message). The app then **signs the user out**: `LoginForm.svelte` shows `auth.errors.not_authorized`, and `/app/+layout.svelte` redirects to `/auth/login`. It must never delete the Firebase account. After a wrong rejection, the next sign-in would get a new uid and lose the link to the user's profile and match history.
+- `ProfileEditor.svelte` sends `avatar_url` only after a new upload. The API checks it against an allow-list (own uploads in the project's Storage bucket, Google profile photos), so re-sending an old value could block a plain username change.
 
 Public routes: `/`, `/auth/*`. Authenticated routes: everything under `/app/*`.
 
