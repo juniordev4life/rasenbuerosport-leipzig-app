@@ -6,6 +6,27 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v1.7.5
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.7.4...v1.7.5)
+
+### 🩹 Fixes
+
+- **storage:** Version the Storage rules and restrict writes to verified @redbulls.com accounts ([#93](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/93))
+- **upload:** Check files against the Storage rules before uploading ([#94](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/94))
+
+### 📖 Documentation
+
+- **features:** Refresh feature docs to match the current app ([#92](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/92))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v1.7.4 ([02580b8](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/02580b8))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v1.7.4 (2026-09-25)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.7.3...v1.7.4)
