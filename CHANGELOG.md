@@ -6,6 +6,29 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v1.7.4
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.7.3...v1.7.4)
+
+### 🩹 Fixes
+
+- **push:** Show app icon and monochrome badge on push notifications ([#87](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/87))
+- **auth:** Sign out instead of deleting the Firebase account on 403 ([#90](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/90))
+
+### 📖 Documentation
+
+- Update CLAUDE.md testing notes to match the test setup ([#88](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/88))
+- **features:** Describe the current navigation in the feature docs ([#91](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/91))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v1.7.3 ([4554a99](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/4554a99))
+- Refresh stale docs and ignore test output at the repo root ([#89](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/89))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v1.7.3 (2026-08-20)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.7.2...v1.7.3)
