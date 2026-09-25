@@ -2,7 +2,7 @@
 
 This guide explains how to run the full RasenBuerosport stack locally (Frontend + Backend + Database).
 
-The recommended local DB setup is a **Docker Postgres 16 seeded from a PROD snapshot** on port `5434`. The Cloud SQL Auth Proxy is only used for the one-off snapshot dump (and as a fallback for read-only debugging). This keeps your local app fully isolated from production.
+The recommended local DB setup is a **Docker Postgres 16 seeded from a PROD snapshot** on port `5434`. The Cloud SQL Auth Proxy is only used for the one-off snapshot dump (and as a fallback for read-only debugging). This keeps your local database fully isolated from production. Firebase Auth and Storage still point at the production project.
 
 ---
 
@@ -15,6 +15,7 @@ The recommended local DB setup is a **Docker Postgres 16 seeded from a PROD snap
 | **Cloud SQL Auth Proxy** | latest | [cloud.google.com/sql/docs/postgres/connect-auth-proxy](https://cloud.google.com/sql/docs/postgres/connect-auth-proxy) |
 | **Docker Desktop** | latest | [docker.com](https://www.docker.com/products/docker-desktop/) |
 | **psql / pg_dump** | >= 16 | `brew install libpq` (macOS) |
+| **Java** | >= 21 | `brew install --cask temurin@21` (macOS), or any JDK 21+ on `PATH`; only for `npm run test:rules` in the frontend |
 
 Authenticate with GCP and select the project:
 
@@ -229,6 +230,7 @@ DATABASE_URL="postgresql://postgres:localdev@127.0.0.1:5434/rasenbuerosport" nod
 | `npm run test:unit` | Run unit + component tests once (Vitest, what CI runs) |
 | `npm run test:unit:watch` | Run Vitest in watch mode |
 | `npm run test:coverage` | Run unit tests with coverage into `coverage/`; fails below the 60% thresholds |
+| `npm run test:rules` | Test `storage.rules` in the Firebase Storage emulator (Java 21+; the first run downloads the emulator) |
 | `npm run test:e2e` | Run Playwright e2e tests (starts the dev server unless one is running) |
 | `npm run test:e2e:ui` | Open Playwright UI mode |
 | `npm run test:e2e:debug` | Debug e2e tests with the Playwright Inspector |
@@ -286,6 +288,14 @@ CORS_ORIGIN=http://localhost:5173
 ### Firebase Auth: "auth/unauthorized-domain"
 
 Firebase Auth only allows sign-in from authorized domains. Add `localhost` to the authorized domains list in [Firebase Console → Authentication → Settings → Authorized domains](https://console.firebase.google.com/project/rasenbuerosport-leipzig-9d54f/authentication/settings).
+
+### Upload fails with `storage/unauthorized`
+
+The local frontend uses the production Storage bucket, so `storage.rules` applies. Uploads need a verified `@redbulls.com` account. An avatar must go into your own `avatars/<uid>/` folder and be at most 2 MiB, a match-stats screenshot at most 10 MiB, and both must be images (no SVG). The rules are deployed separately from the app; see "Storage rules — deployed by hand" in `CLAUDE.md`.
+
+### Storage emulator: "Unexpected rules runtime error: WARNING: … sun.misc.Unsafe"
+
+On Java 24+ the emulator's rules runtime prints this deprecation warning at startup. It is harmless; the tests still run. Java 21 does not print it.
 
 ### "permission-denied" on Cloud SQL
 

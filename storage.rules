@@ -1,0 +1,70 @@
+rules_version = '2';
+
+// Security rules for the Firebase Storage default bucket
+// (rasenbuerosport-leipzig-9d54f.firebasestorage.app).
+//
+// Only client SDK requests are checked. The API writes talkshow/,
+// match-reports/ and feedback-screenshots/ with the Admin SDK, and the capture
+// pipeline writes highlights/ with gsutil. Both bypass these rules and publish
+// their objects through public object ACLs.
+//
+// Download URLs from getDownloadURL() carry a token and are served without a
+// rules check, so stored avatar and screenshot URLs keep working for everyone.
+//
+// Everything not allowed below is denied, including list and delete. An
+// upload counts as create even when it replaces a file; update only covers
+// metadata changes.
+//
+// Test:   npm run test:rules
+// Deploy: npx firebase-tools deploy --only storage --project rasenbuerosport-leipzig-9d54f
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Same gate as the API's requireAuth (isAllowedAccount in
+    // auth.middlewares.js, added in rasenbuerosport-leipzig-api#85): a
+    // verified address on redbulls.com, compared case-insensitively. The "@" rules out lookalikes such as
+    // evilredbulls.com, redbulls.com.evil.com or subdomains. Tokens without
+    // these claims (anonymous or phone sign-in) fail the checks.
+    function isRedbullsAccount() {
+      return request.auth != null
+        && request.auth.token.get('email_verified', false) == true
+        && request.auth.token.get('email', '').lower().matches('.*@redbulls[.]com');
+    }
+
+    // Any image type except SVG, which can carry script. The client declares
+    // the content type, so this keeps out files the app never sends; it does
+    // not inspect the bytes.
+    function isImageUpTo(maxBytes) {
+      let contentType = request.resource.contentType.lower();
+      return request.resource.size <= maxBytes
+        && contentType.matches('image/.+')
+        && !contentType.matches('image/svg.*');
+    }
+
+    // Team logos: the teams table links them without a download token, so
+    // reads stay public. Only API scripts write them.
+    match /team-logos/{allPaths=**} {
+      allow get;
+    }
+
+    // ProfileEditor.svelte uploads avatars/<uid>/avatar.<ext> and rejects
+    // files over 2 MiB. Reads stay public because avatars show up for
+    // everyone who sees the leaderboard.
+    match /avatars/{uid}/{fileName} {
+      allow get;
+      allow create, update: if isRedbullsAccount()
+        && request.auth.uid == uid
+        && isImageUpTo(2 * 1024 * 1024);
+    }
+
+    // MatchReporterAwaitingCard.svelte uploads FC26 screenshots to
+    // match-stats/<gameId>/<slot>.jpg. Images wider than 1920 px arrive as
+    // JPEG re-encodes; narrower ones go up unchanged, e.g. PNG phone
+    // screenshots of a few MB. The API reads them through the download URL
+    // and deletes them with the Admin SDK.
+    match /match-stats/{gameId}/{fileName} {
+      allow get: if isRedbullsAccount();
+      allow create, update: if isRedbullsAccount()
+        && isImageUpTo(10 * 1024 * 1024);
+    }
+  }
+}

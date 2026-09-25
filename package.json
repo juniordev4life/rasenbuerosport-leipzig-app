@@ -18,12 +18,14 @@
 		"test:unit": "vitest run",
 		"test:unit:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
+		"test:rules": "npx firebase-tools emulators:exec --only storage --project demo-rasenbuerosport \"vitest run --config tests/rules/vitest.config.js\"",
 		"test:e2e": "playwright test",
 		"test:e2e:ui": "playwright test --ui",
 		"test:e2e:debug": "playwright test --debug"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.4",
+		"@firebase/rules-unit-testing": "^4.0.1",
 		"@playwright/test": "^1.49.0",
 		"@sveltejs/adapter-static": "^3.0.0",
 		"@sveltejs/kit": "^2.50.2",
