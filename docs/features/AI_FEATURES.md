@@ -2,7 +2,7 @@
 
 # 🤖 AI Features
 
-Three AI features make RasenBürosport unique — powered by **Claude** (Anthropic).
+The AI side of RasenBürosport is powered by **Claude** (Anthropic): it reads the FC26 stats screens, writes the match reports, scripts the weekly talk show and sums up each player's character.
 
 ---
 
@@ -14,72 +14,38 @@ Three AI features make RasenBürosport unique — powered by **Claude** (Anthrop
 
 ### What happens
 
-After an FC26 match you can photograph the **post-match statistics screen** and upload it to the app. **Claude Vision** analyzes the image and automatically extracts all statistic values.
+After an FC26 match you photograph three tabs of the **post-match statistics screen** — **Overview**, **Passes** and **Defence** — and upload them to the match. **Claude Vision** analyzes each image and automatically extracts all statistic values. Matches played with the office recording get their stats from the recording automatically — no photos needed.
 
 ### Extracted statistics
 
-| Category | Values |
+| Screenshot | Values |
 |-----------|-------|
-| **Possession** | Possession (%), Passes, Pass accuracy (%) |
-| **Offense** | Shots, Expected Goals (xG), Shot accuracy (%), Dribbles (%) |
-| **Defense** | Duels, Duels won, Interceptions, Saves |
-| **Discipline** | Fouls, Corners, Yellow cards |
+| **Overview** | Possession, ball recovery time, shots, Expected Goals (xG), passes, pass accuracy, duels & duels won, interceptions, saves, fouls, offsides, corners, free kicks, penalties, yellow cards, dribbling, shot accuracy |
+| **Passes** | Passes & completed passes, pass accuracy, intercepted & offside passes, ground and lob passes, through balls (incl. lobbed), crosses, set pieces, key passes, first-time passes, one-twos, wing play, solo runs — plus both **pass networks** |
+| **Defence** | Tackle success, fair / won / slide tackles, interceptions, blocks, saves, clearances, attacking / defensive / aerial duels won, dribbled past, fouls, penalties conceded, yellow & red cards |
+
+The pass networks (who passes to whom, and where on the pitch) become each team's **pass character** on the match page: central, left-leaning, right-leaning, balanced or wing play.
 
 ### How it works
 
 1. **Right after saving**: the app opens the match detail page — upload the screenshots there (see [Screenshot upload](GAME_DETAIL.md#screenshot-upload))
 2. **Later**: the upload area stays on the match detail page until the stats are in
-3. The image is stored in **Supabase Storage**
+3. Each image is resized and uploaded to **Firebase Storage** — only for the extraction; it's deleted right after
 4. **Claude Vision** analyzes the screenshot and returns structured data
 5. The statistics are stored as JSONB in the match record
+6. Once all three screenshots are in, the match report is written
 
 ### Technical flow
 
 ```
-Screenshot → Supabase Storage → Claude Vision API → JSON extraction → Database
+Screenshot → Firebase Storage (temporary) → Claude Vision API → JSON extraction → Database
 ```
 
-> The extraction works with FC26 screenshots in German and English. The AI model automatically recognizes the table structure.
+> The extraction works with FC26 screenshots in German and English. The AI model automatically recognizes the table structure — and if a pass network can't be read clearly, it's left empty instead of guessed.
 
 ---
 
-## 2. AI Match Prediction
-
-<div align="center">
-<img src="../screenshots/match-prediction.png" width="320" />
-</div>
-
-### What happens
-
-As soon as **players and teams** are set in the match wizard (step 3), a prediction is **automatically** generated — before the match begins.
-
-### Data basis
-
-The AI considers for each player:
-
-| Data source | Example |
-|-------------|---------|
-| **Career stats** | 50 matches, 64% win rate |
-| **Current form** | 2 losses in a row |
-| **xG efficiency** | 1.08x (scores more than expected) |
-| **Head-to-head** | 19 wins in 31 duels vs. LisaKicker |
-| **Favorite team** | Plays with RB Leipzig — extra motivated? |
-| **Match mode** | 1v1 or 2v2 |
-
-### Example output
-
-> *"AnnaAbwehr and LisaKicker are both in form with two wins in a row, but MaxMustermann — despite a recent unlucky streak — is the more experienced player with a 64% win rate. Especially spicy: MaxMustermann plays against his favorite club RB Leipzig! Slight edge to Hamburg — estimated score: 2:1 for HSV."*
-
-### Characteristics
-
-- **Automatic** — no button, no interaction required
-- **In German** — the tone is casual and entertaining
-- **Data-driven** — real career data is used
-- **One-time** — one prediction per match, no regeneration
-
----
-
-## 3. AI Match Report
+## 2. AI Match Report
 
 <div align="center">
 <img src="../screenshots/match-report.png" width="320" />
@@ -87,27 +53,37 @@ The AI considers for each player:
 
 ### What happens
 
-After the match, once **FC26 stats** are available, an AI-generated match report is created automatically. The report reads like a sports commentary and is based on real data.
+Once a match is complete, an AI-generated match report appears on the match page. It reads like a short TV post-match piece and is based on real data. Manually tracked matches get it once all three FC26 screenshots are in; recorded matches once the recording analysis is done.
+
+### Three reporters
+
+| Reporter | Style |
+|----------|-------|
+| **Marcel**, the Chronicler | Classic TV commentary — three decades in the booth |
+| **Sophie**, the Analyst | Tactical and data-focused |
+| **Frank**, the Enthusiast | Emotional and over the top |
+
+Who gets the mic depends on the match: a big comeback or a hattrick goes to Frank, an early red card to Marcel, a clear win without drama to Sophie. Everything else is a draw weighted by how dramatic the match was — and a reporter who narrated the last two reports is much less likely to get a third. Tap the reporter on the match page to read their bio.
 
 ### Data basis
 
 | Source | Use |
 |--------|-----------|
-| **Match result** | Score, timeline, result type |
-| **Match stats** | Possession, xG, passes, duels |
+| **Match result** | Score, timeline (goals, assists, cards, missed penalties), result type |
+| **Match stats** | Possession, xG, passes, duels, pass networks |
 | **Career data** | Win rate, xG efficiency, current streak per player |
-| **Context** | Underdog situations, personal bests |
+| **Storylines** | Streaks of 3+, weekly challenges completed in this match, newly unlocked achievements |
 
-### Narratives detected
+### What shapes the story
 
-The AI automatically detects notable situations and weaves them into the report:
+The **drama level** — score difference, red cards, late goals, comebacks — sets the reporter's tone. On top of that, the report picks up:
 
-- **Comeback** — a team was behind and turned the match around
-- **Underdog win** — won despite significantly less possession
-- **xG overperformance** — more goals than expected
-- **Chance-waster** — many chances, few goals
-- **Streak broken** — a winning or losing streak ends
-- **Career milestones** — scoring milestones, reaching regular starter status
+- **Comeback** — a team turned the match around after trailing by 2+
+- **Red cards** — including how long a team played a man down
+- **Late drama** — goals after the 80th minute
+- **Streaks** — winning or losing runs of 3+
+- **Challenges & achievements** — completed in this very match
+- **Tactics** — one short note when a team's passing style stood out
 
 ### Example output
 
@@ -115,10 +91,24 @@ The AI automatically detects notable situations and weaves them into the report:
 
 ### Characteristics
 
-- **Automatic** — generated once match stats are available
+- **Automatic** — generated as soon as the match data is complete
 - **Saved** — the report is stored in the DB and shown on next visit
 - **Personalized** — includes each player's career data
-- **3–5 sentences** — short, punchy, entertaining
+- **60–90 words** — short, punchy, written to be read aloud
+- **Fact-first** — the prompt forbids inventing goals, names or minutes; missing data is left out
+- **Audio** — when audio reports are switched on, ElevenLabs reads the report aloud
+
+---
+
+## 3. Friday Talk Show
+
+Once a week, Marcel, Sophie & Frank sit down for an audio episode about the office week: the league's numbers, the match of the week and the players on the rise or in a slump. Claude writes the script from the week's data, ElevenLabs gives the three reporters their voices. The episode plays right on the [dashboard](DASHBOARD.md#friday-talk-show) card.
+
+---
+
+## 4. Player Bios
+
+From 15 matches on, Claude writes the adjective in front of your player type and the one-line character verdict on your [profile](PROFILE.md) (*Marcel's take*). Both are kept until your player type changes or you've played a batch of new matches — then they're rewritten.
 
 ---
 
@@ -128,7 +118,8 @@ The AI automatically detects notable situations and weaves them into the report:
 |------------|------------|
 | **AI model** | Claude (Anthropic) |
 | **Vision** | Claude Vision API for screenshot analysis |
-| **Text** | Claude Text API for reports & predictions |
+| **Text** | Claude Text API for match reports, the talk show script and player bios |
+| **Voice** | ElevenLabs text-to-speech for the talk show and audio match reports |
 | **Prompts** | Stored as constants in backend code |
 | **Caching** | Generated reports are cached in the DB |
 | **Language** | All outputs in German |

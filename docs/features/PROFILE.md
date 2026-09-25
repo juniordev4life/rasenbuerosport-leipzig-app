@@ -1,12 +1,12 @@
 [← Back to overview](../../README.md)
 
-# 👤 Profile — Your foosball career
+# 👤 Profile — Your FC26 career
 
-The profile brings together everything that defines your foosball career — from basic stats to unlocked badges.
+The profile brings together everything that defines your FC26 career — from your ELO curve to your trophy shelf. First visit? A short guided tour shows you around.
 
 ---
 
-## Statistics overview
+## Player card
 
 <div align="center">
 <img src="../screenshots/profile-stats.png" width="320" />
@@ -15,36 +15,28 @@ The profile brings together everything that defines your foosball career — fro
 ### Header
 
 - **Avatar** (uploadable) with initials fallback
-- **Username** and **email**
+- **Username** and your **player type** — e.g. *Der Vollstrecker* or *Der Stratege*, worked out from your six character axes once you've played 5 matches. Until then it reads *Rising*
+- **Rank** and number of matches
+- Current **ELO** with this week's trend and a sparkline
+- **Marcel's take** — from 15 matches on, an AI-written line about your character; before that, a standard line
+- **W · D · L** and **win rate**
 - Avatar and username are changed in **Settings** — see [Edit profile](#edit-profile)
 
-### The numbers
+### Player character
 
-| Metric | Example |
-|--------|----------|
-| **Matches** | 50 |
-| **Wins** | 32 |
-| **Losses** | 14 |
+From 5 matches on: a radar chart with six axes — **Finisher**, **Playmaker**, **Clutch**, **Consistency**, **Discipline** and **Winner** — drawn against a *League average* baseline, plus auto-generated tags for your character, strengths and weaknesses. Tap an axis icon to see what it measures.
 
-### Win rate
+### Current form
 
-Large percentage display with visual progress bar:
+Your last 5 results, the ELO change across them and an ELO curve with a dot per result (green win, red loss, grey draw), plus a short comment from Marcel.
 
-- **Red** = win rate
-- **Gray remainder** = draws + losses
+### Favourite & nemesis
 
-### Mode record
+- **Favourite** — the opponent you have the best win rate against
+- **Nemesis** — the opponent you have the worst win rate against
+- **Top duo** — the teammate you have the best win rate with
 
-Separate breakdowns:
-
-- **1v1 record**: 21 wins / 7 losses
-- **2v2 record**: 11 wins / 7 losses
-
-### Favorites
-
-- **Favorite opponent** — who do you play most often?
-- **Best teammate** — who do you win the most with?
-- **Favorite club** — which club do you pick most often?
+Each needs at least 3 matches with that player, and the section fills in once you've played 5 matches overall. Tap one to open their profile.
 
 ---
 
@@ -54,67 +46,45 @@ Separate breakdowns:
 <img src="../screenshots/career-stats.png" width="320" />
 </div>
 
-Aggregated values from all matches with FC26 statistics. A 2x2 grid shows the four key career metrics:
+Six career-wide numbers, calculated over your whole match history:
 
-| Metric | Value | Description |
-|--------|------|-------------|
-| **Avg possession** | 54% | Average possession across all matches |
-| **Avg pass accuracy** | 88% | How accurate are your passes? |
-| **xG efficiency** | 1.08x | Goals vs. Expected Goals — >1.0 means you score more than expected |
-| **Avg duels won** | 59% | How many duels do you win? |
+| Metric | Description |
+|--------|-------------|
+| **Total goals** | All your goals, plus goals per game |
+| **Assists** | All your assists, plus assists per game |
+| **Longest streak** | Most wins in a row |
+| **Hattricks** | Matches with 3+ goals |
+| **Biggest win** | Score, opponent and date |
+| **Peak ELO** | Your highest rating and when you reached it |
 
-> Career stats appear only once at least one match with FC26 stats exists. Top-right shows how many matches the values are calculated from.
+> Numbers that don't exist yet show a dash instead of hiding the card.
 
 ---
 
-## Badges
-
-15 unique badges — collect them all.
+## Awards & trophy room
 
 <div align="center">
 <img src="../screenshots/badges.png" width="320" />
 </div>
 
-### How it works
+### Top awards
 
-- Badges are **automatically** unlocked based on your matches and statistics
-- **Unlocked badges** are shown in color with their emoji
-- **Locked badges** are greyed out
-- Top-right: progress (e.g. *11/15*)
+The profile shows your three best trophies — rarest first (diamond, gold, silver, bronze), then the newest. Trophies from the last 7 days carry a **New** pill. The section also tells you how many trophies you've earned in total; **View all →** opens the trophy room.
 
-### All 15 badges
+### Trophy room
 
-| Badge | Name | How to unlock |
-|-------|------|-------------------|
-| 🎯 | **Tiki-Taka** | 65%+ possession in a match |
-| ⚡ | **Counter King** | Win with under 40% possession |
-| 💎 | **Perfectionist** | 100% pass accuracy in a match |
-| 🎉 | **Goal Fest** | Win with 5+ goal difference |
-| 🛡️ | **Clean Sheet** | Win without conceding |
-| 🏹 | **David vs. Goliath** | Win with under 30% possession |
-| 🤝 | **Fair Play** | 10+ matches without a single yellow card |
-| 👶 | **Debutant** | Played your first match |
-| ⭐ | **Regular** | Played 25+ matches |
-| 👑 | **Club Legend** | Played 100+ matches |
-| ⚽ | **Top Scorer** | Scored 50+ career goals |
-| 🔥 | **Streak Winner** | 5+ wins in a row |
-| 🧲 | **Ball Magnet** | 70%+ pass accuracy in a match |
-| 🔫 | **xG Killer** | xG efficiency over 1.5 in a match |
-| 💪 | **Duel Monster** | 60%+ duels won in a match |
-
-> **Tip**: Some badges require FC26 stats (Tiki-Taka, Counter King, etc.). The more matches with stats, the more badges you can unlock.
+- **Progress** at the top: trophies earned out of the total, and how complete your collection is
+- **Most recent** trophy up front
+- **Shelves** per category: Win, Streak, Goal, Defensive, Special, Duo, Rivalry, Meta and Hidden
+- **Four rarities**: bronze, silver, gold and diamond
+- **Hidden trophies** stay *???* until you earn them
+- Tap a trophy for the details — when you earned it, or how far along you are
 
 ---
 
-## League stats
+## Other players' profiles
 
-Your performance broken down by the leagues of chosen clubs:
-
-- **Flag** and **league name**
-- **Win rate** as a percentage with a progress bar
-- **Record**: Wins · Draws · Losses · Matches
-
-> Example: 86% win rate in La Liga (6W · 0D · 1L · 7 matches), 71% in the Bundesliga (15W · 3D · 3L · 21 matches).
+Tap a player on the leaderboard, in the Top 3 or in your relations to open their profile — same sections, and **View all →** leads to their trophy room.
 
 ---
 
