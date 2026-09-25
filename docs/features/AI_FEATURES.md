@@ -27,8 +27,8 @@ After an FC26 match you can photograph the **post-match statistics screen** and 
 
 ### How it works
 
-1. **In the wizard** (step 3): optionally attach a photo while recording players
-2. **Later**: use the upload area on the match detail page
+1. **Right after saving**: the app opens the match detail page — upload the screenshots there (see [Screenshot upload](GAME_DETAIL.md#screenshot-upload))
+2. **Later**: the upload area stays on the match detail page until the stats are in
 3. The image is stored in **Supabase Storage**
 4. **Claude Vision** analyzes the screenshot and returns structured data
 5. The statistics are stored as JSONB in the match record

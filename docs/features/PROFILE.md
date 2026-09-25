@@ -16,7 +16,7 @@ The profile brings together everything that defines your foosball career — fro
 
 - **Avatar** (uploadable) with initials fallback
 - **Username** and **email**
-- **Edit button** for profile adjustments
+- Avatar and username are changed in **Settings** — see [Edit profile](#edit-profile)
 
 ### The numbers
 
@@ -120,9 +120,11 @@ Your performance broken down by the leagues of chosen clubs:
 
 ## Edit profile
 
+Editing happens in **Settings**, not on the profile itself: tap your avatar in the top-right corner and choose **Settings**.
+
 - Change **username**
-- Upload **avatar** (max. 2 MB)
-- Tap the pencil icon next to the profile picture
+- Upload **avatar** (max. 2 MB) — tap the picture in the **Edit profile** card
+- Confirm with **Save**
 
 ---
 

@@ -58,11 +58,10 @@ The AI **automatically** analyzes historical data and provides a prediction. It 
 - Enter goals **one by one** — each goal is recorded separately
 - Full **match timeline** (score timeline)
 - **Extra time** (n.V.) and **penalties** (n.E.) supported
-- Optional: attach an **FC26 stats screenshot** directly
 
 ### FC26 stats (optional)
 
-At the end of the wizard you can upload a screenshot of the FC26 post-match stats. The AI automatically extracts all values — and an **automatic match report** is generated on the match detail page.
+You add the FC26 post-match stats after the wizard: once you save, the app opens the match detail page, where you upload the three stat screenshots. The AI automatically extracts all values — and an **automatic match report** is generated. See [Screenshot upload](GAME_DETAIL.md#screenshot-upload).
 
 ---
 
@@ -70,7 +69,7 @@ At the end of the wizard you can upload a screenshot of the FC26 post-match stat
 
 - The match appears immediately on the **dashboard**, in **match history** and on the **leaderboard**
 - All stats, streaks and badges are updated automatically
-- If stats were uploaded: the app redirects to the match detail page with stats and the AI report
+- The app redirects straight to the match detail page — the FC26 stats and the AI report follow there
 
 ---
 

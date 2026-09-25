@@ -46,7 +46,7 @@ Top-right you can filter the time range:
 <img src="../screenshots/h2h.png" width="320" />
 </div>
 
-Tap a player in the leaderboard to open the **direct comparison**.
+Tap **Compare** at the top right of the leaderboard, pick your opponent and tap **Start comparison** to open the **direct comparison**. It always pits you against one other player — tapping a player in the leaderboard opens their profile instead.
 
 ### What the H2H shows
 

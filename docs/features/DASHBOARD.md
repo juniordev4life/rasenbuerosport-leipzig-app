@@ -28,7 +28,7 @@ The last 5 matches at a glance:
 
 ### Top 3 players
 
-The current leaderboard top — with points. Tap to open the full leaderboard.
+The current leaderboard top — with points. Tap a player to open their profile, or **Ranking →** for the full leaderboard.
 
 ---
 
@@ -54,7 +54,7 @@ The latest matches from all players with relative time labels ("4h ago", "7h ago
 
 ## Quick action
 
-The red **+** button top-left immediately starts a new match — a single tap opens the wizard.
+The red **+** button in the middle of the bottom bar immediately starts a new match from any page — a single tap opens the wizard. On desktop, it's the red **Quick game** button in the sidebar and in the top bar.
 
 ---
 
