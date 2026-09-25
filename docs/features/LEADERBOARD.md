@@ -15,7 +15,12 @@ The leaderboard shows who sits at the top of the office league — ranked by ELO
 
 ### How the ranking works
 
-The ranking is based on **ELO**. Everyone starts at 1000; wins push your rating up (more so against stronger opponents), losses pull it down. 1v1 and 2v2 are rated separately, so easy 1v1 wins don't inflate your 2v2 rating. Tap the info icon next to the title for the full explanation.
+The ranking is based on **ELO** — one rating per player across all modes, starting at 1500:
+
+- Wins push it up — more so against stronger opponents — and losses pull it down. Players with fewer than 30 matches move faster
+- In 2v2, goals, assists and red cards decide how the team's gain or loss is split between the two players
+- A penalty shootout counts as a draw; each shot adds a little on top: +3 for a goal, −5 for a miss, +5 for the keeper who saves it
+- Cards from the Defence screenshot cost ELO once per match: −2 per yellow card and −5 per red card nobody was logged for, both shared by the team; −8 for a red card logged against a player
 
 At the top you'll find two modes:
 
@@ -28,14 +33,14 @@ At the top you'll find two modes:
 
 Below the modes sit two toggles:
 
-- **2v2 / 1v1** — which rating you're looking at (2v2 is the default)
-- **Current / Form** — sort by current ELO, or by form: the ELO a player gained or lost over their last 10 rated matches
+- **2v2 / 1v1** — which matches the list is built from (2v2 is the default). The ELO next to a name is the player's rating after their last match of that kind — it's the same rating in both views
+- **Current / Form** — sort by current ELO, or by form: the ELO trend over a player's last 10 rated matches
 
 Your choice is kept in the page URL, so a shared link opens the same view.
 
 ### Top of the table
 
-The #1 gets a hero card: crown, current ELO, this week's ELO trend, a sparkline of recent ratings and the W · D · L · games record — plus a 🔥 badge while they're on a winning streak of 3 or more.
+The #1 of the current view gets a hero card: crown, current ELO, this week's ELO trend, a sparkline of recent ratings and the W · D · L · games record — plus a 🔥 badge while they're on a winning streak of 3 or more.
 
 ### Player display
 
@@ -56,7 +61,7 @@ In the **2v2** view, **Top duos** shows the three best pairings (at least 3 matc
 - **Record** and **win rate**
 - **Points** — 3 per win, 1 per draw; ties go to the better win rate
 
-Tap a duo to open its **duo page**: key numbers (matches, win rate, goals and goals conceded per game), chemistry score (from 10 shared matches), playstyle as a duo, contribution split (wins, matches, goals, assists) and the recent shared games. Pairings with fewer than 5 matches see a countdown to their full profile instead of the playstyle and contribution charts.
+Tap a duo to open its **duo page**: key numbers (matches, win rate, and goals scored and conceded per game over the last 5 shared matches), chemistry score (from 10 shared matches), playstyle as a duo and the recent shared games. Under 5 shared matches, a countdown to 10 replaces the playstyle chart; until 10, the chart is marked as still settling.
 
 On desktop, the duo ranking and a short ELO explainer sit in a column to the right of the player list.
 

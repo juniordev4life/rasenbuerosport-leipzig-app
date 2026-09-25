@@ -15,20 +15,20 @@ The profile brings together everything that defines your FC26 career — from yo
 ### Header
 
 - **Avatar** (uploadable) with initials fallback
-- **Username** and your **player type** — e.g. *Der Vollstrecker* or *Der Stratege*, derived from your six character axes. Newcomers see *Freshman* or *Developing* first; the info icon explains it
+- **Username** and your **player type** — e.g. *Der Vollstrecker* or *Der Stratege*, worked out from your six character axes once you've played 5 matches. Until then it reads *Rising*
 - **Rank** and number of matches
 - Current **ELO** with this week's trend and a sparkline
-- **Marcel's take** — a short verdict on your character
+- **Marcel's take** — from 15 matches on, an AI-written line about your character; before that, a standard line
 - **W · D · L** and **win rate**
 - Avatar and username are changed in **Settings** — see [Edit profile](#edit-profile)
 
 ### Player character
 
-A radar chart with six axes — **Finisher**, **Playmaker**, **Clutch**, **Consistency**, **Discipline** and **Winner** — drawn against a *League average* baseline, plus auto-generated tags for your character, strengths and weaknesses. Tap an axis icon to see what it measures.
+From 5 matches on: a radar chart with six axes — **Finisher**, **Playmaker**, **Clutch**, **Consistency**, **Discipline** and **Winner** — drawn against a *League average* baseline, plus auto-generated tags for your character, strengths and weaknesses. Tap an axis icon to see what it measures.
 
 ### Current form
 
-Your last 5 results with the ELO change over those matches, an ELO curve with a green or red dot per result, and a short comment from Marcel.
+Your last 5 results, the ELO change across them and an ELO curve with a dot per result (green win, red loss, grey draw), plus a short comment from Marcel.
 
 ### Favourite & nemesis
 
@@ -36,7 +36,7 @@ Your last 5 results with the ELO change over those matches, an ELO curve with a 
 - **Nemesis** — the opponent you have the worst win rate against
 - **Top duo** — the teammate you have the best win rate with
 
-Each needs at least 3 matches. Tap one to open their profile.
+Each needs at least 3 matches with that player, and the section fills in once you've played 5 matches overall. Tap one to open their profile.
 
 ---
 

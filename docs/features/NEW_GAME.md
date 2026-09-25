@@ -48,7 +48,7 @@ Tap **Kick-off — start the match** to go live.
 
 ### Recording
 
-Kick-off also starts the **office recording**. The app waits until the recording is live (*"Connecting to the recording…"*) — or tap **Start without recording**. If it can't start, you can **Try again** or **Play without recording**.
+Kick-off also starts the **office recording**. The app waits until the recording is live (*"Connecting to the recording…"*) — or tap **Start without recording**. If it can't start, **Try again** takes you back to the poster (kick off again to retry), or **Play without recording** carries on without video.
 
 ### Entering events
 
@@ -72,8 +72,9 @@ There is no score counter — the score is built from the events you log:
 Tap **11m** in the live step to decide the match on penalties:
 
 - Pick the **shooter**, then **Goal** or **Missed**
-- Missed? Pick the **keeper** who saved it — the keeper gets an ELO bonus — or **Post / wide / no save**
+- Missed? Pick the **keeper** who saved it, or **Post / wide / no save**
 - Five shots per team, then sudden death
+- For ELO, the match counts as a draw; every shot adds a little on top: +3 for a goal, −5 for a miss, +5 for the keeper who saves it
 - **Undo last shot** fixes a slip; **Cancel penalty shootout** drops the shots and returns to the live match with the score unchanged
 - Once it's decided, **End match** saves the game with the shootout (*n.E.*)
 
@@ -94,7 +95,7 @@ You add the FC26 post-match stats after the wizard: once you save, the app opens
 ## After saving
 
 - The match appears immediately on the **dashboard**, in **match history** and on the **leaderboard**
-- ELO, streaks and trophies are updated automatically
+- ELO and streaks update right away; new trophies unlock the next time a profile or the trophy room is opened
 - The app redirects straight to the match detail page — the FC26 stats and the AI report follow there
 - A recorded match with no events logged is saved as pending (0:0, no ELO yet); the recording analysis fills in the result, goals and ELO
 

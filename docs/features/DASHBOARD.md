@@ -54,7 +54,7 @@ Only shows up when you're on a run — and it's all about you:
 
 ### Your standing
 
-- Your current **ELO** — tap the info icon for how ELO works
+- Your current **ELO** — see [how the ranking works](LEADERBOARD.md#how-the-ranking-works)
 - Your **ELO change this week**
 - Your **last 5** results as win / draw / loss pills
 - **Profile →** opens your profile
@@ -72,7 +72,9 @@ Tap a row for the match details, or **All →** for the full match history.
 
 ### Top 3 of the league
 
-The ELO podium — medal, avatar, name and current ELO. Tap a player to open their profile, or **Ranking →** for the full leaderboard.
+The top 3 by current ELO — medal, avatar, name and rating. The podium is picked from the ten best players by points, so it can differ from the leaderboard. Tap a player to open their profile, or **Ranking →** for the full leaderboard.
+
+> The dashboard reads the league's 20 most recent matches. After a longer break, some of your numbers stay empty (—) until you play again.
 
 ---
 

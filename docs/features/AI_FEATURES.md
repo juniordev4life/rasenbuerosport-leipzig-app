@@ -2,7 +2,7 @@
 
 # 🤖 AI Features
 
-The AI side of RasenBürosport is powered by **Claude** (Anthropic): it reads the FC26 stats screens, writes the match reports and scripts the weekly talk show.
+The AI side of RasenBürosport is powered by **Claude** (Anthropic): it reads the FC26 stats screens, writes the match reports, scripts the weekly talk show and sums up each player's character.
 
 ---
 
@@ -30,7 +30,7 @@ The pass networks (who passes to whom, and where on the pitch) become each team'
 
 1. **Right after saving**: the app opens the match detail page — upload the screenshots there (see [Screenshot upload](GAME_DETAIL.md#screenshot-upload))
 2. **Later**: the upload area stays on the match detail page until the stats are in
-3. Each image is resized and stored in **Firebase Storage**
+3. Each image is resized and uploaded to **Firebase Storage** — only for the extraction; it's deleted right after
 4. **Claude Vision** analyzes the screenshot and returns structured data
 5. The statistics are stored as JSONB in the match record
 6. Once all three screenshots are in, the match report is written
@@ -38,7 +38,7 @@ The pass networks (who passes to whom, and where on the pitch) become each team'
 ### Technical flow
 
 ```
-Screenshot → Firebase Storage → Claude Vision API → JSON extraction → Database
+Screenshot → Firebase Storage (temporary) → Claude Vision API → JSON extraction → Database
 ```
 
 > The extraction works with FC26 screenshots in German and English. The AI model automatically recognizes the table structure — and if a pass network can't be read clearly, it's left empty instead of guessed.
@@ -106,13 +106,19 @@ Once a week, Marcel, Sophie & Frank sit down for an audio episode about the offi
 
 ---
 
+## 4. Player Bios
+
+From 15 matches on, Claude writes the adjective in front of your player type and the one-line character verdict on your [profile](PROFILE.md) (*Marcel's take*). Both are kept until your player type changes or you've played a batch of new matches — then they're rewritten.
+
+---
+
 ## Technology
 
 | Component | Technology |
 |------------|------------|
 | **AI model** | Claude (Anthropic) |
 | **Vision** | Claude Vision API for screenshot analysis |
-| **Text** | Claude Text API for match reports and the talk show script |
+| **Text** | Claude Text API for match reports, the talk show script and player bios |
 | **Voice** | ElevenLabs text-to-speech for the talk show and audio match reports |
 | **Prompts** | Stored as constants in backend code |
 | **Caching** | Generated reports are cached in the DB |

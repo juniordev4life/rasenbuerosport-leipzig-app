@@ -70,7 +70,7 @@ The stats come from three FC26 screenshots — **Overview**, **Passes** and **De
 |------|---------------|
 | **Headline numbers** | Possession, xG, shots and shot accuracy — four tiles with a split bar each |
 | **Pass character** | One mini pitch per team with its passing style: central, left-leaning, right-leaning, balanced or wing play — read from the pass networks on the Passes screenshot |
-| **Detail statistics** | The five stats where the two teams differ most — picked from pass accuracy, passes, duels, tackles, interceptions, dribbling, saves, fouls, corners, yellow cards, key passes, crosses, blocks and clearances |
+| **Detail statistics** | The five stats where the two teams differ most — picked from pass accuracy, passes, duels, duels won, tackle success, interceptions, dribbling, dribbled past, saves, fouls, corners, yellow cards, key passes, crosses, blocks and clearances |
 
 The better value is highlighted in the team colour. For fouls, cards and similar "lower is better" stats, the smaller number wins. Until the stats are in, a placeholder says they follow after the report.
 
@@ -100,7 +100,7 @@ More on the reporters in [AI Features](AI_FEATURES.md#2-ai-match-report).
 FC26 screenshots are added on the match detail page — the wizard has no upload step. Right after saving, the app opens the new match, and the **FC26 screenshots** card sits below the score:
 
 1. Tap **Add all three now** (or pick them from your gallery)
-2. Select the three FC26 stat screenshots: **Overview**, **Passes** and **Defence**
+2. Select the three FC26 stat screenshots in this order: **Overview**, **Passes**, **Defence** — the app fills the slots in the order the files arrive, whatever they show
 3. AI automatically extracts all statistics — the card shows each screenshot being read, one after the other
 4. Once all three are in, a match report is generated
 
