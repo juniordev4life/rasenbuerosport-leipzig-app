@@ -227,18 +227,40 @@ src/
     i18n/                     # de.json, en.json (Tolgee keys)
     data/  assets/            # static data + assets imported into components
 tests/
-  unit/                       # Vitest unit tests (currently utils only)
+  setup.js                    # Vitest setup: jest-dom matchers + jsdom API stubs
+  unit/                       # Vitest unit + component tests (jsdom)
+    service-worker.test.js    # src/service-worker.js push artwork paths
+    components/               # Component tests, mirroring src/lib/components/
+    utils/                    # Tests for src/lib/utils/
+  e2e/                        # Playwright end-to-end specs (*.spec.js)
 ```
 
 ## Testing
 
-The repo currently has unit tests under `tests/unit/utils/` but Vitest is not yet wired into `package.json` scripts. When adding the first proper test layer:
+Vitest runs the unit and component tests, Playwright the end-to-end tests. Vitest is configured in the `test` block of `vite.config.js` (there is no `vitest.config.js`), Playwright in `playwright.config.js`. The commands are in the Available Scripts table below.
 
-- **Framework**: Vitest (unit/component, jsdom for component tests)
-- **E2E**: Playwright is the expected choice when added later
+- **Environment**: `jsdom` for every test file, with `globals: false` — import `describe`, `it`, `expect` and `vi` from `vitest`
+- **Setup**: `tests/setup.js` runs before each test file. It registers the `@testing-library/jest-dom` matchers and stubs APIs jsdom lacks (`navigator.vibrate`, `matchMedia`, `ResizeObserver`). Mock anything domain-specific per test with `vi.mock(...)`, not there
+- **Discovery**: `tests/unit/**/*.test.js` and `src/**/*.test.js`; `tests/e2e/**` is excluded from Vitest
+- **Components**: `@testing-library/svelte`. Keep the `svelteTesting()` plugin in `vite.config.js` — it makes tests resolve Svelte's client build; without it, rendering throws `lifecycle_function_unavailable`
+- **E2E**: Playwright specs in `tests/e2e/`, Chromium only. `npm run test:e2e` starts `npm run dev` on port 5173 for the run, or reuses a dev server already running there; set `E2E_BASE_URL` to test a running deployment instead. Install the browser once with `npx playwright install chromium`
 - **Pattern**: AAA (Arrange-Act-Assert)
-- **Mocking**: mock `apiRequest`, mock Firebase auth — never hit the real API or Firebase in tests
-- **Test files**: `{Name}.test.js` for components, `{name}.services.test.js` for services
+- **Mocking**: mock `apiRequest`, Firebase auth and Tolgee — never hit the real API or Firebase in tests. A Tolgee mock must return `t` as a readable store (see `tests/unit/components/trophies/TrophyCard.test.js`)
+- **Test files**: `{Name}.test.js` for components, `{name}.utils.test.js` for utils, `{name}.services.test.js` for services
+
+### Tests in CI
+
+`Pre-Match Checks` (`.github/workflows/pre-match-checks.yml`) runs `npm run test:unit` as **Training Session (Unit Tests)** on every pull request and every push to `main`. Its **Medical Check (Coverage Thresholds)** step (`npm run test:coverage`) stays commented out until coverage reaches the 60% thresholds (lines, functions, statements, branches) in `vite.config.js`. Until then, `npm run test:coverage` exits non-zero on the threshold check even when every test passes. E2E tests do not run in CI, and the tag-triggered `Match Day` deploy runs lint + format only.
+
+### File paths in tests
+
+Under jsdom, `new URL("../../static", import.meta.url)` resolves to `http://localhost:3000/static`, not to a path next to the test file. Vite rewrites that pattern (a literal path plus `import.meta.url`) at transform time to `new URL("/static", self.location)`, and jsdom's `self.location` is `http://localhost:3000/`. The global `URL` is jsdom's, but that is not the cause — importing `URL` from `node:url` gives the same result. Build file-system paths with `import.meta.dirname` and `node:path` instead, as `tests/unit/service-worker.test.js` does:
+
+```javascript
+import { join } from "node:path";
+
+const STATIC_DIR = join(import.meta.dirname, "../../static");
+```
 
 ## Internationalization
 
@@ -306,6 +328,12 @@ npm run deploy     # build + firebase deploy --only hosting
 | `npm run check` | Biome lint + format with auto-fix |
 | `npm run lint:check` | Biome lint, no fixes |
 | `npm run format:check` | Biome format check, no fixes |
+| `npm run test:unit` | Vitest unit + component tests, single run (what CI runs) |
+| `npm run test:unit:watch` | Vitest in watch mode |
+| `npm run test:coverage` | Vitest single run with v8 coverage (text, html, lcov → `coverage/`) and the 60% thresholds |
+| `npm run test:e2e` | Playwright e2e tests (starts the dev server unless one is running or `E2E_BASE_URL` is set) |
+| `npm run test:e2e:ui` | Playwright UI mode |
+| `npm run test:e2e:debug` | Playwright headed with the Inspector, for step-through debugging |
 | `npm run deploy` | Build + Firebase Hosting deploy |
 
 ## Commit Messages
