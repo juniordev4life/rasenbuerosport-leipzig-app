@@ -199,30 +199,39 @@ Use Chart.js 4 directly. There is no shared chart-component package — wrap cha
 src/
   app.css                     # Tailwind import + project @theme tokens (light + dark)
   app.html                    # SvelteKit shell
+  service-worker.js           # Web push only (push + notificationclick), no caching
   routes/                     # SvelteKit file-based routing
-    +page.svelte              # Marketing / landing
+    +page.svelte              # Redirects to /app/dashboard or /auth/login
     auth/
       login/                  # Google sign-in
       callback/               # Auth callback
       setup/                  # First-time profile setup
     app/                      # Authenticated area (layout enforces auth)
+      challenges/             # Weekly challenges, active + history tabs
+      compare/                # Player vs player; /h2h/[a]/[b] head-to-head
       dashboard/              # User dashboard
-      games/                  # List, /new, /[id]
-      stats/                  # Personal stats + H2H
-      compare/                # Player vs player
-      leaderboard/            # Public-but-rendered-here rankings
+      duo/                    # /[id] duo profile, id = <playerA>_<playerB>
+      games/                  # /new game wizard, /[id] match detail
+      history/                # Match list with filters; ROUTES.GAMES points here
+      leaderboard/            # Player + duo rankings, 1v1 / 2v2
+      profile/                # Own + /[id] profiles, each with /trophies
       seasons/                # Season list + archive
+      settings/               # Edit profile, theme, push, feedback, logout
+      stats/                  # Personal + community stats, per season
       teams/                  # Team catalog
-      profile/                # Edit profile
       wrapped/                # Weekly wrapped recap
   lib/
     components/               # PascalCase.svelte, grouped by domain
-      auth/  compare/  dashboard/  games/  layout/
-      leaderboard/  profile/  season/  stats/  ui/
-    services/                 # api.services.js, auth.services.js, teams.services.js
+      auth/  challenges/  charts/  compare/  dashboard/
+      duo/  games/  historie/  home/  icons/  layout/
+      leaderboard/  liveMatch/  penaltyShootout/  playerProfile/
+      profile/  season/  stats/  trophies/  ui/  wrapped/
+    services/                 # {name}.services.js; api = HTTP client wrapper
+      api  auth  challenges  playerProfile  push
+      recording  talkshow  teams  trophies  wrapped
     stores/                   # auth, season, theme
     config/                   # firebase.config.js, i18n.config.js
-    constants/                # role + label constants
+    constants/                # liveMatch, reporters, routes, teams, trophies
     utils/                    # framework-agnostic helpers
     i18n/                     # de.json, en.json (Tolgee keys)
     data/  assets/            # static data + assets imported into components
