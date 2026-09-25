@@ -198,6 +198,7 @@ Use Chart.js 4 directly. There is no shared chart-component package — wrap cha
 ## Project Structure
 
 ```
+storage.rules                 # Firebase Storage security rules (deployed by hand, see CI/CD)
 src/
   app.css                     # Tailwind import + project @theme tokens (light + dark)
   app.html                    # SvelteKit shell
@@ -243,16 +244,17 @@ tests/
     service-worker.test.js    # src/service-worker.js push artwork paths
     components/               # Component tests, mirroring src/lib/components/
     utils/                    # Tests for src/lib/utils/
+  rules/                      # storage.rules against the Storage emulator (own Vitest config)
   e2e/                        # Playwright end-to-end specs (*.spec.js)
 ```
 
 ## Testing
 
-Vitest runs the unit and component tests, Playwright the end-to-end tests. Vitest is configured in the `test` block of `vite.config.js` (there is no `vitest.config.js`), Playwright in `playwright.config.js`. The commands are in the Available Scripts table below.
+Vitest runs the unit and component tests, Playwright the end-to-end tests. Vitest is configured in the `test` block of `vite.config.js` (there is no root `vitest.config.js`; the Storage rules tests below have their own), Playwright in `playwright.config.js`. The commands are in the Available Scripts table below.
 
 - **Environment**: `jsdom` for every test file, with `globals: false` — import `describe`, `it`, `expect` and `vi` from `vitest`
 - **Setup**: `tests/setup.js` runs before each test file. It registers the `@testing-library/jest-dom` matchers and stubs APIs jsdom lacks (`navigator.vibrate`, `matchMedia`, `ResizeObserver`). Mock anything domain-specific per test with `vi.mock(...)`, not there
-- **Discovery**: `tests/unit/**/*.test.js` and `src/**/*.test.js`; `tests/e2e/**` is excluded from Vitest
+- **Discovery**: `tests/unit/**/*.test.js` and `src/**/*.test.js`; `tests/e2e/**` is excluded from Vitest, and `tests/rules/**` runs only through `npm run test:rules`
 - **Components**: `@testing-library/svelte`. Keep the `svelteTesting()` plugin in `vite.config.js` — it makes tests resolve Svelte's client build; without it, rendering throws `lifecycle_function_unavailable`
 - **E2E**: Playwright specs in `tests/e2e/`, Chromium only. `npm run test:e2e` starts `npm run dev` on port 5173 for the run, or reuses a dev server already running there; set `E2E_BASE_URL` to test a running deployment instead. Install the browser once with `npx playwright install chromium`
 - **Pattern**: AAA (Arrange-Act-Assert)
@@ -262,6 +264,10 @@ Vitest runs the unit and component tests, Playwright the end-to-end tests. Vites
 ### Tests in CI
 
 `Pre-Match Checks` (`.github/workflows/pre-match-checks.yml`) runs `npm run test:unit` as **Training Session (Unit Tests)** on every pull request and every push to `main`. Its **Medical Check (Coverage Thresholds)** step (`npm run test:coverage`) stays commented out until coverage reaches the 60% thresholds (lines, functions, statements, branches) in `vite.config.js`. Until then, `npm run test:coverage` exits non-zero on the threshold check even when every test passes. E2E tests do not run in CI, and the tag-triggered `Match Day` deploy runs lint + format only.
+
+### Storage rules tests
+
+`tests/rules/storage.rules.test.js` checks `storage.rules` in the Firebase Storage emulator with `@firebase/rules-unit-testing`. `npm run test:rules` wraps `tests/rules/vitest.config.js` (Node environment) in `npx firebase-tools emulators:exec` for the `demo-rasenbuerosport` project, so it never touches real Firebase resources. The emulator needs Java 21+ and downloads its rules runtime on the first run. On Java 24+ the runtime prints a `sun.misc.Unsafe` deprecation warning that firebase-tools labels "Unexpected rules runtime error"; it is harmless. CI does not run these tests, so run them whenever `storage.rules` or an upload in `ProfileEditor.svelte` or `MatchReporterAwaitingCard.svelte` changes.
 
 ### File paths in tests
 
@@ -329,6 +335,28 @@ npm run deploy     # build + firebase deploy --only hosting
 
 `firebase.json` configures the SPA rewrites (`** → /index.html`) and long-cache headers for hashed assets. The matching API runs on Cloud Run; keep `PUBLIC_API_URL` and the API's `CORS_ORIGIN` in sync between environments.
 
+### Storage rules — deployed by hand
+
+`storage.rules` holds the Firebase Storage security rules; `firebase.json` points `firebase deploy --only storage` and the Storage emulator at it. Match Day deploys Hosting only (`action-hosting-deploy` runs `deploy --only hosting`), so a rules change goes live only when someone deploys it:
+
+```bash
+npm run test:rules
+npx firebase-tools deploy --only storage --project rasenbuerosport-leipzig-9d54f
+```
+
+Always pass `--project`: `.firebaserc` only holds a placeholder. The Firebase CLI must be signed in with an account that has access to the project.
+
+The rules only bind the client SDK. The API (Admin SDK) and the capture pipeline (`gsutil`) bypass them.
+
+- `avatars/<uid>/<file>`: create or replace only by the owner, with a verified `@redbulls.com` account; images except SVG, at most 2 MiB (the limit `ProfileEditor.svelte` checks). Everyone may read.
+- `match-stats/<gameId>/<file>`: create or replace by any verified `@redbulls.com` account; images except SVG, at most 10 MiB. Only those accounts may read through the SDK.
+- `team-logos/**`: everyone may read, because the `teams` table links logos without a download token. No client writes.
+- Everything else is denied, and so is every list or delete.
+
+Download URLs from `getDownloadURL()` carry a token and bypass the rules, so stored avatar and screenshot URLs keep working for signed-out viewers.
+
+If you change an upload path, size check or accepted type in `ProfileEditor.svelte` or `MatchReporterAwaitingCard.svelte`, update `storage.rules` and its tests in the same PR. Otherwise the upload fails with `storage/unauthorized`. The account check mirrors `isAllowedAccount` in the API's `auth.middlewares.js`, so change both together.
+
 ## Available Scripts
 
 | Command | Description |
@@ -342,6 +370,7 @@ npm run deploy     # build + firebase deploy --only hosting
 | `npm run test:unit` | Vitest unit + component tests, single run (what CI runs) |
 | `npm run test:unit:watch` | Vitest in watch mode |
 | `npm run test:coverage` | Vitest single run with v8 coverage (text, html, lcov → `coverage/`) and the 60% thresholds |
+| `npm run test:rules` | `storage.rules` tests in the Storage emulator (needs Java 21+, not run in CI) |
 | `npm run test:e2e` | Playwright e2e tests (starts the dev server unless one is running or `E2E_BASE_URL` is set) |
 | `npm run test:e2e:ui` | Playwright UI mode |
 | `npm run test:e2e:debug` | Playwright headed with the Inspector, for step-through debugging |
