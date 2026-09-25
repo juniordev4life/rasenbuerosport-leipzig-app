@@ -2,8 +2,9 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-// Path-based on purpose: under jsdom the global `URL` resolves relative
-// paths against http://localhost:3000, not against this file.
+// Path-based on purpose: in jsdom tests Vite rewrites
+// `new URL("<path>", import.meta.url)` to resolve against `self.location`
+// (http://localhost:3000), not against this file.
 const STATIC_DIR = join(import.meta.dirname, "../../static");
 
 /**
