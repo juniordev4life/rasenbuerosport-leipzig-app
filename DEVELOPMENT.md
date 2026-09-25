@@ -2,7 +2,7 @@
 
 This guide explains how to run the full RasenBuerosport stack locally (Frontend + Backend + Database).
 
-The recommended local DB setup is a **Docker Postgres 16 seeded from a PROD snapshot** on port `5434`. The Cloud SQL Auth Proxy is only used for the one-off snapshot dump (and as a fallback for read-only debugging). This keeps your local app fully isolated from production.
+The recommended local DB setup is a **Docker Postgres 16 seeded from a PROD snapshot** on port `5434`. The Cloud SQL Auth Proxy is only used for the one-off snapshot dump (and as a fallback for read-only debugging). This keeps your local database fully isolated from production. Firebase Auth and Storage still point at the production project.
 
 ---
 
@@ -15,7 +15,7 @@ The recommended local DB setup is a **Docker Postgres 16 seeded from a PROD snap
 | **Cloud SQL Auth Proxy** | latest | [cloud.google.com/sql/docs/postgres/connect-auth-proxy](https://cloud.google.com/sql/docs/postgres/connect-auth-proxy) |
 | **Docker Desktop** | latest | [docker.com](https://www.docker.com/products/docker-desktop/) |
 | **psql / pg_dump** | >= 16 | `brew install libpq` (macOS) |
-| **Java** | >= 21 | `brew install openjdk@21` (macOS); only for `npm run test:rules` in the frontend |
+| **Java** | >= 21 | `brew install --cask temurin@21` (macOS), or any JDK 21+ on `PATH`; only for `npm run test:rules` in the frontend |
 
 Authenticate with GCP and select the project:
 

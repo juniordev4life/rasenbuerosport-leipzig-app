@@ -252,8 +252,8 @@ tests/
 
 Vitest runs the unit and component tests, Playwright the end-to-end tests. Vitest is configured in the `test` block of `vite.config.js` (there is no root `vitest.config.js`; the Storage rules tests below have their own), Playwright in `playwright.config.js`. The commands are in the Available Scripts table below.
 
-- **Environment**: `jsdom` for every test file, with `globals: false` — import `describe`, `it`, `expect` and `vi` from `vitest`
-- **Setup**: `tests/setup.js` runs before each test file. It registers the `@testing-library/jest-dom` matchers and stubs APIs jsdom lacks (`navigator.vibrate`, `matchMedia`, `ResizeObserver`). Mock anything domain-specific per test with `vi.mock(...)`, not there
+- **Environment**: `jsdom` for every unit and component test file, with `globals: false` — import `describe`, `it`, `expect` and `vi` from `vitest`
+- **Setup**: `tests/setup.js` runs before each unit and component test file. It registers the `@testing-library/jest-dom` matchers and stubs APIs jsdom lacks (`navigator.vibrate`, `matchMedia`, `ResizeObserver`). Mock anything domain-specific per test with `vi.mock(...)`, not there
 - **Discovery**: `tests/unit/**/*.test.js` and `src/**/*.test.js`; `tests/e2e/**` is excluded from Vitest, and `tests/rules/**` runs only through `npm run test:rules`
 - **Components**: `@testing-library/svelte`. Keep the `svelteTesting()` plugin in `vite.config.js` — it makes tests resolve Svelte's client build; without it, rendering throws `lifecycle_function_unavailable`
 - **E2E**: Playwright specs in `tests/e2e/`, Chromium only. `npm run test:e2e` starts `npm run dev` on port 5173 for the run, or reuses a dev server already running there; set `E2E_BASE_URL` to test a running deployment instead. Install the browser once with `npx playwright install chromium`
@@ -267,7 +267,7 @@ Vitest runs the unit and component tests, Playwright the end-to-end tests. Vites
 
 ### Storage rules tests
 
-`tests/rules/storage.rules.test.js` checks `storage.rules` in the Firebase Storage emulator with `@firebase/rules-unit-testing`. `npm run test:rules` wraps `tests/rules/vitest.config.js` (Node environment) in `npx firebase-tools emulators:exec` for the `demo-rasenbuerosport` project, so it never touches real Firebase resources. The emulator needs Java 21+ and downloads its rules runtime on the first run. On Java 24+ the runtime prints a `sun.misc.Unsafe` deprecation warning that firebase-tools labels "Unexpected rules runtime error"; it is harmless. CI does not run these tests, so run them whenever `storage.rules` or an upload in `ProfileEditor.svelte` or `MatchReporterAwaitingCard.svelte` changes.
+`tests/rules/storage.rules.test.js` checks `storage.rules` in the Firebase Storage emulator with `@firebase/rules-unit-testing`. `npm run test:rules` wraps `tests/rules/vitest.config.js` (Node environment) in `npx firebase-tools emulators:exec` for the `demo-rasenbuerosport` project, so it never touches real Firebase resources. The emulator needs Java 21+ and downloads its rules runtime on the first run. On Java 24+ the runtime prints a `sun.misc.Unsafe` deprecation warning that firebase-tools labels "Unexpected rules runtime error"; it is harmless. CI does not run these tests, so run them whenever `storage.rules` or an upload in `ProfileEditor.svelte`, `MatchReporterAwaitingCard.svelte` or `image.utils.js` changes. `@firebase/rules-unit-testing` 4.x requires `firebase` 11; bump it to 5.x in the same PR as `firebase` 12, or `npm install` fails with `ERESOLVE`.
 
 ### File paths in tests
 
@@ -355,7 +355,9 @@ The rules only bind the client SDK. The API (Admin SDK) and the capture pipeline
 
 Download URLs from `getDownloadURL()` carry a token and bypass the rules, so stored avatar and screenshot URLs keep working for signed-out viewers.
 
-If you change an upload path, size check or accepted type in `ProfileEditor.svelte` or `MatchReporterAwaitingCard.svelte`, update `storage.rules` and its tests in the same PR. Otherwise the upload fails with `storage/unauthorized`. The account check mirrors `isAllowedAccount` in the API's `auth.middlewares.js`, so change both together.
+If you change an upload path, size check or accepted type in `ProfileEditor.svelte`, `MatchReporterAwaitingCard.svelte` or `resizeImage` (`image.utils.js`, which decides type and size of every match-stats upload), update `storage.rules` and its tests in the same PR. Otherwise the upload fails with `storage/unauthorized`. The account check mirrors `isAllowedAccount` in the API's `auth.middlewares.js` (added in juniordev4life/rasenbuerosport-leipzig-api#85), so change both together.
+
+Deploy the rules from an up-to-date `main` after the PR is merged, so the live rules always match the repo.
 
 ## Available Scripts
 
