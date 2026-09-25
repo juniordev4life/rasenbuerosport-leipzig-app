@@ -1050,7 +1050,7 @@
 		"add_photo": "Stats-Foto hinzufügen",
 		"add_photo_hint": "FC26 Screenshot (optional)",
 		"error_file_type": "Bitte ein Bild auswählen",
-		"error_file_size": "Bild darf max. 20 MB groß sein",
+		"error_file_size": "Bild darf max. 10 MB groß sein",
 		"error_generic": "Stats konnten nicht ausgelesen werden",
 		"upload_overview_title": "Spielstatistik hochladen",
 		"upload_overview_hint": "FC26 Übersicht-Tab Screenshot",

@@ -6,13 +6,16 @@ import {
 	initializeTestEnvironment,
 } from "@firebase/rules-unit-testing";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+	AVATAR_MAX_BYTES,
+	MATCH_STATS_MAX_BYTES,
+} from "../../src/lib/constants/upload.constants.js";
 
 const RULES = readFileSync(
 	join(import.meta.dirname, "../../storage.rules"),
 	"utf8",
 );
 
-const MIB = 1024 * 1024;
 const OWNER_UID = "owner-uid";
 const OTHER_UID = "other-uid";
 const GAME_ID = "0b3f8a52-4c1e-4f5e-9a7d-2e6c1d9b8f40";
@@ -173,15 +176,17 @@ describe("avatars/{uid}/{fileName}", () => {
 		await assertSucceeds(upload(client(REDBULLS_TOKEN), AVATAR_PATH));
 	});
 
-	it("accepts exactly 2 MiB, the limit ProfileEditor enforces", async () => {
+	it("accepts exactly AVATAR_MAX_BYTES, the limit the app enforces", async () => {
 		await assertSucceeds(
-			upload(client(REDBULLS_TOKEN), AVATAR_PATH, { size: 2 * MIB }),
+			upload(client(REDBULLS_TOKEN), AVATAR_PATH, { size: AVATAR_MAX_BYTES }),
 		);
 	});
 
-	it("rejects a file over 2 MiB", async () => {
+	it("rejects a file over AVATAR_MAX_BYTES", async () => {
 		await assertFails(
-			upload(client(REDBULLS_TOKEN), AVATAR_PATH, { size: 2 * MIB + 1 }),
+			upload(client(REDBULLS_TOKEN), AVATAR_PATH, {
+				size: AVATAR_MAX_BYTES + 1,
+			}),
 		);
 	});
 
@@ -293,15 +298,19 @@ describe("match-stats/{gameId}/{fileName}", () => {
 		await assertSucceeds(upload(client(REDBULLS_TOKEN, OTHER_UID), STATS_PATH));
 	});
 
-	it("accepts exactly 10 MiB", async () => {
+	it("accepts exactly MATCH_STATS_MAX_BYTES, the limit the app enforces", async () => {
 		await assertSucceeds(
-			upload(client(REDBULLS_TOKEN), STATS_PATH, { size: 10 * MIB }),
+			upload(client(REDBULLS_TOKEN), STATS_PATH, {
+				size: MATCH_STATS_MAX_BYTES,
+			}),
 		);
 	});
 
-	it("rejects a file over 10 MiB", async () => {
+	it("rejects a file over MATCH_STATS_MAX_BYTES", async () => {
 		await assertFails(
-			upload(client(REDBULLS_TOKEN), STATS_PATH, { size: 10 * MIB + 1 }),
+			upload(client(REDBULLS_TOKEN), STATS_PATH, {
+				size: MATCH_STATS_MAX_BYTES + 1,
+			}),
 		);
 	});
 

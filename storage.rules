@@ -3,10 +3,13 @@ rules_version = '2';
 // Security rules for the Firebase Storage default bucket
 // (rasenbuerosport-leipzig-9d54f.firebasestorage.app).
 //
-// Only client SDK requests are checked. The API writes talkshow/,
-// match-reports/ and feedback-screenshots/ with the Admin SDK, and the capture
-// pipeline writes highlights/ with gsutil. Both bypass these rules and publish
-// their objects through public object ACLs.
+// Only client SDK requests to firebasestorage.googleapis.com are checked. The
+// API writes talkshow/, match-reports/ and feedback-screenshots/ with the Admin
+// SDK, and the capture pipeline writes highlights/ with gsutil. Both bypass
+// these rules and publish their objects through public object ACLs. Reads
+// through storage.googleapis.com URLs (highlights, audio, team logos) go by
+// bucket IAM and object ACLs, not by these rules; see infrastructure/NOTES.md
+// in the API repo.
 //
 // Download URLs from getDownloadURL() carry a token and are served without a
 // rules check, so stored avatar and screenshot URLs keep working for everyone.
@@ -21,9 +24,10 @@ service firebase.storage {
   match /b/{bucket}/o {
     // Same gate as the API's requireAuth (isAllowedAccount in
     // auth.middlewares.js, added in rasenbuerosport-leipzig-api#85): a
-    // verified address on redbulls.com, compared case-insensitively. The "@" rules out lookalikes such as
-    // evilredbulls.com, redbulls.com.evil.com or subdomains. Tokens without
-    // these claims (anonymous or phone sign-in) fail the checks.
+    // verified address on redbulls.com, compared case-insensitively. The "@"
+    // rules out lookalikes such as evilredbulls.com, redbulls.com.evil.com or
+    // subdomains. Tokens without these claims (anonymous or phone sign-in)
+    // fail the checks.
     function isRedbullsAccount() {
       return request.auth != null
         && request.auth.token.get('email_verified', false) == true
@@ -40,15 +44,18 @@ service firebase.storage {
         && !contentType.matches('image/svg.*');
     }
 
-    // Team logos: the teams table links them without a download token, so
-    // reads stay public. Only API scripts write them.
+    // Team logos are public. The teams table links them through
+    // storage.googleapis.com, which bucket IAM serves; this get keeps the
+    // token-less Firebase URL working as well, the form the API's
+    // scripts/update-logo-urls.js writes. Only API scripts write logos.
     match /team-logos/{allPaths=**} {
       allow get;
     }
 
     // ProfileEditor.svelte uploads avatars/<uid>/avatar.<ext> and rejects
-    // files over 2 MiB. Reads stay public because avatars show up for
-    // everyone who sees the leaderboard.
+    // files over AVATAR_MAX_BYTES (src/lib/constants/upload.constants.js).
+    // Reads stay public because avatars show up for everyone who sees the
+    // leaderboard.
     match /avatars/{uid}/{fileName} {
       allow get;
       allow create, update: if isRedbullsAccount()
@@ -57,10 +64,10 @@ service firebase.storage {
     }
 
     // MatchReporterAwaitingCard.svelte uploads FC26 screenshots to
-    // match-stats/<gameId>/<slot>.jpg. Images wider than 1920 px arrive as
-    // JPEG re-encodes; narrower ones go up unchanged, e.g. PNG phone
-    // screenshots of a few MB. The API reads them through the download URL
-    // and deletes them with the Admin SDK.
+    // match-stats/<gameId>/<slot>.jpg. resizeImage re-encodes images wider
+    // than 1920 px or larger than MATCH_STATS_MAX_BYTES as JPEG; others go up
+    // unchanged, e.g. PNG phone screenshots of a few MB. The API reads them
+    // through the download URL and deletes them with the Admin SDK.
     match /match-stats/{gameId}/{fileName} {
       allow get: if isRedbullsAccount();
       allow create, update: if isRedbullsAccount()

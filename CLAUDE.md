@@ -234,7 +234,7 @@ src/
       recording  talkshow  teams  trophies  wrapped
     stores/                   # auth, season, theme
     config/                   # firebase.config.js, i18n.config.js
-    constants/                # liveMatch, reporters, routes, teams, trophies
+    constants/                # liveMatch, reporters, routes, teams, trophies, upload
     utils/                    # framework-agnostic helpers
     i18n/                     # de.json, en.json (Tolgee keys)
     data/  assets/            # static data + assets imported into components
@@ -267,7 +267,7 @@ Vitest runs the unit and component tests, Playwright the end-to-end tests. Vites
 
 ### Storage rules tests
 
-`tests/rules/storage.rules.test.js` checks `storage.rules` in the Firebase Storage emulator with `@firebase/rules-unit-testing`. `npm run test:rules` wraps `tests/rules/vitest.config.js` (Node environment) in `npx firebase-tools emulators:exec` for the `demo-rasenbuerosport` project, so it never touches real Firebase resources. The emulator needs Java 21+ and downloads its rules runtime on the first run. On Java 24+ the runtime prints a `sun.misc.Unsafe` deprecation warning that firebase-tools labels "Unexpected rules runtime error"; it is harmless. CI does not run these tests, so run them whenever `storage.rules` or an upload in `ProfileEditor.svelte`, `MatchReporterAwaitingCard.svelte` or `image.utils.js` changes. `@firebase/rules-unit-testing` 4.x requires `firebase` 11; bump it to 5.x in the same PR as `firebase` 12, or `npm install` fails with `ERESOLVE`.
+`tests/rules/storage.rules.test.js` checks `storage.rules` in the Firebase Storage emulator with `@firebase/rules-unit-testing`. `npm run test:rules` wraps `tests/rules/vitest.config.js` (Node environment) in `npx firebase-tools emulators:exec` for the `demo-rasenbuerosport` project, so it never touches real Firebase resources. The emulator needs Java 21+ and downloads its rules runtime on the first run. On Java 24+ the runtime prints a `sun.misc.Unsafe` deprecation warning that firebase-tools labels "Unexpected rules runtime error"; it is harmless. CI does not run these tests, so run them whenever `storage.rules`, `upload.constants.js` or an upload in `ProfileEditor.svelte`, `MatchReporterAwaitingCard.svelte` or `image.utils.js` changes. The size boundary cases import `AVATAR_MAX_BYTES` and `MATCH_STATS_MAX_BYTES`, so a client limit that drifts from the rules fails the suite. `@firebase/rules-unit-testing` 4.x requires `firebase` 11; bump it to 5.x in the same PR as `firebase` 12, or `npm install` fails with `ERESOLVE`.
 
 ### File paths in tests
 
@@ -346,16 +346,16 @@ npx firebase-tools deploy --only storage --project rasenbuerosport-leipzig-9d54f
 
 Always pass `--project`: `.firebaserc` only holds a placeholder. The Firebase CLI must be signed in with an account that has access to the project.
 
-The rules only bind the client SDK. The API (Admin SDK) and the capture pipeline (`gsutil`) bypass them.
+The rules only bind the client SDK (`firebasestorage.googleapis.com`). The API (Admin SDK) and the capture pipeline (`gsutil`) bypass them. Reads through `storage.googleapis.com` URLs (highlights, audio, team logos) are governed by bucket IAM and object ACLs instead; see `infrastructure/NOTES.md` in the API repo.
 
-- `avatars/<uid>/<file>`: create or replace only by the owner, with a verified `@redbulls.com` account; images except SVG, at most 2 MiB (the limit `ProfileEditor.svelte` checks). Everyone may read.
-- `match-stats/<gameId>/<file>`: create or replace by any verified `@redbulls.com` account; images except SVG, at most 10 MiB. Only those accounts may read through the SDK.
-- `team-logos/**`: everyone may read, because the `teams` table links logos without a download token. No client writes.
+- `avatars/<uid>/<file>`: create or replace only by the owner, with a verified `@redbulls.com` account; images except SVG, at most 2 MiB (`AVATAR_MAX_BYTES`). Everyone may read.
+- `match-stats/<gameId>/<file>`: create or replace by any verified `@redbulls.com` account; images except SVG, at most 10 MiB (`MATCH_STATS_MAX_BYTES`). Only those accounts may read through the SDK.
+- `team-logos/**`: everyone may read. The `teams` table links logos through `storage.googleapis.com`, which bucket IAM serves; this rule keeps the token-less Firebase URL form working as well. No client writes.
 - Everything else is denied, and so is every list or delete.
 
 Download URLs from `getDownloadURL()` carry a token and bypass the rules, so stored avatar and screenshot URLs keep working for signed-out viewers.
 
-If you change an upload path, size check or accepted type in `ProfileEditor.svelte`, `MatchReporterAwaitingCard.svelte` or `resizeImage` (`image.utils.js`, which decides type and size of every match-stats upload), update `storage.rules` and its tests in the same PR. Otherwise the upload fails with `storage/unauthorized`. The account check mirrors `isAllowedAccount` in the API's `auth.middlewares.js` (added in juniordev4life/rasenbuerosport-leipzig-api#85), so change both together.
+The client side of this contract lives in `src/lib/constants/upload.constants.js` (the size limits) and `isUploadableImageType` in `src/lib/utils/image.utils.js` (the type check). Both components validate against them before uploading and show `error_file_type` / `error_file_size` instead of a raw `storage/unauthorized` error. `resizeImage` re-encodes match-stats screenshots that are wider than 1920 px or over the size limit. If you change an upload path, a limit or the accepted types, update `storage.rules` and its tests in the same PR. The account check mirrors `isAllowedAccount` in the API's `auth.middlewares.js` (added in juniordev4life/rasenbuerosport-leipzig-api#85), so change both together.
 
 Deploy the rules from an up-to-date `main` after the PR is merged, so the live rules always match the repo.
 

@@ -2,8 +2,9 @@
 import { getTranslate } from "@tolgee/svelte";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "$lib/config/firebase.config.js";
+import { MATCH_STATS_MAX_BYTES } from "$lib/constants/upload.constants.js";
 import { post } from "$lib/services/api.services.js";
-import { resizeImage } from "$lib/utils/image.utils.js";
+import { isUploadableImageType, resizeImage } from "$lib/utils/image.utils.js";
 
 /**
  * Sophie's awaiting / processing card. Replaces the previous
@@ -108,7 +109,7 @@ async function handleFiles(event) {
 	/** @type {FileList} */
 	const list = event.target?.files;
 	if (!list || list.length === 0) return;
-	const files = Array.from(list).filter((f) => f.type.startsWith("image/"));
+	const files = Array.from(list).filter((f) => isUploadableImageType(f.type));
 	if (files.length === 0) {
 		errorMsg = $t("match_stats.error_file_type");
 		return;
@@ -129,7 +130,12 @@ async function handleFiles(event) {
 async function uploadOne(file, slot) {
 	slotStatus[slot] = "processing";
 	try {
-		const resized = await resizeImage(file);
+		// Narrow files over the cap get re-encoded; anything still larger
+		// would fail in storage.rules with a raw storage/unauthorized error.
+		const resized = await resizeImage(file, 1920, MATCH_STATS_MAX_BYTES);
+		if (resized.size > MATCH_STATS_MAX_BYTES) {
+			throw new Error($t("match_stats.error_file_size"));
+		}
 		const storageRef = ref(storage, `match-stats/${gameId}/${slot}.jpg`);
 		await uploadBytes(storageRef, resized);
 		const imageUrl = await getDownloadURL(storageRef);

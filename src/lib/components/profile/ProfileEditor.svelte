@@ -4,8 +4,10 @@ import { updateProfile } from "firebase/auth";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import Button from "$lib/components/ui/Button.svelte";
 import { auth, storage } from "$lib/config/firebase.config.js";
+import { AVATAR_MAX_BYTES } from "$lib/constants/upload.constants.js";
 import { patch } from "$lib/services/api.services.js";
 import { user } from "$lib/stores/auth.stores.js";
+import { isUploadableImageType } from "$lib/utils/image.utils.js";
 
 /**
  * ProfileEditor - Inline edit form for username and avatar.
@@ -45,12 +47,13 @@ function handleFileChange(e) {
 	const file = e.target.files?.[0];
 	if (!file) return;
 
-	// Validate file type and size
-	if (!file.type.startsWith("image/")) {
+	// Same type and size limits as storage.rules, so the user gets a
+	// translated message instead of a raw storage/unauthorized error.
+	if (!isUploadableImageType(file.type)) {
 		error = $t("profile.edit.error_file_type");
 		return;
 	}
-	if (file.size > 2 * 1024 * 1024) {
+	if (file.size > AVATAR_MAX_BYTES) {
 		error = $t("profile.edit.error_file_size");
 		return;
 	}
