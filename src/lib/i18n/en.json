@@ -1048,7 +1048,7 @@
 		"add_photo": "Add stats photo",
 		"add_photo_hint": "FC26 screenshot (optional)",
 		"error_file_type": "Please select an image file",
-		"error_file_size": "Image must be less than 20 MB",
+		"error_file_size": "Image must be less than 10 MB",
 		"error_generic": "Failed to extract stats",
 		"upload_overview_title": "Upload Match Stats",
 		"upload_overview_hint": "FC26 Overview tab screenshot",

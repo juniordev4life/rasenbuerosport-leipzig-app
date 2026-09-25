@@ -2,10 +2,13 @@
  * Component test for ProfileEditor's save — `avatar_url` must only be sent
  * after a new upload. Re-sending the current avatar would be checked against
  * the API's avatar allow-list and could block a plain username change.
+ * The file checks mirror storage.rules, so a file Storage would deny never
+ * gets uploaded.
  */
 
 import { fireEvent, render, screen, waitFor } from "@testing-library/svelte";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AVATAR_MAX_BYTES } from "../../../../src/lib/constants/upload.constants.js";
 
 const DOWNLOAD_URL =
 	"https://firebasestorage.googleapis.com/v0/b/test-bucket/o/avatars%2Fuid-1%2Favatar.png?alt=media&token=t";
@@ -92,5 +95,51 @@ describe("ProfileEditor", () => {
 			}),
 		);
 		expect(uploadBytes).toHaveBeenCalledOnce();
+	});
+
+	it.each([
+		[
+			"an SVG",
+			new File(["<svg/>"], "avatar.svg", { type: "image/svg+xml" }),
+			"profile.edit.error_file_type",
+		],
+		[
+			"a file over AVATAR_MAX_BYTES",
+			new File([new Uint8Array(AVATAR_MAX_BYTES + 1)], "avatar.png", {
+				type: "image/png",
+			}),
+			"profile.edit.error_file_size",
+		],
+	])("rejects %s with a translated message", async (_label, file, message) => {
+		const { container } = render(ProfileEditor, {
+			props: { currentUsername: "Marco", currentAvatarUrl: null },
+		});
+
+		await fireEvent.change(container.querySelector("#avatar-upload"), {
+			target: { files: [file] },
+		});
+
+		expect(screen.getByText(message)).toBeInTheDocument();
+	});
+
+	it("keeps a rejected file out of the save", async () => {
+		const { container } = render(ProfileEditor, {
+			props: { currentUsername: "Marco", currentAvatarUrl: null },
+		});
+		const svg = new File(["<svg/>"], "avatar.svg", { type: "image/svg+xml" });
+
+		await fireEvent.change(container.querySelector("#avatar-upload"), {
+			target: { files: [svg] },
+		});
+		await fireEvent.click(
+			screen.getByRole("button", { name: "profile.edit.save" }),
+		);
+
+		await waitFor(() =>
+			expect(patch).toHaveBeenCalledWith("/v1/auth/profile", {
+				username: "Marco",
+			}),
+		);
+		expect(uploadBytes).not.toHaveBeenCalled();
 	});
 });
