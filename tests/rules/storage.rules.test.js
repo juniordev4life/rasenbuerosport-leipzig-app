@@ -46,6 +46,11 @@ const REJECTED_ACCOUNTS = [
 	],
 	["a subdomain", { email: "max@mail.redbulls.com", email_verified: true }],
 	["a token without email", { email_verified: true }],
+	["a token without email_verified", { email: REDBULLS_TOKEN.email }],
+	[
+		"email_verified as a string",
+		{ email: REDBULLS_TOKEN.email, email_verified: "true" },
+	],
 ];
 
 let testEnv;
@@ -133,10 +138,33 @@ describe("avatars/{uid}/{fileName}", () => {
 		await assertFails(upload(client(token), AVATAR_PATH));
 	});
 
+	it.each(
+		REJECTED_ACCOUNTS,
+	)("rejects replacing an existing avatar by %s", async (_label, token) => {
+		await seed(AVATAR_PATH);
+
+		await assertFails(upload(client(token), AVATAR_PATH));
+	});
+
 	it("rejects an upload into another user's folder", async () => {
 		await assertFails(
 			upload(client(REDBULLS_TOKEN), `avatars/${OTHER_UID}/avatar.png`),
 		);
+	});
+
+	it("rejects replacing another user's existing avatar", async () => {
+		const otherAvatar = `avatars/${OTHER_UID}/avatar.png`;
+		await seed(otherAvatar);
+
+		await assertFails(upload(client(REDBULLS_TOKEN), otherAvatar));
+	});
+
+	it("rejects a metadata change on another user's avatar", async () => {
+		const otherAvatar = `avatars/${OTHER_UID}/avatar.png`;
+		await seed(otherAvatar);
+		const ref = client(REDBULLS_TOKEN).storage().ref(otherAvatar);
+
+		await assertFails(ref.updateMetadata({ cacheControl: "no-store" }));
 	});
 
 	it("lets the owner replace their avatar", async () => {
@@ -240,6 +268,23 @@ describe("match-stats/{gameId}/{fileName}", () => {
 		REJECTED_ACCOUNTS,
 	)("rejects an upload from %s", async (_label, token) => {
 		await assertFails(upload(client(token), STATS_PATH));
+	});
+
+	it.each(
+		REJECTED_ACCOUNTS,
+	)("rejects replacing an existing screenshot by %s", async (_label, token) => {
+		await seed(STATS_PATH);
+
+		await assertFails(upload(client(token), STATS_PATH));
+	});
+
+	it.each(
+		REJECTED_ACCOUNTS,
+	)("rejects a metadata change on a screenshot by %s", async (_label, token) => {
+		await seed(STATS_PATH);
+		const ref = client(token).storage().ref(STATS_PATH);
+
+		await assertFails(ref.updateMetadata({ cacheControl: "no-store" }));
 	});
 
 	it("lets a colleague replace a screenshot for a retry", async () => {
