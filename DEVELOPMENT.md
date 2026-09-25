@@ -226,10 +226,18 @@ DATABASE_URL="postgresql://postgres:localdev@127.0.0.1:5434/rasenbuerosport" nod
 | `npm run dev` | Start development server (port 5173) |
 | `npm run build` | Build for production |
 | `npm run preview` | Preview production build locally |
+| `npm run test:unit` | Run unit + component tests once (Vitest, what CI runs) |
+| `npm run test:unit:watch` | Run Vitest in watch mode |
+| `npm run test:coverage` | Run unit tests with coverage into `coverage/`; fails below the 60% thresholds |
+| `npm run test:e2e` | Run Playwright e2e tests (starts the dev server unless one is running) |
+| `npm run test:e2e:ui` | Open Playwright UI mode |
+| `npm run test:e2e:debug` | Debug e2e tests with the Playwright Inspector |
 | `npm run check` | Run Biome lint + format with auto-fix |
 | `npm run lint:check` | Check linting (no fix) |
 | `npm run format:check` | Check formatting (no fix) |
 | `npm run deploy` | Build and deploy to Firebase Hosting |
+
+Before the first `npm run test:e2e`, install the browser once: `npx playwright install chromium`.
 
 ### Backend (Playmaker)
 

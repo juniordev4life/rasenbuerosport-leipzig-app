@@ -8,6 +8,11 @@ node_modules
 /.svelte-kit
 /build
 
+# Test output (Vitest coverage, Playwright; paths resolve from the repo root)
+/coverage
+/test-results
+/playwright-report
+
 # OS
 .DS_Store
 Thumbs.db

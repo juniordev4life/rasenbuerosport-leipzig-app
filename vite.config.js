@@ -6,8 +6,10 @@ import { defineConfig } from "vitest/config";
 /**
  * Vite + Vitest configuration for the Striker app.
  *
- * Coverage thresholds: 80% for utils/services (pure logic), 60% for components
- * and overall branches. Static assets and the SvelteKit shell are excluded.
+ * Coverage thresholds: 60% for lines, functions, statements and branches,
+ * applied globally to all covered `src/` files (no per-directory overrides).
+ * `app.html`, `app.css`, route `+layout.js`/`+page.js` files and tests are
+ * excluded from coverage.
  *
  * The `svelteTesting()` plugin flips Vite into browser-resolution mode for
  * test runs so `@testing-library/svelte`'s `mount(...)` resolves the
