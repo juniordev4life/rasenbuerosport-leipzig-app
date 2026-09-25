@@ -82,12 +82,14 @@ Generated **automatically** once match stats are available. The report is:
 
 ## Screenshot upload
 
-If no screenshot was uploaded during match creation, you can add one later on the match detail page:
+FC26 screenshots are added on the match detail page — the wizard has no upload step. Right after saving, the app opens the new match, and the **FC26 screenshots** card sits below the score:
 
-1. Scroll to the upload area
-2. Select the FC26 screenshot
+1. Tap **Add all three now**
+2. Select the three FC26 stat screenshots: **Overview**, **Passes** and **Defence**
 3. AI automatically extracts all statistics
-4. A match report is generated
+4. Once all three are in, a match report is generated
+
+> Recorded matches get their stats from the recording automatically — there the upload is only a fallback, folded away under **Upload statistics manually**.
 
 ---
 
