@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="152 120 208 208">
+  <!-- Notification badge: the circle + arrow from icon.svg as a white silhouette.
+       Android masks badges by their alpha channel, so the arrow is cut out. -->
+  <mask id="arrow-cutout">
+    <rect x="152" y="120" width="208" height="208" fill="white"/>
+    <path d="M208 224 L256 160 L304 224 L272 224 L272 320 L240 320 L240 224 Z" fill="black"/>
+  </mask>
+  <circle cx="256" cy="224" r="96" fill="white" mask="url(#arrow-cutout)"/>
+</svg>
