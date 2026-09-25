@@ -1,7 +1,6 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import { goto } from "$app/navigation";
-import { auth } from "$lib/config/firebase.config.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get } from "$lib/services/api.services.js";
 import { loginWithGoogle, logout } from "$lib/services/auth.services.js";
@@ -24,13 +23,12 @@ async function handleGoogleLogin() {
 	} catch (err) {
 		if (err.code === "auth/popup-closed-by-user") return;
 
-		// If backend rejects the user, delete Firebase Auth entry and sign out
+		// The backend rejected the account: sign out only. Never delete the
+		// Firebase account — after a wrong rejection the next sign-in would
+		// get a new uid and lose the link to the profile and match history.
 		if (err.message === "User not authorized") {
-			if (auth.currentUser) {
-				await auth.currentUser.delete();
-			}
-			await logout();
 			error = $t("auth.errors.not_authorized");
+			await logout();
 		} else {
 			error = err.message || $t("auth.errors.generic");
 		}

@@ -218,7 +218,7 @@ Is **automatically generated** when statistics are available. The report is ente
 | **Database** | Cloud SQL PostgreSQL 16 (GCP) |
 | **Storage** | Firebase Storage (Avatars, Screenshots, Logos) |
 | **AI** | Claude API — Anthropic (Vision + Text) |
-| **Auth** | Firebase Auth (Google Sign-In, Invite-only) |
+| **Auth** | Firebase Auth (Google Sign-In, verified @redbulls.com accounts only) |
 | **Hosting** | Firebase Hosting (Frontend), Cloud Run (Backend) |
 | **App Type** | Progressive Web App (PWA) |
 | **Languages** | German & English (Tolgee i18n) |

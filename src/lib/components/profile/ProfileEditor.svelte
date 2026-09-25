@@ -89,10 +89,12 @@ async function handleSave() {
 			photoURL: avatarUrl,
 		});
 
-		// Update profile in backend via API
+		// Update profile in backend via API. `avatar_url` goes out only after
+		// a new upload: re-sending the current value would be checked against
+		// the API's avatar allow-list and could block a plain username change.
 		await patch("/v1/auth/profile", {
 			username: username.trim(),
-			avatar_url: avatarUrl,
+			...(avatarFile && { avatar_url: avatarUrl }),
 		});
 
 		// Refresh local user store with updated profile data
