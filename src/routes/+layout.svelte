@@ -14,15 +14,6 @@ import { theme } from "$lib/stores/theme.stores.js";
 
 let { children } = $props();
 
-// Register service worker for PWA
-$effect(() => {
-	if (browser && "serviceWorker" in navigator) {
-		navigator.serviceWorker.register("/service-worker.js").catch((err) => {
-			console.error("SW registration failed:", err);
-		});
-	}
-});
-
 // Theme: initialize from localStorage
 $effect(() => {
 	if (!browser) return;
