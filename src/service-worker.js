@@ -27,8 +27,10 @@ sw.addEventListener("push", (event) => {
 	const title = payload.title ?? "RasenBürosport";
 	const options = {
 		body: payload.body ?? "",
-		icon: "/favicon.png",
-		badge: "/favicon.png",
+		icon: "/icons/icon-192.png",
+		// Android renders the badge from its alpha channel only, so it must be
+		// a white-on-transparent silhouette rather than the full-colour icon.
+		badge: "/icons/icon-badge-96.png",
 		tag: payload.tag,
 		data: {
 			url: payload.url ?? "/app/dashboard",
