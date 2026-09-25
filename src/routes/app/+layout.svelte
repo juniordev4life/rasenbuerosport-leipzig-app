@@ -7,7 +7,6 @@ import Header from "$lib/components/layout/Header.svelte";
 import Sidebar from "$lib/components/layout/Sidebar.svelte";
 import Topbar from "$lib/components/layout/Topbar.svelte";
 import PushSoftPrompt from "$lib/components/profile/PushSoftPrompt.svelte";
-import { auth } from "$lib/config/firebase.config.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get } from "$lib/services/api.services.js";
 import { logout } from "$lib/services/auth.services.js";
@@ -35,10 +34,14 @@ $effect(() => {
 		})
 		.catch(async (err) => {
 			if (err.message === "User not authorized") {
-				if (auth.currentUser) {
-					await auth.currentUser.delete();
+				// Sign out only — never delete the Firebase account (see
+				// LoginForm). Redirect even if signing out fails, so the
+				// user is never left on the spinner.
+				try {
+					await logout();
+				} catch (logoutError) {
+					console.error("Sign-out failed:", logoutError);
 				}
-				await logout();
 				goto(ROUTES.LOGIN);
 			} else {
 				// Other errors (network, etc.) — still show the app
