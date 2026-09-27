@@ -15,12 +15,22 @@ import { getAllTeams } from "$lib/services/teams.services.js";
 let { onClose, onConfirm } = $props();
 
 const { t } = getTranslate();
+const uid = $props.id();
 
 let minStars = $state(4);
 let maxStars = $state(5);
 let homeResult = $state(null);
 let awayResult = $state(null);
 let error = $state("");
+
+/**
+ * Screen-reader text for a star-range slider, e.g. "3.5 stars" instead of "3.5"
+ * @param {number} stars
+ * @returns {string}
+ */
+function starsValueText(stars) {
+	return $t("new_game.random_stars_value", { stars });
+}
 
 /**
  * Gets teams whose star rating equals exactly the given value
@@ -131,9 +141,9 @@ function handleConfirm() {
 		     a read-only visualisation; the scroller is the input. -->
 		<div class="flex flex-col gap-4 mb-5">
 			<div>
-				<label class="text-xs font-medium text-text-secondary mb-1.5 block">
+				<span id="{uid}-min-stars" class="text-xs font-medium text-text-secondary mb-1.5 block">
 					{$t("new_game.random_min_stars")}
-				</label>
+				</span>
 				<div class="flex items-center gap-3">
 					<StarRating rating={minStars} size="md" />
 					<div class="flex-1">
@@ -142,6 +152,8 @@ function handleConfirm() {
 							min={0.5}
 							max={5}
 							step={0.5}
+							labelledBy="{uid}-min-stars"
+							valueText={starsValueText}
 							onChange={(v) => {
 								minStars = v;
 								if (minStars > maxStars) maxStars = minStars;
@@ -152,9 +164,9 @@ function handleConfirm() {
 			</div>
 
 			<div>
-				<label class="text-xs font-medium text-text-secondary mb-1.5 block">
+				<span id="{uid}-max-stars" class="text-xs font-medium text-text-secondary mb-1.5 block">
 					{$t("new_game.random_max_stars")}
-				</label>
+				</span>
 				<div class="flex items-center gap-3">
 					<StarRating rating={maxStars} size="md" />
 					<div class="flex-1">
@@ -163,6 +175,8 @@ function handleConfirm() {
 							min={0.5}
 							max={5}
 							step={0.5}
+							labelledBy="{uid}-max-stars"
+							valueText={starsValueText}
 							onChange={(v) => {
 								maxStars = v;
 								if (maxStars < minStars) minStars = maxStars;
