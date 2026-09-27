@@ -8,11 +8,17 @@ import { getAllTeams, searchTeams } from "$lib/services/teams.services.js";
 /**
  * @type {{
  *   value?: string,
+ *   id?: string,
  *   direction?: "down"|"up",
  *   maxVisible?: number,
  * }}
  */
-let { value = $bindable(""), direction = "down", maxVisible = 3 } = $props();
+let {
+	value = $bindable(""),
+	id,
+	direction = "down",
+	maxVisible = 3,
+} = $props();
 
 /** Approx height of a single suggestion row (px). Used to cap the
  *  dropdown to `maxVisible` items before the list starts scrolling. */
@@ -95,6 +101,7 @@ $effect(() => {
 
 <div class="relative">
 	<input
+		{id}
 		type="text"
 		value={inputValue}
 		oninput={handleInput}

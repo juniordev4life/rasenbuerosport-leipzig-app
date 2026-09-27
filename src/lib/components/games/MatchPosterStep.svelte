@@ -38,6 +38,7 @@ let {
 } = $props();
 
 const { t } = getTranslate();
+const uid = $props.id();
 
 const GUEST_ID = "__guest__";
 const DEFAULT_MIN = 4;
@@ -390,16 +391,16 @@ function avatarGradient(id) {
 
 			<div class="flex flex-col gap-4 mb-5">
 				<div>
-					<label class="text-xs font-medium text-accent-red mb-1.5 block tracking-[0.06em] uppercase">
+					<label for="{uid}-home" class="text-xs font-medium text-accent-red mb-1.5 block tracking-[0.06em] uppercase">
 						{$t("new_game.home")}
 					</label>
-					<TeamAutocomplete bind:value={manualHomeDraft} />
+					<TeamAutocomplete id="{uid}-home" bind:value={manualHomeDraft} />
 				</div>
 				<div>
-					<label class="text-xs font-medium text-success mb-1.5 block tracking-[0.06em] uppercase">
+					<label for="{uid}-away" class="text-xs font-medium text-success mb-1.5 block tracking-[0.06em] uppercase">
 						{$t("new_game.away")}
 					</label>
-					<TeamAutocomplete bind:value={manualAwayDraft} direction="up" />
+					<TeamAutocomplete id="{uid}-away" bind:value={manualAwayDraft} direction="up" />
 				</div>
 			</div>
 
