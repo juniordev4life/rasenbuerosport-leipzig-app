@@ -1,12 +1,13 @@
 /**
  * Component test for the scroll-snap step picker behind the star-range
  * selectors in RandomTeamPicker: which values it renders, how it marks
- * the active one, and how the arrow keys step it within [min, max].
+ * the active one, how the arrow keys step it within [min, max], and how
+ * it is named and announced to screen readers.
  * jsdom has no layout, so the scroll-driven path is not covered here.
  */
 
 import { fireEvent, render, screen } from "@testing-library/svelte";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, onTestFinished, vi } from "vitest";
 import StepScroller from "../../../../src/lib/components/games/StepScroller.svelte";
 
 const STAR_RANGE = { min: 0.5, max: 5, step: 0.5 };
@@ -17,6 +18,20 @@ beforeAll(() => {
 		Element.prototype.scrollTo = vi.fn();
 	}
 });
+
+/**
+ * Adds a visible label outside the component, as RandomTeamPicker does,
+ * and removes it again when the test ends.
+ * @param {string} id
+ * @param {string} text
+ */
+function addLabel(id, text) {
+	const label = document.createElement("span");
+	label.id = id;
+	label.textContent = text;
+	document.body.append(label);
+	onTestFinished(() => label.remove());
+}
 
 /** Rendered item labels, in strip order. */
 function itemLabels() {
@@ -91,5 +106,47 @@ describe("StepScroller", () => {
 
 		// Assert
 		expect(onChange).not.toHaveBeenCalled();
+	});
+
+	it("takes its accessible name from the element it is labelled by", () => {
+		// Arrange
+		addLabel("min-stars-label", "Min. Stars");
+
+		// Act
+		render(StepScroller, {
+			value: 4,
+			...STAR_RANGE,
+			labelledBy: "min-stars-label",
+		});
+
+		// Assert
+		expect(screen.getByRole("slider", { name: "Min. Stars" })).toHaveAttribute(
+			"aria-valuenow",
+			"4",
+		);
+	});
+
+	it("announces the formatted value text and keeps it in step", async () => {
+		// Arrange
+		const valueText = (v) => `${v} stars`;
+		render(StepScroller, { value: 3.5, ...STAR_RANGE, valueText });
+		const slider = screen.getByRole("slider");
+		expect(slider).toHaveAttribute("aria-valuetext", "3.5 stars");
+
+		// Act
+		await fireEvent.keyDown(slider, { key: "ArrowRight" });
+
+		// Assert
+		expect(slider).toHaveAttribute("aria-valuetext", "4 stars");
+	});
+
+	it("renders no naming or value-text attributes when they are not given", () => {
+		// Arrange + Act
+		render(StepScroller, { value: 4, ...STAR_RANGE });
+
+		// Assert
+		const slider = screen.getByRole("slider");
+		expect(slider).not.toHaveAttribute("aria-labelledby");
+		expect(slider).not.toHaveAttribute("aria-valuetext");
 	});
 });

@@ -890,6 +890,7 @@
 		"random_teams_title": "Pick Random Teams",
 		"random_min_stars": "Min. Stars",
 		"random_max_stars": "Max. Stars",
+		"random_stars_value": "{stars, plural, one {# star} other {# stars}}",
 		"random_search": "Save",
 		"random_reroll": "Reroll",
 		"random_confirm": "Confirm",

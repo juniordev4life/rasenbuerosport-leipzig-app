@@ -11,15 +11,29 @@ import { onMount, untrack } from "svelte";
  * the star-range pickers in `RandomTeamPicker` (`step = 0.5`, range
  * 0.5..5). Arrow Left / Right move the value by one step.
  *
+ * `labelledBy` is the id of the element that names the slider, rendered
+ * as `aria-labelledby`. `valueText` turns the value into what a screen
+ * reader announces (`aria-valuetext`), e.g. "3.5 stars" instead of "3.5".
+ *
  * @type {{
  *   value: number,
  *   min: number,
  *   max: number,
  *   step?: number,
+ *   labelledBy?: string,
+ *   valueText?: (value: number) => string,
  *   onChange?: (value: number) => void,
  * }}
  */
-let { value = $bindable(), min, max, step = 1, onChange } = $props();
+let {
+	value = $bindable(),
+	min,
+	max,
+	step = 1,
+	labelledBy,
+	valueText,
+	onChange,
+} = $props();
 
 /** Width of one item slot in px — keep in sync with `.picker-number`. */
 const ITEM_WIDTH = 28;
@@ -164,9 +178,11 @@ function handleKeydown(event) {
 	class="step-scroller"
 	role="slider"
 	tabindex="0"
+	aria-labelledby={labelledBy}
 	aria-valuemin={min}
 	aria-valuemax={max}
 	aria-valuenow={value}
+	aria-valuetext={valueText?.(value)}
 	onkeydown={handleKeydown}
 >
 	<div class="picker-fade left" aria-hidden="true"></div>
