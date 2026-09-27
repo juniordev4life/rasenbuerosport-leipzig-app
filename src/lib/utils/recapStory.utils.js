@@ -58,6 +58,53 @@ export function isLastSlide(index, length) {
 	return length <= 0 || index >= length - 1;
 }
 
+const RECAP_FLAG_PREFIX = "rbl:recap:";
+const RECAP_FLAG_SUFFIX = ":v1";
+
+function recapFlagKey(seasonId) {
+	return `${RECAP_FLAG_PREFIX}${seasonId}${RECAP_FLAG_SUFFIX}`;
+}
+
+/**
+ * Whether the signed-in device has already seen the recap story for a
+ * given season. Returns `false` when `localStorage` is unavailable
+ * (SSR, private mode) — better to over-show the story than to
+ * silently swallow it.
+ *
+ * @param {string} seasonId
+ * @returns {boolean}
+ * @example
+ *   if (!isRecapSeen("fc26")) offerRecapStory("fc26");
+ */
+export function isRecapSeen(seasonId) {
+	if (typeof window === "undefined") return false;
+	try {
+		return window.localStorage.getItem(recapFlagKey(seasonId)) === "1";
+	} catch {
+		return false;
+	}
+}
+
+/**
+ * Persist that the recap story for a season has been shown (closed or
+ * finished), so the auto-launcher doesn't offer it again. Silently
+ * no-ops when `localStorage` is unavailable.
+ *
+ * @param {string} seasonId
+ * @returns {void}
+ * @example
+ *   markRecapSeen("fc26");
+ */
+export function markRecapSeen(seasonId) {
+	if (typeof window === "undefined") return;
+	try {
+		window.localStorage.setItem(recapFlagKey(seasonId), "1");
+	} catch {
+		// Storage quota or privacy mode — the story may be offered again
+		// next session, which is an acceptable fallback.
+	}
+}
+
 /**
  * Per-slide progress-bar fill ratios (0..1) for the top progress bars,
  * Instagram-story style: every bar before the active one is full, the

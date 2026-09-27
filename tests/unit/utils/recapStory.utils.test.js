@@ -1,7 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
 	availableSlides,
 	isLastSlide,
+	isRecapSeen,
+	markRecapSeen,
 	nextSlideIndex,
 	slideProgressRatios,
 } from "$lib/utils/recapStory.utils.js";
@@ -89,5 +91,33 @@ describe("slideProgressRatios", () => {
 
 	it("returns an empty array for zero slides", () => {
 		expect(slideProgressRatios(0, 0, 0.5)).toEqual([]);
+	});
+});
+
+describe("isRecapSeen / markRecapSeen", () => {
+	beforeEach(() => {
+		window.localStorage.clear();
+	});
+
+	it("is not seen before it has been marked", () => {
+		expect(isRecapSeen("fc26")).toBe(false);
+	});
+
+	it("is seen after being marked", () => {
+		markRecapSeen("fc26");
+
+		expect(isRecapSeen("fc26")).toBe(true);
+	});
+
+	it("tracks each season independently", () => {
+		markRecapSeen("fc26");
+
+		expect(isRecapSeen("fc27")).toBe(false);
+	});
+
+	it("stores the flag under the documented key format", () => {
+		markRecapSeen("fc26");
+
+		expect(window.localStorage.getItem("rbl:recap:fc26:v1")).toBe("1");
 	});
 });

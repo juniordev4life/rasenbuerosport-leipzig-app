@@ -34,6 +34,9 @@ vi.mock("$lib/components/layout/Topbar.svelte", () => ({ default: vi.fn() }));
 vi.mock("$lib/components/profile/PushSoftPrompt.svelte", () => ({
 	default: vi.fn(),
 }));
+vi.mock("$lib/components/recap/SeasonRecapLauncher.svelte", () => ({
+	default: vi.fn(),
+}));
 
 import { ROUTES } from "../../../../src/lib/constants/routes.constants.js";
 import AppLayout from "../../../../src/routes/app/+layout.svelte";

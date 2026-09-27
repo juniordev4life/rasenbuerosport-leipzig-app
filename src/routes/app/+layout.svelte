@@ -7,6 +7,7 @@ import Header from "$lib/components/layout/Header.svelte";
 import Sidebar from "$lib/components/layout/Sidebar.svelte";
 import Topbar from "$lib/components/layout/Topbar.svelte";
 import PushSoftPrompt from "$lib/components/profile/PushSoftPrompt.svelte";
+import SeasonRecapLauncher from "$lib/components/recap/SeasonRecapLauncher.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get } from "$lib/services/api.services.js";
 import { logout } from "$lib/services/auth.services.js";
@@ -15,9 +16,13 @@ let { children } = $props();
 let authorized = $state(false);
 let checking = $state(true);
 
-/** Hide the chrome (Header greeting) inside the new-game wizard so the
- *  event-entry screen has the full vertical room. */
-const isImmersive = $derived(page.url.pathname.startsWith("/app/games/new"));
+/** Hide the chrome (Header greeting, bottom nav) inside the new-game
+ *  wizard and the full-screen season recap story so both get the full
+ *  viewport to themselves. */
+const isImmersive = $derived(
+	page.url.pathname.startsWith("/app/games/new") ||
+		page.url.pathname.startsWith("/app/recap"),
+);
 
 // Verify user is authorized (has a profile in the database)
 $effect(() => {
@@ -79,5 +84,6 @@ $effect(() => {
 		{#if !isImmersive}
 			<PushSoftPrompt />
 		{/if}
+		<SeasonRecapLauncher />
 	</div>
 {/if}
