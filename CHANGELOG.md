@@ -6,6 +6,26 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v2.0.0
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.7.5...v2.0.0)
+
+### 🚀 Enhancements
+
+- ⚠️  FC27 season switch — league-wide Rangliste and FC26 recap story ([#95](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/95))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v1.7.5 ([42acdf1](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/42acdf1))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️  FC27 season switch — league-wide Rangliste and FC26 recap story ([#95](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/95))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v1.7.5 (2026-09-25)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.7.4...v1.7.5)
