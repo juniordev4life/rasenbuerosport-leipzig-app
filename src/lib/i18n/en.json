@@ -108,7 +108,8 @@
 		"recap_card": {
 			"title": "Your {version} recap is here",
 			"subtitle": "Take a look at your season",
-			"cta": "View"
+			"cta": "View",
+			"subtitle_with_talkrunde": "Look back on your season – season talk show included"
 		},
 		"sections": {
 			"challenges": "Weekly challenges",
@@ -361,7 +362,11 @@
 		"awards_title": "Season awards",
 		"recap_cta": "Your {version} recap",
 		"retry": "Try again",
-		"error_generic": "Something went wrong."
+		"error_generic": "Something went wrong.",
+		"season_talkrunde": {
+			"title": "Special episode: {version} season talk show",
+			"subtitle": "Marcel, Sophie and Frank look back on the whole season"
+		}
 	},
 	"h2h": {
 		"title": "Head to Head",
@@ -1544,18 +1549,42 @@
 		"profile_link": "Trophy Room"
 	},
 	"season_awards": {
-		"champion": { "label": "Champion" },
-		"top_scorer": { "label": "Top Scorer" },
-		"top_assister": { "label": "Top Assister" },
-		"dream_duo": { "label": "Dream Duo" },
-		"penalty_king": { "label": "Penalty King" },
-		"fair_play": { "label": "Fair Play Award" },
-		"wall": { "label": "The Wall" },
-		"marathon": { "label": "Iron Man" },
-		"form_of_the_year": { "label": "Form of the Season" },
-		"lunch_king": { "label": "Lunch Break King" },
-		"comeback_king": { "label": "Comeback King" },
-		"unlucky": { "label": "Unlucky One of the Season" }
+		"champion": {
+			"label": "Champion"
+		},
+		"top_scorer": {
+			"label": "Top Scorer"
+		},
+		"top_assister": {
+			"label": "Top Assister"
+		},
+		"dream_duo": {
+			"label": "Dream Duo"
+		},
+		"penalty_king": {
+			"label": "Penalty King"
+		},
+		"fair_play": {
+			"label": "Fair Play Award"
+		},
+		"wall": {
+			"label": "The Wall"
+		},
+		"marathon": {
+			"label": "Iron Man"
+		},
+		"form_of_the_year": {
+			"label": "Form of the Season"
+		},
+		"lunch_king": {
+			"label": "Lunch Break King"
+		},
+		"comeback_king": {
+			"label": "Comeback King"
+		},
+		"unlucky": {
+			"label": "Unlucky One of the Season"
+		}
 	},
 	"season_recap": {
 		"title": "Recap",

@@ -6,9 +6,9 @@ import { getTranslate } from "@tolgee/svelte";
  * season's recap is fresh — see `isRecentlyGenerated` in
  * `recapStory.utils.js` for the 14-day freshness window.
  *
- * @type {{ seasonId: string, gameVersion: string }}
+ * @type {{ seasonId: string, gameVersion: string, withTalkrunde?: boolean }}
  */
-let { seasonId, gameVersion } = $props();
+let { seasonId, gameVersion, withTalkrunde = false } = $props();
 
 const { t } = getTranslate();
 </script>
@@ -22,7 +22,9 @@ const { t } = getTranslate();
 		<div class="text-sm font-extrabold text-text-primary">
 			{$t("home.recap_card.title", { version: gameVersion })}
 		</div>
-		<div class="text-xs text-text-secondary">{$t("home.recap_card.subtitle")}</div>
+		<div class="text-xs text-text-secondary">
+			{withTalkrunde ? $t("home.recap_card.subtitle_with_talkrunde") : $t("home.recap_card.subtitle")}
+		</div>
 	</div>
 	<span class="text-accent-red font-bold text-sm shrink-0">{$t("home.recap_card.cta")}</span>
 </a>

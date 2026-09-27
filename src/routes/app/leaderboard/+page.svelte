@@ -9,6 +9,7 @@ import ModeSwitch from "$lib/components/leaderboard/ModeSwitch.svelte";
 import PlayerRow from "$lib/components/leaderboard/PlayerRow.svelte";
 import RanglisteHero from "$lib/components/leaderboard/RanglisteHero.svelte";
 import SeasonSwitch from "$lib/components/leaderboard/SeasonSwitch.svelte";
+import SeasonTalkrundeCard from "$lib/components/leaderboard/SeasonTalkrundeCard.svelte";
 import SegmentedToggle from "$lib/components/leaderboard/SegmentedToggle.svelte";
 import InfoTip from "$lib/components/ui/InfoTip.svelte";
 import {
@@ -328,6 +329,12 @@ function handleDuoClick(duo) {
 
 	{#if !loading && !error && !isCurrentSeason}
 		<AwardsStrip {awards} />
+		{#if seasonMeta?.talkrunde?.audio_url}
+			<SeasonTalkrundeCard
+				audioUrl={seasonMeta.talkrunde.audio_url}
+				gameVersion={seasonMeta.game_version ?? ""}
+			/>
+		{/if}
 		{#if hasRecap && recapHref}
 			<a
 				href={recapHref}

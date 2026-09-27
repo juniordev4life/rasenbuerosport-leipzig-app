@@ -110,7 +110,8 @@
 		"recap_card": {
 			"title": "Dein {version}-Rückblick ist da",
 			"subtitle": "Schau dir deine Saison an",
-			"cta": "Ansehen"
+			"cta": "Ansehen",
+			"subtitle_with_talkrunde": "Schau dir deine Saison an – inklusive Saison-Talkrunde"
 		},
 		"sections": {
 			"challenges": "Wochen-Challenges",
@@ -363,7 +364,11 @@
 		"awards_title": "Saison-Awards",
 		"recap_cta": "Dein {version}-Rückblick",
 		"retry": "Erneut versuchen",
-		"error_generic": "Etwas ist schiefgelaufen."
+		"error_generic": "Etwas ist schiefgelaufen.",
+		"season_talkrunde": {
+			"title": "Sonderfolge: Saison-Talkrunde {version}",
+			"subtitle": "Marcel, Sophie und Frank blicken auf die ganze Saison zurück"
+		}
 	},
 	"h2h": {
 		"title": "Direkter Vergleich",
@@ -1546,18 +1551,42 @@
 		"profile_link": "Trophäenraum"
 	},
 	"season_awards": {
-		"champion": { "label": "Meister" },
-		"top_scorer": { "label": "Torschützenkönig" },
-		"top_assister": { "label": "Vorlagenkönig" },
-		"dream_duo": { "label": "Dream-Duo" },
-		"penalty_king": { "label": "Elfmeterkönig" },
-		"fair_play": { "label": "Fairplay-Preis" },
-		"wall": { "label": "Die Mauer" },
-		"marathon": { "label": "Dauerbrenner" },
-		"form_of_the_year": { "label": "Form der Saison" },
-		"lunch_king": { "label": "Mittagspausen-König" },
-		"comeback_king": { "label": "Comeback-König" },
-		"unlucky": { "label": "Pechvogel" }
+		"champion": {
+			"label": "Meister"
+		},
+		"top_scorer": {
+			"label": "Torschützenkönig"
+		},
+		"top_assister": {
+			"label": "Vorlagenkönig"
+		},
+		"dream_duo": {
+			"label": "Dream-Duo"
+		},
+		"penalty_king": {
+			"label": "Elfmeterkönig"
+		},
+		"fair_play": {
+			"label": "Fairplay-Preis"
+		},
+		"wall": {
+			"label": "Die Mauer"
+		},
+		"marathon": {
+			"label": "Dauerbrenner"
+		},
+		"form_of_the_year": {
+			"label": "Form der Saison"
+		},
+		"lunch_king": {
+			"label": "Mittagspausen-König"
+		},
+		"comeback_king": {
+			"label": "Comeback-König"
+		},
+		"unlucky": {
+			"label": "Pechvogel"
+		}
 	},
 	"season_recap": {
 		"title": "Rückblick",

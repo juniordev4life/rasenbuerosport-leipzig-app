@@ -93,7 +93,11 @@ $effect(() => {
 			if (!closed) return;
 			const recap = await getSeasonRecap(closed.id);
 			if (!recap || !isRecentlyGenerated(recap.generated_at)) return;
-			recapCard = { seasonId: closed.id, gameVersion: closed.game_version };
+			recapCard = {
+				seasonId: closed.id,
+				gameVersion: closed.game_version,
+				withTalkrunde: Boolean(closed.talkrunde?.audio_url),
+			};
 		} catch (err) {
 			console.warn("Recap card load failed:", err);
 		}
@@ -315,7 +319,11 @@ const top3 = $derived(
 			{#if recapCard}
 				<!-- mb-4 on mobile only: the stack has no gap there, at lg the grid's gap-4 spaces it. -->
 				<div class="mb-4 lg:mb-0 lg:col-span-12">
-					<RecapReadyCard seasonId={recapCard.seasonId} gameVersion={recapCard.gameVersion} />
+					<RecapReadyCard
+						seasonId={recapCard.seasonId}
+						gameVersion={recapCard.gameVersion}
+						withTalkrunde={recapCard.withTalkrunde}
+					/>
 				</div>
 			{/if}
 
