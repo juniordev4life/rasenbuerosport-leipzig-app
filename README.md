@@ -35,11 +35,12 @@ RasenBürosport Leipzig transforms the office foosball table into a professional
 | 🔮 | **AI Prediction** | Automatic match prediction before the game |
 | 📸 | **FC26 Integration** | Upload screenshot, AI reads stats |
 | 📝 | **AI Match Report** | Automatic match report after the game |
-| 🏆 | **Leaderboard** | Points system with time-range filters |
+| 🏆 | **Leaderboard** | Skill-Rating (ELO) and a season-reset Liga table, by EA FC edition |
 | ⚔️ | **Head-to-Head** | Direct comparison between two players |
 | 🏅 | **15 Badges** | Unlockable achievements |
 | 📈 | **Career Stats** | xG efficiency, possession, pass accuracy |
 | ⚽ | **League Stats** | Performance per league (Bundesliga, La Liga...) |
+| 🎬 | **Season Recap** | Story-style recap of your season once it closes |
 
 ---
 
@@ -113,19 +114,19 @@ Wenn FC26-Statistiken vorhanden sind, werden diese als interaktiver Vergleich an
 
 ## 🏆 Leaderboard
 
-Two perspectives on the league — for fair comparisons.
+League seasons follow the EA FC editions (FC26, FC27, …) — ELO carries over between them, but the points table resets. Two views per season:
 
 <div align="center">
 <img src="docs/screenshots/leaderboard.png" width="300" />
 <img src="docs/screenshots/rangliste-2.png" width="300" />
 </div>
 
-| Mode | Logic |
+| View | Logic |
 |-------|-------|
-| **Overall** | 3 points per win, 1 per draw. Classic table. |
-| **Per Match** | Points divided by number of matches. Fair when players have different match counts. |
+| **Skill-Rating** | One ELO rating per player across every mode, sortable by current rating or recent form. Player and duo tabs. |
+| **Liga** | Classic points table for the season: 3 per win, 1 per draw, 2/1 for a shootout win/loss. Toggle between total points and points per game. |
 
-**Time range filter**: Overall · 7 days · 30 days · 90 days
+Once a season closes, an awards strip (Meister, Torschützenkönig, Dream-Duo, …) and — if you played that season — a personal [Season Recap →](docs/features/SEASON_RECAP.md) appear underneath.
 
 Tap a player for the **direct comparison**:
 
