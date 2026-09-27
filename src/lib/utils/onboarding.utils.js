@@ -107,10 +107,11 @@ const TOUR_DEFINITIONS = {
 				position: "bottom",
 			},
 			{ selector: '[data-onboarding="lobby-away"]', tip: 2, position: "top" },
-			// `position` deliberately omitted — the guest tile lives at the
-			// right edge of the pitch on mobile and a forced "bottom" makes
-			// intro.js push the tooltip off-screen. Letting it auto-pick
-			// keeps the tooltip inside the viewport on every layout.
+			// `position` deliberately omitted — the guest tile ends the
+			// avatar strip, so once it is scrolled into view it sits at the
+			// right edge of the pitch, and a forced "bottom" makes intro.js
+			// push the tooltip off-screen. Letting it auto-pick keeps the
+			// tooltip inside the viewport on every layout.
 			{ selector: '[data-onboarding="lobby-guest"]', tip: 3 },
 		],
 	},
@@ -317,6 +318,34 @@ function buildIntroSteps(def) {
 }
 
 /**
+ * Scroll `el` into view inside its nearest horizontal scroller. intro.js
+ * only scrolls vertically, so an anchor at the end of an overflowing strip
+ * (the lobby's guest tile) would be highlighted off-screen without this.
+ *
+ * @param {Element} el — the step's anchor.
+ * @returns {() => void} restores the scroller's previous position.
+ */
+function revealHorizontally(el) {
+	let scroller = el.parentElement;
+	while (scroller) {
+		const { overflowX } = getComputedStyle(scroller);
+		const scrollable = overflowX === "auto" || overflowX === "scroll";
+		if (scrollable && scroller.scrollWidth > scroller.clientWidth) break;
+		scroller = scroller.parentElement;
+	}
+	if (!scroller) return () => {};
+
+	const previous = scroller.scrollLeft;
+	const box = scroller.getBoundingClientRect();
+	const elBox = el.getBoundingClientRect();
+	if (elBox.right > box.right) scroller.scrollLeft += elBox.right - box.right;
+	else if (elBox.left < box.left) scroller.scrollLeft -= box.left - elBox.left;
+	return () => {
+		scroller.scrollLeft = previous;
+	};
+}
+
+/**
  * Run the intro.js tour for the given onboarding key. The CSS and
  * the library itself are imported lazily so first-time-only tours
  * don't grow the main bundle. On completion (or any kind of exit)
@@ -424,6 +453,19 @@ export async function runOnboardingTour(key) {
 		resolveDeferred(this, index + 1);
 	});
 
+	// Bring an anchor that sits in a horizontal scroller into view for
+	// its step, and put the scroller back when the step is left, so the
+	// tour ends with the layout the user started from. Floating steps
+	// (no selector) get intro.js' placeholder element, which is skipped.
+	let restoreScroll = () => {};
+	tour.onbeforechange(function revealAnchor(targetElement, index) {
+		restoreScroll();
+		restoreScroll = () => {};
+		if (targetElement && def.steps[index]?.selector) {
+			restoreScroll = revealHorizontally(targetElement);
+		}
+	});
+
 	// intro.js fires both `oncomplete` and `onexit` when the user
 	// finishes via the Done button — guard so the demo reset and the
 	// localStorage write only happen once per tour run.
@@ -431,6 +473,7 @@ export async function runOnboardingTour(key) {
 	const finish = () => {
 		if (finished) return;
 		finished = true;
+		restoreScroll();
 		const resetAction = def.resetActionOnExit;
 		if (resetAction && typeof window.__rblLiveDemo === "function") {
 			try {
