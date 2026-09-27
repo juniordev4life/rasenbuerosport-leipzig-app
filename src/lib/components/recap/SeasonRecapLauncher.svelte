@@ -5,7 +5,10 @@ import {
 	getLeagueSeasons,
 	getSeasonRecap,
 } from "$lib/services/seasons.services.js";
-import { isRecapSeen } from "$lib/utils/recapStory.utils.js";
+import {
+	findClosedSeasonWithRecap,
+	isRecapSeen,
+} from "$lib/utils/recapStory.utils.js";
 
 /**
  * Invisible auto-launcher for the season recap story. Mounted once,
@@ -35,7 +38,7 @@ $effect(() => {
 	(async () => {
 		try {
 			const seasons = await getLeagueSeasons();
-			const closedWithRecap = seasons.find((s) => !s.is_current && s.has_recap);
+			const closedWithRecap = findClosedSeasonWithRecap(seasons);
 			if (!closedWithRecap || isRecapSeen(closedWithRecap.id)) return;
 
 			const recap = await getSeasonRecap(closedWithRecap.id);

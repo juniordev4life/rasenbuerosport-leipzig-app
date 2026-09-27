@@ -107,6 +107,11 @@
 			"neutral": "{name}, solide Bilanz — ein bisschen Hype geht aber noch, oder?",
 			"empty": "{name}, frische Woche, frische Chancen! Zeit für das erste Match!"
 		},
+		"recap_card": {
+			"title": "Dein {version}-Rückblick ist da",
+			"subtitle": "Schau dir deine Saison an",
+			"cta": "Ansehen"
+		},
 		"sections": {
 			"challenges": "Wochen-Challenges",
 			"talkrunde": "Freitags-Talkrunde",
@@ -1553,5 +1558,85 @@
 		"lunch_king": { "label": "Mittagspausen-König" },
 		"comeback_king": { "label": "Comeback-König" },
 		"unlucky": { "label": "Pechvogel" }
+	},
+	"season_recap": {
+		"title": "Rückblick",
+		"dialog_label": "Saison-Rückblick",
+		"close": "Schließen",
+		"error": "Der Rückblick konnte nicht geladen werden.",
+		"retry": "Erneut versuchen",
+		"back": "Zurück",
+		"empty": "Für diese Saison gibt es noch keinen Rückblick für dich.",
+		"intro": {
+			"title": "Deine Saison {version}",
+			"games": "Spiele",
+			"league_facts": "Die Liga in {version}: {games} Spiele, {goals} Tore."
+		},
+		"numbers": {
+			"title": "Zahlen",
+			"win_rate": "Sieg-Quote",
+			"wins": "Siege",
+			"draws": "Remis",
+			"losses": "Niederlagen",
+			"games_played": "{count} Spiele insgesamt",
+			"rank": "Platz {rank} von {of} bei den Siegen"
+		},
+		"goals": {
+			"title": "Tore",
+			"goals_label": "Tore erzielt",
+			"assists": "Vorlagen",
+			"per_game": "Tore/Spiel",
+			"hattricks": "Hattricks",
+			"clean_sheets": "Zu-Null-Spiele"
+		},
+		"timing": {
+			"title": "Wann du spielst",
+			"favorite_weekday": "{count} Spiele — dein häufigster Spieltag",
+			"lucky_day": "Dein Glückstag",
+			"win_rate": "{percent}% Siege ({count} Spiele)",
+			"lunch_break": "{percent}% deiner Spiele in der Mittagspause",
+			"favorite_hour": "Deine liebste Anstoßzeit: {hour} Uhr ({count} Spiele)"
+		},
+		"relations": {
+			"title": "Mit wem",
+			"best_partner": "Top-Partner",
+			"best_partner_detail": "{wins} Siege in {games} gemeinsamen Spielen",
+			"nemesis": "Angstgegner",
+			"nemesis_detail": "{losses} Niederlagen in {games} Spielen",
+			"favorite_victim": "Lieblingsgegner",
+			"favorite_victim_detail": "{wins} Siege in {games} Spielen"
+		},
+		"match_of_season": {
+			"title": "Dein Spiel der Saison",
+			"penalty_badge": "Elfmeterschießen",
+			"watch_highlight": "Highlight ansehen",
+			"biggest_win": "Höchster Sieg",
+			"highest_scoring": "Torreichstes Spiel",
+			"most_common_score": "Häufigstes Ergebnis",
+			"favorite_club": "Lieblingsverein",
+			"best_club": "Bester Verein"
+		},
+		"elo_journey": {
+			"title": "Deine ELO-Reise",
+			"peak": "Höchststand {value} am {date}",
+			"rank": "Platz {rank} von {of}"
+		},
+		"new_elo": {
+			"title": "Das neue ELO",
+			"explainer": "League-ELO v2 rechnet fairer: Nullsummenspiel, moderate Tordifferenz, Vorlagen und gehaltene Elfmeter zählen mit.",
+			"hint_yellow_cards": "{count} Gelbe Karten kosten dich jetzt nichts mehr",
+			"hint_one_vs_two": "{count} Spiele 1v2 werden jetzt fair verrechnet",
+			"hint_draws": "{count} Unentschieden bewegen jetzt dein ELO",
+			"hint_shootouts": "{count} Elfmeterschießen zählen als knapper Sieg"
+		},
+		"awards": {
+			"title": "Saison-Awards",
+			"you_won": "Du bist unter den Preisträgern!"
+		},
+		"finale": {
+			"persona": "{persona} meint:",
+			"next_season": "FC27 läuft — dein Start-ELO: {rating}",
+			"cta": "Zur Rangliste"
+		}
 	}
 }

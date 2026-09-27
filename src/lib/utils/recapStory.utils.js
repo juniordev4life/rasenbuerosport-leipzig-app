@@ -25,6 +25,55 @@ export function availableSlides(slides, recap) {
 }
 
 /**
+ * The recap story's fixed slide list — id plus an optional `hasData`
+ * guard deciding whether that slide has anything to show for a given
+ * recap payload. Exported as plain data (not Svelte components) so
+ * "which slides show for this recap" is answerable — and testable —
+ * without mounting anything; `SeasonRecapStory.svelte` pairs each id
+ * with its slide component via its own `SLIDE_COMPONENTS` map.
+ */
+export const RECAP_SLIDE_DEFS = [
+	{ id: "intro" },
+	{ id: "numbers", hasData: (r) => !!r?.stats },
+	{ id: "goals", hasData: (r) => typeof r?.stats?.goals === "number" },
+	{
+		id: "timing",
+		hasData: (r) =>
+			!!(
+				r?.stats?.favorite_weekday ||
+				r?.stats?.best_weekday ||
+				typeof r?.stats?.lunch_break_share === "number" ||
+				r?.stats?.favorite_hour
+			),
+	},
+	{
+		id: "relations",
+		hasData: (r) =>
+			!!(
+				r?.stats?.best_partner ||
+				r?.stats?.nemesis ||
+				r?.stats?.favorite_victim
+			),
+	},
+	{
+		id: "match_of_season",
+		hasData: (r) =>
+			!!(
+				r?.stats?.match_of_season ||
+				r?.stats?.biggest_win ||
+				r?.stats?.highest_scoring_game ||
+				r?.stats?.most_common_score ||
+				r?.stats?.favorite_club ||
+				r?.stats?.best_club
+			),
+	},
+	{ id: "elo_journey", hasData: (r) => !!r?.elo },
+	{ id: "new_elo", hasData: (r) => !!r?.elo },
+	{ id: "awards", hasData: (r) => (r?.league?.awards?.length ?? 0) > 0 },
+	{ id: "finale" },
+];
+
+/**
  * Clamp-advance the current slide index by one step (`+1` / `-1`).
  * Stays within `[0, length - 1]` instead of wrapping, so calling this
  * again at either end is a safe no-op rather than jumping to the
@@ -56,6 +105,50 @@ export function nextSlideIndex(index, length, step) {
  */
 export function isLastSlide(index, length) {
 	return length <= 0 || index >= length - 1;
+}
+
+const RECAP_DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Find the most recently closed league season that has a generated
+ * recap, from `GET /v1/seasons` (already newest first). Shared by the
+ * auto-launcher and the dashboard's recap card so both agree on which
+ * season's recap they're talking about.
+ *
+ * @param {Array<{ id: string, is_current: boolean, has_recap: boolean }>} seasons
+ * @returns {object|null}
+ * @example
+ *   findClosedSeasonWithRecap([
+ *     { id: "fc27", is_current: true, has_recap: false },
+ *     { id: "fc26", is_current: false, has_recap: true },
+ *   ])?.id; // → "fc26"
+ */
+export function findClosedSeasonWithRecap(seasons) {
+	return (seasons ?? []).find((s) => !s.is_current && s.has_recap) ?? null;
+}
+
+/**
+ * Whether an ISO timestamp is within the last `days` days of `now`.
+ * Used to gate the dashboard's "your recap is ready" card so it fades
+ * away once the recap has been out for a while.
+ *
+ * @param {string|null|undefined} generatedAtIso
+ * @param {number} [days]
+ * @param {Date} [now]
+ * @returns {boolean}
+ * @example
+ *   isRecentlyGenerated("2026-09-20T00:00:00.000Z", 14, new Date("2026-09-23"));
+ *   // → true
+ */
+export function isRecentlyGenerated(
+	generatedAtIso,
+	days = 14,
+	now = new Date(),
+) {
+	if (!generatedAtIso) return false;
+	const generated = new Date(generatedAtIso).getTime();
+	if (Number.isNaN(generated)) return false;
+	return now.getTime() - generated <= days * RECAP_DAY_MS;
 }
 
 const RECAP_FLAG_PREFIX = "rbl:recap:";

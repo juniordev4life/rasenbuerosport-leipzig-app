@@ -3,6 +3,7 @@ import { getTranslate } from "@tolgee/svelte";
 import ActiveChallengesCard from "$lib/components/challenges/ActiveChallengesCard.svelte";
 import FrankCard from "$lib/components/home/FrankCard.svelte";
 import QuickStats from "$lib/components/home/QuickStats.svelte";
+import RecapReadyCard from "$lib/components/home/RecapReadyCard.svelte";
 import RecentHighlightsCard from "$lib/components/home/RecentHighlightsCard.svelte";
 import RecentMatchesList from "$lib/components/home/RecentMatchesList.svelte";
 import SectionHeader from "$lib/components/home/SectionHeader.svelte";
@@ -18,7 +19,11 @@ import PlayIcon from "$lib/components/icons/PlayIcon.svelte";
 import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get } from "$lib/services/api.services.js";
-import { getSeasonRating } from "$lib/services/seasons.services.js";
+import {
+	getLeagueSeasons,
+	getSeasonRating,
+	getSeasonRecap,
+} from "$lib/services/seasons.services.js";
 import { getLatestTalkshowEpisode } from "$lib/services/talkshow.services.js";
 import { user } from "$lib/stores/auth.stores.js";
 import {
@@ -26,6 +31,10 @@ import {
 	ONBOARDING_KEYS,
 	runOnboardingTour,
 } from "$lib/utils/onboarding.utils.js";
+import {
+	findClosedSeasonWithRecap,
+	isRecentlyGenerated,
+} from "$lib/utils/recapStory.utils.js";
 import { detectUserSeries } from "$lib/utils/series.utils.js";
 
 const { t } = getTranslate();
@@ -34,6 +43,8 @@ let games = $state([]);
 let seasonRating = $state(null);
 let talkshowEpisode = $state(null);
 let loading = $state(true);
+/** @type {{ seasonId: string, gameVersion: string }|null} */
+let recapCard = $state(null);
 
 const userId = $derived($user?.uid ?? null);
 const userName = $derived($user?.user_metadata?.username ?? "Spieler");
@@ -66,6 +77,27 @@ $effect(() => {
 	return () => {
 		aborted = true;
 	};
+});
+
+/**
+ * Independent, best-effort lookup for the "your recap is ready" card —
+ * never blocks the rest of the dashboard. Shows the card only while a
+ * closed season has a recap for this player and it's still fresh
+ * (see `isRecentlyGenerated`).
+ */
+$effect(() => {
+	(async () => {
+		try {
+			const seasons = await getLeagueSeasons();
+			const closed = findClosedSeasonWithRecap(seasons);
+			if (!closed) return;
+			const recap = await getSeasonRecap(closed.id);
+			if (!recap || !isRecentlyGenerated(recap.generated_at)) return;
+			recapCard = { seasonId: closed.id, gameVersion: closed.game_version };
+		} catch (err) {
+			console.warn("Recap card load failed:", err);
+		}
+	})();
 });
 
 // One-shot dashboard onboarding — fires after the cards mount so the
@@ -280,6 +312,12 @@ const top3 = $derived(
 		<!-- `contents` keeps the mobile single-column stack byte-for-byte;
 		     at `lg` the wrapper becomes the bento grid. -->
 		<div class="contents lg:grid lg:grid-cols-12 lg:auto-rows-min lg:gap-4 lg:items-start">
+			{#if recapCard}
+				<div class="lg:col-span-12">
+					<RecapReadyCard seasonId={recapCard.seasonId} gameVersion={recapCard.gameVersion} />
+				</div>
+			{/if}
+
 			<div data-onboarding="dashboard-week" class="lg:col-span-5">
 				<FrankCard
 					{userName}

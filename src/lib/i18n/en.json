@@ -105,6 +105,11 @@
 			"neutral": "{name}, solid week — there's still some hype to be had though, right?",
 			"empty": "{name}, fresh week, fresh chances! Time for your first match!"
 		},
+		"recap_card": {
+			"title": "Your {version} recap is here",
+			"subtitle": "Take a look at your season",
+			"cta": "View"
+		},
 		"sections": {
 			"challenges": "Weekly challenges",
 			"talkrunde": "Friday talk show",
@@ -1551,5 +1556,85 @@
 		"lunch_king": { "label": "Lunch Break King" },
 		"comeback_king": { "label": "Comeback King" },
 		"unlucky": { "label": "Unlucky One of the Season" }
+	},
+	"season_recap": {
+		"title": "Recap",
+		"dialog_label": "Season recap",
+		"close": "Close",
+		"error": "The recap could not be loaded.",
+		"retry": "Try again",
+		"back": "Back",
+		"empty": "There's no recap for you for this season yet.",
+		"intro": {
+			"title": "Your {version} season",
+			"games": "games",
+			"league_facts": "The league in {version}: {games} games, {goals} goals."
+		},
+		"numbers": {
+			"title": "The numbers",
+			"win_rate": "Win rate",
+			"wins": "wins",
+			"draws": "draws",
+			"losses": "losses",
+			"games_played": "{count} games total",
+			"rank": "Rank {rank} of {of} for wins"
+		},
+		"goals": {
+			"title": "Goals",
+			"goals_label": "goals scored",
+			"assists": "assists",
+			"per_game": "goals/game",
+			"hattricks": "hattricks",
+			"clean_sheets": "clean sheets"
+		},
+		"timing": {
+			"title": "When you play",
+			"favorite_weekday": "{count} games — your most common matchday",
+			"lucky_day": "Your lucky day",
+			"win_rate": "{percent}% wins ({count} games)",
+			"lunch_break": "{percent}% of your games were during lunch break",
+			"favorite_hour": "Your favourite kickoff time: {hour} ({count} games)"
+		},
+		"relations": {
+			"title": "Who you play with",
+			"best_partner": "Best partner",
+			"best_partner_detail": "{wins} wins in {games} games together",
+			"nemesis": "Nemesis",
+			"nemesis_detail": "{losses} losses in {games} games",
+			"favorite_victim": "Favourite victim",
+			"favorite_victim_detail": "{wins} wins in {games} games"
+		},
+		"match_of_season": {
+			"title": "Your match of the season",
+			"penalty_badge": "Penalty shootout",
+			"watch_highlight": "Watch highlight",
+			"biggest_win": "Biggest win",
+			"highest_scoring": "Highest-scoring game",
+			"most_common_score": "Most common score",
+			"favorite_club": "Favourite club",
+			"best_club": "Best club"
+		},
+		"elo_journey": {
+			"title": "Your ELO journey",
+			"peak": "Peak of {value} on {date}",
+			"rank": "Rank {rank} of {of}"
+		},
+		"new_elo": {
+			"title": "The new ELO",
+			"explainer": "League-ELO v2 is fairer: zero-sum, goal difference counts moderately, and assists plus saved penalties count too.",
+			"hint_yellow_cards": "{count} yellow cards no longer cost you anything",
+			"hint_one_vs_two": "{count} 1v2 games are now settled fairly",
+			"hint_draws": "{count} draws now move your ELO",
+			"hint_shootouts": "{count} penalty shootouts count as a narrow win"
+		},
+		"awards": {
+			"title": "Season awards",
+			"you_won": "You're among the winners!"
+		},
+		"finale": {
+			"persona": "{persona} says:",
+			"next_season": "FC27 is live — your starting ELO: {rating}",
+			"cta": "Go to the leaderboard"
+		}
 	}
 }

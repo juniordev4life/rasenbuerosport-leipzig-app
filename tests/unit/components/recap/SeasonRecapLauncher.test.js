@@ -22,7 +22,12 @@ vi.mock("$lib/services/seasons.services.js", () => ({
 	getLeagueSeasons,
 	getSeasonRecap,
 }));
-vi.mock("$lib/utils/recapStory.utils.js", () => ({ isRecapSeen }));
+// findClosedSeasonWithRecap is pure and already covered by its own unit
+// tests — keep the real implementation here and only stub isRecapSeen.
+vi.mock("$lib/utils/recapStory.utils.js", async (importOriginal) => {
+	const actual = await importOriginal();
+	return { ...actual, isRecapSeen };
+});
 
 import SeasonRecapLauncher from "$lib/components/recap/SeasonRecapLauncher.svelte";
 

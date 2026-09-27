@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
 	availableSlides,
+	findClosedSeasonWithRecap,
 	isLastSlide,
 	isRecapSeen,
+	isRecentlyGenerated,
 	markRecapSeen,
 	nextSlideIndex,
 	slideProgressRatios,
@@ -119,5 +121,50 @@ describe("isRecapSeen / markRecapSeen", () => {
 		markRecapSeen("fc26");
 
 		expect(window.localStorage.getItem("rbl:recap:fc26:v1")).toBe("1");
+	});
+});
+
+describe("findClosedSeasonWithRecap", () => {
+	it("finds the most recent closed season with a recap", () => {
+		const seasons = [
+			{ id: "fc27", is_current: true, has_recap: false },
+			{ id: "fc26", is_current: false, has_recap: true },
+			{ id: "fc25", is_current: false, has_recap: true },
+		];
+
+		expect(findClosedSeasonWithRecap(seasons)?.id).toBe("fc26");
+	});
+
+	it("skips a closed season without a recap yet", () => {
+		const seasons = [
+			{ id: "fc27", is_current: true, has_recap: false },
+			{ id: "fc26", is_current: false, has_recap: false },
+		];
+
+		expect(findClosedSeasonWithRecap(seasons)).toBeNull();
+	});
+
+	it("returns null for an empty list", () => {
+		expect(findClosedSeasonWithRecap([])).toBeNull();
+	});
+});
+
+describe("isRecentlyGenerated", () => {
+	const now = new Date("2026-09-23T00:00:00.000Z");
+
+	it("is true within the window", () => {
+		expect(isRecentlyGenerated("2026-09-20T00:00:00.000Z", 14, now)).toBe(true);
+	});
+
+	it("is false outside the window", () => {
+		expect(isRecentlyGenerated("2026-08-01T00:00:00.000Z", 14, now)).toBe(false);
+	});
+
+	it("is false for a missing timestamp", () => {
+		expect(isRecentlyGenerated(null, 14, now)).toBe(false);
+	});
+
+	it("is false for an unparsable timestamp", () => {
+		expect(isRecentlyGenerated("not-a-date", 14, now)).toBe(false);
 	});
 });
