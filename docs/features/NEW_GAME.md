@@ -15,10 +15,11 @@ The match wizard takes you from the lineup to the final whistle: **lineup → ki
 *"Who's playing today?"* — players pick their side right on the pitch:
 
 - **Tap** an avatar on the home or away half to put that player on that side; tap again to remove them
+- Players are sorted by **games played**, most first — the regulars fill the tiles you see without swiping; swipe sideways for the rest
 - A player picked on one side is greyed out on the other
 - Each side needs at least one player, up to five
 - The **match mode** follows from the lineup: 1 vs. 1 is **1v1**, 2 vs. 2 is **2v2**
-- **Guests** — one guest tile per side for spontaneous players without an account; guests don't collect stats or ELO
+- **Guests** — one guest tile per side, at the end of the row, for spontaneous players without an account; guests don't collect stats or ELO
 
 ---
 

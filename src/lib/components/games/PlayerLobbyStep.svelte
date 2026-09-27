@@ -1,5 +1,6 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import { sortPlayersByGamesPlayed } from "$lib/utils/lobbyPlayers.utils.js";
 
 /**
  * Step 1 of the new-game wizard — players pick their side directly on
@@ -7,12 +8,15 @@ import { getTranslate } from "@tolgee/svelte";
  * an avatar on a side toggles assignment there, and once a player is
  * picked on one side they are dimmed/disabled on the other.
  *
+ * Players are ordered by games played, so the regulars fill the tiles
+ * that are visible without scrolling.
+ *
  * Each half also exposes a single "Gast"-tile at the end of the row
  * (id `__guest__home` or `__guest__away`) so users can record a
  * one-off guest player without prior signup. Max one guest per side.
  *
  * @type {{
- *   allPlayers: Array<{ id: string, username: string, avatar_url?: string|null }>,
+ *   allPlayers: Array<{ id: string, username: string, avatar_url?: string|null, games_played?: number }>,
  *   homePlayers: string[],
  *   awayPlayers: string[],
  *   onNext: () => void,
@@ -34,6 +38,7 @@ const GUEST_HOME_ID = "__guest__home";
 const GUEST_AWAY_ID = "__guest__away";
 
 const isValid = $derived(homePlayers.length >= 1 && awayPlayers.length >= 1);
+const orderedPlayers = $derived(sortPlayersByGamesPlayed(allPlayers));
 
 function getPlayerSide(id) {
 	if (homePlayers.includes(id)) return "home";
@@ -179,24 +184,7 @@ function trackHorizontalOverflow(node, onChange) {
 		}}
 		class="relative h-full grid [grid-template-rows:auto_auto] grid-flow-col auto-cols-[calc((100%-2rem)/3.3)] gap-x-3 gap-y-4 overflow-x-auto px-3 py-4 {contentAlign} [&::-webkit-scrollbar]:hidden [scrollbar-width:none]"
 	>
-		<!-- Guest tile is rendered FIRST so it always sits in the
-		     visible viewport, even when the roster overflows on
-		     mobile. Pinning it to the front guarantees the onboarding
-		     hint can attach to it without being scrolled out of view,
-		     and matches the mental model of "ad-hoc guest slot before
-		     the real squad". The home guest doubles as the onboarding
-		     anchor; the away copy passes `null` so the tour has a
-		     single, unambiguous target. -->
-		{@render avatarTile(
-			guestId,
-			$t("new_game.guest"),
-			GUEST_GRADIENT,
-			side,
-			null,
-			side === "home" ? "lobby-guest" : null,
-		)}
-
-		{#each allPlayers as player (player.id)}
+		{#each orderedPlayers as player (player.id)}
 			{@render avatarTile(
 				player.id,
 				player.username,
@@ -206,6 +194,21 @@ function trackHorizontalOverflow(node, onChange) {
 				null,
 			)}
 		{/each}
+
+		<!-- Guest tile comes LAST: it is the least-used slot, so the
+		     visible tiles go to the regulars. The onboarding tour
+		     scrolls it into view for its tip (see runOnboardingTour).
+		     The home guest doubles as the onboarding anchor; the away
+		     copy passes `null` so the tour has a single, unambiguous
+		     target. -->
+		{@render avatarTile(
+			guestId,
+			$t("new_game.guest"),
+			GUEST_GRADIENT,
+			side,
+			null,
+			side === "home" ? "lobby-guest" : null,
+		)}
 	</div>
 {/snippet}
 
