@@ -313,7 +313,8 @@ const top3 = $derived(
 		     at `lg` the wrapper becomes the bento grid. -->
 		<div class="contents lg:grid lg:grid-cols-12 lg:auto-rows-min lg:gap-4 lg:items-start">
 			{#if recapCard}
-				<div class="lg:col-span-12">
+				<!-- mb-4 on mobile only: the stack has no gap there, at lg the grid's gap-4 spaces it. -->
+				<div class="mb-4 lg:mb-0 lg:col-span-12">
 					<RecapReadyCard seasonId={recapCard.seasonId} gameVersion={recapCard.gameVersion} />
 				</div>
 			{/if}
