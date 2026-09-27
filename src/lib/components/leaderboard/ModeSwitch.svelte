@@ -17,11 +17,12 @@ let { value = "skill", onChange, seasonIsCurrent = true } = $props();
 const { t } = getTranslate();
 </script>
 
-<div class="grid grid-cols-2 gap-2">
+<div class="grid grid-cols-2 gap-2" role="tablist" aria-label={$t("leaderboard.view_switch")}>
 	<button
 		type="button"
+		role="tab"
 		onclick={() => onChange("skill")}
-		aria-pressed={value === "skill"}
+		aria-selected={value === "skill"}
 		class="rounded-2xl border px-3 py-2.5 text-left transition-colors {value === 'skill'
 			? 'border-accent-red/40 bg-accent-red/10'
 			: 'border-border bg-bg-card hover:bg-bg-input'}"
@@ -41,8 +42,9 @@ const { t } = getTranslate();
 	</button>
 	<button
 		type="button"
+		role="tab"
 		onclick={() => onChange("league")}
-		aria-pressed={value === "league"}
+		aria-selected={value === "league"}
 		class="rounded-2xl border px-3 py-2.5 text-left transition-colors {value === 'league'
 			? 'border-accent-red/40 bg-accent-red/10'
 			: 'border-border bg-bg-card hover:bg-bg-input'}"
