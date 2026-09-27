@@ -1439,9 +1439,8 @@
 		},
 		"keeper": {
 			"title": "Who saved it?",
-			"subtitle": "{shooter} missed — the keeper gets an ELO bonus.",
+			"subtitle": "{shooter} missed — who saved it?",
 			"no_keeper": "Post / wide / no save",
-			"elo_preview": "ELO: {shooter} {shooterDelta} · keeper +{keeperDelta}",
 			"back_to_result": "Edit result"
 		},
 		"end": {

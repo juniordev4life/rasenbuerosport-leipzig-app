@@ -16,18 +16,6 @@
 export const PENALTY_REGULAR_ROUNDS = 5;
 
 /**
- * ELO deltas applied per shot. Tuned to match the spec in
- * `roadmap/elfmeterschiessen/ELFMETERSCHIESSEN_IMPLEMENTATION.md`.
- * Centralised here so the same numbers drive the live preview and
- * the eventual backend computation.
- */
-export const PENALTY_ELO_DELTAS = Object.freeze({
-	GOAL_SCORED: 3,
-	PENALTY_MISSED: -5,
-	PENALTY_SAVED: 5,
-});
-
-/**
  * Counts the goals scored so far per side.
  *
  * @param {Array<{ team: 'home' | 'away', result: 'goal' | 'missed' }>} shots
@@ -151,37 +139,6 @@ export function isPenaltyShootoutDecided(shots) {
 		};
 	}
 	return { decided: false, winnerSide: null };
-}
-
-/**
- * ELO-delta map for a single shot. Keyed by player ID so the caller
- * can apply the deltas to whatever shape it stores players in.
- *
- * - Goal: shooter +GOAL_SCORED, no opponent delta
- * - Missed with keeper: shooter PENALTY_MISSED, keeper PENALTY_SAVED
- * - Missed without keeper (post / wide): shooter PENALTY_MISSED only
- *
- * @param {{ shooterId: string, result: 'goal' | 'missed', keeperId?: string | null }} shot
- * @returns {Record<string, number>}
- * @example
- *   computePenaltyShotEloDeltas({ shooterId: 'a', result: 'goal' });
- *   // { a: 3 }
- *   computePenaltyShotEloDeltas({ shooterId: 'a', result: 'missed', keeperId: 'b' });
- *   // { a: -5, b: 5 }
- */
-export function computePenaltyShotEloDeltas(shot) {
-	const deltas = {};
-	if (shot.result === "goal") {
-		deltas[shot.shooterId] = PENALTY_ELO_DELTAS.GOAL_SCORED;
-		return deltas;
-	}
-	if (shot.result === "missed") {
-		deltas[shot.shooterId] = PENALTY_ELO_DELTAS.PENALTY_MISSED;
-		if (shot.keeperId) {
-			deltas[shot.keeperId] = PENALTY_ELO_DELTAS.PENALTY_SAVED;
-		}
-	}
-	return deltas;
 }
 
 /**

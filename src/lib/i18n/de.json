@@ -1441,9 +1441,8 @@
 		},
 		"keeper": {
 			"title": "Wer hat gehalten?",
-			"subtitle": "{shooter} verschossen — der Torhüter bekommt einen ELO-Bonus.",
+			"subtitle": "{shooter} verschossen — wer hat gehalten?",
 			"no_keeper": "Pfosten / vorbei / kein Halten",
-			"elo_preview": "ELO: {shooter} {shooterDelta} · Halter +{keeperDelta}",
 			"back_to_result": "Ergebnis korrigieren"
 		},
 		"end": {

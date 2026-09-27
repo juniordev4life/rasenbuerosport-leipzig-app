@@ -248,7 +248,7 @@ function handleStartPenaltyShootout(payload) {
  * Translate a single shot from the in-component camelCase shape into
  * the snake-case wire format the backend stores in `penalty_shootout`.
  *
- * @param {{ order: number, round: number, team: string, shooterId: string, result: string, keeperId: string | null, eloDeltas: Record<string, number> }} shot
+ * @param {{ order: number, round: number, team: string, shooterId: string, result: string, keeperId: string | null }} shot
  * @returns {object}
  */
 function shotToWire(shot) {
@@ -259,7 +259,6 @@ function shotToWire(shot) {
 		shooter_id: shot.shooterId,
 		result: shot.result,
 		keeper_id: shot.keeperId ?? null,
-		elo_deltas: shot.eloDeltas ?? {},
 	};
 }
 
