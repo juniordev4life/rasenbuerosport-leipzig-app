@@ -174,10 +174,10 @@ function runDemoAction(action) {
 			break;
 		}
 		case "select-assister": {
-			// Prefer a different teammate, fall back to the scorer for 1v1
-			// games — the state machine treats a second tap on the scorer
-			// as a no-op, so the editor still shows the right end state.
-			const id = homePlayers[1] ?? homePlayers[0];
+			// 1v1 has no teammate to assist, so skip the tap. Tapping the
+			// scorer again would cancel the goal entry, and the remaining
+			// demo steps would then run against a closed editor.
+			const id = homePlayers[1];
 			if (id) state = selectPlayer(state, { playerId: id, side: "home" });
 			break;
 		}
