@@ -4,8 +4,6 @@ import { untrack } from "svelte";
 import { goto, replaceState } from "$app/navigation";
 import AwardsStrip from "$lib/components/leaderboard/AwardsStrip.svelte";
 import DuoRow from "$lib/components/leaderboard/DuoRow.svelte";
-import LeagueTable from "$lib/components/leaderboard/LeagueTable.svelte";
-import ModeSwitch from "$lib/components/leaderboard/ModeSwitch.svelte";
 import PlayerRow from "$lib/components/leaderboard/PlayerRow.svelte";
 import RanglisteHero from "$lib/components/leaderboard/RanglisteHero.svelte";
 import SeasonSwitch from "$lib/components/leaderboard/SeasonSwitch.svelte";
@@ -17,7 +15,6 @@ import {
 	getSeasonAwards,
 	getSeasonRating,
 	getSeasonRecap,
-	getSeasonTable,
 } from "$lib/services/seasons.services.js";
 import { user } from "$lib/stores/auth.stores.js";
 import { selectedLeagueSeason } from "$lib/stores/leagueSeason.stores.js";
@@ -26,27 +23,23 @@ import {
 	findSeasonLeader,
 	firstUnqualifiedIndex,
 	sortPlayers,
-	sortTableRows,
 } from "$lib/utils/leaderboard.utils.js";
 
 const { t } = getTranslate();
 
 let seasons = $state([]);
 let selectedSeasonId = $state(initialParam("season", "current"));
-let view = $state(initialView());
 let skillTab = $state(initialParam("tab", "players", ["players", "duos"]));
 let sort = $state(initialParam("sort", "current", ["current", "form"]));
-let tableMode = $state(initialParam("table", "total", ["total", "per_game"]));
 
 let rating = $state(null);
-let table = $state(null);
 let awards = $state([]);
 let hasRecap = $state(false);
 
 let loading = $state(true);
 let error = $state(false);
 /** Bumped by {@link retry} to force the load effect below to re-run
- *  after a failed fetch, even though season/view didn't change. */
+ *  after a failed fetch, even though the season didn't change. */
 let reloadToken = $state(0);
 
 const userId = $derived($user?.uid ?? null);
@@ -58,21 +51,13 @@ function initialParam(key, fallback, allowed) {
 	return allowed ? (allowed.includes(v) ? v : fallback) : v;
 }
 
-function initialView() {
-	if (typeof window === "undefined") return "skill";
-	const v = new URL(window.location.href).searchParams.get("mode");
-	return v === "league" ? "league" : "skill";
-}
-
 function syncUrl() {
 	if (typeof window === "undefined") return;
 	const url = new URL(window.location.href);
 	const params = {
 		season: selectedSeasonId,
-		mode: view,
 		tab: skillTab,
 		sort,
-		table: tableMode,
 	};
 	const desired = new URLSearchParams(params).toString();
 	const current = new URLSearchParams(
@@ -89,15 +74,11 @@ function syncUrl() {
 
 $effect(() => {
 	const _s = selectedSeasonId;
-	const _v = view;
 	const _t = skillTab;
 	const _so = sort;
-	const _tm = tableMode;
 	void _s;
-	void _v;
 	void _t;
 	void _so;
-	void _tm;
 	untrack(() => syncUrl());
 	selectedLeagueSeason.set(selectedSeasonId);
 });
@@ -135,7 +116,6 @@ async function loadSeasonExtras(meta) {
 
 $effect(() => {
 	const seasonId = selectedSeasonId;
-	const currentView = view;
 	void reloadToken;
 	let aborted = false;
 	(async () => {
@@ -143,17 +123,10 @@ $effect(() => {
 		error = false;
 		let meta = null;
 		try {
-			if (currentView === "skill") {
-				const res = await getSeasonRating(seasonId);
-				if (aborted) return;
-				rating = res;
-				meta = res.season;
-			} else {
-				const res = await getSeasonTable(seasonId);
-				if (aborted) return;
-				table = res;
-				meta = res.season;
-			}
+			const res = await getSeasonRating(seasonId);
+			if (aborted) return;
+			rating = res;
+			meta = res.season;
 		} catch (err) {
 			if (aborted) return;
 			console.error("Rangliste load failed:", err);
@@ -174,7 +147,7 @@ function retry() {
 	reloadToken += 1;
 }
 
-const seasonMeta = $derived(rating?.season ?? table?.season ?? null);
+const seasonMeta = $derived(rating?.season ?? null);
 const isCurrentSeason = $derived(seasonMeta ? seasonMeta.is_current : true);
 
 const sortedPlayers = $derived(sortPlayers(rating?.players ?? [], sort));
@@ -182,8 +155,6 @@ const heroPlayer = $derived(findSeasonLeader(rating?.players ?? []));
 const dividerIndex = $derived(
 	sort === "current" ? firstUnqualifiedIndex(sortedPlayers) : -1,
 );
-
-const sortedTableRows = $derived(sortTableRows(table?.rows ?? [], tableMode));
 
 const recapHref = $derived(seasonMeta ? `/app/recap/${seasonMeta.id}` : null);
 
@@ -222,8 +193,6 @@ function handleDuoClick(duo) {
 
 	<SeasonSwitch {seasons} value={selectedSeasonId} onChange={(v) => (selectedSeasonId = v)} />
 
-	<ModeSwitch value={view} onChange={(v) => (view = v)} seasonIsCurrent={isCurrentSeason} />
-
 	{#if loading}
 		<div class="flex justify-center py-12">
 			<div
@@ -241,7 +210,7 @@ function handleDuoClick(duo) {
 				{$t("leaderboard.retry")}
 			</button>
 		</div>
-	{:else if view === "skill"}
+	{:else}
 		<SegmentedToggle
 			options={[
 				{ value: "players", label: $t("leaderboard.tab_players") },
@@ -305,25 +274,6 @@ function handleDuoClick(duo) {
 					<DuoRow rank={duo.rank} {duo} onClick={handleDuoClick} />
 				{/each}
 			</div>
-		{/if}
-	{:else}
-		<SegmentedToggle
-			options={[
-				{ value: "total", label: $t("leaderboard.tab_total") },
-				{ value: "per_game", label: $t("leaderboard.tab_per_game") },
-			]}
-			value={tableMode}
-			onChange={(v) => (tableMode = v)}
-			ariaLabel={$t("leaderboard.mode_league")}
-		/>
-
-		{#if sortedTableRows.length === 0}
-			<p class="text-text-secondary text-center py-8">
-				{$t("leaderboard.league_empty", { version: seasonMeta?.game_version ?? "" })}
-			</p>
-		{:else}
-			<LeagueTable rows={sortedTableRows} mode={tableMode} currentUserId={userId} />
-			<p class="text-[11px] text-text-muted text-center">{$t("leaderboard.league_legend")}</p>
 		{/if}
 	{/if}
 

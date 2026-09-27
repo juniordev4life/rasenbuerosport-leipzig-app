@@ -34,23 +34,6 @@ export async function getSeasonRating(seasonId = "current") {
 }
 
 /**
- * Fetch the Liga (season table) — points-based standings, reset at the
- * start of every season.
- *
- * @param {string} [seasonId] - A season id (e.g. "fc26") or "current".
- * @returns {Promise<{ season: object|null, rows: Array<object> }>}
- * @example
- *   const table = await getSeasonTable("fc26");
- *   table.rows[0].points; // → 25
- */
-export async function getSeasonTable(seasonId = "current") {
-	const response = await get(
-		`/v1/seasons/${encodeURIComponent(seasonId)}/table`,
-	);
-	return response.data ?? { season: null, rows: [] };
-}
-
-/**
  * Fetch the signed-in player's recap for a season. Resolves to `null`
  * when the player has no recap for that season (no games, or the
  * recap hasn't been generated yet) — callers should treat that as "no

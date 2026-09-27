@@ -17,9 +17,9 @@ The leaderboard shows who sits at the top of the office league — ranked by ELO
 
 A league season is an EA FC edition (FC26, FC27, …), not a calendar quarter — ELO runs continuously across seasons, there is no reset. A segmented control at the top switches between them: the current season reads "**FC27 · läuft**", a closed one "**FC26 · Endstand**". Your choice is kept in the page URL (`?season=`), so a shared link opens the same season.
 
-### Skill-Rating
+### Rating
 
-The default view. ELO is a single rating per player across every mode (1v1, 2v2, 1v2), starting at 1500:
+The ranking is ELO only — there is no points table, because players who play more would simply collect more points. ELO is a single rating per player across every mode (1v1, 2v2, 1v2), starting at 1500:
 
 - Each match is zero-sum — what one side gains, the other loses — and goal difference counts moderately on top of the result. The winner always gains at least 1 point
 - Assists, saved penalties and red cards add a bonus or malus; yellow cards no longer cost points
@@ -56,22 +56,9 @@ Tap a player to open their profile.
 
 Two overlapping avatars, both names, the duo's rating, its season delta and the season's W/D/L plus the pair's all-time match count. Tap a duo to open its **duo page**.
 
-### Liga
-
-The season table — a classic points table, reset at the start of every season:
-
-| Result | Points |
-|--------|--------|
-| Win | 3 |
-| Draw | 1 |
-| Loss | 0 |
-| Shootout win / loss | 2 / 1 |
-
-Columns: Pl., Spieler, Sp. (games), S-U-N (wins-draws-losses, with a small "±*N* n.E." note when shootouts are involved), Tore (for:against), Diff and Pkt. A toggle switches between **Gesamt** (total points) and **Pro Spiel** (points per game — fairer when players have very different match counts), which re-sorts the table accordingly. A short legend under the table spells out the points above. A season with no matches yet shows an empty state instead of an empty table.
-
 ### Season awards & recap
 
-Once a season closes, an **awards strip** appears below its view: horizontally scrollable chips for Meister, Torschützenkönig, Vorlagenkönig, Dream-Duo, Elfmeterkönig, Fairplay-Preis, Die Mauer, Dauerbrenner, Form der Saison, Mittagspausen-König, Comeback-König and Pechvogel — each with its winner(s) and the value they won it with. If you have a generated recap for that season, a button opens it: **"Dein *Edition*-Rückblick"**. See [Season Recap →](SEASON_RECAP.md).
+Once a season closes, an **awards strip** appears below the ranking: horizontally scrollable chips for Meister, Torschützenkönig, Vorlagenkönig, Dream-Duo, Elfmeterkönig, Fairplay-Preis, Die Mauer, Dauerbrenner, Form der Saison, Mittagspausen-König, Comeback-König and Pechvogel — each with its winner(s) and the value they won it with. If you have a generated recap for that season, a button opens it: **"Dein *Edition*-Rückblick"**. See [Season Recap →](SEASON_RECAP.md).
 
 ---
 

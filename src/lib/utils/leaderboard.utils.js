@@ -83,36 +83,6 @@ export function firstUnqualifiedIndex(sortedPlayers) {
 }
 
 /**
- * Sort Liga (season-table) rows. "total" mirrors the server's default
- * order (points, then points-per-game, goal difference, goals for);
- * "per_game" leads with `points_per_game` instead, which is fairer
- * when players have played very different numbers of matches.
- *
- * @param {Array<object>} rows - `table.rows` from `getSeasonTable`.
- * @param {"total"|"per_game"} mode
- * @returns {Array<object>} A new, sorted array.
- * @example
- *   sortTableRows(rows, "per_game")[0].points_per_game; // → the best rate
- */
-export function sortTableRows(rows, mode) {
-	const list = [...(rows ?? [])];
-	const primary = mode === "per_game" ? "points_per_game" : "points";
-	const secondary = mode === "per_game" ? "points" : "points_per_game";
-	list.sort(
-		(a, b) =>
-			(b[primary] ?? Number.NEGATIVE_INFINITY) -
-				(a[primary] ?? Number.NEGATIVE_INFINITY) ||
-			(b[secondary] ?? Number.NEGATIVE_INFINITY) -
-				(a[secondary] ?? Number.NEGATIVE_INFINITY) ||
-			(b.goal_diff ?? Number.NEGATIVE_INFINITY) -
-				(a.goal_diff ?? Number.NEGATIVE_INFINITY) ||
-			(b.goals_for ?? Number.NEGATIVE_INFINITY) -
-				(a.goals_for ?? Number.NEGATIVE_INFINITY),
-	);
-	return list;
-}
-
-/**
  * Build the sorted `<a>_<b>` duo id the `/app/duo/:id` route expects,
  * from two player ids in any order. The API's `duo_id` already comes
  * pre-sorted in this shape; this helper lets call sites derive the

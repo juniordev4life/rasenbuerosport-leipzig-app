@@ -216,7 +216,7 @@ src/
       duo/                    # /[id] duo profile, id = <playerA>_<playerB>
       games/                  # /new game wizard, /[id] match detail
       history/                # Match list with filters; ROUTES.GAMES points here
-      leaderboard/            # Player + duo rankings, 1v1 / 2v2
+      leaderboard/            # Season ELO ranking (players, duos), FC27/FC26 switch
       profile/                # Own + /[id] profiles, each with /trophies
       seasons/                # Season list + archive
       settings/               # Edit profile, theme, push, feedback, logout

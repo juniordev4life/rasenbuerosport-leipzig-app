@@ -4,7 +4,6 @@ import {
 	findSeasonLeader,
 	firstUnqualifiedIndex,
 	sortPlayers,
-	sortTableRows,
 } from "$lib/utils/leaderboard.utils.js";
 
 describe("sortPlayers", () => {
@@ -93,34 +92,6 @@ describe("sortPlayers", () => {
 		sortPlayers(players, "current");
 
 		expect(players).toEqual(original);
-	});
-});
-
-describe("sortTableRows", () => {
-	const rows = [
-		{ username: "A", points: 20, points_per_game: 2.5, goal_diff: 4, goals_for: 10 },
-		{ username: "B", points: 25, points_per_game: 2.08, goal_diff: 12, goals_for: 30 },
-		{ username: "C", points: 25, points_per_game: 2.08, goal_diff: 15, goals_for: 28 },
-	];
-
-	it("sorts by points desc, then points_per_game, then goal_diff for 'total'", () => {
-		const result = sortTableRows(rows, "total");
-
-		expect(result.map((r) => r.username)).toEqual(["C", "B", "A"]);
-	});
-
-	it("leads with points_per_game for 'per_game'", () => {
-		const result = sortTableRows(rows, "per_game");
-
-		expect(result.map((r) => r.username)).toEqual(["A", "C", "B"]);
-	});
-
-	it("does not mutate the input array", () => {
-		const original = [...rows];
-
-		sortTableRows(rows, "total");
-
-		expect(rows).toEqual(original);
 	});
 });
 

@@ -35,7 +35,7 @@ RasenBürosport Leipzig transforms the office foosball table into a professional
 | 🔮 | **AI Prediction** | Automatic match prediction before the game |
 | 📸 | **FC26 Integration** | Upload screenshot, AI reads stats |
 | 📝 | **AI Match Report** | Automatic match report after the game |
-| 🏆 | **Leaderboard** | Skill-Rating (ELO) and a season-reset Liga table, by EA FC edition |
+| 🏆 | **Leaderboard** | ELO ranking of players and duos, by EA FC edition |
 | ⚔️ | **Head-to-Head** | Direct comparison between two players |
 | 🏅 | **15 Badges** | Unlockable achievements |
 | 📈 | **Career Stats** | xG efficiency, possession, pass accuracy |
@@ -114,17 +114,17 @@ Wenn FC26-Statistiken vorhanden sind, werden diese als interaktiver Vergleich an
 
 ## 🏆 Leaderboard
 
-League seasons follow the EA FC editions (FC26, FC27, …) — ELO carries over between them, but the points table resets. Two views per season:
+League seasons follow the EA FC editions (FC26, FC27, …) — ELO carries over between them. There is no points table: players who play more would collect more points, so the ranking is ELO only.
 
 <div align="center">
 <img src="docs/screenshots/leaderboard.png" width="300" />
 <img src="docs/screenshots/rangliste-2.png" width="300" />
 </div>
 
-| View | Logic |
+| Tab | Logic |
 |-------|-------|
-| **Skill-Rating** | One ELO rating per player across every mode, sortable by current rating or recent form. Player and duo tabs. |
-| **Liga** | Classic points table for the season: 3 per win, 1 per draw, 2/1 for a shootout win/loss. Toggle between total points and points per game. |
+| **Spieler** | One ELO rating per player across every mode, sortable by current rating or recent form. |
+| **Duos** | Pairings with 10+ matches together, sorted by duo rating. |
 
 Once a season closes, an awards strip (Meister, Torschützenkönig, Dream-Duo, …) and — if you played that season — a personal [Season Recap →](docs/features/SEASON_RECAP.md) appear underneath.
 
