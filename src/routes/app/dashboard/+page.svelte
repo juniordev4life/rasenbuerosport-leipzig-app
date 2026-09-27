@@ -18,6 +18,7 @@ import PlayIcon from "$lib/components/icons/PlayIcon.svelte";
 import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get } from "$lib/services/api.services.js";
+import { getSeasonRating } from "$lib/services/seasons.services.js";
 import { getLatestTalkshowEpisode } from "$lib/services/talkshow.services.js";
 import { user } from "$lib/stores/auth.stores.js";
 import {
@@ -30,7 +31,7 @@ import { detectUserSeries } from "$lib/utils/series.utils.js";
 const { t } = getTranslate();
 
 let games = $state([]);
-let leaderboard = $state([]);
+let seasonRating = $state(null);
 let talkshowEpisode = $state(null);
 let loading = $state(true);
 
@@ -41,9 +42,9 @@ $effect(() => {
 	let aborted = false;
 	(async () => {
 		try {
-			const [gamesRes, lbRes, episode] = await Promise.all([
+			const [gamesRes, ratingRes, episode] = await Promise.all([
 				get("/v1/games?limit=20"),
-				get("/v1/leaderboard?limit=10"),
+				getSeasonRating("current"),
 				// Talkshow is non-critical for the dashboard — if the
 				// endpoint is slow or the episode doesn't exist yet, the
 				// card just falls back to its empty-state placeholder.
@@ -54,7 +55,7 @@ $effect(() => {
 			]);
 			if (aborted) return;
 			games = gamesRes.data || [];
-			leaderboard = lbRes.data || [];
+			seasonRating = ratingRes;
 			talkshowEpisode = episode;
 		} catch (err) {
 			console.error("Home load failed:", err);
@@ -162,19 +163,6 @@ const myCurrentElo = $derived.by(() => {
 	return null;
 });
 
-/** Look up another player's latest ELO from the same games window. */
-function latestEloFor(id) {
-	for (const game of games) {
-		const snap = game.elo_snapshot;
-		if (!snap) continue;
-		const entry = [...(snap.teamA ?? []), ...(snap.teamB ?? [])].find(
-			(e) => e.playerId === id,
-		);
-		if (entry?.ratingAfter != null) return entry.ratingAfter;
-	}
-	return null;
-}
-
 const lastFiveResults = $derived.by(() => {
 	const out = [];
 	for (const game of myGames.slice(0, 5)) {
@@ -267,20 +255,15 @@ const recentMatches = $derived(
 	}),
 );
 
-// The /v1/leaderboard endpoint sorts by points, not ELO. For the
-// dashboard top-3 we want the actual ELO podium — so resolve each
-// player's latest ELO from the games window and sort by that.
-// Players whose ELO can't be resolved drop to the back.
+// The current season's Skill-Rating is already sorted by rating desc
+// server-side, so the dashboard just takes the top 3 as-is.
 const top3 = $derived(
-	leaderboard
-		.map((row) => ({
-			id: row.player_id,
-			name: row.username ?? "?",
-			elo: latestEloFor(row.player_id),
-			avatarUrl: row.avatar_url ?? null,
-		}))
-		.sort((a, b) => (b.elo ?? -Infinity) - (a.elo ?? -Infinity))
-		.slice(0, 3),
+	(seasonRating?.players ?? []).slice(0, 3).map((p) => ({
+		id: p.player_id,
+		name: p.username ?? "?",
+		elo: p.rating ?? null,
+		avatarUrl: p.avatar_url ?? null,
+	})),
 );
 </script>
 
