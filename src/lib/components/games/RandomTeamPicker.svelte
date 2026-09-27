@@ -1,6 +1,6 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import MinuteScroller from "$lib/components/liveMatch/MinuteScroller.svelte";
+import StepScroller from "$lib/components/games/StepScroller.svelte";
 import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
 import StarRating from "$lib/components/ui/StarRating.svelte";
 import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
@@ -137,12 +137,11 @@ function handleConfirm() {
 				<div class="flex items-center gap-3">
 					<StarRating rating={minStars} size="md" />
 					<div class="flex-1">
-						<MinuteScroller
+						<StepScroller
 							value={minStars}
 							min={0.5}
 							max={5}
 							step={0.5}
-							variant="secondary"
 							onChange={(v) => {
 								minStars = v;
 								if (minStars > maxStars) maxStars = minStars;
@@ -159,12 +158,11 @@ function handleConfirm() {
 				<div class="flex items-center gap-3">
 					<StarRating rating={maxStars} size="md" />
 					<div class="flex-1">
-						<MinuteScroller
+						<StepScroller
 							value={maxStars}
 							min={0.5}
 							max={5}
 							step={0.5}
-							variant="secondary"
 							onChange={(v) => {
 								maxStars = v;
 								if (maxStars < minStars) minStars = maxStars;
