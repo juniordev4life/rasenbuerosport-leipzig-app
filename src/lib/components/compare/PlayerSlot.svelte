@@ -50,7 +50,7 @@ const accentColor = $derived(accent === "self" ? "#F59E0B" : "#06B6D4");
 		<div class="lock-badge" aria-hidden="true">{"\u{1F512}"}</div>
 		<div class="avatar" style="background: {gradient};">
 			{#if player.avatarUrl}
-				<img src={player.avatarUrl} alt={player.username} />
+				<img referrerpolicy="no-referrer" src={player.avatarUrl} alt={player.username} />
 			{:else}
 				<span>{player.initials}</span>
 			{/if}
@@ -72,7 +72,7 @@ const accentColor = $derived(accent === "self" ? "#F59E0B" : "#06B6D4");
 		>×</button>
 		<div class="avatar" style="background: {gradient};">
 			{#if player.avatarUrl}
-				<img src={player.avatarUrl} alt={player.username} />
+				<img referrerpolicy="no-referrer" src={player.avatarUrl} alt={player.username} />
 			{:else}
 				<span>{player.initials}</span>
 			{/if}

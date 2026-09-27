@@ -45,7 +45,7 @@ const bgClass = $derived.by(() => {
 	class="flex flex-col items-center gap-1 p-1.5 rounded-lg transition-all duration-150 active:scale-95 min-w-[56px] {dimmed ? 'opacity-30' : ''}"
 >
 	{#if avatarUrl && !isGuest}
-		<img
+		<img referrerpolicy="no-referrer"
 			src={avatarUrl}
 			alt={label}
 			class="w-10 h-10 rounded-full object-cover transition-all duration-150 {ringClass}"

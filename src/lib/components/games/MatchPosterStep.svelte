@@ -167,7 +167,7 @@ function avatarGradient(id) {
 	{@const p = getPlayer(id)}
 	<div class="inline-flex items-center gap-1.5 rounded-full bg-bg-input border border-border pl-0.5 pr-2.5 py-0.5 max-w-full">
 		{#if p.avatar_url}
-			<img src={p.avatar_url} alt={p.username} class="w-5 h-5 rounded-full object-cover" />
+			<img referrerpolicy="no-referrer" src={p.avatar_url} alt={p.username} class="w-5 h-5 rounded-full object-cover" />
 		{:else}
 			<span
 				class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"

@@ -99,7 +99,7 @@ function openFeedback() {
 			aria-label={$t("nav.settings")}
 		>
 			{#if $user?.user_metadata?.avatar_url}
-				<img
+				<img referrerpolicy="no-referrer"
 					src={$user.user_metadata.avatar_url}
 					alt={$user.user_metadata.username || "Avatar"}
 					class="w-full h-full object-cover"

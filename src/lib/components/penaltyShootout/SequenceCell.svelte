@@ -50,7 +50,7 @@ const label = $derived.by(() => {
 	{#if showAvatar}
 		<div class="avatar" class:pulse={state === "wartet"} style:--cell-gradient={gradient ?? "linear-gradient(135deg, #475569, #334155)"}>
 			{#if shooter?.avatar_url}
-				<img src={shooter.avatar_url} alt={shooter.username ?? ""} />
+				<img referrerpolicy="no-referrer" src={shooter.avatar_url} alt={shooter.username ?? ""} />
 			{:else}
 				<span class="avatar-initial">{initial}</span>
 			{/if}

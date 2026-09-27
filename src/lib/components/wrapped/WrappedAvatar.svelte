@@ -21,7 +21,7 @@ const gradient = $derived(avatarGradient(playerId ?? name).gradient);
 </script>
 
 {#if avatarUrl}
-	<img
+	<img referrerpolicy="no-referrer"
 		src={avatarUrl}
 		alt={name ?? "Spieler"}
 		class="avatar-photo"

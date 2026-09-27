@@ -59,7 +59,7 @@ const streakLabel = $derived(
 			{#if crownOn === "a"}<div class="crown" aria-hidden="true">{"\u{1F451}"}</div>{/if}
 			<div class="avatar" style="background: linear-gradient(135deg, {COLOR_A}, #D97706); border-color: {COLOR_A}66;">
 				{#if playerA.avatarUrl}
-					<img src={playerA.avatarUrl} alt={playerA.username} />
+					<img referrerpolicy="no-referrer" src={playerA.avatarUrl} alt={playerA.username} />
 				{:else}
 					<span>{playerA.initials}</span>
 				{/if}
@@ -84,7 +84,7 @@ const streakLabel = $derived(
 			{#if crownOn === "b"}<div class="crown" aria-hidden="true">{"\u{1F451}"}</div>{/if}
 			<div class="avatar" style="background: linear-gradient(135deg, {COLOR_B}, #0891B2); border-color: {COLOR_B}66;">
 				{#if playerB.avatarUrl}
-					<img src={playerB.avatarUrl} alt={playerB.username} />
+					<img referrerpolicy="no-referrer" src={playerB.avatarUrl} alt={playerB.username} />
 				{:else}
 					<span>{playerB.initials}</span>
 				{/if}

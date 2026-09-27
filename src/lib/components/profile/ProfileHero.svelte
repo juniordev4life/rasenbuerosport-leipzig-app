@@ -69,7 +69,7 @@ const winRate = $derived(decided > 0 ? Math.round((wins / decided) * 100) : 0);
 			style="background: {gradient.gradient}; border-color: {gradient.from}66;"
 		>
 			{#if avatarUrl}
-				<img src={avatarUrl} alt={username} />
+				<img referrerpolicy="no-referrer" src={avatarUrl} alt={username} />
 			{:else}
 				<span>{initials}</span>
 			{/if}

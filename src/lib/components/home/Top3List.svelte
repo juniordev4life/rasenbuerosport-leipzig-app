@@ -44,7 +44,7 @@ function gradientFor(id) {
 				style={player.avatarUrl ? "" : `background: ${gradientFor(player.id)};`}
 			>
 				{#if player.avatarUrl}
-					<img src={player.avatarUrl} alt={player.name} class="w-full h-full object-cover" />
+					<img referrerpolicy="no-referrer" src={player.avatarUrl} alt={player.name} class="w-full h-full object-cover" />
 				{:else}
 					{player.name.charAt(0).toUpperCase()}
 				{/if}

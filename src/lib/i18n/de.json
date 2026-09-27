@@ -107,6 +107,12 @@
 			"neutral": "{name}, solide Bilanz — ein bisschen Hype geht aber noch, oder?",
 			"empty": "{name}, frische Woche, frische Chancen! Zeit für das erste Match!"
 		},
+		"recap_card": {
+			"title": "Dein {version}-Rückblick ist da",
+			"subtitle": "Schau dir deine Saison an",
+			"cta": "Ansehen",
+			"subtitle_with_talkrunde": "Schau dir deine Saison an – inklusive Saison-Talkrunde"
+		},
 		"sections": {
 			"challenges": "Wochen-Challenges",
 			"talkrunde": "Freitags-Talkrunde",
@@ -313,31 +319,37 @@
 		"d_short": "U",
 		"l_short": "N",
 		"games_short": "Spiele",
-		"tab_total": "Gesamt",
-		"tab_per_game": "Pro Spiel",
-		"ppg_label": "Pkt/Spiel",
+		"goals_short": "Tore",
 		"period_all": "Gesamt",
 		"mode_all": "Alle",
 		"mode_1v1": "1v1",
 		"mode_2v2": "2v2",
 		"mode_duos": "Duos",
-		"mode_skill": "Skill-Rating",
-		"mode_skill_sub": "ELO · live",
-		"mode_league": "Liga",
-		"mode_league_sub": "Saison-Tabelle",
-		"coming_soon": "Bald",
-		"team_size": "Spielmodus",
+		"season_switch": "Saisonauswahl",
+		"season_running": "läuft",
+		"season_final": "Endstand",
+		"tab_players": "Spieler",
+		"view_switch": "Ansicht",
 		"sort": "Sortierung",
 		"sort_current": "Aktuell",
 		"sort_form": "Form",
 		"hero_label": "Spitzenreiter",
+		"hero_label_closed": "{version}-Meister",
+		"since_season_start": "seit Saisonstart",
 		"this_week": "diese Woche",
 		"streak_suffix": "er-Streak",
 		"rookie": "Rookie",
-		"solo_section": "Einzelspieler",
-		"duo_section": "Stärkste Duos",
-		"win_rate_short": "Win-Rate",
-		"points_short": "Pkt"
+		"duo_total_games_short": "gesamt",
+		"not_qualified_divider": "unter {minGames} Spielen · nicht gewertet",
+		"no_duos": "Noch keine Duos mit genug gemeinsamen Spielen.",
+		"awards_title": "Saison-Awards",
+		"recap_cta": "Dein {version}-Rückblick",
+		"retry": "Erneut versuchen",
+		"error_generic": "Etwas ist schiefgelaufen.",
+		"season_talkrunde": {
+			"title": "Sonderfolge: Saison-Talkrunde {version}",
+			"subtitle": "Marcel, Sophie und Frank blicken auf die ganze Saison zurück"
+		}
 	},
 	"h2h": {
 		"title": "Direkter Vergleich",
@@ -1353,7 +1365,7 @@
 	"info_tips": {
 		"elo": {
 			"title": "ELO",
-			"body": "ELO ist deine Spielerstärke als Zahl. Startwert ist 1000.\n\nSie steigt nach Siegen — besonders gegen Stärkere — und fällt nach Niederlagen, besonders gegen Schwächere. Ein Sieg gegen eine deutlich stärkere Mannschaft bringt mehr Punkte als gegen einen Schwächeren.\n\nDie Berechnung läuft pro Spielmodus getrennt (1v1, 2v2). So polierst du nicht durch leichte 1v1-Siege deinen 2v2-Wert auf — und umgekehrt."
+			"body": "ELO ist deine Spielstärke als Zahl — eine einzige Bewertung für alle Modi (1v1, 2v2, 1v2). Startwert ist 1500.\n\nJede Partie ist ein Nullsummenspiel: Was die eine Seite gewinnt, verliert die andere. Wer gewinnt, bekommt immer mindestens +1 Punkt, die Tordifferenz zählt moderat mit obendrauf.\n\nDazu gibt es Bonus bzw. Malus für Vorlagen, gehaltene Elfmeter und rote Karten — Gelbe Karten kosten seit Kurzem nichts mehr. 2v2- und 1v2-Spiele zählen mit Faktor 0,75, mehrfach exakt dieselbe Aufstellung in einer Woche zählt weniger, und das Handicap für 1v2-Spiele wird automatisch gelernt."
 		},
 		"archetype": {
 			"title": "Archetyp",
@@ -1441,9 +1453,8 @@
 		},
 		"keeper": {
 			"title": "Wer hat gehalten?",
-			"subtitle": "{shooter} verschossen — der Torhüter bekommt einen ELO-Bonus.",
+			"subtitle": "{shooter} verschossen — wer hat gehalten?",
 			"no_keeper": "Pfosten / vorbei / kein Halten",
-			"elo_preview": "ELO: {shooter} {shooterDelta} · Halter +{keeperDelta}",
 			"back_to_result": "Ergebnis korrigieren"
 		},
 		"end": {
@@ -1519,5 +1530,123 @@
 			"load_failed": "Trophäen konnten nicht geladen werden."
 		},
 		"profile_link": "Trophäenraum"
+	},
+	"season_awards": {
+		"champion": {
+			"label": "Meister"
+		},
+		"top_scorer": {
+			"label": "Torschützenkönig"
+		},
+		"top_assister": {
+			"label": "Vorlagenkönig"
+		},
+		"dream_duo": {
+			"label": "Dream-Duo"
+		},
+		"penalty_king": {
+			"label": "Elfmeterkönig"
+		},
+		"fair_play": {
+			"label": "Fairplay-Preis"
+		},
+		"wall": {
+			"label": "Die Mauer"
+		},
+		"marathon": {
+			"label": "Dauerbrenner"
+		},
+		"form_of_the_year": {
+			"label": "Form der Saison"
+		},
+		"lunch_king": {
+			"label": "Mittagspausen-König"
+		},
+		"comeback_king": {
+			"label": "Comeback-König"
+		},
+		"unlucky": {
+			"label": "Pechvogel"
+		}
+	},
+	"season_recap": {
+		"title": "Rückblick",
+		"dialog_label": "Saison-Rückblick",
+		"close": "Schließen",
+		"error": "Der Rückblick konnte nicht geladen werden.",
+		"retry": "Erneut versuchen",
+		"back": "Zurück",
+		"empty": "Für diese Saison gibt es noch keinen Rückblick für dich.",
+		"intro": {
+			"title": "Deine Saison {version}",
+			"games": "Spiele",
+			"league_facts": "Die Liga in {version}: {games} Spiele, {goals} Tore."
+		},
+		"numbers": {
+			"title": "Zahlen",
+			"win_rate": "Sieg-Quote",
+			"wins": "Siege",
+			"draws": "Remis",
+			"losses": "Niederlagen",
+			"games_played": "{count} Spiele insgesamt",
+			"rank": "Platz {rank} von {of} bei den Siegen"
+		},
+		"goals": {
+			"title": "Tore",
+			"goals_label": "Tore erzielt",
+			"assists": "Vorlagen",
+			"per_game": "Tore/Spiel",
+			"hattricks": "Hattricks",
+			"clean_sheets": "Zu-Null-Spiele"
+		},
+		"timing": {
+			"title": "Wann du spielst",
+			"favorite_weekday": "{count} Spiele — dein häufigster Spieltag",
+			"lucky_day": "Dein Glückstag",
+			"win_rate": "{percent}% Siege ({count} Spiele)",
+			"lunch_break": "{percent}% deiner Spiele in der Mittagspause",
+			"favorite_hour": "Deine liebste Anstoßzeit: {hour} Uhr ({count} Spiele)"
+		},
+		"relations": {
+			"title": "Mit wem",
+			"best_partner": "Top-Partner",
+			"best_partner_detail": "{wins} Siege in {games} gemeinsamen Spielen",
+			"nemesis": "Angstgegner",
+			"nemesis_detail": "{losses} Niederlagen in {games} Spielen",
+			"favorite_victim": "Lieblingsgegner",
+			"favorite_victim_detail": "{wins} Siege in {games} Spielen"
+		},
+		"match_of_season": {
+			"title": "Dein Spiel der Saison",
+			"penalty_badge": "Elfmeterschießen",
+			"watch_highlight": "Highlight ansehen",
+			"biggest_win": "Höchster Sieg",
+			"highest_scoring": "Torreichstes Spiel",
+			"most_common_score": "Häufigstes Ergebnis",
+			"favorite_club": "Lieblingsverein",
+			"best_club": "Bester Verein"
+		},
+		"elo_journey": {
+			"title": "Deine ELO-Reise",
+			"peak": "Höchststand {value} am {date}",
+			"rank": "Platz {rank} von {of}"
+		},
+		"new_elo": {
+			"title": "Das neue ELO",
+			"explainer": "League-ELO v2 rechnet fairer: Nullsummenspiel, moderate Tordifferenz, Vorlagen und gehaltene Elfmeter zählen mit.",
+			"hint_yellow_cards": "{count} Gelbe Karten kosten dich jetzt nichts mehr",
+			"hint_one_vs_two": "{count} Spiele 1v2 werden jetzt fair verrechnet",
+			"hint_draws": "{count} Unentschieden bewegen jetzt dein ELO",
+			"hint_shootouts": "{count} Elfmeterschießen zählen als knapper Sieg"
+		},
+		"awards": {
+			"title": "Saison-Awards",
+			"you_won": "Du bist unter den Preisträgern!"
+		},
+		"finale": {
+			"persona": "{persona} meint:",
+			"next_season": "FC27 läuft — dein Start-ELO: {rating}",
+			"cta": "Zur Rangliste"
+		}
 	}
 }

@@ -1,13 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
-	computePenaltyShotEloDeltas,
 	computeRunningScore,
 	countShotsTaken,
 	getBoardCellCount,
 	getCurrentRound,
 	getNextShootingTeam,
 	isPenaltyShootoutDecided,
-	PENALTY_ELO_DELTAS,
 } from "$lib/utils/penaltyShootout.utils.js";
 
 const goalHome = { team: "home", result: "goal" };
@@ -169,37 +167,6 @@ describe("isPenaltyShootoutDecided", () => {
 			decided: true,
 			winnerSide: "home",
 		});
-	});
-});
-
-describe("computePenaltyShotEloDeltas", () => {
-	it("rewards a converted penalty with the goal bonus only", () => {
-		expect(
-			computePenaltyShotEloDeltas({ shooterId: "alice", result: "goal" }),
-		).toEqual({ alice: PENALTY_ELO_DELTAS.GOAL_SCORED });
-	});
-
-	it("penalises the shooter and rewards the keeper on a save", () => {
-		expect(
-			computePenaltyShotEloDeltas({
-				shooterId: "alice",
-				result: "missed",
-				keeperId: "bob",
-			}),
-		).toEqual({
-			alice: PENALTY_ELO_DELTAS.PENALTY_MISSED,
-			bob: PENALTY_ELO_DELTAS.PENALTY_SAVED,
-		});
-	});
-
-	it("penalises only the shooter when the ball misses the goal entirely", () => {
-		expect(
-			computePenaltyShotEloDeltas({
-				shooterId: "alice",
-				result: "missed",
-				keeperId: null,
-			}),
-		).toEqual({ alice: PENALTY_ELO_DELTAS.PENALTY_MISSED });
 	});
 });
 

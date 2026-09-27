@@ -49,7 +49,7 @@ function initial(name) {
 				{/if}
 				<div class="avatar" style="background: {g.gradient};">
 					{#if p.avatarUrl}
-						<img src={p.avatarUrl} alt={p.username} />
+						<img referrerpolicy="no-referrer" src={p.avatarUrl} alt={p.username} />
 					{:else}
 						<span>{initial(p.username)}</span>
 					{/if}

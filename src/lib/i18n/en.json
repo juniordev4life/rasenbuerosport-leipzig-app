@@ -105,6 +105,12 @@
 			"neutral": "{name}, solid week — there's still some hype to be had though, right?",
 			"empty": "{name}, fresh week, fresh chances! Time for your first match!"
 		},
+		"recap_card": {
+			"title": "Your {version} recap is here",
+			"subtitle": "Take a look at your season",
+			"cta": "View",
+			"subtitle_with_talkrunde": "Look back on your season – season talk show included"
+		},
 		"sections": {
 			"challenges": "Weekly challenges",
 			"talkrunde": "Friday talk show",
@@ -311,31 +317,37 @@
 		"d_short": "D",
 		"l_short": "L",
 		"games_short": "games",
-		"tab_total": "Total",
-		"tab_per_game": "Per Game",
-		"ppg_label": "Pts/Game",
+		"goals_short": "goals",
 		"period_all": "All time",
 		"mode_all": "All",
 		"mode_1v1": "1v1",
 		"mode_2v2": "2v2",
 		"mode_duos": "Duos",
-		"mode_skill": "Skill Rating",
-		"mode_skill_sub": "ELO · live",
-		"mode_league": "League",
-		"mode_league_sub": "Season table",
-		"coming_soon": "Soon",
-		"team_size": "Team size",
+		"season_switch": "Season selector",
+		"season_running": "running",
+		"season_final": "Final standing",
+		"tab_players": "Players",
+		"view_switch": "View",
 		"sort": "Sort by",
 		"sort_current": "Current",
 		"sort_form": "Form",
 		"hero_label": "Top of the table",
+		"hero_label_closed": "{version} champion",
+		"since_season_start": "since season start",
 		"this_week": "this week",
 		"streak_suffix": " streak",
 		"rookie": "Rookie",
-		"solo_section": "Solo players",
-		"duo_section": "Top duos",
-		"win_rate_short": "win rate",
-		"points_short": "pts"
+		"duo_total_games_short": "total",
+		"not_qualified_divider": "under {minGames} games · not ranked",
+		"no_duos": "No duos with enough matches together yet.",
+		"awards_title": "Season awards",
+		"recap_cta": "Your {version} recap",
+		"retry": "Try again",
+		"error_generic": "Something went wrong.",
+		"season_talkrunde": {
+			"title": "Special episode: {version} season talk show",
+			"subtitle": "Marcel, Sophie and Frank look back on the whole season"
+		}
 	},
 	"h2h": {
 		"title": "Head to Head",
@@ -1351,7 +1363,7 @@
 	"info_tips": {
 		"elo": {
 			"title": "ELO",
-			"body": "ELO is your player strength expressed as a number. Starting value is 1000.\n\nIt rises after wins — especially against stronger opponents — and falls after losses, particularly against weaker ones. Beating a much stronger team earns more points than beating a weaker one.\n\nThe calculation is done separately per game mode (1v1, 2v2), so easy 1v1 wins don't inflate your 2v2 rating and vice versa."
+			"body": "ELO is your skill rating as a single number — one rating for every mode (1v1, 2v2, 1v2). Starting value is 1500.\n\nEach match is zero-sum: what one side wins, the other loses. The winner always gains at least +1 point, and goal difference counts moderately on top.\n\nThere's also a bonus or malus for assists, saved penalties and red cards — yellow cards no longer cost points. 2v2 and 1v2 matches count at a 0.75 weight, repeating the exact same line-up several times in one week counts for less, and the 1v2 handicap is learned automatically."
 		},
 		"archetype": {
 			"title": "Archetype",
@@ -1439,9 +1451,8 @@
 		},
 		"keeper": {
 			"title": "Who saved it?",
-			"subtitle": "{shooter} missed — the keeper gets an ELO bonus.",
+			"subtitle": "{shooter} missed — who saved it?",
 			"no_keeper": "Post / wide / no save",
-			"elo_preview": "ELO: {shooter} {shooterDelta} · keeper +{keeperDelta}",
 			"back_to_result": "Edit result"
 		},
 		"end": {
@@ -1517,5 +1528,123 @@
 			"load_failed": "Failed to load trophies."
 		},
 		"profile_link": "Trophy Room"
+	},
+	"season_awards": {
+		"champion": {
+			"label": "Champion"
+		},
+		"top_scorer": {
+			"label": "Top Scorer"
+		},
+		"top_assister": {
+			"label": "Top Assister"
+		},
+		"dream_duo": {
+			"label": "Dream Duo"
+		},
+		"penalty_king": {
+			"label": "Penalty King"
+		},
+		"fair_play": {
+			"label": "Fair Play Award"
+		},
+		"wall": {
+			"label": "The Wall"
+		},
+		"marathon": {
+			"label": "Iron Man"
+		},
+		"form_of_the_year": {
+			"label": "Form of the Season"
+		},
+		"lunch_king": {
+			"label": "Lunch Break King"
+		},
+		"comeback_king": {
+			"label": "Comeback King"
+		},
+		"unlucky": {
+			"label": "Unlucky One of the Season"
+		}
+	},
+	"season_recap": {
+		"title": "Recap",
+		"dialog_label": "Season recap",
+		"close": "Close",
+		"error": "The recap could not be loaded.",
+		"retry": "Try again",
+		"back": "Back",
+		"empty": "There's no recap for you for this season yet.",
+		"intro": {
+			"title": "Your {version} season",
+			"games": "games",
+			"league_facts": "The league in {version}: {games} games, {goals} goals."
+		},
+		"numbers": {
+			"title": "The numbers",
+			"win_rate": "Win rate",
+			"wins": "wins",
+			"draws": "draws",
+			"losses": "losses",
+			"games_played": "{count} games total",
+			"rank": "Rank {rank} of {of} for wins"
+		},
+		"goals": {
+			"title": "Goals",
+			"goals_label": "goals scored",
+			"assists": "assists",
+			"per_game": "goals/game",
+			"hattricks": "hattricks",
+			"clean_sheets": "clean sheets"
+		},
+		"timing": {
+			"title": "When you play",
+			"favorite_weekday": "{count} games — your most common matchday",
+			"lucky_day": "Your lucky day",
+			"win_rate": "{percent}% wins ({count} games)",
+			"lunch_break": "{percent}% of your games were during lunch break",
+			"favorite_hour": "Your favourite kickoff time: {hour} ({count} games)"
+		},
+		"relations": {
+			"title": "Who you play with",
+			"best_partner": "Best partner",
+			"best_partner_detail": "{wins} wins in {games} games together",
+			"nemesis": "Nemesis",
+			"nemesis_detail": "{losses} losses in {games} games",
+			"favorite_victim": "Favourite victim",
+			"favorite_victim_detail": "{wins} wins in {games} games"
+		},
+		"match_of_season": {
+			"title": "Your match of the season",
+			"penalty_badge": "Penalty shootout",
+			"watch_highlight": "Watch highlight",
+			"biggest_win": "Biggest win",
+			"highest_scoring": "Highest-scoring game",
+			"most_common_score": "Most common score",
+			"favorite_club": "Favourite club",
+			"best_club": "Best club"
+		},
+		"elo_journey": {
+			"title": "Your ELO journey",
+			"peak": "Peak of {value} on {date}",
+			"rank": "Rank {rank} of {of}"
+		},
+		"new_elo": {
+			"title": "The new ELO",
+			"explainer": "League-ELO v2 is fairer: zero-sum, goal difference counts moderately, and assists plus saved penalties count too.",
+			"hint_yellow_cards": "{count} yellow cards no longer cost you anything",
+			"hint_one_vs_two": "{count} 1v2 games are now settled fairly",
+			"hint_draws": "{count} draws now move your ELO",
+			"hint_shootouts": "{count} penalty shootouts count as a narrow win"
+		},
+		"awards": {
+			"title": "Season awards",
+			"you_won": "You're among the winners!"
+		},
+		"finale": {
+			"persona": "{persona} says:",
+			"next_season": "FC27 is live — your starting ELO: {rating}",
+			"cta": "Go to the leaderboard"
+		}
 	}
 }

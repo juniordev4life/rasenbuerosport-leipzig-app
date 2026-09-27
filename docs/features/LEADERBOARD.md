@@ -13,57 +13,52 @@ The leaderboard shows who sits at the top of the office league — ranked by ELO
 <img src="../screenshots/rangliste-2.png" width="320" />
 </div>
 
-### How the ranking works
+### Seasons
 
-The ranking is based on **ELO** — one rating per player across all modes, starting at 1500:
+A league season is an EA FC edition (FC26, FC27, …), not a calendar quarter — ELO runs continuously across seasons, there is no reset. A segmented control at the top switches between them: the current season reads "**FC27 · läuft**", a closed one "**FC26 · Endstand**". Your choice is kept in the page URL (`?season=`), so a shared link opens the same season.
 
-- Wins push it up — more so against stronger opponents — and losses pull it down. Players with fewer than 30 matches move faster
-- In 2v2, goals, assists and red cards decide how the team's gain or loss is split between the two players
-- A penalty shootout counts as a draw; each shot adds a little on top: +3 for a goal, −5 for a miss, +5 for the keeper who saves it
-- Cards from the Defence screenshot cost ELO once per match: −2 per yellow card and −5 per red card nobody was logged for, both shared by the team; −8 for a red card logged against a player
+### Rating
 
-At the top you'll find two modes:
+The ranking is ELO only — there is no points table, because players who play more would simply collect more points. ELO is a single rating per player across every mode (1v1, 2v2, 1v2), starting at 1500:
 
-| Mode | Description |
-|-------|-------------|
-| **Skill Rating** · ELO live | The ranking described on this page |
-| **League** · season table | Marked **Soon** — not available yet |
+- Each match is zero-sum — what one side gains, the other loses — and goal difference counts moderately on top of the result. The winner always gains at least 1 point
+- Assists, saved penalties and red cards add a bonus or malus; yellow cards no longer cost points
+- 2v2 and 1v2 matches count at a 0.75 weight, and repeating the exact same line-up several times in the same week counts for less
+- A penalty shootout counts as a narrow win/loss for ELO. The 1v2 handicap is learned automatically rather than fixed
 
-### Switches
+Two tabs sit below the season switch:
 
-Below the modes sit two toggles:
+| Tab | Shows |
+|-----|-------|
+| **Spieler** | Every player with at least one rated match, sorted by rating |
+| **Duos** | Pairings with 10+ matches together, sorted by duo rating |
 
-- **2v2 / 1v1** — which matches the list is built from (2v2 is the default). The ELO next to a name is the player's rating after their last match of that kind — it's the same rating in both views
-- **Current / Form** — sort by current ELO, or by form: the ELO trend over a player's last 10 rated matches
+On **Spieler**, a sort toggle switches between **Aktuell** (live rating) and **Form** (the rating trend over a player's last 10 rated matches).
 
-Your choice is kept in the page URL, so a shared link opens the same view.
+**Closed-season qualification**: once a season ends, only players who reached the season's minimum match count are eligible for its top spot and its "Meister" award — a higher raw rating from very few matches doesn't count. Non-qualified players still appear in the list (so nobody just vanishes), below a small "unter *N* Spielen · nicht gewertet" divider.
 
-### Top of the table
+### Hero card
 
-The #1 of the current view gets a hero card: crown, current ELO, this week's ELO trend, a sparkline of recent ratings and the W · D · L · games record — plus a 🔥 badge while they're on a winning streak of 3 or more.
+The season leader (the top *qualified* player) gets a hero card: crown, rating, a sparkline of recent ratings, "+*N* seit Saisonstart" and — for the running season — "±*N* diese Woche", plus the W · D · L · games record and a 🔥 badge while on a win streak of 3 or more. For a closed season the label reads "*Edition*-Meister" instead of "Spitzenreiter".
 
 ### Player display
 
 - **Rank** with medal icons (🥇🥈🥉) for the top 3
 - **Avatar** and **username**
-- **Record**: Wins · Draws · Losses · Matches
-- **Badges**: **Rookie** (fewer than 5 matches), 🔥 winning streak (3+ in a row), **You** on your own entry
-- **Sparkline** of the recent ELO curve — dashed grey for rookies
-- **ELO** with a trend arrow: this week's change, or the form value when sorted by **Form**
+- **Badges**: **Rookie** (fewer than 5 rated matches ever), 🔥 win streak (3+ in a row), **Ich** on your own entry
+- **Stats line**: Siege · Unentschieden · Niederlagen · Spiele · Tore for the season — players with no matches yet this season show "—" here but keep their (carried-over) rating
+- **Sparkline** of the recent rating curve — dashed grey for rookies
+- **Rating** with a trend pill: the season delta when sorted by **Aktuell**, the form delta when sorted by **Form**
 
-Tap a player to open their profile. Records and curves cover the league's last 200 matches, so players who haven't played in a long time drop off the list.
+Tap a player to open their profile.
 
-### Duo ranking
+### Duos
 
-In the **2v2** view, **Top duos** shows the three best pairings (at least 3 matches together):
+Two overlapping avatars, both names, the duo's rating, its season delta and the season's W/D/L plus the pair's all-time match count. Tap a duo to open its **duo page**.
 
-- Both **avatars** and names
-- **Record** and **win rate**
-- **Points** — 3 per win, 1 per draw; ties go to the better win rate
+### Season awards & recap
 
-Tap a duo to open its **duo page**: key numbers (matches, win rate, and goals scored and conceded per game over the last 5 shared matches), chemistry score (from 10 shared matches), playstyle as a duo and the recent shared games. Under 5 shared matches, a countdown to 10 replaces the playstyle chart; until 10, the chart is marked as still settling.
-
-On desktop, the duo ranking and a short ELO explainer sit in a column to the right of the player list.
+Once a season closes, an **awards strip** appears below the ranking: horizontally scrollable chips for Meister, Torschützenkönig, Vorlagenkönig, Dream-Duo, Elfmeterkönig, Fairplay-Preis, Die Mauer, Dauerbrenner, Form der Saison, Mittagspausen-König, Comeback-König and Pechvogel — each with its winner(s) and the value they won it with. If you have a generated recap for that season, a button opens it: **"Dein *Edition*-Rückblick"**. See [Season Recap →](SEASON_RECAP.md).
 
 ---
 

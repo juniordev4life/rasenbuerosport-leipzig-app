@@ -93,7 +93,7 @@ function isActive(href) {
 				: 'hover:bg-bg-input'}"
 	>
 		{#if $user?.user_metadata?.avatar_url}
-			<img
+			<img referrerpolicy="no-referrer"
 				src={$user.user_metadata.avatar_url}
 				alt={$user.user_metadata.username || "Avatar"}
 				class="w-8 h-8 rounded-full object-cover ring-1 {isActive(ROUTES.PROFILE) ? 'ring-accent-red' : 'ring-border'}"

@@ -1,26 +1,20 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
 import RankIndicator from "./RankIndicator.svelte";
 import TrendPill from "./TrendPill.svelte";
 
 /**
- * Duo list row. The ELO column reuses the points value the API
- * already returns — duos have no dedicated ELO snapshot yet, but the
- * column reads "Pkt" in the stats line so users see the right
- * scale.
+ * Duo list row for the Skill-Rating "Duos" tab — two overlapping
+ * avatars, both names, the duo's rating and season record.
  *
  * @type {{
  *   rank: number,
  *   duo: {
  *     duo_id: string,
- *     player1: { player_id: string, username: string, avatar_url: string|null },
- *     player2: { player_id: string, username: string, avatar_url: string|null },
- *     wins: number,
- *     draws: number,
- *     losses: number,
- *     games: number,
- *     win_rate: number,
- *     points: number,
+ *     players: Array<{ player_id: string, username: string, avatar_url: string|null }>,
+ *     rating: number, delta_season: number,
+ *     games: number, wins: number, draws: number, losses: number, games_total: number,
  *   },
  *   onClick?: (duo: object) => void,
  * }}
@@ -34,97 +28,51 @@ function initial(name) {
 }
 </script>
 
-<button type="button" class="duo-row" onclick={() => onClick?.(duo)}>
+<button
+	type="button"
+	class="w-full flex items-center gap-2.5 rounded-xl border border-border bg-bg-card px-3 py-2.5 mb-2 text-left hover:bg-bg-input transition-colors"
+	onclick={() => onClick?.(duo)}
+>
 	<RankIndicator {rank} />
 
-	<div class="duo-avatars">
-		{#if duo.player1.avatar_url}
-			<img src={duo.player1.avatar_url} alt={duo.player1.username} class="duo-avatar duo-a" />
-		{:else}
-			<div class="duo-avatar duo-a duo-fallback">{initial(duo.player1.username)}</div>
-		{/if}
-		{#if duo.player2.avatar_url}
-			<img src={duo.player2.avatar_url} alt={duo.player2.username} class="duo-avatar duo-b" />
-		{:else}
-			<div class="duo-avatar duo-b duo-fallback">{initial(duo.player2.username)}</div>
-		{/if}
+	<div class="relative w-14 h-[38px] shrink-0">
+		{#each duo.players.slice(0, 2) as p, i (p.player_id)}
+			<div
+				class="absolute top-0 w-9 h-9 rounded-full border-2 border-bg-card shadow-sm overflow-hidden {i === 0
+					? 'left-0 z-[2]'
+					: 'right-0 z-[1]'}"
+				style:background={p.avatar_url
+					? undefined
+					: avatarGradient(p.player_id ?? p.username).gradient}
+			>
+				{#if p.avatar_url}
+					<img referrerpolicy="no-referrer" src={p.avatar_url} alt={p.username} class="w-full h-full object-cover" />
+				{:else}
+					<span class="w-full h-full flex items-center justify-center text-[13px] font-bold text-white">
+						{initial(p.username)}
+					</span>
+				{/if}
+			</div>
+		{/each}
 	</div>
 
-	<div class="duo-info">
-		<div class="duo-names">{duo.player1.username} &amp; {duo.player2.username}</div>
-		<div class="duo-stats">
+	<div class="flex-1 min-w-0">
+		<div class="text-[13px] font-bold text-text-primary truncate mb-0.5">
+			{duo.players.map((p) => p.username).join(" & ")}
+		</div>
+		<div class="text-[10px] text-text-muted tabular-nums">
 			{duo.wins}{$t("leaderboard.w_short")} ·
 			{duo.draws}{$t("leaderboard.d_short")} ·
 			{duo.losses}{$t("leaderboard.l_short")} ·
 			{duo.games} {$t("leaderboard.games_short")} ·
-			{duo.win_rate}% {$t("leaderboard.win_rate_short")}
+			{duo.games_total} {$t("leaderboard.duo_total_games_short")}
 		</div>
 	</div>
 
-	<div class="duo-elo-block">
-		<div class="duo-elo">{duo.points}</div>
-		<div class="duo-elo-label">{$t("leaderboard.points_short")}</div>
+	<div class="shrink-0 text-right flex flex-col items-end gap-0.5">
+		<div class="text-[17px] font-extrabold leading-none tabular-nums text-text-primary">
+			{duo.rating ?? "—"}
+		</div>
+		<TrendPill delta={duo.delta_season} />
 	</div>
 </button>
-
-<style>
-.duo-row {
-	display: flex; align-items: center; gap: 11px;
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 10px 12px;
-	margin-bottom: 8px;
-	width: 100%;
-	text-align: left;
-	cursor: pointer;
-	transition: background-color .15s;
-}
-.duo-row:hover { background: #161C28; }
-.duo-avatars {
-	position: relative;
-	width: 56px; height: 38px;
-	flex-shrink: 0;
-}
-.duo-avatar {
-	position: absolute;
-	width: 36px; height: 36px; border-radius: 50%;
-	object-fit: cover;
-	border: 2px solid #131822;
-	box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
-.duo-fallback {
-	background: linear-gradient(135deg, #6366F1, #4338CA);
-	display: flex; align-items: center; justify-content: center;
-	font-size: 13px; font-weight: 700; color: white;
-}
-.duo-a { left: 0; top: 0; z-index: 2; }
-.duo-b { right: 0; top: 0; z-index: 1; }
-
-.duo-info { flex: 1; min-width: 0; }
-.duo-names {
-	font-size: 13px; font-weight: 700;
-	color: #E5E7EB;
-	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-	margin-bottom: 2px;
-}
-.duo-stats {
-	font-size: 10px; color: #6B7280;
-	font-variant-numeric: tabular-nums;
-}
-.duo-elo-block {
-	text-align: right;
-	flex-shrink: 0;
-}
-.duo-elo {
-	font-size: 17px; font-weight: 800;
-	color: #FFFFFF;
-	line-height: 1;
-	font-variant-numeric: tabular-nums;
-}
-.duo-elo-label {
-	font-size: 10px;
-	color: #6B7280;
-	margin-top: 2px;
-}
-</style>

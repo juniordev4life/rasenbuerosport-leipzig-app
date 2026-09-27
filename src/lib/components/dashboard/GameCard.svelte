@@ -129,7 +129,7 @@ const formattedDate = $derived(
 			<div class="flex items-center justify-end -space-x-1.5">
 				{#each homePlayers as player (player.player_id)}
 					{#if player.profiles?.avatar_url}
-						<img
+						<img referrerpolicy="no-referrer"
 							src={player.profiles.avatar_url}
 							alt={player.profiles?.username || "?"}
 							class="w-7 h-7 rounded-full object-cover ring-2 ring-bg-secondary"
@@ -165,7 +165,7 @@ const formattedDate = $derived(
 			<div class="flex items-center justify-start -space-x-1.5">
 				{#each awayPlayers as player (player.player_id)}
 					{#if player.profiles?.avatar_url}
-						<img
+						<img referrerpolicy="no-referrer"
 							src={player.profiles.avatar_url}
 							alt={player.profiles?.username || "?"}
 							class="w-7 h-7 rounded-full object-cover ring-2 ring-bg-secondary"

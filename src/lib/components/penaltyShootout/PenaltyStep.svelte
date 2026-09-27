@@ -1,12 +1,10 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import {
-	computePenaltyShotEloDeltas,
 	computeRunningScore,
 	getCurrentRound,
 	getNextShootingTeam,
 	isPenaltyShootoutDecided,
-	PENALTY_ELO_DELTAS,
 } from "$lib/utils/penaltyShootout.utils.js";
 import SequenceBoard from "./SequenceBoard.svelte";
 
@@ -149,11 +147,6 @@ function commitShot({ result, keeperId = null }) {
 		shooterId: pendingShooterId,
 		result,
 		keeperId,
-		eloDeltas: computePenaltyShotEloDeltas({
-			shooterId: pendingShooterId,
-			result,
-			keeperId,
-		}),
 	};
 	shots = [...shots, shot];
 	resetActiveShot();
@@ -206,17 +199,6 @@ function confirmAbortYes() {
 function confirmAbortNo() {
 	confirmAbort = false;
 }
-
-const eloPreview = $derived.by(() => {
-	if (activePhase !== "pickKeeper" || !pendingShooterId) return null;
-	const shooterName =
-		nextTeamPlayers.find((p) => p.id === pendingShooterId)?.username ?? "—";
-	return {
-		shooterName,
-		shooterDelta: PENALTY_ELO_DELTAS.PENALTY_MISSED,
-		keeperDelta: PENALTY_ELO_DELTAS.PENALTY_SAVED,
-	};
-});
 </script>
 
 <div class="penalty-step">
@@ -314,7 +296,7 @@ const eloPreview = $derived.by(() => {
 								style:--cell-gradient={gradientFor(player.id)}
 							>
 								{#if player.avatar_url}
-									<img src={player.avatar_url} alt="" />
+									<img referrerpolicy="no-referrer" src={player.avatar_url} alt="" />
 								{:else}
 									{player.username?.charAt(0).toUpperCase() ?? "?"}
 								{/if}
@@ -371,7 +353,7 @@ const eloPreview = $derived.by(() => {
 								style:--cell-gradient={gradientFor(keeper.id)}
 							>
 								{#if keeper.avatar_url}
-									<img src={keeper.avatar_url} alt="" />
+									<img referrerpolicy="no-referrer" src={keeper.avatar_url} alt="" />
 								{:else}
 									{keeper.username?.charAt(0).toUpperCase() ?? "?"}
 								{/if}
@@ -387,15 +369,6 @@ const eloPreview = $derived.by(() => {
 				>
 					{$t("penalty_shootout.keeper.no_keeper")}
 				</button>
-				{#if eloPreview}
-					<p class="elo-preview">
-						{$t("penalty_shootout.keeper.elo_preview", {
-							shooter: eloPreview.shooterName,
-							shooterDelta: eloPreview.shooterDelta,
-							keeperDelta: eloPreview.keeperDelta,
-						})}
-					</p>
-				{/if}
 				<button type="button" class="link-back" onclick={() => (activePhase = "pickResult")}>
 					← {$t("penalty_shootout.keeper.back_to_result")}
 				</button>
@@ -657,13 +630,6 @@ const eloPreview = $derived.by(() => {
 .no-keeper-button:hover {
 	color: #E5E7EB;
 	border-color: rgba(255, 255, 255, 0.25);
-}
-
-.elo-preview {
-	font-size: 10px;
-	color: #9CA3AF;
-	margin: 10px 0 0;
-	text-align: center;
 }
 
 /* END CARD ---------------------------------------------------------- */

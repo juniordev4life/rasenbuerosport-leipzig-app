@@ -1,69 +1,101 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
 import Sparkline from "./Sparkline.svelte";
 import TrendPill from "./TrendPill.svelte";
 
 /**
- * Top-of-page hero card for the current #1 player. Shows the avatar
- * with a crown, the headline ELO, a sparkline of recent ratings,
- * a "this week" trend pill and the wins/draws/losses breakdown.
+ * Top-of-page hero card for the #1 player of the Skill-Rating view.
+ * Reads "Spitzenreiter" while the season is running, "<edition>-
+ * Meister" (crown) once the season is closed — the crown always
+ * shows, only the label copy changes.
  *
  * @type {{
  *   player: {
- *     id: string,
- *     username: string,
- *     avatarUrl: string|null,
- *     initials: string,
- *     currentRating: number|null,
- *     ratings: number[],
- *     weekDelta: number,
- *     wins: number,
- *     draws: number,
- *     losses: number,
- *     games: number,
- *     currentStreak: { type: "win"|"loss"|"draw", count: number }|null,
+ *     player_id: string, username: string, avatar_url: string|null,
+ *     rating: number, delta_season: number, delta_week: number,
+ *     history: number[], wins: number, draws: number, losses: number,
+ *     games: number, streak: { type: "W"|"D"|"L", count: number }|null,
  *   },
+ *   season: { isCurrent: boolean, gameVersion: string },
  * }}
  */
-let { player } = $props();
+let { player, season } = $props();
 
 const { t } = getTranslate();
 
 const winStreak = $derived(
-	player.currentStreak?.type === "win" && player.currentStreak.count >= 3
-		? player.currentStreak.count
+	player.streak?.type === "W" && player.streak.count >= 3
+		? player.streak.count
 		: null,
+);
+const initial = $derived((player.username ?? "?").charAt(0).toUpperCase());
+const fallbackGradient = $derived(
+	avatarGradient(player.player_id ?? player.username).gradient,
 );
 </script>
 
-<div class="hero-card">
-	<div class="hero-top-row">
-		<div class="hero-avatar-wrap">
-			<div class="crown-badge" aria-hidden="true">{"\u{1F451}"}</div>
-			{#if player.avatarUrl}
-				<img src={player.avatarUrl} alt={player.username} class="hero-avatar-img" />
+<div class="relative rounded-2xl border border-warning/30 bg-bg-card p-4 overflow-hidden">
+	<div class="flex items-center gap-3.5">
+		<div class="relative shrink-0">
+			<span
+				aria-hidden="true"
+				class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[22px] drop-shadow z-10"
+			>{"\u{1F451}"}</span>
+			{#if player.avatar_url}
+				<img referrerpolicy="no-referrer"
+					src={player.avatar_url}
+					alt={player.username}
+					class="w-[70px] h-[70px] rounded-full object-cover border-[3px] border-warning/50 shadow-lg"
+				/>
 			{:else}
-				<div class="hero-avatar">{player.initials}</div>
+				<div
+					class="w-[70px] h-[70px] rounded-full flex items-center justify-center text-2xl font-extrabold text-white border-[3px] border-warning/50 shadow-lg"
+					style:background={fallbackGradient}
+				>
+					{initial}
+				</div>
 			{/if}
 		</div>
-		<div class="hero-info">
-			<div class="hero-rank-label">★ {$t("leaderboard.hero_label")}</div>
-			<h2 class="hero-name">{player.username}</h2>
+		<div class="flex-1 min-w-0">
+			<div class="text-[9px] font-extrabold uppercase tracking-widest text-warning mb-0.5">
+				{"★"}
+				{season.isCurrent
+					? $t("leaderboard.hero_label")
+					: $t("leaderboard.hero_label_closed", { version: season.gameVersion })}
+			</div>
+			<h2 class="text-[19px] font-extrabold tracking-tight text-text-primary truncate">
+				{player.username}
+			</h2>
 		</div>
 	</div>
 
-	<div class="hero-elo-row">
-		<div class="hero-elo-left">
-			<div class="hero-elo-value">{player.currentRating ?? "—"}</div>
-			<TrendPill delta={player.weekDelta} variant="pill" suffix={$t("leaderboard.this_week")} />
+	<div class="flex items-center justify-between gap-3.5 mt-3.5">
+		<div class="flex flex-col items-start gap-2">
+			<div class="text-[42px] font-extrabold leading-none tabular-nums tracking-tight text-text-primary">
+				{player.rating ?? "—"}
+			</div>
+			<div class="flex flex-wrap items-center gap-1.5">
+				<TrendPill
+					delta={player.delta_season}
+					variant="pill"
+					suffix={$t("leaderboard.since_season_start")}
+				/>
+				{#if season.isCurrent}
+					<TrendPill
+						delta={player.delta_week}
+						variant="pill"
+						suffix={$t("leaderboard.this_week")}
+					/>
+				{/if}
+			</div>
 		</div>
-		<div class="hero-sparkline">
+		<div class="flex-1 max-w-[200px] h-14">
 			<Sparkline
-				points={player.ratings}
-				width={220}
+				points={player.history}
+				width={200}
 				height={56}
-				stroke="#84CC16"
-				fillId="ranglisteHeroSpark"
+				stroke="var(--color-success)"
 				strokeWidth={2}
 				opacity={1}
 				fluid
@@ -71,114 +103,28 @@ const winStreak = $derived(
 		</div>
 	</div>
 
-	<div class="hero-bottom-row">
-		<span class="hero-stat"><strong>{player.wins}</strong>{$t("leaderboard.w_short")}</span>
-		<span class="hero-stat-divider">·</span>
-		<span class="hero-stat"><strong>{player.draws}</strong>{$t("leaderboard.d_short")}</span>
-		<span class="hero-stat-divider">·</span>
-		<span class="hero-stat"><strong>{player.losses}</strong>{$t("leaderboard.l_short")}</span>
-		<span class="hero-stat-divider">·</span>
-		<span class="hero-stat"><strong>{player.games}</strong> {$t("leaderboard.games_short")}</span>
+	<div class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border">
+		<span class="text-[11px] text-text-secondary tabular-nums">
+			<strong class="text-text-primary font-bold">{player.wins}</strong>{$t("leaderboard.w_short")}
+		</span>
+		<span class="text-border">·</span>
+		<span class="text-[11px] text-text-secondary tabular-nums">
+			<strong class="text-text-primary font-bold">{player.draws}</strong>{$t("leaderboard.d_short")}
+		</span>
+		<span class="text-border">·</span>
+		<span class="text-[11px] text-text-secondary tabular-nums">
+			<strong class="text-text-primary font-bold">{player.losses}</strong>{$t("leaderboard.l_short")}
+		</span>
+		<span class="text-border">·</span>
+		<span class="text-[11px] text-text-secondary tabular-nums">
+			<strong class="text-text-primary font-bold">{player.games}</strong> {$t("leaderboard.games_short")}
+		</span>
 		{#if winStreak}
-			<span class="hero-streak-badge">{"\u{1F525}"} {winStreak}{$t("leaderboard.streak_suffix")}</span>
+			<span
+				class="ml-auto inline-flex items-center gap-1 rounded-full border border-warning/30 bg-warning/10 px-2 py-1 text-[10px] font-bold text-warning"
+			>
+				{"\u{1F525}"} {winStreak}{$t("leaderboard.streak_suffix")}
+			</span>
 		{/if}
 	</div>
 </div>
-
-<style>
-.hero-card {
-	position: relative;
-	background: radial-gradient(circle at top right, rgba(132, 204, 22, 0.12), transparent 60%),
-		linear-gradient(135deg, #1A1F2A 0%, #232938 100%);
-	border: 1px solid rgba(132, 204, 22, 0.25);
-	border-radius: 18px;
-	padding: 14px;
-	overflow: hidden;
-}
-.hero-top-row {
-	display: flex; gap: 14px; align-items: center;
-	position: relative; z-index: 1;
-}
-.hero-avatar-wrap { position: relative; flex-shrink: 0; }
-.hero-avatar,
-.hero-avatar-img {
-	width: 70px; height: 70px; border-radius: 50%;
-	box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-	border: 3px solid rgba(251, 191, 36, 0.5);
-}
-.hero-avatar {
-	background: linear-gradient(135deg, #84CC16, #65A30D);
-	display: flex; align-items: center; justify-content: center;
-	font-size: 28px; font-weight: 800; color: white;
-}
-.hero-avatar-img { object-fit: cover; }
-.crown-badge {
-	position: absolute;
-	top: -10px; left: 50%;
-	transform: translateX(-50%);
-	font-size: 22px;
-	filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
-	z-index: 2;
-}
-.hero-info { flex: 1; min-width: 0; }
-.hero-rank-label {
-	font-size: 9px; color: #FBBF24;
-	text-transform: uppercase; letter-spacing: 0.1em;
-	font-weight: 800;
-	margin-bottom: 2px;
-}
-.hero-name {
-	font-size: 19px; font-weight: 800;
-	margin: 0;
-	letter-spacing: -0.01em;
-	color: #FFFFFF;
-	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.hero-elo-row {
-	display: flex; align-items: center;
-	justify-content: space-between;
-	gap: 14px;
-	margin-top: 14px;
-	position: relative; z-index: 1;
-}
-.hero-elo-left {
-	display: flex; flex-direction: column;
-	align-items: flex-start;
-	gap: 8px;
-}
-.hero-elo-value {
-	font-size: 42px; font-weight: 800;
-	color: #FFFFFF;
-	line-height: 1;
-	font-variant-numeric: tabular-nums;
-	letter-spacing: -0.02em;
-}
-/* Sparkline grows to fill the gap between the headline ELO and the
- * card edge — was previously clipped to 100 px, leaving a lot of
- * empty space. Bounds keep it readable across breakpoints. */
-.hero-sparkline { flex: 1 1 auto; min-width: 100px; max-width: 240px; height: 56px; }
-.hero-bottom-row {
-	margin-top: 10px;
-	padding-top: 10px;
-	border-top: 1px solid rgba(255,255,255,0.06);
-	display: flex; gap: 8px;
-	flex-wrap: wrap;
-	align-items: center;
-	position: relative; z-index: 1;
-}
-.hero-stat {
-	font-size: 11px; color: #9CA3AF;
-	font-variant-numeric: tabular-nums;
-}
-.hero-stat strong { color: #E5E7EB; font-weight: 700; }
-.hero-stat-divider { color: #4B5563; }
-.hero-streak-badge {
-	background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.1));
-	border: 1px solid rgba(245, 158, 11, 0.3);
-	color: #F59E0B;
-	font-size: 10px; font-weight: 700;
-	padding: 3px 8px;
-	border-radius: 999px;
-	margin-left: auto;
-}
-</style>
