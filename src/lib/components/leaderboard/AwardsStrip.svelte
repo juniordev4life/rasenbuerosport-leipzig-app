@@ -41,7 +41,7 @@ function initial(name) {
 				{#if award.players?.[0]}
 					<div class="flex items-center gap-2">
 						{#if award.players[0].avatar_url}
-							<img
+							<img referrerpolicy="no-referrer"
 								src={award.players[0].avatar_url}
 								alt=""
 								class="w-6 h-6 rounded-full object-cover shrink-0"

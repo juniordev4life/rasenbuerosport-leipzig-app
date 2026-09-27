@@ -43,7 +43,7 @@ const fallbackGradient = $derived(
 				class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[22px] drop-shadow z-10"
 			>{"\u{1F451}"}</span>
 			{#if player.avatar_url}
-				<img
+				<img referrerpolicy="no-referrer"
 					src={player.avatar_url}
 					alt={player.username}
 					class="w-[70px] h-[70px] rounded-full object-cover border-[3px] border-warning/50 shadow-lg"

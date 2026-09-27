@@ -91,7 +91,7 @@ function handleClick() {
 	<RankIndicator {rank} />
 
 	{#if player.avatar_url}
-		<img
+		<img referrerpolicy="no-referrer"
 			src={player.avatar_url}
 			alt={player.username}
 			class="w-[42px] h-[42px] rounded-full object-cover shrink-0"

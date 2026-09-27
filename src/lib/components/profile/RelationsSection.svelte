@@ -81,7 +81,7 @@ function metaLabel(r) {
 					<div class="relation-tag {r.type}">{tagLabel(r.type)}</div>
 					<div class="relation-avatar" style="background: {g.gradient};">
 						{#if r.avatarUrl}
-							<img src={r.avatarUrl} alt={r.name} />
+							<img referrerpolicy="no-referrer" src={r.avatarUrl} alt={r.name} />
 						{:else}
 							<span>{initial(r.name)}</span>
 						{/if}

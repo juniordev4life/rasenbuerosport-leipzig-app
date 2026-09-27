@@ -98,7 +98,7 @@ const canProceed = $derived(
 				{#each homePlayers as playerId (playerId)}
 					<div class="flex flex-col items-center gap-1">
 						{#if getPlayerAvatar(playerId)}
-							<img
+							<img referrerpolicy="no-referrer"
 								src={getPlayerAvatar(playerId)}
 								alt={getPlayerName(playerId)}
 								class="w-10 h-10 rounded-full object-cover ring-2 ring-accent-red"
@@ -130,7 +130,7 @@ const canProceed = $derived(
 				{#each awayPlayers as playerId (playerId)}
 					<div class="flex flex-col items-center gap-1">
 						{#if getPlayerAvatar(playerId)}
-							<img
+							<img referrerpolicy="no-referrer"
 								src={getPlayerAvatar(playerId)}
 								alt={getPlayerName(playerId)}
 								class="w-10 h-10 rounded-full object-cover ring-2 ring-blue-500"

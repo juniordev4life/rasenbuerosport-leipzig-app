@@ -128,7 +128,7 @@ function isMe(playerId) {
 				<div class="player-row">
 					<div class="avatar" style="background: {g.gradient};">
 						{#if p.profiles?.avatar_url}
-							<img src={p.profiles.avatar_url} alt={p.profiles?.username ?? "?"} />
+							<img referrerpolicy="no-referrer" src={p.profiles.avatar_url} alt={p.profiles?.username ?? "?"} />
 						{:else}
 							<span>{initial(p.profiles?.username)}</span>
 						{/if}
@@ -173,7 +173,7 @@ function isMe(playerId) {
 				<div class="player-row">
 					<div class="avatar" style="background: {g.gradient};">
 						{#if p.profiles?.avatar_url}
-							<img src={p.profiles.avatar_url} alt={p.profiles?.username ?? "?"} />
+							<img referrerpolicy="no-referrer" src={p.profiles.avatar_url} alt={p.profiles?.username ?? "?"} />
 						{:else}
 							<span>{initial(p.profiles?.username)}</span>
 						{/if}

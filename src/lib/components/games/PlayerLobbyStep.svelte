@@ -144,7 +144,7 @@ function trackHorizontalOverflow(node, onChange) {
 			style={avatarUrl ? "" : `background: ${gradient};`}
 		>
 			{#if avatarUrl}
-				<img src={avatarUrl} alt={name} class="w-full h-full rounded-full object-cover" />
+				<img referrerpolicy="no-referrer" src={avatarUrl} alt={name} class="w-full h-full rounded-full object-cover" />
 			{:else}
 				{name.charAt(0).toUpperCase()}
 			{/if}

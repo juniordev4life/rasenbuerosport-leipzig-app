@@ -37,7 +37,7 @@ const fallbackGradient = $derived(
 
 <div class="flex flex-col items-center text-center gap-5">
 	{#if recap.player?.avatar_url}
-		<img
+		<img referrerpolicy="no-referrer"
 			src={recap.player.avatar_url}
 			alt=""
 			class="w-24 h-24 rounded-full object-cover border-4 border-white/10"

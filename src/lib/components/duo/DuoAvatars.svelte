@@ -25,14 +25,14 @@ function initial(name) {
 <div class="duo-avatars-wrap" style="--avatar-size: {size}px;">
 	<div class="duo-avatar" style="background: {g1.gradient}; border-color: #131822;">
 		{#if player1.avatar_url}
-			<img src={player1.avatar_url} alt={player1.username} />
+			<img referrerpolicy="no-referrer" src={player1.avatar_url} alt={player1.username} />
 		{:else}
 			<span>{initial(player1.username)}</span>
 		{/if}
 	</div>
 	<div class="duo-avatar second" style="background: {g2.gradient}; border-color: #131822;">
 		{#if player2.avatar_url}
-			<img src={player2.avatar_url} alt={player2.username} />
+			<img referrerpolicy="no-referrer" src={player2.avatar_url} alt={player2.username} />
 		{:else}
 			<span>{initial(player2.username)}</span>
 		{/if}

@@ -296,7 +296,7 @@ function confirmAbortNo() {
 								style:--cell-gradient={gradientFor(player.id)}
 							>
 								{#if player.avatar_url}
-									<img src={player.avatar_url} alt="" />
+									<img referrerpolicy="no-referrer" src={player.avatar_url} alt="" />
 								{:else}
 									{player.username?.charAt(0).toUpperCase() ?? "?"}
 								{/if}
@@ -353,7 +353,7 @@ function confirmAbortNo() {
 								style:--cell-gradient={gradientFor(keeper.id)}
 							>
 								{#if keeper.avatar_url}
-									<img src={keeper.avatar_url} alt="" />
+									<img referrerpolicy="no-referrer" src={keeper.avatar_url} alt="" />
 								{:else}
 									{keeper.username?.charAt(0).toUpperCase() ?? "?"}
 								{/if}

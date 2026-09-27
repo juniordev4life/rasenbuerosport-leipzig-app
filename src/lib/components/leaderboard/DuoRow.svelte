@@ -46,7 +46,7 @@ function initial(name) {
 					: avatarGradient(p.player_id ?? p.username).gradient}
 			>
 				{#if p.avatar_url}
-					<img src={p.avatar_url} alt={p.username} class="w-full h-full object-cover" />
+					<img referrerpolicy="no-referrer" src={p.avatar_url} alt={p.username} class="w-full h-full object-cover" />
 				{:else}
 					<span class="w-full h-full flex items-center justify-center text-[13px] font-bold text-white">
 						{initial(p.username)}

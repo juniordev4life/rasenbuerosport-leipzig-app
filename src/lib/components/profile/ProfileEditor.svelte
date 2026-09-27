@@ -135,7 +135,7 @@ const initial = $derived(username?.charAt(0)?.toUpperCase() || "?");
 	<div class="flex flex-col items-center gap-2">
 		<label for="avatar-upload" class="cursor-pointer group relative">
 			{#if avatarPreview}
-				<img
+				<img referrerpolicy="no-referrer"
 					src={avatarPreview}
 					alt="Avatar"
 					class="w-20 h-20 rounded-full object-cover ring-2 ring-border group-hover:ring-accent-red transition-colors"

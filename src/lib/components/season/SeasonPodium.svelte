@@ -37,7 +37,7 @@ const medals = ["\u{1F947}", "\u{1F948}", "\u{1F949}"];
 
 				<!-- Avatar -->
 				{#if player.avatar_url}
-					<img
+					<img referrerpolicy="no-referrer"
 						src={player.avatar_url}
 						alt={player.username}
 						class="w-8 h-8 rounded-full object-cover ring-1 ring-border"

@@ -63,7 +63,7 @@ function initial(name) {
 		{#if row.data}
 			<div class="w-full flex items-center gap-3 rounded-xl bg-white/5 p-3 text-left">
 				{#if row.data.avatar_url}
-					<img src={row.data.avatar_url} alt="" class="w-10 h-10 rounded-full object-cover shrink-0" />
+					<img referrerpolicy="no-referrer" src={row.data.avatar_url} alt="" class="w-10 h-10 rounded-full object-cover shrink-0" />
 				{:else}
 					<div
 						class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
