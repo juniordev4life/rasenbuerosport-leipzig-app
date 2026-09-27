@@ -313,6 +313,7 @@
 		"d_short": "U",
 		"l_short": "N",
 		"games_short": "Spiele",
+		"goals_short": "Tore",
 		"tab_total": "Gesamt",
 		"tab_per_game": "Pro Spiel",
 		"ppg_label": "Pkt/Spiel",
@@ -325,19 +326,39 @@
 		"mode_skill_sub": "ELO · live",
 		"mode_league": "Liga",
 		"mode_league_sub": "Saison-Tabelle",
-		"coming_soon": "Bald",
-		"team_size": "Spielmodus",
+		"season_switch": "Saisonauswahl",
+		"season_running": "läuft",
+		"season_final": "Endstand",
+		"tab_players": "Spieler",
+		"view_switch": "Ansicht",
 		"sort": "Sortierung",
 		"sort_current": "Aktuell",
 		"sort_form": "Form",
 		"hero_label": "Spitzenreiter",
+		"hero_label_closed": "{version}-Meister",
+		"since_season_start": "seit Saisonstart",
 		"this_week": "diese Woche",
 		"streak_suffix": "er-Streak",
 		"rookie": "Rookie",
-		"solo_section": "Einzelspieler",
-		"duo_section": "Stärkste Duos",
-		"win_rate_short": "Win-Rate",
-		"points_short": "Pkt"
+		"duo_total_games_short": "gesamt",
+		"not_qualified_divider": "unter {minGames} Spielen · nicht gewertet",
+		"table": {
+			"rank": "Pl.",
+			"player": "Spieler",
+			"games": "Sp.",
+			"wdl": "S-U-N",
+			"goals": "Tore",
+			"diff": "Diff",
+			"points": "Pkt"
+		},
+		"shootout_short": "n.E.",
+		"league_legend": "Sieg 3 · Remis 1 · Elfmeterschießen 2:1",
+		"league_empty": "Die Saison {version} hat gerade begonnen – noch keine Spiele.",
+		"no_duos": "Noch keine Duos mit genug gemeinsamen Spielen.",
+		"awards_title": "Saison-Awards",
+		"recap_cta": "Dein {version}-Rückblick",
+		"retry": "Erneut versuchen",
+		"error_generic": "Etwas ist schiefgelaufen."
 	},
 	"h2h": {
 		"title": "Direkter Vergleich",
@@ -1353,7 +1374,7 @@
 	"info_tips": {
 		"elo": {
 			"title": "ELO",
-			"body": "ELO ist deine Spielerstärke als Zahl. Startwert ist 1000.\n\nSie steigt nach Siegen — besonders gegen Stärkere — und fällt nach Niederlagen, besonders gegen Schwächere. Ein Sieg gegen eine deutlich stärkere Mannschaft bringt mehr Punkte als gegen einen Schwächeren.\n\nDie Berechnung läuft pro Spielmodus getrennt (1v1, 2v2). So polierst du nicht durch leichte 1v1-Siege deinen 2v2-Wert auf — und umgekehrt."
+			"body": "ELO ist deine Spielstärke als Zahl — eine einzige Bewertung für alle Modi (1v1, 2v2, 1v2). Startwert ist 1500.\n\nJede Partie ist ein Nullsummenspiel: Was die eine Seite gewinnt, verliert die andere. Wer gewinnt, bekommt immer mindestens +1 Punkt, die Tordifferenz zählt moderat mit obendrauf.\n\nDazu gibt es Bonus bzw. Malus für Vorlagen, gehaltene Elfmeter und rote Karten — Gelbe Karten kosten seit Kurzem nichts mehr. 2v2- und 1v2-Spiele zählen mit Faktor 0,75, mehrfach exakt dieselbe Aufstellung in einer Woche zählt weniger, und das Handicap für 1v2-Spiele wird automatisch gelernt."
 		},
 		"archetype": {
 			"title": "Archetyp",
@@ -1518,5 +1539,19 @@
 			"load_failed": "Trophäen konnten nicht geladen werden."
 		},
 		"profile_link": "Trophäenraum"
+	},
+	"season_awards": {
+		"champion": { "label": "Meister" },
+		"top_scorer": { "label": "Torschützenkönig" },
+		"top_assister": { "label": "Vorlagenkönig" },
+		"dream_duo": { "label": "Dream-Duo" },
+		"penalty_king": { "label": "Elfmeterkönig" },
+		"fair_play": { "label": "Fairplay-Preis" },
+		"wall": { "label": "Die Mauer" },
+		"marathon": { "label": "Dauerbrenner" },
+		"form_of_the_year": { "label": "Form der Saison" },
+		"lunch_king": { "label": "Mittagspausen-König" },
+		"comeback_king": { "label": "Comeback-König" },
+		"unlucky": { "label": "Pechvogel" }
 	}
 }

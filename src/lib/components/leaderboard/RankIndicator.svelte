@@ -12,27 +12,10 @@ const MEDALS = ["\u{1F947}", "\u{1F948}", "\u{1F949}"];
 const medal = $derived(rank >= 1 && rank <= 3 ? MEDALS[rank - 1] : null);
 </script>
 
-<div class="rank-indicator">
+<div class="w-7 flex items-center justify-center shrink-0">
 	{#if medal}
-		<span class="rank-medal" aria-hidden="true">{medal}</span>
+		<span class="text-[22px] leading-none" aria-hidden="true">{medal}</span>
 	{:else}
-		<span class="rank-num">{rank}</span>
+		<span class="text-[15px] font-bold text-text-muted tabular-nums">{rank}</span>
 	{/if}
 </div>
-
-<style>
-.rank-indicator {
-	width: 28px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-shrink: 0;
-}
-.rank-medal { font-size: 22px; line-height: 1; }
-.rank-num {
-	font-size: 15px;
-	font-weight: 700;
-	color: #6B7280;
-	font-variant-numeric: tabular-nums;
-}
-</style>

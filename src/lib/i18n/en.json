@@ -311,6 +311,7 @@
 		"d_short": "D",
 		"l_short": "L",
 		"games_short": "games",
+		"goals_short": "goals",
 		"tab_total": "Total",
 		"tab_per_game": "Per Game",
 		"ppg_label": "Pts/Game",
@@ -323,19 +324,39 @@
 		"mode_skill_sub": "ELO · live",
 		"mode_league": "League",
 		"mode_league_sub": "Season table",
-		"coming_soon": "Soon",
-		"team_size": "Team size",
+		"season_switch": "Season selector",
+		"season_running": "running",
+		"season_final": "Final standing",
+		"tab_players": "Players",
+		"view_switch": "View",
 		"sort": "Sort by",
 		"sort_current": "Current",
 		"sort_form": "Form",
 		"hero_label": "Top of the table",
+		"hero_label_closed": "{version} champion",
+		"since_season_start": "since season start",
 		"this_week": "this week",
 		"streak_suffix": " streak",
 		"rookie": "Rookie",
-		"solo_section": "Solo players",
-		"duo_section": "Top duos",
-		"win_rate_short": "win rate",
-		"points_short": "pts"
+		"duo_total_games_short": "total",
+		"not_qualified_divider": "under {minGames} games · not ranked",
+		"table": {
+			"rank": "Pos",
+			"player": "Player",
+			"games": "GP",
+			"wdl": "W-D-L",
+			"goals": "Goals",
+			"diff": "Diff",
+			"points": "Pts"
+		},
+		"shootout_short": "pens",
+		"league_legend": "Win 3 · Draw 1 · Shootout 2:1",
+		"league_empty": "The {version} season has just started – no games yet.",
+		"no_duos": "No duos with enough matches together yet.",
+		"awards_title": "Season awards",
+		"recap_cta": "Your {version} recap",
+		"retry": "Try again",
+		"error_generic": "Something went wrong."
 	},
 	"h2h": {
 		"title": "Head to Head",
@@ -1351,7 +1372,7 @@
 	"info_tips": {
 		"elo": {
 			"title": "ELO",
-			"body": "ELO is your player strength expressed as a number. Starting value is 1000.\n\nIt rises after wins — especially against stronger opponents — and falls after losses, particularly against weaker ones. Beating a much stronger team earns more points than beating a weaker one.\n\nThe calculation is done separately per game mode (1v1, 2v2), so easy 1v1 wins don't inflate your 2v2 rating and vice versa."
+			"body": "ELO is your skill rating as a single number — one rating for every mode (1v1, 2v2, 1v2). Starting value is 1500.\n\nEach match is zero-sum: what one side wins, the other loses. The winner always gains at least +1 point, and goal difference counts moderately on top.\n\nThere's also a bonus or malus for assists, saved penalties and red cards — yellow cards no longer cost points. 2v2 and 1v2 matches count at a 0.75 weight, repeating the exact same line-up several times in one week counts for less, and the 1v2 handicap is learned automatically."
 		},
 		"archetype": {
 			"title": "Archetype",
@@ -1516,5 +1537,19 @@
 			"load_failed": "Failed to load trophies."
 		},
 		"profile_link": "Trophy Room"
+	},
+	"season_awards": {
+		"champion": { "label": "Champion" },
+		"top_scorer": { "label": "Top Scorer" },
+		"top_assister": { "label": "Top Assister" },
+		"dream_duo": { "label": "Dream Duo" },
+		"penalty_king": { "label": "Penalty King" },
+		"fair_play": { "label": "Fair Play Award" },
+		"wall": { "label": "The Wall" },
+		"marathon": { "label": "Iron Man" },
+		"form_of_the_year": { "label": "Form of the Season" },
+		"lunch_king": { "label": "Lunch Break King" },
+		"comeback_king": { "label": "Comeback King" },
+		"unlucky": { "label": "Unlucky One of the Season" }
 	}
 }
