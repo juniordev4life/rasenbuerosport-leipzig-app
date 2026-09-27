@@ -55,7 +55,7 @@ Kick-off also starts the **office recording**. The app waits until the recording
 
 There is no score counter — the score is built from the events you log:
 
-- **Goal** — tap the scorer, set the minute (stoppage time at 45, 90 and 120) and save
+- **Goal** — tap the scorer, type the minute and save. At 45, 90 and 120 the field next to it takes the stoppage time (e.g. 45 + 3). Events go in order: several can share a minute, but the editor won't save a time before the last event and names the earliest one allowed
 - **Assist** — while a goal is open, tap a teammate
 - **Goal type** — open play by default; switch to corner, free kick or penalty in the editor
 - **Own goal** — long-press the player
