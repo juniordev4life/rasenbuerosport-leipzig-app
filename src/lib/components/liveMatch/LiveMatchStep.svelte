@@ -150,13 +150,13 @@ function handleStartPenaltyShootout() {
 /**
  * Demo bridge for the onboarding tour. Each action drives the same
  * state machine real taps would, so the user sees the editor open,
- * the minute slider scroll, the stoppage slider light up and the
+ * the minute field fill in, the stoppage field unlock and the
  * event pill appear — without touching the DOM. The tour calls these
  * via `window.__rblLiveDemo` (set up below) so we don't have to
  * plumb props or stores just for a first-run walkthrough.
  *
  * The demo intentionally lands on minute 45 + 3 of stoppage time so
- * the tour can showcase the stoppage slider — that slider is only
+ * the tour can showcase the stoppage field — that field is only
  * usable at the 45 / 90 / 120 boundaries. The goal-type pill is
  * highlighted by the tour but left on the default ("Spiel"); a
  * penalty + assist combo wouldn't make sense as a demo example.
@@ -182,7 +182,7 @@ function runDemoAction(action) {
 			break;
 		}
 		case "set-minute":
-			// 45 lets the next step (stoppage) showcase the slider — only
+			// 45 lets the next step (stoppage) showcase that field — only
 			// 45 / 90 / 120 unlock the stoppage row.
 			state = setMinute(state, 45);
 			break;

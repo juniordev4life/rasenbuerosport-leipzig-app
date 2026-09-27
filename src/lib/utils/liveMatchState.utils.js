@@ -39,6 +39,12 @@ import {
 /** Minutes at which the stoppage picker becomes enabled. */
 export const STOPPAGE_TRIGGER_MINUTES = [45, 90, 120];
 
+/** Last regular minute including extra time. */
+export const MAX_MINUTE = 120;
+
+/** Longest stoppage time the editor accepts. */
+export const MAX_STOPPAGE = 10;
+
 /**
  * Build a fresh state with the score and event-log reset. Used both on
  * page mount and after every successful save.
@@ -64,48 +70,71 @@ export function initialLiveMatchState() {
 }
 
 /**
- * Lowest selectable BASE minute for the next event. If the previous
- * event happened during stoppage time the floor stays on the same
- * base minute (so the user can still record another goal at e.g.
- * 90+5 after a 90+3); the stoppage-side floor is computed separately
- * via `getMinAllowedStoppage`.
+ * Lowest allowed BASE minute for the next event: the minute of the last
+ * one. Events may share a minute, they only may not go back in time;
+ * within that minute the stoppage floor comes from
+ * `getMinAllowedStoppage`.
  *
  * @param {Array<object>} events
  * @returns {number}
  * @example
  *   getMinAllowedMinute([])                              // → 1
- *   getMinAllowedMinute([{ minute: 23, stoppage: 0 }])   // → 24
- *   getMinAllowedMinute([{ minute: 45, stoppage: 3 }])   // → 45 (more stoppage possible)
+ *   getMinAllowedMinute([{ minute: 23, stoppage: 0 }])   // → 23
+ *   getMinAllowedMinute([{ minute: 45, stoppage: 3 }])   // → 45
  */
 export function getMinAllowedMinute(events) {
 	if (!events || events.length === 0) return 1;
-	const last = events[events.length - 1];
-	const lastMinute = last.minute ?? 0;
-	const lastStoppage = last.stoppage ?? 0;
-	if (lastStoppage > 0) return lastMinute;
-	return Math.min(120, lastMinute + 1);
+	return Math.max(1, events[events.length - 1].minute ?? 1);
 }
 
 /**
- * Lowest selectable stoppage value when the picker's primary is at
- * `currentMinute`. Returns `1` unless the previous event happened in
- * stoppage of that same base minute — then the next event must use a
- * higher stoppage to preserve event ordering.
+ * Lowest allowed stoppage at `currentMinute`: the last event's stoppage
+ * when it happened in that same minute, otherwise `0` (none needed).
  *
  * @param {Array<object>} events
  * @param {number} currentMinute
  * @returns {number}
  * @example
- *   getMinAllowedStoppage([{ minute: 45, stoppage: 3 }], 45) // → 4
- *   getMinAllowedStoppage([{ minute: 45, stoppage: 3 }], 90) // → 1
+ *   getMinAllowedStoppage([{ minute: 45, stoppage: 3 }], 45) // → 3
+ *   getMinAllowedStoppage([{ minute: 45, stoppage: 3 }], 90) // → 0
  */
 export function getMinAllowedStoppage(events, currentMinute) {
-	if (!events || events.length === 0) return 1;
+	if (!events || events.length === 0) return 0;
 	const last = events[events.length - 1];
-	if ((last.minute ?? 0) === currentMinute && (last.stoppage ?? 0) > 0) {
-		return Math.min(10, last.stoppage + 1);
+	return (last.minute ?? 0) === currentMinute ? (last.stoppage ?? 0) : 0;
+}
+
+/**
+ * Check a typed event time. Events are logged in order, so the new one
+ * may share the last one's time but not come before it.
+ *
+ * @param {Array<object>} events - events logged so far
+ * @param {number} minute - typed base minute (`NaN` when the field is empty)
+ * @param {number|null} stoppage - typed stoppage, `null` for none
+ * @returns {null | { reason: "range" } | { reason: "stoppage_range" } | { reason: "floor", earliest: string }}
+ *   `null` when the time is valid; `earliest` is the first allowed time, e.g. `"45+3"`
+ * @example
+ *   getEventTimeError([], 130, null) // → { reason: "range" }
+ *   getEventTimeError([{ minute: 45, stoppage: 3 }], 45, 2) // → { reason: "floor", earliest: "45+3" }
+ *   getEventTimeError([{ minute: 45, stoppage: 3 }], 45, 3) // → null
+ */
+export function getEventTimeError(events, minute, stoppage) {
+	if (!Number.isInteger(minute) || minute < 1 || minute > MAX_MINUTE) {
+		return { reason: "range" };
 	}
-	return 1;
+	if (stoppage !== null && stoppage > MAX_STOPPAGE) {
+		return { reason: "stoppage_range" };
+	}
+
+	const minMinute = getMinAllowedMinute(events);
+	const minStoppage = getMinAllowedStoppage(events, minMinute);
+	const tooEarly =
+		minute < minMinute ||
+		(minute === minMinute && (stoppage ?? 0) < minStoppage);
+	if (!tooEarly) return null;
+	const earliest =
+		minStoppage > 0 ? `${minMinute}+${minStoppage}` : `${minMinute}`;
+	return { reason: "floor", earliest };
 }
 
 /**
@@ -116,11 +145,10 @@ export function getMinAllowedStoppage(events, currentMinute) {
  */
 function clearEntry(state) {
 	const minute = getMinAllowedMinute(state.events);
-	// If the events log ended in stoppage of the same base minute, the
-	// next entry pre-selects the bumped stoppage value so the picker
-	// opens at a legal floor instead of forcing the user to scroll.
+	// If the events log ended in stoppage, the next entry starts on that
+	// same time (e.g. 45+3), the earliest one allowed.
 	const stoppageFloor = getMinAllowedStoppage(state.events, minute);
-	const stoppageMinutes = stoppageFloor > 1 ? stoppageFloor : null;
+	const stoppageMinutes = stoppageFloor > 0 ? stoppageFloor : null;
 	return {
 		...state,
 		mode: MODE.IDLE,

@@ -139,14 +139,14 @@ const TOUR_DEFINITIONS = {
 		nsKey: "live",
 		// `demoAction` is dispatched through `window.__rblLiveDemo` (set up
 		// by LiveMatchStep) right after the matching step is shown — so
-		// the editor opens, the goal-type pill flips, the minute slider
-		// scrolls, the stoppage slider unlocks, the event pill pops up,
+		// the editor opens, the goal-type pill flips, the minute field
+		// fills in, the stoppage field unlocks, the event pill pops up,
 		// all while the tooltip is read. The terminal `reset` in
 		// oncomplete/onexit wipes the demo events so nothing leaks into
 		// the real saveGame payload.
 		//
 		// The demo lands on minute 45+3 so we can demonstrate the
-		// stoppage-time slider — it only unlocks at the half-time / full-
+		// stoppage-time field — it only unlocks at the half-time / full-
 		// time / extra-time boundaries.
 		steps: [
 			// Step 1 — orient the user to the line-up + screen layout
@@ -182,7 +182,7 @@ const TOUR_DEFINITIONS = {
 				position: "bottom",
 				demoAction: "select-assister",
 			},
-			// Step 5 — minute slider lands on 45 (half-time boundary).
+			// Step 5 — minute field is set to 45 (half-time boundary).
 			{
 				selector: '[data-onboarding="live-pitch"]',
 				tip: 5,
