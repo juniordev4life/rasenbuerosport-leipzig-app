@@ -7,37 +7,22 @@ import { onMount, untrack } from "svelte";
  * there is zero JS drag logic. The active value is derived from the
  * scroll offset via the picker's own index math.
  *
- * Variants:
- * - `primary`: large active digit (30px) — used for minutes 1..120
- * - `secondary`: smaller active digit (18px) — used for stoppage and
- *   the star-range pickers (`step = 0.5`, range 0.5..5)
- *
- * Items below `min` render in a dim "locked" state and the picker
- * snaps back to `min` if the user inertia-scrolls into the locked
- * range. When `disabled` is set the scroller blocks pointer events
- * and dims to ~30 % opacity.
+ * Renders every value from `min` to `max` in increments of `step`, e.g.
+ * the star-range pickers in `RandomTeamPicker` (`step = 0.5`, range
+ * 0.5..5). Arrow Left / Right move the value by one step.
  *
  * @type {{
  *   value: number,
- *   min?: number,
- *   max?: number,
+ *   min: number,
+ *   max: number,
  *   step?: number,
- *   variant?: "primary"|"secondary",
- *   disabled?: boolean,
  *   onChange?: (value: number) => void,
  * }}
  */
-let {
-	value = $bindable(1),
-	min = 1,
-	max = 120,
-	step = 1,
-	variant = "primary",
-	disabled = false,
-	onChange,
-} = $props();
+let { value = $bindable(), min, max, step = 1, onChange } = $props();
 
-const itemWidth = $derived(variant === "primary" ? 52 : 28);
+/** Width of one item slot in px — keep in sync with `.picker-number`. */
+const ITEM_WIDTH = 28;
 /** Tolerance for float-safe equality. */
 const EPS = 1e-6;
 
@@ -68,18 +53,9 @@ function fmt(n) {
 }
 
 function classFor(n) {
-	const classes = [];
-	if (n < min - EPS) classes.push("locked");
-	else if (Math.abs(n - value) < EPS) classes.push("active");
-	else if (Math.abs(Math.abs(n - value) - step) < EPS) classes.push("near");
-
-	// Mark the extra-time band (minutes 91..120) with a gold accent so
-	// the user sees at a glance that scrolling past 90 means they're
-	// recording a goal during Verlängerung. Only applies to the primary
-	// minute scroller; the stoppage picker has max=10 and never trips
-	// this branch.
-	if (n > 90 + EPS) classes.push("extra-time");
-	return classes.join(" ");
+	if (Math.abs(n - value) < EPS) return "active";
+	if (Math.abs(Math.abs(n - value) - step) < EPS) return "near";
+	return "";
 }
 
 /** Look up the array index of `target`; defaults to 0 when unknown. */
@@ -92,13 +68,13 @@ function indexOf(target) {
 
 /**
  * Center a value in the strip. With `padding: 0 50%` the first item
- * already sits in the viewport centre at `scrollLeft = itemWidth / 2`,
- * each subsequent item shifts that anchor by `itemWidth`.
+ * already sits in the viewport centre at `scrollLeft = ITEM_WIDTH / 2`,
+ * each subsequent item shifts that anchor by `ITEM_WIDTH`.
  */
 function scrollToValue(target, smooth = true) {
 	if (!scrollerEl) return;
 	const index = indexOf(target);
-	const left = index * itemWidth + itemWidth / 2;
+	const left = index * ITEM_WIDTH + ITEM_WIDTH / 2;
 	suppressEvents = true;
 	scrollerEl.scrollTo({ left, behavior: smooth ? "smooth" : "instant" });
 	setTimeout(
@@ -112,12 +88,14 @@ function scrollToValue(target, smooth = true) {
 /**
  * Compute the active number from the current scroll offset. The
  * scroller is padded with 50 % on either side so `scrollLeft = 0`
- * sits the first item in the centre; every additional `itemWidth`
+ * sits the first item in the centre; every additional `ITEM_WIDTH`
  * advances the centred index by one. We round to the nearest index.
  */
 function activeValueFromScroll() {
 	if (!scrollerEl) return value;
-	const index = Math.round((scrollerEl.scrollLeft - itemWidth / 2) / itemWidth);
+	const index = Math.round(
+		(scrollerEl.scrollLeft - ITEM_WIDTH / 2) / ITEM_WIDTH,
+	);
 	const clamped = Math.max(0, Math.min(numbers.length - 1, index));
 	return numbers[clamped];
 }
@@ -128,10 +106,6 @@ function handleScroll() {
 	if (rafId) cancelAnimationFrame(rafId);
 	rafId = requestAnimationFrame(() => {
 		const next = activeValueFromScroll();
-		if (next < min - EPS) {
-			scrollToValue(min);
-			return;
-		}
 		if (Math.abs(next - value) > EPS) {
 			value = next;
 			onChange?.(next);
@@ -152,9 +126,8 @@ onMount(() => {
 // scroll position is *already* at the new value's slot — re-calling
 // `scrollTo` with smooth behaviour would launch a competing animation
 // back to that same spot and fight the user's finger. We skip that
-// case and only re-centre for genuine external changes (e.g. floor
-// rises after a new event lifts `min` above the current pick, or the
-// parent overwrites `value` directly).
+// case and only re-centre for genuine external changes (the parent
+// overwrites `value`, e.g. to keep a min/max pair in order).
 $effect(() => {
 	const v = value;
 	untrack(() => {
@@ -174,21 +147,7 @@ $effect(() => {
 	});
 });
 
-// If `min` rises above the current value (e.g. new event lifted the
-// floor), nudge the picker up to the new floor so the user can't see
-// an invalid selection sitting in the centre.
-$effect(() => {
-	const floor = min;
-	untrack(() => {
-		if (value < floor - EPS) {
-			value = floor;
-			onChange?.(floor);
-		}
-	});
-});
-
 function handleKeydown(event) {
-	if (disabled) return;
 	if (event.key === "ArrowLeft" && value > min + EPS) {
 		event.preventDefault();
 		value = Math.max(min, value - step);
@@ -202,14 +161,12 @@ function handleKeydown(event) {
 </script>
 
 <div
-	class="minute-picker {variant}"
-	class:disabled
+	class="step-scroller"
 	role="slider"
 	tabindex="0"
 	aria-valuemin={min}
 	aria-valuemax={max}
 	aria-valuenow={value}
-	aria-disabled={disabled}
 	onkeydown={handleKeydown}
 >
 	<div class="picker-fade left" aria-hidden="true"></div>
@@ -225,21 +182,13 @@ function handleKeydown(event) {
 </div>
 
 <style>
-.minute-picker {
+.step-scroller {
 	position: relative;
 	background: rgba(0, 0, 0, 0.4);
 	border: 1px solid rgba(255, 255, 255, 0.08);
-	border-radius: 12px;
-	overflow: hidden;
-	height: 56px;
-}
-.minute-picker.secondary {
-	height: 36px;
 	border-radius: 8px;
-}
-.minute-picker.disabled {
-	opacity: 0.3;
-	pointer-events: none;
+	overflow: hidden;
+	height: 36px;
 }
 
 .picker-selection-line {
@@ -292,59 +241,27 @@ function handleKeydown(event) {
 
 .picker-number {
 	flex-shrink: 0;
-	width: 52px;
+	width: 28px;
 	height: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 16px;
+	font-size: 11px;
 	font-weight: 600;
 	color: #6B7280;
 	scroll-snap-align: center;
 	transition: font-size 0.2s, color 0.2s;
 	font-variant-numeric: tabular-nums;
-	letter-spacing: -0.02em;
-}
-.minute-picker.secondary .picker-number {
-	width: 28px;
-	font-size: 11px;
 	letter-spacing: 0;
 }
 .picker-number.active {
 	color: #ffffff;
-	font-size: 30px;
-	font-weight: 800;
-	letter-spacing: -0.04em;
-}
-.minute-picker.secondary .picker-number.active {
 	font-size: 18px;
-	letter-spacing: 0;
+	font-weight: 800;
 }
 .picker-number.near {
 	color: #9CA3AF;
-	font-size: 20px;
-	font-weight: 700;
-}
-.minute-picker.secondary .picker-number.near {
 	font-size: 13px;
-}
-.picker-number.locked {
-	color: #3A3D45;
-	opacity: 0.5;
-}
-
-/* Extra-time band (minutes 91..120). The accent stays subtle when the
-   number isn't selected so a scroll past 90 reads as "you're now in
-   Verlängerung" without screaming. When the user lands on an
-   extra-time number, the active style still wins on weight + size,
-   but the gold tint persists so it's unambiguous in the editor. */
-.picker-number.extra-time {
-	color: #D4A437;
-}
-.picker-number.extra-time.near {
-	color: #FBBF24;
-}
-.picker-number.extra-time.active {
-	color: #FCD34D;
+	font-weight: 700;
 }
 </style>
