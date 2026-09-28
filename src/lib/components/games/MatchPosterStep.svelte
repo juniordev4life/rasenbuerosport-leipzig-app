@@ -12,10 +12,10 @@ import TeamAutocomplete from "./TeamAutocomplete.svelte";
  * Step 2 of the new-game wizard — match poster with the two teams
  * picked for the upcoming match. On mount it auto-rolls a balanced
  * pair (4–5★ default); the three action buttons re-roll, open the
- * star-range dialog or fall back to the manual TeamSelectionStep
- * (autocomplete fields). The big red CTA forwards to onAnpfiff,
- * which transitions the wizard into the live-match step without
- * bumping the visible stepper.
+ * star-range dialog or open the manual dialog, where both teams are
+ * typed into autocomplete fields and applied only on confirm. The
+ * big red CTA forwards to onAnpfiff, which transitions the wizard
+ * into the live-match step without bumping the visible stepper.
  *
  * @type {{
  *   homePlayers: string[],
