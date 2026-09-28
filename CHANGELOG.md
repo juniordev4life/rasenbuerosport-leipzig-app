@@ -6,6 +6,34 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v2.1.0
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v2.0.0...v2.1.0)
+
+### 🚀 Enhancements
+
+- **lobby:** Order players by games played, guest tile last ([#96](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/96))
+- **live-match:** Type the minute instead of scrolling it ([#97](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/97))
+
+### 🩹 Fixes
+
+- **live-match:** Keep onboarding demo editor open in 1v1 games ([#98](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/98))
+- **games:** Give the star-range sliders an accessible name ([#100](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/100))
+- **games:** Name the manual team fields by their labels ([#101](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/101))
+
+### 💅 Refactors
+
+- **games:** Reduce MinuteScroller to StepScroller for star pickers ([#99](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/99))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v2.0.0 ([4288497](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/4288497))
+- **games:** Remove unused TeamSelectionStep ([#102](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/102))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v2.0.0 (2026-09-27)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v1.7.5...v2.0.0)
