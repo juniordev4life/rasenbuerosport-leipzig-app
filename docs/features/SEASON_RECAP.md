@@ -8,7 +8,7 @@ When an EA FC edition ends, every player who took part gets a personal, story-st
 
 ## How it starts
 
-- **Automatically, once**: the first time you open the app after your recap is ready, the app checks in the background and — if you haven't seen it yet on this device — opens it for you. It never interrupts an active flow (e.g. mid-way through recording a match) and only checks once per app session
+- **Automatically, once**: the first time you open the app after your recap is ready, the app checks in the background and — if you haven't seen it yet on this device — opens it for you. Once it has been on screen it counts as seen, however you leave it (✕, back gesture, closing the app), so it never opens by itself again. It never interrupts an active flow (e.g. mid-way through recording a match) and only checks once per app session
 - **From the dashboard**: a "Dein *Edition*-Rückblick ist da" card appears for the first two weeks after your recap is generated
 - **From the leaderboard**: once a season is closed, its view shows a "Dein *Edition*-Rückblick" button
 - **From a push notification**: "Dein Rückblick auf FC26 ist fertig" opens it directly
