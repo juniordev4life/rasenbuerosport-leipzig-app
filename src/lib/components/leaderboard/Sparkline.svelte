@@ -2,7 +2,7 @@
 /**
  * Minimal area-line sparkline rendered as an SVG `<polyline>` pair.
  * Auto-scales the input series into the viewBox. A dashed grey line is
- * drawn when too few points are available (rookie / cold-start state).
+ * drawn when too few points are available (cold start).
  *
  * `fluid` makes the SVG fill its container horizontally (`width: 100%`)
  * — useful for the hero blocks on the profile + leaderboard pages

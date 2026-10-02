@@ -123,8 +123,8 @@ League seasons follow the EA FC editions (FC26, FC27, …) — ELO carries over 
 
 | Tab | Logic |
 |-------|-------|
-| **Spieler** | One ELO rating per player across every mode, sortable by current rating or recent form. |
-| **Duos** | Pairings with 10+ matches together, sorted by duo rating. |
+| **Spieler** | One ELO rating per player across every mode, sortable by current rating or recent form. Lists players with 5+ matches in the season. |
+| **Duos** | Pairings with 5+ matches together in the season, sorted by duo rating. |
 
 Once a season closes, an awards strip (Meister, Torschützenkönig, Dream-Duo, …) and — if you played that season — a personal [Season Recap →](docs/features/SEASON_RECAP.md) appear underneath.
 

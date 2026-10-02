@@ -150,6 +150,10 @@ function retry() {
 const seasonMeta = $derived(rating?.season ?? null);
 const isCurrentSeason = $derived(seasonMeta ? seasonMeta.is_current : true);
 
+// Season games a player or duo needs to be listed. 5 mirrors the API for
+// responses from before it sent ranking_min_games.
+const minGames = $derived(rating?.season?.ranking_min_games ?? 5);
+
 const sortedPlayers = $derived(sortPlayers(rating?.players ?? [], sort));
 const heroPlayer = $derived(findSeasonLeader(rating?.players ?? []));
 const dividerIndex = $derived(
@@ -240,7 +244,7 @@ function handleDuoClick(duo) {
 			{/if}
 
 			{#if sortedPlayers.length === 0}
-				<p class="text-text-secondary text-center py-8">{$t("leaderboard.no_data")}</p>
+				<p class="text-text-secondary text-center py-8">{$t("leaderboard.no_data", { minGames })}</p>
 			{:else}
 				<div class="flex flex-col">
 					{#each sortedPlayers as p, i (p.player_id)}
@@ -267,7 +271,7 @@ function handleDuoClick(duo) {
 				</div>
 			{/if}
 		{:else if (rating?.duos ?? []).length === 0}
-			<p class="text-text-secondary text-center py-8">{$t("leaderboard.no_duos")}</p>
+			<p class="text-text-secondary text-center py-8">{$t("leaderboard.no_duos", { minGames })}</p>
 		{:else}
 			<div class="flex flex-col">
 				{#each rating.duos as duo (duo.duo_id)}
