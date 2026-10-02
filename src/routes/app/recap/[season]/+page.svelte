@@ -20,6 +20,10 @@ async function load() {
 	error = false;
 	try {
 		recap = await getSeasonRecap(seasonId);
+		// One showing is enough. Most viewers never tap ✕: they watch to the
+		// last slide and close the app, or swipe back. Marking only on close
+		// made the auto-launcher reopen the story on every start.
+		if (recap) markRecapSeen(seasonId);
 	} catch (err) {
 		console.error("Failed to load season recap:", err);
 		error = true;
@@ -35,12 +39,10 @@ $effect(() => {
 });
 
 /**
- * Marks the season recap as seen (so the auto-launcher never offers
- * it again) and leaves the story — back to wherever the user came
- * from when there is history in this tab, otherwise the dashboard.
+ * Leaves the story — back to wherever the user came from when there is
+ * history in this tab, otherwise the dashboard.
  */
 function handleClose() {
-	markRecapSeen(seasonId);
 	if (typeof window !== "undefined" && window.history.length > 1) {
 		window.history.back();
 	} else {
