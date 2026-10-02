@@ -30,12 +30,12 @@ Two tabs sit below the season switch:
 
 | Tab | Shows |
 |-----|-------|
-| **Spieler** | Every player with at least one rated match, sorted by rating |
-| **Duos** | Pairings with 10+ matches together, sorted by duo rating |
+| **Spieler** | Every player with at least 5 matches in the selected season, sorted by rating |
+| **Duos** | Pairings with at least 5 matches together in the selected season, sorted by duo rating |
 
-On **Spieler**, a sort toggle switches between **Aktuell** (live rating) and **Form** (the rating trend over a player's last 10 rated matches).
+A rating carried over from earlier seasons doesn't list anyone on its own: whoever has fewer than 5 matches in the season is left out, in the running season as in a closed one, and the dashboard's top 3 follow the same list. On **Spieler**, a sort toggle switches between **Aktuell** (live rating) and **Form** (the rating trend over a player's last 10 rated matches).
 
-**Closed-season qualification**: once a season ends, only players who reached the season's minimum match count are eligible for its top spot and its "Meister" award — a higher raw rating from very few matches doesn't count. Non-qualified players still appear in the list (so nobody just vanishes), below a small "unter *N* Spielen · nicht gewertet" divider.
+**Closed-season qualification**: once a season ends, only players who reached the season's minimum match count are eligible for its top spot and its "Meister" award — a higher raw rating from very few matches doesn't count. Non-qualified players with at least 5 matches still appear in the list, below a small "unter *N* Spielen · nicht gewertet" divider.
 
 ### Hero card
 
@@ -45,9 +45,9 @@ The season leader (the top *qualified* player) gets a hero card: crown, rating, 
 
 - **Rank** with medal icons (🥇🥈🥉) for the top 3
 - **Avatar** and **username**
-- **Badges**: **Rookie** (fewer than 5 rated matches ever), 🔥 win streak (3+ in a row), **Ich** on your own entry
-- **Stats line**: Siege · Unentschieden · Niederlagen · Spiele · Tore for the season — players with no matches yet this season show "—" here but keep their (carried-over) rating
-- **Sparkline** of the recent rating curve — dashed grey for rookies
+- **Badges**: 🔥 win streak (3+ in a row), **Ich** on your own entry
+- **Stats line**: Siege · Unentschieden · Niederlagen · Spiele · Tore for the season
+- **Sparkline** of the recent rating curve
 - **Rating** with a trend pill: the season delta when sorted by **Aktuell**, the form delta when sorted by **Form**
 
 Tap a player to open their profile.

@@ -63,11 +63,7 @@ const trendDirection = $derived(
 );
 
 const sparkStroke = $derived(
-	player.rookie
-		? "var(--color-text-muted)"
-		: trendDirection === "down"
-			? "var(--color-error)"
-			: "var(--color-success)",
+	trendDirection === "down" ? "var(--color-error)" : "var(--color-success)",
 );
 
 const fallbackGradient = $derived(
@@ -108,13 +104,6 @@ function handleClick() {
 	<div class="flex-1 min-w-0">
 		<div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
 			<span class="text-sm font-bold text-text-primary truncate">{player.username}</span>
-			{#if player.rookie}
-				<span
-					class="shrink-0 rounded-full border border-border bg-bg-input px-1.5 py-px text-[8px] font-bold uppercase tracking-wide text-text-secondary"
-				>
-					{$t("leaderboard.rookie")}
-				</span>
-			{/if}
 			{#if streakLabel}
 				<span class="shrink-0 text-[10px] font-bold text-warning">{streakLabel}</span>
 			{/if}
@@ -145,7 +134,6 @@ function handleClick() {
 			width={50}
 			height={18}
 			stroke={sparkStroke}
-			dashed={player.rookie}
 			strokeWidth={1.3}
 			opacity={0.85}
 		/>
