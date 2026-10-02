@@ -6,6 +6,26 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v2.2.0
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v2.1.0...v2.2.0)
+
+### 🚀 Enhancements
+
+- **leaderboard:** Explain the 5-game minimum, drop the rookie badge ([#104](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/104))
+
+### 🩹 Fixes
+
+- **recap:** Count the season recap as seen once it is shown ([#103](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/103))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v2.1.0 ([cbdd4cd](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/cbdd4cd))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v2.1.0 (2026-09-28)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v2.0.0...v2.1.0)
