@@ -100,13 +100,27 @@ export function computeGroupEloDelta(games, playerId) {
 	return Math.round(sum);
 }
 
-function startOfDay(date) {
+/**
+ * Local midnight of the given day.
+ *
+ * @param {Date|number} date
+ * @returns {number} Epoch ms
+ */
+export function startOfDay(date) {
 	const d = new Date(date);
 	d.setHours(0, 0, 0, 0);
 	return d.getTime();
 }
 
-function startOfWeek(date) {
+/**
+ * Local midnight of the Monday that starts the given date's week.
+ *
+ * @param {Date|number} date
+ * @returns {number} Epoch ms
+ * @example
+ *   startOfWeek(new Date(2026, 9, 4)); // Sun 4 Oct → Mon 28 Sep, 00:00
+ */
+export function startOfWeek(date) {
 	const d = new Date(date);
 	const dayNum = (d.getDay() + 6) % 7;
 	d.setDate(d.getDate() - dayNum);
@@ -114,7 +128,13 @@ function startOfWeek(date) {
 	return d.getTime();
 }
 
-function startOfMonth(date) {
+/**
+ * Local midnight of the first day of the given date's month.
+ *
+ * @param {Date|number} date
+ * @returns {number} Epoch ms
+ */
+export function startOfMonth(date) {
 	const d = new Date(date);
 	d.setDate(1);
 	d.setHours(0, 0, 0, 0);

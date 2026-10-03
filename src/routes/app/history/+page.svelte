@@ -15,6 +15,12 @@ import {
 	computeGroupEloDelta,
 	groupMatchesByDate,
 } from "$lib/utils/dateGrouping.utils.js";
+import {
+	getWindowStart,
+	isHistoryComplete,
+	matchesHistoryFilters,
+	ownGamesOnly,
+} from "$lib/utils/historyFilters.utils.js";
 
 const { t } = getTranslate();
 
@@ -32,6 +38,7 @@ const PAGE_SIZE = 20;
 let games = $state([]);
 let offset = $state(0);
 let loading = $state(true);
+let loadFailed = $state(false);
 let loadingMore = $state(false);
 let hasMore = $state(true);
 
@@ -71,7 +78,7 @@ function buildGamesUrl(currentOffset) {
 	const params = new URLSearchParams({
 		limit: String(PAGE_SIZE),
 		offset: String(currentOffset),
-		mine: String(who === "me"),
+		mine: String(ownGamesOnly(who, erg)),
 	});
 	return `/v1/games?${params.toString()}`;
 }
@@ -83,6 +90,7 @@ $effect(() => {
 	offset = 0;
 	hasMore = true;
 	loading = true;
+	loadFailed = false;
 	let aborted = false;
 	(async () => {
 		try {
@@ -93,6 +101,7 @@ $effect(() => {
 			hasMore = games.length >= PAGE_SIZE;
 		} catch (err) {
 			console.error("Historie load failed:", err);
+			if (!aborted) loadFailed = true;
 		} finally {
 			if (!aborted) loading = false;
 		}
@@ -118,72 +127,25 @@ async function loadMore() {
 	}
 }
 
-const filtered = $derived.by(() => {
-	const now = new Date();
-	let from = null;
-	let to = null;
-	const startOfDay = (d) => {
-		const n = new Date(d);
-		n.setHours(0, 0, 0, 0);
-		return n.getTime();
-	};
-	const today = startOfDay(now);
-	if (zeit === "today") from = today;
-	else if (zeit === "thisweek") {
-		const d = new Date(now);
-		const dayNum = (d.getDay() + 6) % 7;
-		d.setDate(d.getDate() - dayNum);
-		d.setHours(0, 0, 0, 0);
-		from = d.getTime();
-	} else if (zeit === "thismonth") {
-		const d = new Date(now);
-		d.setDate(1);
-		d.setHours(0, 0, 0, 0);
-		from = d.getTime();
-	}
+const windowStart = $derived(getWindowStart(zeit));
 
-	return (games ?? []).filter((g) => {
-		const ts = new Date(g.played_at).getTime();
-		if (!Number.isFinite(ts)) return false;
-		if (from != null && ts < from) return false;
-		if (to != null && ts > to) return false;
-
-		if (who === "me") {
-			if (!userId) return false;
-			const involved = (g.game_players ?? []).some(
-				(p) => p.player_id === userId,
-			);
-			if (!involved) return false;
-		}
-
-		if (erg !== "all") {
-			const home = g.score_home ?? 0;
-			const away = g.score_away ?? 0;
-			const isDraw = home === away;
-			const myEntry =
-				who === "me" && userId
-					? (g.game_players ?? []).find((p) => p.player_id === userId)
-					: null;
-			const winSide = isDraw ? null : home > away ? "home" : "away";
-			if (erg === "wins") {
-				if (who === "me") {
-					if (!myEntry || myEntry.team !== winSide) return false;
-				} else if (winSide !== "home") return false;
-			} else if (erg === "losses") {
-				if (who === "me") {
-					if (!myEntry || isDraw || myEntry.team === winSide) return false;
-				} else if (winSide !== "away") return false;
-			} else if (erg === "zunull") {
-				if (home !== 0 && away !== 0) return false;
-			}
-		}
-		return true;
-	});
-});
+const filtered = $derived(
+	games.filter((g) =>
+		matchesHistoryFilters(g, { who, erg, windowStart, userId }),
+	),
+);
 
 const groups = $derived(groupMatchesByDate(filtered, currentLanguage));
 
 const totalCount = $derived(filtered.length);
+
+// Filters run on the pages loaded so far. Until no later page can add a
+// match, the count is a minimum ("20+") and the oldest group may be cut.
+const complete = $derived(isHistoryComplete({ games, hasMore, windowStart }));
+
+const countLabel = $derived(
+	loading || loadFailed ? "–" : `${totalCount}${complete ? "" : "+"}`,
+);
 
 const filterDescription = $derived.by(() => {
 	const parts = [];
@@ -264,7 +226,7 @@ const filterGroups = $derived([
 			<div class="title-row">
 				<h1 class="page-title title">{$t("historie.title")}</h1>
 				<p class="summary">
-					<strong class="count">{totalCount} {$t("historie.matches")}</strong>
+					<strong class="count">{countLabel} {$t("historie.matches")}</strong>
 					<span class="desc">
 						<span aria-hidden="true">·</span>
 						{filterDescription}
@@ -295,27 +257,40 @@ const filterGroups = $derived([
 			<div class="loading">
 				<span class="spinner" role="status" aria-label={$t("common.loading")}></span>
 			</div>
-		{:else if totalCount === 0}
-			<EmptyState {who} {zeit} {erg} onReset={resetFilters} />
+		{:else if loadFailed}
+			<p class="card notice" role="alert">{$t("historie.load_error")}</p>
 		{:else}
-			{#each groups as group (group.key)}
-				{@const eloDelta = who === "me" ? computeGroupEloDelta(group.matches, userId) : null}
-				<section class="group">
-					<DateGroupHeader
-						label={group.label}
-						matchCount={group.matches.length}
-						{eloDelta}
-						matchesLabel={$t("historie.matches")}
-					/>
-					<div class="list">
-						{#each group.matches as game (game.id)}
-							<MatchCard {game} currentUserId={userId} locale={currentLanguage} />
-						{/each}
-					</div>
-				</section>
-			{/each}
+			{#if totalCount === 0}
+				<!-- Only a complete list may claim there is nothing; otherwise
+				     say how many loaded matches were checked. -->
+				<EmptyState
+					{who}
+					{zeit}
+					{erg}
+					checked={complete ? null : games.length}
+					onReset={resetFilters}
+				/>
+			{:else}
+				{#each groups as group, i (group.key)}
+					{@const eloDelta = who === "me" ? computeGroupEloDelta(group.matches, userId) : null}
+					<section class="group">
+						<DateGroupHeader
+							label={group.label}
+							matchCount={group.matches.length}
+							partial={!complete && i === groups.length - 1}
+							{eloDelta}
+							matchesLabel={$t("historie.matches")}
+						/>
+						<div class="list">
+							{#each group.matches as game (game.id)}
+								<MatchCard {game} currentUserId={userId} locale={currentLanguage} />
+							{/each}
+						</div>
+					</section>
+				{/each}
+			{/if}
 
-			{#if hasMore}
+			{#if !complete}
 				<LoadMoreCard
 					remaining={null}
 					loading={loadingMore}
@@ -330,7 +305,7 @@ const filterGroups = $derived([
 	<aside class="rail">
 		<div class="card rail-card">
 			<div class="rail-count">
-				<span class="num count-num">{totalCount}</span>
+				<span class="num count-num">{countLabel}</span>
 				<span class="label count-label">{$t("historie.matches")}</span>
 			</div>
 			{#each filterGroups as group (group.key)}

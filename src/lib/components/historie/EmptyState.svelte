@@ -7,18 +7,23 @@ import FootballIcon from "$lib/components/icons/FootballIcon.svelte";
  * headline that fits the active filter combination and a reset button
  * once at least one filter differs from its default.
  *
+ * `checked` is set while older pages could still hold a match: the
+ * headline then only says that none of the loaded matches fits.
+ *
  * @type {{
  *   who: string,
  *   zeit: string,
  *   erg: string,
+ *   checked?: number|null,
  *   onReset: () => void,
  * }}
  */
-let { who, zeit, erg, onReset } = $props();
+let { who, zeit, erg, checked = null, onReset } = $props();
 
 const { t } = getTranslate();
 
 const headline = $derived.by(() => {
+	if (checked != null) return $t("historie.empty.partial", { count: checked });
 	if (erg === "comebacks") return $t("historie.empty.comebacks");
 	if (erg === "hattricks") return $t("historie.empty.hattricks");
 	if (who === "me" && zeit === "thisweek")

@@ -735,6 +735,7 @@
 		"load_more_remaining": "{count} weitere laden",
 		"load_more_loading": "Lädt …",
 		"load_more_hint": "Tippen um zu laden",
+		"load_error": "Matches konnten nicht geladen werden.",
 		"filter_who_title": "Wer hat gespielt?",
 		"filter_zeit_title": "Welcher Zeitraum?",
 		"filter_erg_title": "Welche Ergebnisse?",
@@ -764,6 +765,7 @@
 		},
 		"empty": {
 			"default": "Keine Matches im aktuellen Filter.",
+			"partial": "Keins der letzten {count} Matches passt zum Filter.",
 			"today": "Heute noch nichts gespielt — die Liga ruht.",
 			"me_thisweek": "Diese Woche noch keine eigenen Matches — Zeit für ein Spiel!",
 			"me_default": "Noch keine eigenen Matches im Filter.",

@@ -733,6 +733,7 @@
 		"load_more_remaining": "Load {count} more",
 		"load_more_loading": "Loading …",
 		"load_more_hint": "Tap to load",
+		"load_error": "Could not load matches.",
 		"filter_who_title": "Who played?",
 		"filter_zeit_title": "Which time range?",
 		"filter_erg_title": "Which results?",
@@ -762,6 +763,7 @@
 		},
 		"empty": {
 			"default": "No matches for the current filter.",
+			"partial": "None of the last {count} matches fit the filter.",
 			"today": "Nothing played today — the league is resting.",
 			"me_thisweek": "No matches of your own this week — time for a game!",
 			"me_default": "No matches of your own in this filter.",

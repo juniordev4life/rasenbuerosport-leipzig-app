@@ -6,21 +6,31 @@
  * change only shows under the "Meine Spiele" filter and always carries
  * its sign, so it never relies on colour.
  *
+ * `partial` marks a bucket that may continue on the next page: its count
+ * reads "8+" and its incomplete ELO change is left out.
+ *
  * @type {{
  *   label: string,
  *   matchCount: number,
+ *   partial?: boolean,
  *   eloDelta?: number|null,
  *   matchesLabel?: string,
  * }}
  */
-let { label, matchCount, eloDelta = null, matchesLabel = "Matches" } = $props();
+let {
+	label,
+	matchCount,
+	partial = false,
+	eloDelta = null,
+	matchesLabel = "Matches",
+} = $props();
 
 // Bucket labels arrive in caps ("DIESE WOCHE"). Lower-case them so each
 // design sets the case in CSS: caps in A, capitalised words in B.
 const when = $derived((label ?? "").toLowerCase());
 
 const eloText = $derived.by(() => {
-	if (eloDelta == null) return null;
+	if (eloDelta == null || partial) return null;
 	if (eloDelta > 0) return `+${eloDelta} ELO`;
 	if (eloDelta < 0) return `−${Math.abs(eloDelta)} ELO`;
 	return "±0 ELO";
@@ -35,7 +45,7 @@ const tone = $derived(
 	<h2 class="section-title on-page title">
 		<span class="when">{when}</span>
 		<span class="sep" aria-hidden="true"></span>
-		{matchCount}
+		{matchCount}{partial ? "+" : ""}
 		{matchesLabel}
 	</h2>
 	{#if eloText}
