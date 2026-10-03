@@ -1,28 +1,29 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import { RARITY_META } from "$lib/constants/trophies.constants.js";
-import TrophyCategoryIcon from "./TrophyCategoryIcon.svelte";
+import TrophyMedal from "./TrophyMedal.svelte";
+import TrophyRarityChip from "./TrophyRarityChip.svelte";
 
 /**
- * One trophy tile inside a shelf row. The trophy can be in one of
- * three modes that the backend signals:
- *   - `trophy.unlocked === true`   → earned (colour + date + medal)
- *   - `trophy.unlocked === false`  → locked. Two subcases:
- *       - `trophy.masked`          → hidden, name suppressed
- *       - otherwise                → name visible, progress bar if
- *                                    backend supplied one
+ * One trophy tile on a shelf. The backend signals three modes:
+ *   - `trophy.unlocked === true`  → earned: tier medal, rarity, date
+ *   - `trophy.unlocked === false` → locked, shown with a padlock:
+ *       - `trophy.masked`         → hidden, name and text suppressed
+ *       - otherwise               → name visible, a progress bar when
+ *                                   the backend supplies one, else a
+ *                                   "not earned yet" note
+ * Design A: a white card, content left-aligned, square medal. Design B:
+ * a white sticker, content centred, metallic disc.
  *
- * The card is a button — tap opens the detail sheet via `onSelect`.
+ * The card is a button: a tap opens the detail sheet via `onSelect`.
  *
- * @type {{ trophy: object, locale: string, onSelect?: (trophy: object) => void }}
+ * @type {{ trophy: object, locale?: string, onSelect?: (trophy: object) => void }}
  */
 let { trophy, locale = "de-DE", onSelect } = $props();
 
 const { t } = getTranslate();
 
 const rarity = $derived(trophy.rarity);
-const rarityMeta = $derived(RARITY_META[rarity]);
-
 const unlocked = $derived(trophy.unlocked === true);
 const masked = $derived(trophy.masked === true);
 const progress = $derived(trophy.progress ?? null);
@@ -42,256 +43,183 @@ const dateText = $derived(
 		: null,
 );
 
-function handleClick() {
-	onSelect?.(trophy);
-}
-
-function handleKey(event) {
-	if (event.key === "Enter" || event.key === " ") {
-		event.preventDefault();
-		handleClick();
+/** Name, rarity and state in one line for screen readers. */
+const ariaLabel = $derived.by(() => {
+	const parts = [titleText];
+	const rarityKey = RARITY_META[rarity]?.i18nKey;
+	if (rarityKey) parts.push($t(rarityKey));
+	if (unlocked) {
+		if (dateText)
+			parts.push(`${$t("trophies.featured.earned_on")} ${dateText}`);
+	} else if (progress) {
+		parts.push(
+			`${$t("trophies.detail.progress")} ${progress.current} / ${progress.target}`,
+		);
+	} else {
+		parts.push($t("trophies.card.locked"));
 	}
-}
+	return parts.join(", ");
+});
 </script>
 
 <button
 	type="button"
 	class="trophy"
-	class:earned={unlocked}
 	class:locked={!unlocked}
-	class:masked
 	data-rarity={rarity}
-	style:--rarity-color={rarityMeta?.color}
-	onclick={handleClick}
-	onkeydown={handleKey}
-	aria-label={titleText}
+	onclick={() => onSelect?.(trophy)}
+	aria-label={ariaLabel}
 >
-	<div class="trophy-icon-circle">
-		{#if masked}
-			<!-- Lock glyph for masked / hidden trophies -->
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				width="26"
-				height="26"
-				aria-hidden="true"
-			>
-				<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-				<path d="M7 11V7a5 5 0 0110 0v4" />
-			</svg>
-		{:else}
-			<TrophyCategoryIcon category={trophy.category} size={26} />
-		{/if}
-	</div>
+	<TrophyMedal {rarity} category={trophy.category} locked={!unlocked} />
+	<span class="name">{titleText}</span>
+	<span class="desc">{descText}</span>
 
-	<div class="trophy-name">{titleText}</div>
-	<div class="trophy-desc">{descText}</div>
-	<div class="trophy-rarity-pill">{$t(rarityMeta?.i18nKey)}</div>
-
-	<!--
-		Footer slot — same min-height regardless of which child renders.
-		Keeps every card the same overall height so a row of mixed
-		earned / locked / masked tiles doesn't look jagged.
-	-->
-	<div class="trophy-footer">
+	<!-- Pinned to the bottom so a row of mixed cards ends on one line. -->
+	<span class="foot">
+		<TrophyRarityChip {rarity} />
 		{#if unlocked && dateText}
-			<div class="trophy-date">{dateText}</div>
+			<span class="meta">{dateText}</span>
 		{:else if progress}
-			<div class="trophy-progress">
-				<div class="trophy-progress-bar">
-					<div
-						class="trophy-progress-fill"
-						style:width="{progress.percent}%"
-					></div>
-				</div>
-				<div class="trophy-progress-text">
-					{progress.current} / {progress.target}
-				</div>
-			</div>
+			<span class="progress-row">
+				<span class="progress bar"><span style:width="{progress.percent}%"></span></span>
+				<span class="count">{progress.current} / {progress.target}</span>
+			</span>
+		{:else if !unlocked}
+			<span class="meta">{$t("trophies.card.locked")}</span>
 		{/if}
-	</div>
+	</span>
 </button>
 
 <style>
-	.trophy {
-		flex: 0 0 130px;
-		/* Stretch to the row's tallest card so a mixed row of
-		 * earned / locked / masked tiles stays uniform. The row sets
-		 * `align-items: stretch` (the flex default) — this `height`
-		 * just opts each card into the stretching instead of sizing
-		 * to its own content. */
-		height: 100%;
-		min-height: 220px;
-		background: var(--color-surface);
-		border: 1px solid var(--color-line);
-		border-radius: 14px;
-		padding: 12px 10px;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 6px;
-		position: relative;
-		cursor: pointer;
-		transition:
-			transform 0.2s ease,
-			opacity 0.2s ease;
-		text-align: center;
-		font: inherit;
-		color: inherit;
-		appearance: none;
-	}
-	.trophy:active {
-		transform: scale(0.97);
-	}
+/* ── Design A: white card, left-aligned ─────────────────────────────── */
+.trophy {
+	--medal-size: 44px;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 6px;
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 212px;
+	padding: 12px 10px;
+	border: 0;
+	border-radius: var(--radius-card);
+	background: var(--color-surface);
+	box-shadow: var(--shadow-card);
+	color: var(--color-ink);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+	transition:
+		transform 120ms,
+		box-shadow 120ms;
+}
 
-	.trophy.earned {
-		background:
-			radial-gradient(
-				ellipse at top,
-				color-mix(in srgb, var(--rarity-color) 18%, transparent) 0%,
-				transparent 70%
-			),
-			var(--color-surface);
-		border-color: color-mix(in srgb, var(--rarity-color) 40%, transparent);
-	}
-	.trophy.locked {
-		opacity: 0.6;
-		border-style: dashed;
-		border-color: color-mix(in srgb, var(--color-line) 60%, transparent);
-	}
-	.trophy.masked {
-		opacity: 0.5;
-	}
+.trophy:hover {
+	box-shadow: var(--shadow-raised);
+}
 
-	.trophy-icon-circle {
-		width: 64px;
-		height: 64px;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		position: relative;
-	}
-	.trophy.earned .trophy-icon-circle {
-		background: radial-gradient(
-			circle,
-			color-mix(in srgb, var(--rarity-color) 30%, transparent) 0%,
-			color-mix(in srgb, var(--rarity-color) 18%, transparent) 70%
-		);
-		border: 2px solid
-			color-mix(in srgb, var(--rarity-color) 50%, transparent);
-		color: var(--rarity-color);
-		box-shadow: 0 4px 16px
-			color-mix(in srgb, var(--rarity-color) 25%, transparent);
-	}
-	.trophy.locked .trophy-icon-circle {
-		background: rgba(0, 0, 0, 0.18);
-		border: 2px dashed
-			color-mix(in srgb, var(--color-line) 70%, transparent);
-		color: var(--color-muted);
-	}
+.trophy:active {
+	transform: scale(0.98);
+}
 
-	.trophy.earned[data-rarity="diamond"] .trophy-icon-circle::after {
-		content: "";
-		position: absolute;
-		inset: -3px;
-		border-radius: 50%;
-		border: 1px solid
-			color-mix(in srgb, var(--rarity-color) 40%, transparent);
-		animation: diamondPulse 2.5s ease-in-out infinite;
-	}
-	@keyframes diamondPulse {
-		0%,
-		100% {
-			transform: scale(1);
-			opacity: 0.4;
-		}
-		50% {
-			transform: scale(1.08);
-			opacity: 0;
-		}
-	}
+.name {
+	margin-top: 4px;
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.2;
+	overflow-wrap: anywhere;
+}
 
-	.trophy-name {
-		font-size: 11px;
-		font-weight: 800;
-		color: var(--color-ink);
-		line-height: 1.15;
-		min-height: 26px;
-		display: flex;
-		align-items: center;
-	}
-	.trophy.locked .trophy-name {
-		color: var(--color-muted);
-	}
-	.trophy-desc {
-		font-size: 9px;
-		color: var(--color-muted);
-		line-height: 1.3;
-		min-height: 24px;
-	}
-	.trophy.locked .trophy-desc {
-		color: var(--color-muted);
-	}
-	.trophy-rarity-pill {
-		font-size: 7px;
-		font-weight: 800;
-		padding: 2px 6px;
-		border-radius: 999px;
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		margin-top: 2px;
-		background: color-mix(in srgb, var(--rarity-color) 15%, transparent);
-		color: var(--rarity-color);
-		border: 1px solid
-			color-mix(in srgb, var(--rarity-color) 35%, transparent);
-	}
-	.trophy.locked .trophy-rarity-pill {
-		background: rgba(75, 85, 99, 0.15);
-		color: var(--color-muted);
-		border-color: color-mix(in srgb, var(--color-line) 50%, transparent);
-	}
-	/* Footer slot always claims the same vertical space — date OR
-	 * progress OR nothing, every card ends at the same bottom line.
-	 * `margin-top: auto` pins it to the bottom so the icon + name
-	 * stack stays anchored at the top. */
-	.trophy-footer {
-		width: 100%;
-		min-height: 22px;
-		margin-top: auto;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: flex-end;
-	}
-	.trophy-date {
-		font-size: 8px;
-		color: var(--color-muted);
-		letter-spacing: 0.04em;
-	}
-	.trophy-progress {
-		width: 100%;
-	}
-	.trophy-progress-bar {
-		height: 3px;
-		background: rgba(255, 255, 255, 0.06);
-		border-radius: 2px;
-		overflow: hidden;
-	}
-	.trophy-progress-fill {
-		height: 100%;
-		background: linear-gradient(90deg, #6b7280, #9ca3af);
-		border-radius: 2px;
-	}
-	.trophy-progress-text {
-		font-size: 8px;
-		color: var(--color-muted);
-		font-weight: 700;
-		margin-top: 3px;
-		font-variant-numeric: tabular-nums;
-	}
+.locked .name {
+	color: var(--color-muted);
+}
+
+.desc {
+	font-size: 12px;
+	line-height: 1.3;
+	color: var(--color-muted);
+}
+
+.foot {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 6px;
+	width: 100%;
+	margin-top: auto;
+}
+
+.meta {
+	font-size: 12px;
+	color: var(--color-muted);
+}
+
+.progress-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+}
+
+.bar {
+	flex: 1;
+	height: 4px;
+}
+
+/* A fills the trophy bar in navy, the red stays for the brand. */
+.bar > span {
+	background: var(--color-navy);
+}
+
+.count {
+	flex-shrink: 0;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+}
+
+/* ── Design B: white sticker, centred ───────────────────────────────── */
+:global([data-variant="b"]) .trophy {
+	--medal-size: 52px;
+	align-items: center;
+	min-height: 214px;
+	box-shadow: var(--shadow-control);
+	text-align: center;
+}
+
+:global([data-variant="b"]) .trophy:hover {
+	box-shadow: var(--shadow-raised);
+}
+
+:global([data-variant="b"]) .name {
+	margin-top: 2px;
+	font-size: 13px;
+}
+
+:global([data-variant="b"]) .desc {
+	font-size: 11.5px;
+}
+
+:global([data-variant="b"]) .foot {
+	align-items: center;
+}
+
+:global([data-variant="b"]) .meta,
+:global([data-variant="b"]) .count {
+	font-size: 11px;
+}
+
+:global([data-variant="b"]) .count {
+	font-family: var(--font-sans);
+}
+
+:global([data-variant="b"]) .bar {
+	height: 6px;
+}
+
+:global([data-variant="b"]) .bar > span {
+	background: var(--color-progress);
+}
 </style>

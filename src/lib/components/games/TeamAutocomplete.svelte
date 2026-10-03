@@ -110,32 +110,87 @@ $effect(() => {
 		onkeydown={handleKeydown}
 		placeholder={$t("new_game.select_team")}
 		autocomplete="off"
-		class="w-full bg-sunken border border-line rounded-lg px-3 py-2.5 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+		class="field"
 	/>
 
 	{#if showSuggestions && suggestions.length > 0}
 		<ul
-			class="absolute z-10 w-full bg-surface border border-line rounded-lg overflow-y-auto shadow-lg {direction === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}"
+			class="suggestions {direction === 'up' ? 'up' : 'down'}"
 			style="max-height: {maxVisible * ROW_PX}px;"
 		>
 			{#each suggestions as team, i (team.name)}
 				<li>
 					<button
 						type="button"
-						class="w-full text-left px-3 py-2 text-sm transition-colors flex items-center justify-between gap-2 {i === highlightIndex ? 'bg-brand text-white' : 'text-ink hover:bg-sunken'}"
+						class="suggestion"
+						class:highlighted={i === highlightIndex}
 						onmousedown={() => selectTeam(team)}
 					>
-						<div class="flex items-center gap-2 min-w-0">
+						<span class="flex items-center gap-2 min-w-0">
 							<TeamLogo logoUrl={team.logo_url} teamName={team.name} size="sm" />
 							<span class="truncate">{team.name}</span>
-						</div>
-						<div class="flex items-center gap-1.5 shrink-0">
+						</span>
+						<span class="flex items-center gap-1.5 shrink-0">
 							<OvrBadge rating={team.overall_rating} size="xs" />
 							<StarRating rating={team.star_rating} size="xs" />
-						</div>
+						</span>
 					</button>
 				</li>
 			{/each}
 		</ul>
 	{/if}
 </div>
+
+<style>
+.suggestions {
+	position: absolute;
+	z-index: 10;
+	left: 0;
+	right: 0;
+	margin: 0;
+	padding: 4px 0;
+	list-style: none;
+	overflow-y: auto;
+	background: var(--color-surface);
+	border: 1px solid var(--color-line);
+	border-radius: var(--radius-tile);
+	box-shadow: var(--shadow-raised);
+}
+
+.suggestions.down {
+	top: 100%;
+	margin-top: 4px;
+}
+
+.suggestions.up {
+	bottom: 100%;
+	margin-bottom: 4px;
+}
+
+.suggestion {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	width: 100%;
+	min-height: 44px;
+	padding: 0 12px;
+	border: 0;
+	background: transparent;
+	color: var(--color-ink);
+	font-size: 14px;
+	text-align: left;
+	cursor: pointer;
+}
+
+/* Keyboard highlight: a red marker on the sunken row, so the brand-red
+ * stars stay readable. */
+.suggestion:hover,
+.suggestion.highlighted {
+	background: var(--color-sunken);
+}
+
+.suggestion.highlighted {
+	box-shadow: inset 3px 0 0 var(--color-brand);
+}
+</style>

@@ -3,13 +3,13 @@ import { getTranslate } from "@tolgee/svelte";
 import { CATEGORY_META } from "$lib/constants/trophies.constants.js";
 import TrophyCard from "./TrophyCard.svelte";
 import TrophyCategoryIcon from "./TrophyCategoryIcon.svelte";
+import TrophySectionHead from "./TrophySectionHead.svelte";
 
 /**
- * One category-bucket of trophies, rendered as a header + horizontally
- * scrolling shelf. The header shows the category icon, label, and
- * "X von Y erreicht" counter; the shelf hosts every trophy in that
- * category (earned + locked + masked) sorted by rarity, then by
- * unlocked-date.
+ * One category of trophies: a heading with the "X von Y erreicht"
+ * counter and every trophy of the category (earned, locked, hidden),
+ * earned first. Phones scroll the shelf sideways, edge to edge; from
+ * `lg` it wraps into a grid that uses the full width.
  *
  * @type {{
  *   category: string,
@@ -21,6 +21,9 @@ import TrophyCategoryIcon from "./TrophyCategoryIcon.svelte";
 let { category, trophies, locale = "de-DE", onSelect } = $props();
 
 const { t } = getTranslate();
+
+const uid = $props.id();
+const headingId = `trophy-shelf-${uid}`;
 
 const meta = $derived(CATEGORY_META[category]);
 const unlockedCount = $derived(
@@ -45,102 +48,73 @@ const sorted = $derived.by(() => {
 });
 </script>
 
-<section class="regal-section">
-	<header class="regal-header">
-		<div class="regal-title-block">
-			<div
-				class="regal-icon-wrap"
-			>
-				<TrophyCategoryIcon {category} size={16} />
-			</div>
-			<div class="regal-title-text">
-				<div class="regal-name">{$t(meta?.i18nKey)}</div>
-				<div class="regal-progress">
-					<strong>{unlockedCount}</strong>
-					{$t("trophies.shelf.progress_separator")}
-					{trophies.length}
-					{$t("trophies.shelf.progress_suffix")}
-				</div>
-			</div>
-		</div>
-	</header>
-	<div class="regal-shelf" role="list">
-		<div class="regal-row">
-			{#each sorted as trophy (trophy.id)}
-				<div role="listitem">
-					<TrophyCard {trophy} {locale} {onSelect} />
-				</div>
-			{/each}
-		</div>
-	</div>
+<section class="shelf" aria-labelledby={headingId}>
+	<TrophySectionHead id={headingId} title={meta ? $t(meta.i18nKey) : category}>
+		{#snippet icon()}<TrophyCategoryIcon {category} size={22} strokeWidth={2} />{/snippet}
+		<strong>{unlockedCount} {$t("trophies.shelf.progress_separator")} {trophies.length}</strong>
+		{$t("trophies.shelf.progress_suffix")}
+	</TrophySectionHead>
+
+	<ul class="row">
+		{#each sorted as trophy (trophy.id)}
+			<li class="item">
+				<TrophyCard {trophy} {locale} {onSelect} />
+			</li>
+		{/each}
+	</ul>
 </section>
 
 <style>
-	.regal-section {
-		margin-bottom: 24px;
-	}
-	.regal-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0 4px;
-		margin-bottom: 12px;
-	}
-	.regal-title-block {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-	}
-	.regal-icon-wrap {
-		width: 28px;
-		height: 28px;
-		border-radius: 8px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 1px solid transparent;
-		color: var(--cat-color);
-	}
-	.regal-title-text {
-		display: flex;
-		flex-direction: column;
-	}
-	.regal-name {
-		font-size: 14px;
-		font-weight: 800;
-		color: var(--color-ink);
-		line-height: 1.1;
-	}
-	.regal-progress {
-		font-size: 10px;
-		color: var(--color-muted);
-		margin-top: 2px;
-	}
-	.regal-progress strong {
-		color: var(--color-gold);
-	}
-	.regal-shelf {
-		position: relative;
-		overflow-x: auto;
-		overflow-y: visible;
-		padding: 8px 0 24px;
-		scroll-behavior: smooth;
-		scrollbar-width: none;
-		margin-left: -4px;
-		margin-right: -4px;
-	}
-	.regal-shelf::-webkit-scrollbar {
-		display: none;
-	}
-	.regal-row {
-		display: flex;
-		/* Explicit `stretch` so every card in the row matches the
-		 * tallest one — `<TrophyCard>` uses `height: 100%` to opt in.
-		 * Without this every card sizes to its own content and a
-		 * mixed row (earned with a date, locked with a progress bar,
-		 * masked with nothing) looks jagged. */
-		align-items: stretch;
+.shelf {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	min-width: 0;
+}
+
+/* Phones: a sideways strip from screen edge to screen edge. The scroller
+ * clips, so it gets room for the cards' shadows, taken back by the
+ * negative block margins. */
+.row {
+	display: flex;
+	gap: 8px;
+	margin: -8px calc(var(--page-gutter, 1rem) * -1) -6px;
+	padding: 8px var(--page-gutter, 1rem) 16px;
+	list-style: none;
+	overflow-x: auto;
+	scroll-snap-type: x proximity;
+	scroll-padding-inline: var(--page-gutter, 1rem);
+	scrollbar-width: none;
+}
+
+.row::-webkit-scrollbar {
+	display: none;
+}
+
+.item {
+	display: flex;
+	flex: 0 0 112px;
+	scroll-snap-align: start;
+}
+
+:global([data-variant="b"]) .row {
+	gap: 10px;
+}
+
+:global([data-variant="b"]) .item {
+	flex-basis: 116px;
+}
+
+/* Desktop: the whole category at a glance. */
+@media (min-width: 1024px) {
+	.row,
+	:global([data-variant="b"]) .row {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 		gap: 12px;
-		padding: 0 4px 4px;
+		margin: 0;
+		padding: 0 0 4px;
+		overflow: visible;
 	}
+}
 </style>

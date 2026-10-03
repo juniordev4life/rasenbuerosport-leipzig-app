@@ -50,19 +50,3 @@ export function avatarInitials(name) {
 	if (text.length <= 2) return text.toUpperCase();
 	return text.charAt(0).toUpperCase();
 }
-
-/**
- * Transitional: the old gradient API, now backed by the avatar tokens so
- * callers render in the active design. Use <PlayerAvatar> instead; this
- * goes once the last caller has moved.
- *
- * @deprecated
- * @param {string|null|undefined} key
- * @returns {{ from: string, to: string, gradient: string }}
- * @example
- *   avatarGradient("marco-uid").gradient; // "var(--color-avatar-3)"
- */
-export function avatarGradient(key) {
-	const color = `var(--color-avatar-${hashText(key ?? "?") % AVATAR_COLOR_SLOTS})`;
-	return { from: color, to: color, gradient: color };
-}

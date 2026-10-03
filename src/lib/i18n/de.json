@@ -149,6 +149,24 @@
 		},
 		"highlights": {
 			"empty": "Noch keine Highlight-Videos."
+		},
+		"series": {
+			"win_streak": {
+				"label": "Siege in Folge",
+				"headline": "{name} hat eine Siegesserie!"
+			},
+			"loss_streak": {
+				"label": "Niederlagen in Folge",
+				"headline": "{name} steckt in einer Durststrecke..."
+			},
+			"scoring": {
+				"label": "Spiele mit 3+ Toren",
+				"headline": "{name} ist ein Torjäger!"
+			},
+			"defensive": {
+				"label": "Spiele zu Null",
+				"headline": "{name} ist eine Mauer!"
+			}
 		}
 	},
 	"push": {
@@ -703,7 +721,8 @@
 			"error_file_size": "Bild darf max. 2 MB groß sein",
 			"error_generic": "Fehler beim Speichern",
 			"saved": "Gespeichert"
-		}
+		},
+		"draws": "Remis"
 	},
 	"historie": {
 		"title": "Historie",
@@ -902,9 +921,9 @@
 			"back": "Zurück",
 			"lobby": {
 				"tip_1_title": "Heim-Hälfte",
-				"tip_1_body": "Tipp einen Avatar in der oberen, roten Spielfeld-Hälfte an, um den Spieler ins Heim-Team zu setzen. Erneut tippen löst die Zuordnung wieder.",
+				"tip_1_body": "Tipp einen Avatar in der Heim-Karte an, um den Spieler ins Heim-Team zu setzen. Erneut tippen löst die Zuordnung wieder.",
 				"tip_2_title": "Auswärts-Hälfte",
-				"tip_2_body": "In der unteren, grünen Hälfte funktioniert es genauso fürs Auswärts-Team. Spieler, die schon auf der anderen Seite sind, erscheinen hier ausgegraut.",
+				"tip_2_body": "In der Auswärts-Karte funktioniert es genauso. Spieler, die schon im anderen Team sind, erscheinen hier ausgegraut.",
 				"tip_3_title": "Gast-Slot",
 				"tip_3_body": "Pro Seite gibt es eine Gast-Kachel für Mitspielende ohne Account. Das Spiel zählt für sie nicht ins Profil, aber das Endergebnis bleibt korrekt erfasst."
 			},
@@ -930,7 +949,7 @@
 				"tip_6_title": "Nachspielzeit",
 				"tip_6_body": "Bei 45, 90 oder 120 wird das Feld daneben aktiv — das ist die Nachspielzeit. Wir setzen sie hier auf +3, also Minute 45+3.",
 				"tip_7_title": "Bestätigen",
-				"tip_7_body": "Der grüne Haken speichert das Event. Der Editor schließt, und das Tor erscheint gleich unten als Pill in der Timeline.",
+				"tip_7_body": "„Speichern“ sichert das Event. Der Editor schließt, und das Tor erscheint gleich unten als Pill in der Timeline.",
 				"tip_8_title": "Event entfernen",
 				"tip_8_body": "Verklickt? Tippe das × auf der Pill, bestätige die Sicherheitsabfrage — das Event ist sauber raus, Spielstand wird neu berechnet.",
 				"tip_9_title": "Karten & Elfer",
@@ -1032,7 +1051,10 @@
 		"sort_name": "Name",
 		"sort_rating": "Bewertung",
 		"no_results": "Keine Teams gefunden",
-		"team_count": "{count} Teams"
+		"team_count": "{count} Teams",
+		"league_label": "Liga",
+		"sort_label": "Sortierung",
+		"error_loading": "Teams konnten nicht geladen werden."
 	},
 	"season": {
 		"all_time": "Gesamt",
@@ -1306,7 +1328,8 @@
 		"goals_distribution": "Tor-Verteilung pro Spiel",
 		"total_goals_axis": "Tore gesamt",
 		"popular_teams": "Beliebteste Teams",
-		"team_win_rate": "Siegquote pro Team"
+		"team_win_rate": "Siegquote pro Team",
+		"game_n": "Spiel {n}"
 	},
 	"rematch": {
 		"title": "Revanche",
@@ -1532,7 +1555,10 @@
 		"error": {
 			"load_failed": "Trophäen konnten nicht geladen werden."
 		},
-		"profile_link": "Trophäenraum"
+		"profile_link": "Trophäenraum",
+		"card": {
+			"locked": "Noch nicht erreicht"
+		}
 	},
 	"season_awards": {
 		"champion": {
@@ -1650,7 +1676,9 @@
 			"persona": "{persona} meint:",
 			"next_season": "FC27 läuft — dein Start-ELO: {rating}",
 			"cta": "Zur Rangliste"
-		}
+		},
+		"previous_slide": "Vorherige Seite",
+		"next_slide": "Nächste Seite"
 	},
 	"settings": {
 		"design": {

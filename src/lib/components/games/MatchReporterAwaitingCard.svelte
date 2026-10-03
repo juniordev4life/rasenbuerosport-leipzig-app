@@ -1,6 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import CheckIcon from "$lib/components/icons/CheckIcon.svelte";
 import { storage } from "$lib/config/firebase.config.js";
 import { MATCH_STATS_MAX_BYTES } from "$lib/constants/upload.constants.js";
 import { post } from "$lib/services/api.services.js";
@@ -12,7 +13,8 @@ import { isUploadableImageType, resizeImage } from "$lib/utils/image.utils.js";
  * three FC26 screenshots in one go (camera or gallery), and the
  * component uploads + extracts them sequentially. Each step on the
  * stats stepper transitions through `active` → `processing` → `done`
- * so the user can see the AI working.
+ * so the user can see the AI working. Design A: Sophie's line as an
+ * aqua-ruled quote; design B: a pale gold speech bubble.
  *
  * Slot order is fixed (`overview` → `passes` → `defense`) regardless
  * of which file the user picked — the API extractors don't know the
@@ -202,332 +204,423 @@ const isIOS =
 	onchange={handleFiles}
 />
 
-<div class="card">
-	<div class="header">
-		<div class="avatar" class:thinking={!!processingSlot}>
+<div class="card awaiting">
+	<div class="head">
+		<span class="sophie" class:thinking={!!processingSlot}>
 			<img src="/images/reporter/sophie.webp" alt="Sophie" />
-		</div>
+		</span>
 		<div class="info">
-			<div class="name">Sophie</div>
-			<div class="role">
-				<span class="role-dot"></span>
+			<span class="name">Sophie</span>
+			<span class="status">
+				<span class="status-dot" aria-hidden="true"></span>
 				<span>{statusLine}</span>
-			</div>
+			</span>
 		</div>
 	</div>
 
 	{#if toast}
-		<div class="toast">
-			<div class="toast-icon">
-				<svg viewBox="0 0 24 24" fill="none" stroke="#84CC16" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true">
-					<polyline points="20 6 9 17 4 12" />
-				</svg>
-			</div>
-			<div class="toast-text">
+		<div class="toast" role="status">
+			<span class="toast-icon" aria-hidden="true"><CheckIcon size={13} strokeWidth={3} /></span>
+			<span class="toast-text">
 				<strong>{toast.label}</strong>
 				{$t("awaiting_report.toast_extracted")}
-			</div>
+			</span>
 		</div>
 	{/if}
 
-	<div class="quote">{quoteText}</div>
+	<p class="quote bubble">{quoteText}</p>
 
-	<div class="stats-section">
-		<div class="stats-label">
-			<span>{$t("awaiting_report.screenshots_label")}</span>
-			<span class="stats-counter">
+	<div class="steps">
+		<div class="steps-head">
+			<span class="label">{$t("awaiting_report.screenshots_label")}</span>
+			<span class="counter">
 				{doneCount} / {SLOTS.length}
 				<span class="counter-suffix">{$t("awaiting_report.counter_suffix")}</span>
 			</span>
 		</div>
 		<div class="stepper">
-			<div class="line"></div>
-			<div class="line-fill" style="width: {(fillPercent / 100) * 72}%;"></div>
+			<div class="line" aria-hidden="true"></div>
+			<div class="line-fill" aria-hidden="true" style="width: {(fillPercent / 100) * 72}%;"></div>
 			{#each SLOTS as slot (slot)}
 				{@const state = nodeState(slot)}
-				<div class="node">
-					<div class="circle {state}">
+				<div class="node {state}">
+					<span class="circle">
 						{#if state === "done"}
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true">
-								<polyline points="20 6 9 17 4 12" />
-							</svg>
+							<CheckIcon size={14} strokeWidth={3} />
 						{:else}
 							{SLOTS.indexOf(slot) + 1}
 						{/if}
-					</div>
-					<div class="label {state}">{$t(`awaiting_report.slots.${slot}.label`)}</div>
-					<div class="sub {state}">{subLabel(state)}</div>
+					</span>
+					<span class="node-label">{$t(`awaiting_report.slots.${slot}.label`)}</span>
+					<span class="node-sub">{subLabel(state)}</span>
 				</div>
 			{/each}
 		</div>
 	</div>
 
 	{#if errorMsg}
-		<div class="error">{errorMsg}</div>
+		<p class="error">{errorMsg}</p>
 	{/if}
 
 	{#if !allDone}
-		<button type="button" class="primary" onclick={openPicker}>
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true">
-				<path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
-				<circle cx="12" cy="13" r="4" />
-			</svg>
-			<span>{primaryLabel}</span>
-		</button>
-		<button type="button" class="secondary" onclick={openPicker}>
-			{anyUploaded
-				? $t("awaiting_report.secondary_reupload")
-				: $t("awaiting_report.secondary_gallery")}
-		</button>
+		<div class="actions">
+			<button type="button" class="btn btn-primary w-full" onclick={openPicker}>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true">
+					<path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+					<circle cx="12" cy="13" r="4" />
+				</svg>
+				<span>{primaryLabel}</span>
+			</button>
+			<button type="button" class="btn btn-ghost btn-sm secondary" onclick={openPicker}>
+				{anyUploaded
+					? $t("awaiting_report.secondary_reupload")
+					: $t("awaiting_report.secondary_gallery")}
+			</button>
+		</div>
 	{/if}
 </div>
 
 <style>
-.card {
-	position: relative;
-	background: radial-gradient(ellipse at top right, rgba(147, 197, 253, 0.08) 0%, transparent 55%),
-		#131822;
-	border: 1px solid #1F2937;
-	border-left: 3px solid #93C5FD;
-	border-radius: 18px;
+.awaiting {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 	padding: 16px;
-	overflow: hidden;
 }
-.header {
-	display: flex; align-items: center; gap: 12px;
-	margin-bottom: 14px;
-}
-.avatar {
-	position: relative;
-	width: 44px; height: 44px;
-	border-radius: 50%;
-	overflow: visible;
-	flex-shrink: 0;
-	box-shadow: 0 0 0 2px rgba(147, 197, 253, 0.4);
-}
-.avatar img {
-	width: 100%; height: 100%;
-	border-radius: 50%;
-	object-fit: cover;
-}
-.avatar.thinking::after {
-	content: '';
-	position: absolute;
-	inset: -4px;
-	border-radius: 50%;
-	border: 2px solid transparent;
-	border-top-color: rgba(147, 197, 253, 0.6);
-	animation: thinkingSpin 1.8s linear infinite;
-}
-@keyframes thinkingSpin {
-	from { transform: rotate(0deg); }
-	to { transform: rotate(360deg); }
-}
-.info { flex: 1; min-width: 0; }
-.name {
-	font-size: 16px;
-	font-weight: 800;
-	color: #FFFFFF;
-	line-height: 1.1;
-	margin-bottom: 2px;
-}
-.role {
-	font-size: 11px;
-	color: #FBBF24;
-	font-weight: 600;
-	display: inline-flex; align-items: center; gap: 5px;
-}
-.role-dot {
-	width: 5px; height: 5px;
-	border-radius: 50%;
-	background: #FBBF24;
-	animation: rolePulse 1.5s ease-in-out infinite;
-}
-@keyframes rolePulse {
-	0%, 100% { opacity: 1; }
-	50% { opacity: 0.3; }
-}
-.quote {
-	font-size: 13px;
-	line-height: 1.6;
-	color: #D1D5DB;
-	background: rgba(147, 197, 253, 0.04);
-	border-left: 2px solid rgba(147, 197, 253, 0.25);
-	padding: 10px 12px;
-	border-radius: 0 8px 8px 0;
-	margin-bottom: 14px;
-	font-style: italic;
-}
-.toast {
-	background: rgba(132, 204, 22, 0.1);
-	border: 1px solid rgba(132, 204, 22, 0.3);
-	border-radius: 10px;
-	padding: 10px 12px;
-	margin-bottom: 14px;
-	display: flex; align-items: center; gap: 10px;
-	font-size: 11px;
-	color: #84CC16;
-}
-.toast-icon {
-	width: 22px; height: 22px;
-	border-radius: 50%;
-	background: rgba(132, 204, 22, 0.2);
-	display: flex; align-items: center; justify-content: center;
-	flex-shrink: 0;
-}
-.toast-text { flex: 1; line-height: 1.3; }
-.toast-text strong { color: #FFFFFF; font-weight: 700; }
-.stats-section { margin-bottom: 14px; }
-.stats-label {
-	display: flex; justify-content: space-between;
+
+/* ── Sophie ────────────────────────────────────────────────────────── */
+.head {
+	display: flex;
 	align-items: center;
-	font-size: 10px;
-	text-transform: uppercase;
-	letter-spacing: 0.1em;
-	font-weight: 700;
-	color: #9CA3AF;
-	margin-bottom: 10px;
+	gap: 12px;
 }
-.stats-counter {
-	color: #93C5FD;
-	font-variant-numeric: tabular-nums;
-}
-.counter-suffix { color: #6B7280; font-weight: 500; }
-.stepper {
-	display: grid;
-	grid-template-columns: 1fr 1fr 1fr;
-	gap: 0;
+
+.sophie {
 	position: relative;
-	padding: 0 4px;
+	width: 52px;
+	height: 52px;
+	flex-shrink: 0;
+	border-radius: var(--radius-avatar);
+	background: var(--color-sunken);
+	box-shadow: 0 0 0 2px var(--color-aqua);
 }
-.line {
+
+.sophie img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	border-radius: var(--radius-avatar);
+}
+
+/* An arc circling the photo while a screenshot is being read. */
+.sophie.thinking::after {
+	content: "";
 	position: absolute;
-	top: 14px;
-	left: 14%; right: 14%;
-	height: 2px;
-	background: rgba(255,255,255,0.05);
-	z-index: 0;
+	inset: -6px;
+	border: 2px solid transparent;
+	border-top-color: var(--color-aqua);
+	border-radius: 999px;
+	animation: spin 1.8s linear infinite;
 }
+
+.info {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	flex: 1;
+	min-width: 0;
+}
+
+.name {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 18px;
+	letter-spacing: 0.03em;
+	line-height: 1.1;
+	text-transform: uppercase;
+}
+
+.status {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--color-muted);
+	font-size: 13px;
+}
+
+.status-dot {
+	width: 7px;
+	height: 7px;
+	flex-shrink: 0;
+	border-radius: 999px;
+	background: var(--color-gold);
+	animation: blink 1.5s ease-in-out infinite;
+}
+
+.toast {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	border-radius: var(--radius-tile);
+	background: var(--color-win-soft);
+	color: var(--color-win);
+	font-size: 14px;
+}
+
+.toast-icon {
+	width: 24px;
+	height: 24px;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--radius-avatar);
+	background: var(--color-win);
+	color: var(--color-on-win);
+}
+
+.toast-text {
+	flex: 1;
+	line-height: 1.3;
+}
+
+.toast-text strong {
+	color: var(--color-ink);
+	font-weight: 700;
+}
+
+.quote {
+	margin: 0;
+	padding: 2px 0 2px 12px;
+	border-left: 3px solid var(--color-aqua);
+	font-style: italic;
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+/* ── Screenshot stepper ────────────────────────────────────────────── */
+.steps {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.steps-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+	color: var(--color-muted);
+}
+
+.counter {
+	color: var(--color-ink);
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 15px;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.counter-suffix {
+	color: var(--color-muted);
+	font-family: var(--font-sans);
+	font-weight: 500;
+	font-size: 13px;
+}
+
+.stepper {
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.line,
 .line-fill {
 	position: absolute;
-	top: 14px;
+	top: 15px;
 	left: 14%;
-	height: 2px;
-	background: linear-gradient(90deg, #84CC16, #65A30D);
-	border-radius: 1px;
-	z-index: 1;
+	height: 3px;
+	border-radius: var(--radius-bar);
+}
+
+.line {
+	right: 14%;
+	background: var(--color-track);
+}
+
+.line-fill {
+	background: var(--color-progress);
 	transition: width 0.4s ease;
 }
+
 .node {
-	display: flex; flex-direction: column;
-	align-items: center; gap: 6px;
 	position: relative;
-	z-index: 2;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	text-align: center;
 }
+
 .circle {
-	width: 30px; height: 30px;
-	border-radius: 50%;
-	display: flex; align-items: center; justify-content: center;
-	font-size: 11px;
-	font-weight: 800;
-	border: 2px solid #2A3142;
-	background: #1A1F2A;
-	color: #6B7280;
-	transition: background 0.3s, border-color 0.3s, color 0.3s, box-shadow 0.3s;
-}
-.circle.done {
-	background: linear-gradient(135deg, #84CC16, #65A30D);
-	color: white;
-	border-color: rgba(132, 204, 22, 0.4);
-	box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.12), 0 4px 10px rgba(132, 204, 22, 0.3);
-}
-.circle.processing {
 	position: relative;
-	background: rgba(147, 197, 253, 0.15);
-	color: #93C5FD;
-	border-color: rgba(147, 197, 253, 0.4);
-}
-.circle.processing::before {
-	content: '';
-	position: absolute;
-	inset: -4px;
-	border-radius: 50%;
-	border: 2px solid transparent;
-	border-top-color: rgba(147, 197, 253, 0.7);
-	animation: thinkingSpin 1.2s linear infinite;
-}
-.circle.active {
-	background: rgba(245, 158, 11, 0.18);
-	color: #FBBF24;
-	border-color: rgba(245, 158, 11, 0.5);
-	box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
-	animation: activeBreath 2s ease-in-out infinite;
-}
-@keyframes activeBreath {
-	0%, 100% { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12); }
-	50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.05); }
-}
-.label {
-	font-size: 10px;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--radius-avatar);
+	background: var(--color-sunken);
+	color: var(--color-ink);
+	box-shadow: inset 0 0 0 2px var(--color-line);
+	font-family: var(--font-cond);
 	font-weight: 700;
-	color: #6B7280;
-	text-align: center;
+	font-size: 14px;
+	transition:
+		background-color 0.3s,
+		color 0.3s,
+		box-shadow 0.3s;
 }
-.label.done { color: #84CC16; }
-.label.processing { color: #93C5FD; }
-.label.active { color: #FBBF24; }
-.sub {
-	font-size: 8px;
-	color: #4B5563;
-	text-align: center;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	font-weight: 600;
-	margin-top: -2px;
+
+.done .circle {
+	background: var(--color-win);
+	color: var(--color-on-win);
+	box-shadow: none;
 }
-.sub.done { color: #65A30D; }
-.sub.processing { color: #60A5FA; }
-.sub.active { color: #D97706; }
-.error {
-	background: rgba(226, 75, 74, 0.12);
-	border: 1px solid rgba(226, 75, 74, 0.3);
-	color: #E24B4A;
-	font-size: 11px;
-	padding: 8px 10px;
-	border-radius: 8px;
-	margin-bottom: 10px;
+
+.active .circle {
+	background: var(--color-gold);
+	color: var(--color-on-gold);
+	box-shadow: 0 0 0 4px var(--color-gold-soft);
+	animation: breathe 2s ease-in-out infinite;
 }
-.primary {
-	width: 100%;
-	background: linear-gradient(135deg, #93C5FD, #60A5FA);
-	color: #0F1419;
-	border: 0;
-	border-radius: 12px;
-	padding: 13px;
+
+.processing .circle {
+	background: var(--color-surface);
+	box-shadow: inset 0 0 0 2px var(--color-aqua);
+}
+
+.processing .circle::before {
+	content: "";
+	position: absolute;
+	inset: -5px;
+	border: 2px solid transparent;
+	border-top-color: var(--color-aqua);
+	border-radius: 999px;
+	animation: spin 1.2s linear infinite;
+}
+
+.node-label {
+	color: var(--color-muted);
+	font-weight: 700;
 	font-size: 13px;
-	font-weight: 800;
-	cursor: pointer;
-	display: flex; align-items: center; justify-content: center;
-	gap: 8px;
-	box-shadow: 0 4px 14px rgba(147, 197, 253, 0.3);
-	margin-bottom: 8px;
-	transition: transform 0.15s, opacity 0.15s;
 }
-.primary:hover:not(:disabled) { transform: translateY(-1px); }
-.secondary {
-	width: 100%;
-	background: none;
-	border: 0;
-	color: #6B7280;
+
+.done .node-label {
+	color: var(--color-win);
+}
+
+.active .node-label,
+.processing .node-label {
+	color: var(--color-ink);
+}
+
+.node-sub {
+	margin-top: -3px;
+	color: var(--color-muted);
+	font-family: var(--font-cond);
+	font-weight: 700;
 	font-size: 11px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
+.done .node-sub {
+	color: var(--color-win);
+}
+
+.error {
+	margin: 0;
+	padding: 10px 12px;
+	border-radius: var(--radius-tile);
+	background: var(--color-loss-soft);
+	color: var(--color-loss);
 	font-weight: 600;
-	padding: 8px;
-	cursor: pointer;
-	display: flex; align-items: center; justify-content: center;
-	gap: 5px;
+	font-size: 14px;
+}
+
+/* ── Actions ───────────────────────────────────────────────────────── */
+.actions {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+
+.secondary {
+	color: var(--color-muted);
+	font-weight: 600;
+	font-size: 13px;
 	text-decoration: underline;
 	text-underline-offset: 3px;
-	text-decoration-color: rgba(107, 114, 128, 0.4);
 }
-.secondary:hover { color: #D1D5DB; }
+
+.secondary:hover:not(:disabled) {
+	color: var(--color-ink);
+}
+
+@keyframes blink {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.3;
+	}
+}
+
+@keyframes breathe {
+	0%,
+	100% {
+		box-shadow: 0 0 0 4px var(--color-gold-soft);
+	}
+	50% {
+		box-shadow: 0 0 0 7px var(--color-gold-soft);
+	}
+}
+
+/* ── Design B: bold name, Sophie's line as a speech bubble ─────────── */
+:global([data-variant="b"]) .name {
+	font-weight: 800;
+	font-size: 21px;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+/* B: the shared `.bubble`; drop A's ruled quote, whose padding would
+ * otherwise win over the bubble's. */
+:global([data-variant="b"]) .quote {
+	padding: 14px 16px;
+	border-left: 0;
+	font-style: normal;
+	font-weight: 500;
+}
+
+:global([data-variant="b"]) .node-sub {
+	font-family: var(--font-sans);
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sophie.thinking::after,
+	.status-dot,
+	.active .circle,
+	.processing .circle::before {
+		animation: none;
+	}
+}
 </style>

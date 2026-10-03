@@ -1,26 +1,28 @@
 <script>
 /**
- * Dashed-border placeholder used in the awaiting/processing reporter
- * flow. Surfaces the upcoming section ("Timeline · sichtbar nach
- * Bericht") so the page hierarchy stays visible even before the
- * stats are uploaded.
+ * Dashed placeholder used in the awaiting/processing reporter flow.
+ * Surfaces the upcoming section ("Statistiken · sichtbar nach Bericht")
+ * so the page hierarchy stays visible even before the stats are
+ * uploaded. A white surface in both designs, so the muted text keeps
+ * its contrast on the A page grey and on the B pitch.
  *
- * @type {{ label: string }}
+ * @type {{ label: string, class?: string }}
  */
-let { label } = $props();
+let { label, class: className = "" } = $props();
 </script>
 
-<div class="placeholder">{label}</div>
+<p class="placeholder {className}">{label}</p>
 
 <style>
 .placeholder {
-	background: #131822;
-	border: 1px dashed #1F2937;
-	border-radius: 14px;
-	padding: 14px;
-	text-align: center;
-	font-size: 11px;
-	color: #4B5563;
+	margin: 0;
+	padding: 16px;
+	border: 1.5px dashed var(--color-line);
+	border-radius: var(--radius-card);
+	background: var(--color-surface);
+	color: var(--color-muted);
+	font-size: 13px;
 	font-style: italic;
+	text-align: center;
 }
 </style>

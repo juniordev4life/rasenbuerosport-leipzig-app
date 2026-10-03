@@ -39,14 +39,14 @@ A rating carried over from earlier seasons doesn't list anyone on its own: whoev
 
 ### Hero card
 
-The season leader (the top *qualified* player) gets a hero card: crown, rating, a sparkline of recent ratings, "+*N* seit Saisonstart" and — for the running season — "±*N* diese Woche", plus the W · D · L · games record and a 🔥 badge while on a win streak of 3 or more. For a closed season the label reads "*Edition*-Meister" instead of "Spitzenreiter".
+The season leader (the top *qualified* player) gets a hero card: rating, a sparkline of recent ratings, "+*N* seit Saisonstart" and — for the running season — "±*N* diese Woche", plus the W · D · L · games record and a gold streak chip (lightning icon and length) while on a win streak of 3 or more. For a closed season the label reads "*Edition*-Meister" instead of "Spitzenreiter".
 
 ### Player display
 
-- **Rank** with medal icons (🥇🥈🥉) for the top 3
+- **Rank** as a number; in design B the top 3 get gold, silver and bronze badges
 - **Avatar** and **username**
-- **Badges**: 🔥 win streak (3+ in a row), **Ich** on your own entry
-- **Stats line**: Siege · Unentschieden · Niederlagen · Spiele · Tore for the season
+- **Badges**: a lightning chip with the length of a win streak (3+ in a row), **Ich** on your own entry
+- **Stats line**: Spiele · S U N for the season; on desktop the ranking is a table that adds the goals
 - **Sparkline** of the recent rating curve
 - **Rating** with a trend pill: the season delta when sorted by **Aktuell**, the form delta when sorted by **Form**
 

@@ -1,5 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import RecapCard from "../RecapCard.svelte";
+import RecapSlide from "../RecapSlide.svelte";
 
 /**
  * Slide 4 — when you play: favorite weekday, "lucky day", lunch-break
@@ -11,6 +13,11 @@ let { recap } = $props();
 
 const { t } = getTranslate();
 const stats = $derived(recap.stats ?? {});
+
+const hasLunchShare = $derived(typeof stats.lunch_break_share === "number");
+const hasFacts = $derived(
+	!!(stats.best_weekday || hasLunchShare || stats.favorite_hour),
+);
 
 /**
  * Localised weekday name for an ISO weekday (1 = Monday … 7 = Sunday).
@@ -29,51 +36,122 @@ function hourLabel(hour) {
 }
 </script>
 
-<div class="flex flex-col items-center text-center gap-4 w-full">
-	<h2 class="text-xs uppercase tracking-[0.2em] text-white/50 font-bold">
-		{$t("season_recap.timing.title")}
-	</h2>
-
+<RecapSlide title={$t("season_recap.timing.title")}>
 	{#if stats.favorite_weekday}
-		<div class="w-full rounded-xl bg-white/5 p-4">
-			<div class="text-2xl font-extrabold">{weekdayName(stats.favorite_weekday.weekday)}</div>
-			<div class="text-[12px] text-white/50 mt-1">
-				{$t("season_recap.timing.favorite_weekday", { count: stats.favorite_weekday.games })}
-			</div>
-		</div>
-	{/if}
-
-	{#if stats.best_weekday}
-		<div class="w-full rounded-xl bg-white/5 p-4">
-			<div class="text-[11px] uppercase tracking-wide text-[#84CC16] font-bold">
-				{$t("season_recap.timing.lucky_day")}
-			</div>
-			<div class="text-xl font-extrabold mt-1">{weekdayName(stats.best_weekday.weekday)}</div>
-			<div class="text-[12px] text-white/50 mt-1">
-				{$t("season_recap.timing.win_rate", {
-					percent: Math.round(stats.best_weekday.win_rate * 100),
-					count: stats.best_weekday.games,
+		<RecapCard>
+			<p class="weekday">{weekdayName(stats.favorite_weekday.weekday)}</p>
+			<p class="recap-note">
+				{$t("season_recap.timing.favorite_weekday", {
+					count: stats.favorite_weekday.games,
 				})}
-			</div>
-		</div>
+			</p>
+		</RecapCard>
 	{/if}
 
-	{#if typeof stats.lunch_break_share === "number"}
-		<div class="w-full rounded-xl bg-white/5 p-4">
-			<div class="text-lg font-extrabold">
-				{$t("season_recap.timing.lunch_break", {
-					percent: Math.round(stats.lunch_break_share * 100),
-				})}
-			</div>
-		</div>
+	{#if hasFacts}
+		<RecapCard panel>
+			<ul class="facts rows">
+				{#if stats.best_weekday}
+					<li class="fact">
+						<span class="chip chip-gold">{$t("season_recap.timing.lucky_day")}</span>
+						<span class="fact-main">{weekdayName(stats.best_weekday.weekday)}</span>
+						<span class="fact-sub">
+							{$t("season_recap.timing.win_rate", {
+								percent: Math.round(stats.best_weekday.win_rate * 100),
+								count: stats.best_weekday.games,
+							})}
+						</span>
+					</li>
+				{/if}
+				{#if hasLunchShare}
+					<li class="fact">
+						<span class="fact-text">
+							{$t("season_recap.timing.lunch_break", {
+								percent: Math.round(stats.lunch_break_share * 100),
+							})}
+						</span>
+					</li>
+				{/if}
+				{#if stats.favorite_hour}
+					<li class="fact">
+						<span class="fact-sub">
+							{$t("season_recap.timing.favorite_hour", {
+								hour: hourLabel(stats.favorite_hour.hour),
+								count: stats.favorite_hour.games,
+							})}
+						</span>
+					</li>
+				{/if}
+			</ul>
+		</RecapCard>
 	{/if}
+</RecapSlide>
 
-	{#if stats.favorite_hour}
-		<p class="text-[12px] text-white/50">
-			{$t("season_recap.timing.favorite_hour", {
-				hour: hourLabel(stats.favorite_hour.hour),
-				count: stats.favorite_hour.games,
-			})}
-		</p>
-	{/if}
-</div>
+<style>
+.weekday {
+	margin: 0;
+	font-family: var(--font-num);
+	font-weight: var(--num-weight);
+	font-size: min(60px, 15cqw);
+	line-height: 0.9;
+	text-transform: var(--title-case);
+	overflow-wrap: anywhere;
+}
+
+.facts {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.fact {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
+	padding: 12px 0;
+}
+
+.fact:first-child {
+	padding-top: 0;
+}
+
+.fact:last-child {
+	padding-bottom: 0;
+}
+
+.fact .chip {
+	margin-bottom: 2px;
+}
+
+.fact-main {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 24px;
+	line-height: 1.05;
+	text-transform: var(--title-case);
+}
+
+.fact-text {
+	font-weight: 700;
+	font-size: 16px;
+	line-height: 1.35;
+}
+
+.fact-sub {
+	font-size: 14px;
+	line-height: 1.35;
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .weekday {
+	font-size: min(48px, 13cqw);
+	color: var(--color-ink);
+}
+
+:global([data-variant="b"]) .fact-main {
+	font-weight: 800;
+}
+</style>

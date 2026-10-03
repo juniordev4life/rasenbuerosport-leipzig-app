@@ -9,8 +9,10 @@
  * Fully controlled — the caller owns the active value, which keeps URL
  * synchronisation on the page level straightforward.
  *
+ * An option with `sub` renders as two lines (title + caption).
+ *
  * @type {{
- *   options: Array<{ value: string, label: string }>,
+ *   options: Array<{ value: string, label: string, sub?: string }>,
  *   value: string,
  *   onChange: (next: string) => void,
  *   ariaLabel: string,
@@ -38,10 +40,16 @@ let {
 			type="button"
 			role="tab"
 			class="seg-option"
+			class:seg-option-2={option.sub}
 			aria-selected={option.value === value}
 			onclick={() => onChange(option.value)}
 		>
-			{option.label}
+			{#if option.sub}
+				<span class="seg-title">{option.label}</span>
+				<span class="seg-sub">{option.sub}</span>
+			{:else}
+				{option.label}
+			{/if}
 		</button>
 	{/each}
 </div>

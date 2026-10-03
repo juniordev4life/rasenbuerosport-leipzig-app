@@ -185,8 +185,6 @@ function handleKeydown(event) {
 	aria-valuetext={valueText?.(value)}
 	onkeydown={handleKeydown}
 >
-	<div class="picker-fade left" aria-hidden="true"></div>
-	<div class="picker-fade right" aria-hidden="true"></div>
 	<div class="picker-selection-line" aria-hidden="true"></div>
 	<div class="picker-scroller" bind:this={scrollerEl} onscroll={handleScroll}>
 		{#each numbers as n (n)}
@@ -198,13 +196,15 @@ function handleKeydown(event) {
 </div>
 
 <style>
+/* A sunken strip with a red centre line; the active value sits on the
+ * line in display type. Square in A, rounded in B (via --radius-tile). */
 .step-scroller {
 	position: relative;
-	background: rgba(0, 0, 0, 0.4);
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	border-radius: 8px;
+	height: 40px;
 	overflow: hidden;
-	height: 36px;
+	background: var(--color-sunken);
+	border: 1px solid var(--color-line);
+	border-radius: var(--radius-tile);
 }
 
 .picker-selection-line {
@@ -212,32 +212,12 @@ function handleKeydown(event) {
 	top: 6px;
 	bottom: 6px;
 	left: 50%;
-	width: 1px;
+	width: 2px;
 	transform: translateX(-50%);
 	z-index: 2;
 	pointer-events: none;
-	background: linear-gradient(180deg,
-		transparent,
-		rgba(226, 75, 74, 0.5),
-		rgba(226, 75, 74, 0.5),
-		transparent);
-}
-
-.picker-fade {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	width: 60px;
-	z-index: 3;
-	pointer-events: none;
-}
-.picker-fade.left {
-	left: 0;
-	background: linear-gradient(90deg, rgba(0, 0, 0, 0.6), transparent);
-}
-.picker-fade.right {
-	right: 0;
-	background: linear-gradient(270deg, rgba(0, 0, 0, 0.6), transparent);
+	background: var(--color-brand);
+	opacity: 0.35;
 }
 
 .picker-scroller {
@@ -262,22 +242,28 @@ function handleKeydown(event) {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 11px;
+	font-family: var(--font-cond);
+	font-size: 12px;
 	font-weight: 600;
-	color: #6B7280;
+	color: var(--color-muted);
 	scroll-snap-align: center;
-	transition: font-size 0.2s, color 0.2s;
+	transition:
+		font-size 0.2s,
+		color 0.2s;
 	font-variant-numeric: tabular-nums;
 	letter-spacing: 0;
 }
-.picker-number.active {
-	color: #ffffff;
-	font-size: 18px;
-	font-weight: 800;
-}
 .picker-number.near {
-	color: #9CA3AF;
-	font-size: 13px;
+	color: var(--color-ink);
+	font-size: 14px;
 	font-weight: 700;
+}
+.picker-number.active {
+	position: relative;
+	z-index: 3;
+	color: var(--color-ink);
+	font-family: var(--font-num);
+	font-weight: var(--num-weight);
+	font-size: 20px;
 }
 </style>

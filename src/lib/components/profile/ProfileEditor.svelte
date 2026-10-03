@@ -2,7 +2,9 @@
 import { getTranslate } from "@tolgee/svelte";
 import { updateProfile } from "firebase/auth";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import CheckIcon from "$lib/components/icons/CheckIcon.svelte";
 import Button from "$lib/components/ui/Button.svelte";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
 import { auth, storage } from "$lib/config/firebase.config.js";
 import { AVATAR_MAX_BYTES } from "$lib/constants/upload.constants.js";
 import { patch } from "$lib/services/api.services.js";
@@ -10,7 +12,10 @@ import { user } from "$lib/stores/auth.stores.js";
 import { isUploadableImageType } from "$lib/utils/image.utils.js";
 
 /**
- * ProfileEditor - Inline edit form for username and avatar.
+ * ProfileEditor - Inline edit form for username and avatar, as a card.
+ * The heading comes from the surrounding section (Settings). The avatar
+ * is a labelled file input: tap or click the picture, or focus it with
+ * the keyboard and press Enter/Space.
  *
  * @param {string} currentUsername - Current username
  * @param {string|null} currentAvatarUrl - Current avatar URL
@@ -122,80 +127,168 @@ async function handleSave() {
 		saving = false;
 	}
 }
-
-const initial = $derived(username?.charAt(0)?.toUpperCase() || "?");
 </script>
 
-<div class="bg-surface border border-line rounded-lg p-5 flex flex-col gap-4">
-	<h3 class="text-sm font-bold text-ink text-center">
-		{$t("profile.edit.title")}
-	</h3>
-
-	<!-- Avatar Preview + Upload -->
-	<div class="flex flex-col items-center gap-2">
-		<label for="avatar-upload" class="cursor-pointer group relative">
-			{#if avatarPreview}
-				<img referrerpolicy="no-referrer"
-					src={avatarPreview}
-					alt="Avatar"
-					class="w-20 h-20 rounded-full object-cover ring-2 ring-line group-hover:ring-brand transition-colors"
-				/>
-			{:else}
-				<div
-					class="w-20 h-20 rounded-full bg-brand flex items-center justify-center text-3xl font-bold text-white ring-2 ring-line group-hover:ring-brand transition-colors"
-				>
-					{initial}
-				</div>
-			{/if}
-			<!-- Camera overlay -->
-			<div class="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-					<path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+<div class="card editor">
+	<div class="avatar-col">
+		<label class="avatar-pick">
+			<PlayerAvatar
+				player={{ name: username, avatarUrl: avatarPreview }}
+				size={88}
+				self
+			/>
+			<span class="camera" aria-hidden="true">
+				<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+					<path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
 				</svg>
-			</div>
+			</span>
+			<input
+				id="avatar-upload"
+				type="file"
+				accept="image/*"
+				onchange={handleFileChange}
+				class="sr-only"
+				aria-label={$t("profile.edit.avatar_hint")}
+			/>
 		</label>
-		<input
-			id="avatar-upload"
-			type="file"
-			accept="image/*"
-			onchange={handleFileChange}
-			class="hidden"
-		/>
-		<p class="text-[10px] text-muted">{$t("profile.edit.avatar_hint")}</p>
+		<p class="hint">{$t("profile.edit.avatar_hint")}</p>
 	</div>
 
-	<!-- Username Input -->
-	<div class="flex flex-col gap-1">
-		<label for="username-input" class="text-xs text-muted font-medium">
-			{$t("profile.edit.username_label")}
-		</label>
-		<input
-			id="username-input"
-			type="text"
-			bind:value={username}
-			maxlength="30"
-			class="w-full bg-sunken border border-line rounded-lg px-3 py-2.5 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-		/>
-	</div>
+	<div class="fields">
+		<div class="flex flex-col gap-1.5">
+			<label for="username-input" class="field-label">
+				{$t("profile.edit.username_label")}
+			</label>
+			<input
+				id="username-input"
+				type="text"
+				bind:value={username}
+				maxlength="30"
+				class="field"
+			/>
+		</div>
 
-	<!-- Error -->
-	{#if error}
-		<p class="text-xs text-loss text-center">{error}</p>
-	{/if}
+		{#if error}
+			<p class="error" role="alert">{error}</p>
+		{/if}
 
-	<!-- Buttons -->
-	<div class="flex items-center gap-3">
-		{#if hasCancel}
-			<Button variant="secondary" onclick={onClose} class="flex-1">
-				{$t("profile.edit.cancel")}
+		<div class="actions">
+			{#if hasCancel}
+				<Button variant="secondary" onclick={onClose} class="flex-1">
+					{$t("profile.edit.cancel")}
+				</Button>
+			{/if}
+			<Button variant="primary" onclick={handleSave} loading={saving} class="flex-1">
+				{saving ? $t("profile.edit.saving") : $t("profile.edit.save")}
 			</Button>
-		{/if}
-		<Button variant="primary" onclick={handleSave} loading={saving} class="flex-1">
-			{saving ? $t("profile.edit.saving") : $t("profile.edit.save")}
-		</Button>
-		{#if savedHint}
-			<span class="text-xs text-win font-semibold">{$t("profile.edit.saved")}</span>
-		{/if}
+		</div>
+
+		<p class="saved" role="status">
+			{#if savedHint}
+				<CheckIcon size={14} strokeWidth={3} />
+				{$t("profile.edit.saved")}
+			{/if}
+		</p>
 	</div>
 </div>
+
+<style>
+.editor {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 18px;
+	padding: 20px 16px 16px;
+}
+
+.avatar-col {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+}
+
+/* The picture is the file picker; the input stays focusable (sr-only)
+ * and the visible focus ring sits on the picture. */
+.avatar-pick {
+	position: relative;
+	display: inline-flex;
+	border-radius: var(--radius-avatar);
+	cursor: pointer;
+}
+
+.avatar-pick:has(input:focus-visible) {
+	outline: 2px solid var(--color-navy);
+	outline-offset: 3px;
+}
+
+:global([data-variant="b"]) .avatar-pick:has(input:focus-visible) {
+	outline-color: var(--color-gold);
+}
+
+.camera {
+	position: absolute;
+	right: -6px;
+	bottom: -6px;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 2px solid var(--color-surface);
+	border-radius: var(--radius-badge);
+	background: var(--color-navy);
+	color: var(--color-on-navy);
+	transition: background-color 120ms;
+}
+
+.avatar-pick:hover .camera {
+	background: var(--color-brand);
+	color: var(--color-on-brand);
+}
+
+.hint {
+	margin: 0;
+	font-size: 12px;
+	text-align: center;
+	color: var(--color-muted);
+}
+
+.fields {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.field-label {
+	font-weight: 700;
+	font-size: 14px;
+}
+
+.error {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color-loss);
+}
+
+.actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+/* Reserved line, so the "saved" note does not shift the card. */
+.saved {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 18px;
+	margin: -4px 0 0;
+	font-weight: 700;
+	font-size: 13px;
+	color: var(--color-win);
+}
+</style>

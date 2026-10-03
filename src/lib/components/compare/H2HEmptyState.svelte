@@ -1,11 +1,12 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import BallIcon from "$lib/components/icons/BallIcon.svelte";
+import FootballIcon from "$lib/components/icons/FootballIcon.svelte";
 
 /**
- * Empty state shown when two players have never faced each other
- * directly. BallIcon, friendly headline, body text and a CTA back
- * to the selection screen.
+ * Shown when two players have never faced each other directly: a
+ * ball, a friendly headline, a short note and a button back to the
+ * selection screen. Built on the shared `.notice`; the headline is set
+ * larger in the condensed face.
  *
  * @type {{
  *   playerAName: string,
@@ -18,57 +19,35 @@ let { playerAName, playerBName, onBack } = $props();
 const { t } = getTranslate();
 </script>
 
-<div class="empty">
-	<div class="ball-icon" aria-hidden="true">
-		<BallIcon size={56} strokeWidth={1.6} />
-	</div>
-	<div class="headline">
+<div class="card notice">
+	<FootballIcon size={56} />
+	<p class="notice-title headline">
 		{$t("compare.empty_headline", { a: playerAName, b: playerBName })}
-	</div>
-	<div class="body">{$t("compare.empty_body")}</div>
-	<button type="button" class="cta" onclick={onBack}>
+	</p>
+	<p class="body">{$t("compare.empty_body")}</p>
+	<button type="button" class="btn btn-secondary" onclick={onBack}>
 		{$t("compare.back_to_selection")}
 	</button>
 </div>
 
 <style>
-.empty {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 18px;
-	padding: 32px 20px;
-	text-align: center;
-	display: flex; flex-direction: column;
-	align-items: center;
-	gap: 12px;
-}
-.ball-icon {
-	color: var(--color-muted);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
 .headline {
-	font-size: 16px;
-	font-weight: 800;
-	color: #FFFFFF;
+	max-width: 22rem;
+	font-family: var(--font-cond);
+	font-size: 20px;
+	line-height: 1.15;
+	text-transform: var(--label-case);
+	letter-spacing: var(--label-tracking);
+	text-wrap: balance;
 }
+
 .body {
-	font-size: 12px;
-	color: #9CA3AF;
-	line-height: 1.5;
-	max-width: 280px;
+	max-width: 20rem;
+	margin-bottom: 6px;
 }
-.cta {
-	margin-top: 8px;
-	background: rgba(6, 182, 212, 0.12);
-	border: 1px solid rgba(6, 182, 212, 0.4);
-	color: #06B6D4;
-	font-size: 13px;
-	font-weight: 700;
-	padding: 10px 18px;
-	border-radius: 999px;
-	cursor: pointer;
+
+:global([data-variant="b"]) .headline {
+	font-weight: 800;
+	font-size: 22px;
 }
-.cta:hover { background: rgba(6, 182, 212, 0.2); }
 </style>

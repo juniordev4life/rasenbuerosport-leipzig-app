@@ -5,11 +5,15 @@
  * title and the content — cards inside it lose their own frame, so a
  * child can always render a plain `.card`.
  *
+ * `aside` sits at the end of the title row, before the action link (an
+ * InfoTip, a count).
+ *
  * @type {{
  *   title: string,
  *   href?: string|null,
  *   actionLabel?: string|null,
  *   icon?: import('svelte').Snippet,
+ *   aside?: import('svelte').Snippet,
  *   children: import('svelte').Snippet,
  *   class?: string,
  * }}
@@ -19,6 +23,7 @@ let {
 	href = null,
 	actionLabel = null,
 	icon,
+	aside,
 	children,
 	class: className = "",
 } = $props();
@@ -30,6 +35,9 @@ let {
 			<span class="section-icon">{@render icon()}</span>
 		{/if}
 		<h2 class="section-title flex-1 min-w-0">{title}</h2>
+		{#if aside}
+			<span class="ui-section-aside">{@render aside()}</span>
+		{/if}
 		{#if href && actionLabel}
 			<a {href} class="link shrink-0">{actionLabel}</a>
 		{/if}
@@ -49,6 +57,13 @@ let {
 	display: flex;
 	align-items: baseline;
 	gap: 10px;
+}
+
+.ui-section-aside {
+	display: inline-flex;
+	align-self: center;
+	flex-shrink: 0;
+	color: var(--section-color);
 }
 
 :global([data-variant="b"]) .ui-section {

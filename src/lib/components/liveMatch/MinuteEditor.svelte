@@ -185,20 +185,39 @@ const goalTypeLabel = $derived.by(() => {
 });
 </script>
 
-<form class="flex flex-col gap-1.5 h-full" novalidate onsubmit={handleSubmit}>
-	<div class="flex items-center justify-between gap-2">
-		<span class="inline-flex items-center gap-1.5 text-[11px] tracking-[0.06em] uppercase font-bold text-muted truncate">
+{#snippet goalTypeIcon(type)}
+	<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+		{#if type === GOAL_TYPE.CORNER}
+			<line x1="4" y1="21" x2="4" y2="3" />
+			<path d="M4 3h12l-3 4 3 4H4" />
+		{:else if type === GOAL_TYPE.FREEKICK}
+			<circle cx="12" cy="12" r="9" />
+			<circle cx="12" cy="12" r="5" />
+			<circle cx="12" cy="12" r="1.5" fill="currentColor" />
+		{:else if type === GOAL_TYPE.PENALTY}
+			<rect x="3" y="6" width="18" height="12" rx="1" />
+			<line x1="3" y1="10" x2="21" y2="10" />
+			<line x1="7" y1="6" x2="7" y2="18" />
+			<line x1="12" y1="6" x2="12" y2="18" />
+			<line x1="17" y1="6" x2="17" y2="18" />
+		{:else}
+			<circle cx="12" cy="12" r="9" />
+			<path d="M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13" />
+		{/if}
+	</svg>
+{/snippet}
+
+<form class="editor" novalidate onsubmit={handleSubmit}>
+	<div class="editor-head">
+		<span class="kind label">
 			{#if labelKind.variant === "goal"}
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
-					<circle cx="12" cy="12" r="9" />
-					<path d="M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13" />
-				</svg>
+				{@render goalTypeIcon(GOAL_TYPE.OPEN_PLAY)}
 			{:else if labelKind.variant === "card-yellow"}
-				<span class="inline-block" aria-hidden="true" style="width: 9px; height: 12px; background: #F59E0B; border-radius: 2px;"></span>
+				<span class="card-shape yellow" aria-hidden="true"></span>
 			{:else if labelKind.variant === "card-red"}
-				<span class="inline-block" aria-hidden="true" style="width: 9px; height: 12px; background: #E24B4A; border-radius: 2px;"></span>
+				<span class="card-shape red" aria-hidden="true"></span>
 			{:else if labelKind.variant === "miss"}
-				<svg viewBox="0 0 24 24" fill="none" stroke="#E24B4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true">
+				<svg class="text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true">
 					<line x1="18" y1="6" x2="6" y2="18" />
 					<line x1="6" y1="6" x2="18" y2="18" />
 				</svg>
@@ -210,36 +229,12 @@ const goalTypeLabel = $derived.by(() => {
 				type="button"
 				onclick={onGoalTypeClick}
 				data-onboarding="live-goaltype-pill"
-				class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sunken border border-line text-[11px] font-semibold whitespace-nowrap"
+				class="goal-type"
 				aria-label={$t("new_game.goal_type_title")}
 			>
-				{#if goalType === GOAL_TYPE.CORNER}
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true">
-						<line x1="4" y1="21" x2="4" y2="3" />
-						<path d="M4 3h12l-3 4 3 4H4" />
-					</svg>
-				{:else if goalType === GOAL_TYPE.FREEKICK}
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true">
-						<circle cx="12" cy="12" r="9" />
-						<circle cx="12" cy="12" r="5" />
-						<circle cx="12" cy="12" r="1.5" fill="currentColor" />
-					</svg>
-				{:else if goalType === GOAL_TYPE.PENALTY}
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true">
-						<rect x="3" y="6" width="18" height="12" rx="1" />
-						<line x1="3" y1="10" x2="21" y2="10" />
-						<line x1="7" y1="6" x2="7" y2="18" />
-						<line x1="12" y1="6" x2="12" y2="18" />
-						<line x1="17" y1="6" x2="17" y2="18" />
-					</svg>
-				{:else}
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true">
-						<circle cx="12" cy="12" r="9" />
-						<path d="M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13" />
-					</svg>
-				{/if}
+				{@render goalTypeIcon(goalType)}
 				<span class="truncate max-w-[80px]">{goalTypeLabel}</span>
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="8" height="8" aria-hidden="true">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="10" height="10" aria-hidden="true">
 					<polyline points="6 9 12 15 18 9" />
 				</svg>
 			</button>
@@ -248,7 +243,7 @@ const goalTypeLabel = $derived.by(() => {
 
 	<div class="flex items-end gap-2">
 		<div class="flex flex-col gap-1 flex-1 min-w-0">
-			<label for="{uid}-minute" class="field-label">
+			<label for="{uid}-minute" class="field-label label">
 				{$t("live_match.editor.minute_label")}
 			</label>
 			<div class="relative">
@@ -266,17 +261,17 @@ const goalTypeLabel = $derived.by(() => {
 					onfocus={selectAll}
 					aria-invalid={showError && timeError.reason !== "stoppage_range"}
 					aria-describedby="{uid}-hint"
-					class="time-input minute bg-sunken text-ink {showError && timeError.reason !== 'stoppage_range' ? 'border-loss' : 'border-line'}"
+					class="field time-input minute"
 				/>
-				<span class="time-suffix text-muted" aria-hidden="true">'</span>
+				<span class="time-suffix" aria-hidden="true">'</span>
 			</div>
 		</div>
-		<div class="flex flex-col gap-1 w-[76px] shrink-0 transition-opacity {stoppageEnabled ? '' : 'opacity-40'}">
-			<label for="{uid}-stoppage" class="field-label">
+		<div class="stoppage-col" class:locked={!stoppageEnabled}>
+			<label for="{uid}-stoppage" class="field-label label">
 				{$t("live_match.editor.stoppage_label")}
 			</label>
 			<div class="relative">
-				<span class="time-prefix text-muted" aria-hidden="true">+</span>
+				<span class="time-prefix" aria-hidden="true">+</span>
 				<input
 					bind:this={stoppageInput}
 					id="{uid}-stoppage"
@@ -292,29 +287,25 @@ const goalTypeLabel = $derived.by(() => {
 					onfocus={selectAll}
 					aria-invalid={showError && timeError.reason === "stoppage_range"}
 					aria-describedby="{uid}-hint"
-					class="time-input stoppage bg-sunken text-ink {showError && timeError.reason === 'stoppage_range' ? 'border-loss' : 'border-line'}"
+					class="field time-input stoppage"
 				/>
 			</div>
 		</div>
 	</div>
 
-	<p
-		id="{uid}-hint"
-		class="min-h-[14px] text-[11px] leading-[14px] truncate {showError ? 'text-loss font-semibold' : 'text-muted'}"
-		aria-live="polite"
-	>
+	<p id="{uid}-hint" class="hint" class:error={showError} aria-live="polite">
 		{hintText}
 	</p>
 
 	<div class="confirm-row">
-		<button type="button" class="confirm-btn cancel" onclick={onCancel}>
+		<button type="button" class="btn btn-secondary btn-sm" onclick={onCancel}>
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true">
 				<line x1="18" y1="6" x2="6" y2="18" />
 				<line x1="6" y1="6" x2="18" y2="18" />
 			</svg>
 			<span>{$t("live_match.editor.cancel")}</span>
 		</button>
-		<button type="submit" class="confirm-btn save" disabled={saving}>
+		<button type="submit" class="btn btn-sm btn-confirm" disabled={saving}>
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true">
 				<polyline points="20 6 9 17 4 12" />
 			</svg>
@@ -324,85 +315,156 @@ const goalTypeLabel = $derived.by(() => {
 </form>
 
 <style>
-.field-label {
-	font-size: 10px;
-	line-height: 12px;
-	font-weight: 700;
-	letter-spacing: 0.06em;
-	text-transform: uppercase;
+.editor {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	height: 100%;
+}
+
+.editor-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.kind {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
 	color: var(--color-muted);
 }
+
+.card-shape {
+	display: inline-block;
+	flex-shrink: 0;
+	width: 9px;
+	height: 12px;
+	border-radius: 2px;
+}
+
+.card-shape.yellow {
+	background: var(--color-gold);
+}
+
+.card-shape.red {
+	background: var(--color-brand);
+}
+
+/* Tappable goal-type pill: opens GoalTypeDialog. */
+.goal-type {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	min-height: 32px;
+	padding: 0 10px;
+	border: 1px solid var(--color-line);
+	border-radius: var(--radius-control);
+	background: var(--color-sunken);
+	color: var(--color-ink);
+	font-size: 12px;
+	font-weight: 700;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.goal-type:hover {
+	border-color: var(--color-navy);
+}
+
+.field-label {
+	color: var(--color-muted);
+	font-size: 11px;
+}
+
+.stoppage-col {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	width: 80px;
+	flex-shrink: 0;
+	transition: opacity 150ms;
+}
+
+.stoppage-col.locked {
+	opacity: 0.45;
+}
+
+/* Big typed numbers on the shared .field. */
 .time-input {
-	width: 100%;
-	height: 48px;
-	border-width: 1px;
-	border-radius: 12px;
+	height: 50px;
 	text-align: center;
-	font-weight: 800;
+	font-family: var(--font-num);
+	font-weight: var(--num-weight);
 	font-variant-numeric: tabular-nums;
 }
+
 .time-input.minute {
-	font-size: 26px;
-	padding: 0 24px;
+	font-size: 28px;
+	padding: 0 26px;
 }
+
 .time-input.stoppage {
-	font-size: 20px;
+	font-size: 22px;
 	padding: 0 8px 0 20px;
 }
+
 .time-input:disabled {
 	cursor: not-allowed;
+	background: var(--color-sunken);
 }
+
+.time-input[aria-invalid="true"] {
+	border-color: var(--color-loss);
+	box-shadow: 0 0 0 1px var(--color-loss);
+}
+
 .time-suffix,
 .time-prefix {
 	position: absolute;
 	top: 50%;
 	transform: translateY(-50%);
+	color: var(--color-muted);
 	font-weight: 700;
 	pointer-events: none;
 }
+
 .time-suffix {
 	right: 14px;
 	font-size: 22px;
 }
+
 .time-prefix {
 	left: 10px;
 	font-size: 16px;
 }
-.confirm-row {
-	display: flex;
-	gap: 8px;
-	margin-top: 10px;
-	padding-top: 8px;
-}
-.confirm-btn {
-	flex: 1;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	border-radius: 12px;
-	padding: 11px;
+
+.hint {
+	min-height: 15px;
+	margin: 0;
+	overflow: hidden;
+	color: var(--color-muted);
 	font-size: 12px;
-	font-weight: 800;
-	border: 1px solid transparent;
-	cursor: pointer;
-	transition: transform 0.1s, opacity 0.15s, background-color 0.15s, border-color 0.15s;
+	line-height: 15px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
-.confirm-btn:active:not(:disabled) { transform: scale(0.98); }
-.confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.confirm-btn.cancel {
-	background: #131822;
-	border-color: #1F2937;
-	color: #D1D5DB;
+
+.hint.error {
+	color: var(--color-loss);
+	font-weight: 700;
 }
-.confirm-btn.cancel:hover:not(:disabled) {
-	background: #1A1F2A;
-	border-color: #2A3142;
+
+.confirm-row {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+	margin-top: auto;
 }
-.confirm-btn.save {
-	background: linear-gradient(135deg, #84CC16, #65A30D);
-	color: white;
-	box-shadow: 0 6px 18px rgba(132, 204, 22, 0.4);
+
+.confirm-row .btn {
+	padding: 0 10px;
 }
-.confirm-btn.save:hover:not(:disabled) { transform: translateY(-1px); }
 </style>

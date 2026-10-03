@@ -1,8 +1,14 @@
 <script>
+import CheckIcon from "$lib/components/icons/CheckIcon.svelte";
+import Sheet from "$lib/components/ui/Sheet.svelte";
+
 /**
- * Generic bottom-sheet for selecting one option from a list. Used for
- * all three Historie filters (Wer / Zeitraum / Ergebnis) so the sheet
- * styling stays consistent.
+ * Picker for one Historie filter (Wer / Zeitraum / Ergebnis) on the
+ * shared Sheet, which brings the portal, scrim, Escape and focus
+ * handling. One row per option, the current one marked with a check;
+ * picking an option applies it and closes the sheet. Design A: rows
+ * with hairlines, the current one in red. Design B: rounded tiles, the
+ * current one navy.
  *
  * @type {{
  *   title: string,
@@ -18,92 +24,84 @@ function pick(v) {
 	onSelect(v);
 	onClose();
 }
-
-function handleKey(event) {
-	if (event.key === "Escape") onClose();
-}
 </script>
 
-<svelte:window onkeydown={handleKey} />
-
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="backdrop" onclick={onClose} role="dialog" aria-modal="true">
-	<div class="sheet" onclick={(e) => e.stopPropagation()}>
-		<div class="grabber" aria-hidden="true"></div>
-		<div class="title">{title}</div>
-		<div class="options">
-			{#each options as opt (opt.value)}
-				<button
-					type="button"
-					class="option"
-					class:active={opt.value === value}
-					onclick={() => pick(opt.value)}
-				>
-					<span>{opt.label}</span>
-					{#if opt.value === value}
-						<span class="check" aria-hidden="true">✓</span>
-					{/if}
-				</button>
-			{/each}
-		</div>
+<Sheet {title} {onClose} size="sm">
+	<div class="options">
+		{#each options as opt (opt.value)}
+			{@const selected = opt.value === value}
+			<button
+				type="button"
+				class="option"
+				class:selected
+				aria-pressed={selected}
+				onclick={() => pick(opt.value)}
+			>
+				<span class="min-w-0">{opt.label}</span>
+				{#if selected}
+					<CheckIcon size={18} />
+				{/if}
+			</button>
+		{/each}
 	</div>
-</div>
+</Sheet>
 
 <style>
-.backdrop {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.6);
-	z-index: 60;
+.options {
 	display: flex;
-	align-items: flex-end;
-	justify-content: center;
+	flex-direction: column;
 }
-.sheet {
-	width: 100%;
-	max-width: 480px;
-	background: #1A1F2A;
-	border-top-left-radius: 18px;
-	border-top-right-radius: 18px;
-	padding: 12px 14px 18px;
-	max-height: 75vh;
-	overflow-y: auto;
-}
-.grabber {
-	width: 36px; height: 4px;
-	background: rgba(255,255,255,0.15);
-	border-radius: 999px;
-	margin: 0 auto 10px;
-}
-.title {
-	font-size: 10px;
-	color: #6B7280;
-	text-transform: uppercase;
-	letter-spacing: 0.12em;
-	font-weight: 800;
-	margin-bottom: 8px;
-}
-.options { display: flex; flex-direction: column; gap: 4px; }
+
 .option {
-	display: flex; justify-content: space-between; align-items: center;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
 	width: 100%;
-	padding: 12px 14px;
-	background: rgba(255,255,255,0.02);
-	border: 1px solid #1F2937;
-	border-radius: 12px;
-	color: #D1D5DB;
-	font-size: 13px;
-	font-weight: 600;
-	cursor: pointer;
+	min-height: 52px;
+	padding: 0 4px;
+	border: 0;
+	border-bottom: 1px solid var(--color-line);
+	background: transparent;
+	color: var(--color-ink);
+	font-family: var(--font-sans);
+	font-size: 16px;
+	font-weight: 500;
 	text-align: left;
-	transition: background-color .15s, border-color .15s, color .15s;
+	cursor: pointer;
 }
-.option:hover { background: rgba(255,255,255,0.05); }
-.option.active {
-	background: rgba(226, 75, 74, 0.12);
-	border-color: rgba(226, 75, 74, 0.35);
-	color: #E24B4A;
+
+.option:last-child {
+	border-bottom: 0;
 }
-.check { color: #E24B4A; font-weight: 800; }
+
+.option:hover {
+	background: var(--color-sunken);
+}
+
+.option.selected {
+	color: var(--color-brand);
+	font-weight: 700;
+}
+
+/* Design B: rounded tiles, the current option navy. */
+:global([data-variant="b"]) .options {
+	gap: 6px;
+}
+
+:global([data-variant="b"]) .option {
+	padding: 0 16px;
+	border-bottom: 0;
+	border-radius: var(--radius-tile);
+	background: var(--color-sunken);
+}
+
+:global([data-variant="b"]) .option:hover {
+	background: var(--color-line);
+}
+
+:global([data-variant="b"]) .option.selected {
+	background: var(--color-navy);
+	color: var(--color-on-navy);
+}
 </style>

@@ -1,12 +1,14 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
+import ClockIcon from "$lib/components/icons/ClockIcon.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 
 /**
- * Centered-axis match timeline. Vertical line down the middle, minute
- * bubbles sitting on the axis in the scoring team's colour, the
- * scorer/assist content alternating left (home) and right (away).
- * ABPFIFF anchor on top, ANPFIFF on the bottom.
+ * "Spielverlauf": the goals on a centred time axis, newest first —
+ * Abpfiff on top, Anpfiff at the bottom. Each goal puts its minute on
+ * the axis in the scoring side's colour (home red, away navy) and the
+ * score after the goal, the scorer and the assist on that side's half,
+ * so the side never depends on colour alone.
  *
  * The component takes the raw `score_timeline` from the API and the
  * `game_players` list so it can resolve player_id → username.
@@ -15,15 +17,17 @@ import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
  *   timeline: Array<object>,
  *   gamePlayers: Array<object>,
  *   currentUserId: string|null,
+ *   class?: string,
  * }}
  */
-let { timeline = [], gamePlayers = [], currentUserId = null } = $props();
+let {
+	timeline = [],
+	gamePlayers = [],
+	currentUserId = null,
+	class: className = "",
+} = $props();
 
 const { t } = getTranslate();
-
-const userAccent = $derived(
-	currentUserId ? avatarGradient(currentUserId).from : "#F59E0B",
-);
 
 const events = $derived.by(() => {
 	if (!Array.isArray(timeline)) return [];
@@ -86,145 +90,166 @@ function nameFor(playerId) {
 }
 
 function isCurrentUser(playerId) {
-	return currentUserId && playerId === currentUserId;
+	return Boolean(currentUserId) && playerId === currentUserId;
 }
 </script>
 
-<div class="card">
-	<div class="anchor">{$t("game_detail.timeline.fulltime")}</div>
-	<div class="timeline">
+<Section title={$t("game_detail.section.timeline")} class={className}>
+	{#snippet icon()}<ClockIcon size={22} strokeWidth={2} />{/snippet}
+	<div class="card timeline">
+		<p class="label anchor">{$t("game_detail.timeline.fulltime")}</p>
 		{#if events.length === 0}
-			<div class="empty">{$t("game_detail.timeline.empty")}</div>
+			<p class="empty">{$t("game_detail.timeline.empty")}</p>
+		{:else}
+			<ol class="events">
+				{#each events as evt, i (i)}
+					{@const scorerName = nameFor(evt.scoredBy)}
+					{@const assistName = nameFor(evt.assistBy)}
+					<li class="event {evt.side}">
+						<span class="content">
+							<span class="goal-score">{evt.home}:{evt.away}</span>
+							<span class="scorer" class:me={isCurrentUser(evt.scoredBy)}>
+								{scorerName ?? "?"}
+							</span>
+							{#if assistName}
+								<span class="assist" class:me={isCurrentUser(evt.assistBy)}>
+									{$t("game_detail.assisted_by", { name: assistName })}
+								</span>
+							{/if}
+						</span>
+						<span class="minute">{evt.minute}</span>
+					</li>
+				{/each}
+			</ol>
 		{/if}
-		{#each events as evt, i (i)}
-			{@const scorerName = nameFor(evt.scoredBy)}
-			{@const assistName = nameFor(evt.assistBy)}
-			<div class="event">
-				{#if evt.side === "home"}
-					<div class="content home">
-						<span class="score-pill home">⚽ {evt.home}:{evt.away}</span>
-						<span class="scorer" class:me={isCurrentUser(evt.scoredBy)} style:--accent={userAccent}>
-							{scorerName ?? "?"}
-						</span>
-						{#if assistName}
-							<span class="assist">
-								↳ <span class:me={isCurrentUser(evt.assistBy)} style:--accent={userAccent}>{assistName}</span>
-							</span>
-						{/if}
-					</div>
-					<div class="minute home">{evt.minute}</div>
-					<div></div>
-				{:else}
-					<div></div>
-					<div class="minute away">{evt.minute}</div>
-					<div class="content away">
-						<span class="score-pill away">⚽ {evt.home}:{evt.away}</span>
-						<span class="scorer" class:me={isCurrentUser(evt.scoredBy)} style:--accent={userAccent}>
-							{scorerName ?? "?"}
-						</span>
-						{#if assistName}
-							<span class="assist">
-								↳ <span class:me={isCurrentUser(evt.assistBy)} style:--accent={userAccent}>{assistName}</span>
-							</span>
-						{/if}
-					</div>
-				{/if}
-			</div>
-		{/each}
+		<p class="label anchor">{$t("game_detail.timeline.kickoff")}</p>
 	</div>
-	<div class="anchor bottom">{$t("game_detail.timeline.kickoff")}</div>
-</div>
+</Section>
 
 <style>
-.card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 14px;
-}
-.anchor {
-	text-align: center;
-	font-size: 9px;
-	font-weight: 800;
-	color: #6B7280;
-	letter-spacing: 0.15em;
-	text-transform: uppercase;
-	margin: 4px 0 12px;
-}
-.anchor.bottom { margin: 12px 0 4px; }
-.empty {
-	text-align: center;
-	color: #6B7280;
-	font-size: 12px;
-	padding: 16px 0;
-}
 .timeline {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding: 16px;
+}
+
+.anchor {
+	margin: 0;
+	color: var(--color-muted);
+	text-align: center;
+}
+
+.empty {
+	margin: 0;
+	padding: 8px 0;
+	color: var(--color-muted);
+	font-size: 14px;
+	text-align: center;
+}
+
+.events {
 	position: relative;
-	display: flex; flex-direction: column;
-	gap: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
-.timeline::before {
-	content: '';
+
+/* The time axis down the middle. */
+.events::before {
+	content: "";
 	position: absolute;
-	top: 4px; bottom: 4px;
+	top: 0;
+	bottom: 0;
 	left: 50%;
-	width: 1px;
-	background: rgba(255,255,255,0.06);
+	width: 2px;
+	transform: translateX(-50%);
+	background: var(--color-line);
 }
+
 .event {
 	display: grid;
-	grid-template-columns: 1fr 32px 1fr;
+	grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr);
 	align-items: center;
 	gap: 10px;
-	min-height: 36px;
 }
+
 .minute {
-	width: 32px; height: 32px;
-	background: #1A1F2A;
-	border: 1.5px solid #2A3142;
-	border-radius: 50%;
-	display: flex; align-items: center; justify-content: center;
-	font-size: 10px;
-	font-weight: 800;
-	color: #9CA3AF;
-	font-variant-numeric: tabular-nums;
-	z-index: 1;
-	margin: 0 auto;
-}
-.minute.home { border-color: rgba(226, 75, 74, 0.4); color: #E24B4A; }
-.minute.away { border-color: rgba(132, 204, 22, 0.4); color: #84CC16; }
-.content {
-	display: flex; flex-direction: column;
-	gap: 2px;
-}
-.content.home { align-items: flex-end; text-align: right; }
-.content.away { align-items: flex-start; text-align: left; }
-.score-pill {
-	display: inline-flex; align-items: center;
-	gap: 4px;
-	font-size: 11px;
-	font-weight: 800;
-	font-variant-numeric: tabular-nums;
-	padding: 2px 8px;
-	border-radius: 999px;
-}
-.score-pill.home {
-	background: rgba(226, 75, 74, 0.15);
-	color: #E24B4A;
-}
-.score-pill.away {
-	background: rgba(132, 204, 22, 0.15);
-	color: #84CC16;
-}
-.scorer {
-	font-size: 13px;
+	position: relative;
+	grid-column: 2;
+	grid-row: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	height: 30px;
+	padding: 0 4px;
+	border-radius: var(--radius-badge);
+	font-family: var(--font-cond);
 	font-weight: 700;
-	color: #E5E7EB;
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
 }
-.scorer.me { color: var(--accent, #F59E0B); }
+
+.home .minute {
+	background: var(--color-home);
+	color: var(--color-on-home);
+}
+
+.away .minute {
+	background: var(--color-away);
+	color: var(--color-on-away);
+}
+
+.content {
+	grid-row: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.home .content {
+	grid-column: 1;
+	align-items: flex-end;
+	text-align: right;
+}
+
+.away .content {
+	grid-column: 3;
+	align-items: flex-start;
+	text-align: left;
+}
+
+.goal-score {
+	padding: 2px 8px;
+	border-radius: var(--radius-badge);
+	background: var(--color-score);
+	color: var(--color-on-score);
+	font-family: var(--font-num);
+	font-weight: var(--num-weight);
+	font-size: 14px;
+	line-height: 1.2;
+	font-variant-numeric: tabular-nums;
+}
+
+.scorer {
+	font-weight: 700;
+	font-size: 15px;
+	line-height: 1.2;
+}
+
 .assist {
-	font-size: 10px;
-	color: #6B7280;
+	color: var(--color-muted);
+	font-size: 13px;
 }
-.assist .me { color: var(--accent, #F59E0B); }
+
+.scorer.me,
+.assist.me {
+	color: var(--color-brand);
+}
 </style>

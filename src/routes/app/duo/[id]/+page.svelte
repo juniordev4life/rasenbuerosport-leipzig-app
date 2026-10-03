@@ -219,50 +219,107 @@ const contributionRows = $derived.by(() => []);
 	<title>RasenBürosport - {$t("duo.title")}</title>
 </svelte:head>
 
-<div class="mx-auto max-w-3xl p-3">
-
+<!-- Phone: one column. Desktop: the duo card across the top, then the
+     figures and recent matches left, the play style right. -->
+<div class="duo pb-4 lg:pb-8">
 	{#if loading}
 		<div class="flex justify-center py-12">
-			<div class="animate-spin h-8 w-8 border-2 border-win border-t-transparent rounded-full"></div>
+			<span class="spinner" role="status" aria-label={$t("common.loading")}></span>
 		</div>
 	{:else if errorMsg}
-		<div class="bg-surface border border-loss/60 rounded-2xl p-6 text-center text-loss">
-			{errorMsg}
-		</div>
+		<div class="card notice text-loss" role="alert">{errorMsg}</div>
 	{:else if detail}
-		<div class="flex flex-col gap-3 pb-4">
-			<DuoHero
-				player1={detail.player1}
-				player2={detail.player2}
-				archetype={lifecycle === "fresh" ? $t("duo.archetypes.fresh") : archetype}
-				archetypeTentative={lifecycle === "finding"}
-				chemistryScore={chemistry}
-				rankInfo={null}
-				sophieQuote={sophieQuote || $t("duo.sophie.fresh")}
-			/>
-
-			<KpiRow cards={kpiCards} />
-
-			{#if lifecycle === "fresh"}
-				<OnboardingCard matchCount={detail.total_games ?? 0} target={10} />
-			{:else if spiderValues}
-				<DuoSpiderSection
-					values={spiderValues}
-					duoName={`${detail.player1.username} & ${detail.player2.username}`}
-					{tags}
-					tentative={lifecycle === "finding"}
+		<div class="duo-grid stack">
+			<div class="area-hero">
+				<DuoHero
+					player1={detail.player1}
+					player2={detail.player2}
+					archetype={lifecycle === "fresh" ? $t("duo.archetypes.fresh") : archetype}
+					archetypeTentative={lifecycle === "finding"}
+					chemistryScore={chemistry}
+					rankInfo={null}
+					sophieQuote={sophieQuote || $t("duo.sophie.fresh")}
 				/>
+			</div>
 
-				{#if contributionRows.length > 0}
-					<ContributionSection
-						player1={detail.player1}
-						player2={detail.player2}
-						rows={contributionRows}
+			<div class="area-kpis">
+				<KpiRow cards={kpiCards} />
+			</div>
+
+			<div class="area-main">
+				{#if lifecycle === "fresh"}
+					<OnboardingCard matchCount={detail.total_games ?? 0} target={10} />
+				{:else if spiderValues}
+					<DuoSpiderSection
+						values={spiderValues}
+						duoName={`${detail.player1.username} & ${detail.player2.username}`}
+						{tags}
+						tentative={lifecycle === "finding"}
 					/>
-				{/if}
-			{/if}
 
-			<RecentMatchesSection matches={recentRows} />
+					{#if contributionRows.length > 0}
+						<ContributionSection
+							player1={detail.player1}
+							player2={detail.player2}
+							rows={contributionRows}
+						/>
+					{/if}
+				{/if}
+			</div>
+
+			<div class="area-recent">
+				<RecentMatchesSection matches={recentRows} />
+			</div>
 		</div>
 	{/if}
 </div>
+
+<style>
+/* Phone: the area wrappers dissolve into the page stack. */
+.area-hero,
+.area-kpis,
+.area-main,
+.area-recent {
+	display: contents;
+}
+
+@media (min-width: 1024px) {
+	.duo-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-areas:
+			"hero hero"
+			"kpis main"
+			"recent main";
+		grid-template-rows: auto auto 1fr;
+		gap: var(--stack-gap) 32px;
+		align-items: start;
+	}
+
+	.area-hero,
+	.area-kpis,
+	.area-main,
+	.area-recent {
+		display: flex;
+		flex-direction: column;
+		gap: var(--stack-gap);
+		min-width: 0;
+	}
+
+	.area-hero {
+		grid-area: hero;
+	}
+
+	.area-kpis {
+		grid-area: kpis;
+	}
+
+	.area-main {
+		grid-area: main;
+	}
+
+	.area-recent {
+		grid-area: recent;
+	}
+}
+</style>

@@ -147,6 +147,24 @@
 		},
 		"highlights": {
 			"empty": "No highlight clips yet."
+		},
+		"series": {
+			"win_streak": {
+				"label": "wins in a row",
+				"headline": "{name} is on a winning streak!"
+			},
+			"loss_streak": {
+				"label": "losses in a row",
+				"headline": "{name} is stuck in a slump..."
+			},
+			"scoring": {
+				"label": "games with 3+ goals",
+				"headline": "{name} is a goal machine!"
+			},
+			"defensive": {
+				"label": "clean sheets",
+				"headline": "{name} is a brick wall!"
+			}
 		}
 	},
 	"push": {
@@ -701,7 +719,8 @@
 			"error_file_size": "Image must be less than 2 MB",
 			"error_generic": "Failed to save",
 			"saved": "Saved"
-		}
+		},
+		"draws": "Draws"
 	},
 	"historie": {
 		"title": "History",
@@ -900,9 +919,9 @@
 			"back": "Back",
 			"lobby": {
 				"tip_1_title": "Home half",
-				"tip_1_body": "Tap an avatar in the upper, red pitch half to put that player on the home side. Tap again to un-assign.",
+				"tip_1_body": "Tap an avatar in the Home card to put that player on the home side. Tap again to un-assign.",
 				"tip_2_title": "Away half",
-				"tip_2_body": "The lower, green half works the same way for the away side. Players already assigned on the opposite side appear dimmed here.",
+				"tip_2_body": "The Away card works the same way. Players already on the other side appear dimmed here.",
 				"tip_3_title": "Guest slot",
 				"tip_3_body": "Each side has a guest tile for players without an account. The match doesn't count toward their profile, but the final score is still recorded correctly."
 			},
@@ -928,7 +947,7 @@
 				"tip_6_title": "Stoppage time",
 				"tip_6_body": "At 45, 90 or 120 the field next to it unlocks — that's stoppage time. We're setting it to +3 here, so minute 45+3.",
 				"tip_7_title": "Confirm",
-				"tip_7_body": "The green check saves the event. The editor closes and the goal appears just below as a pill on the timeline.",
+				"tip_7_body": "“Save” stores the event. The editor closes and the goal appears just below as a pill on the timeline.",
 				"tip_8_title": "Remove an event",
 				"tip_8_body": "Mis-tapped? Hit the × on the pill, confirm the prompt — the event is cleanly removed and the score recalculated.",
 				"tip_9_title": "Cards & misses",
@@ -1030,7 +1049,10 @@
 		"sort_name": "Name",
 		"sort_rating": "Rating",
 		"no_results": "No teams found",
-		"team_count": "{count} teams"
+		"team_count": "{count} teams",
+		"league_label": "League",
+		"sort_label": "Sort by",
+		"error_loading": "Could not load teams."
 	},
 	"season": {
 		"all_time": "All time",
@@ -1304,7 +1326,8 @@
 		"goals_distribution": "Goals per Game Distribution",
 		"total_goals_axis": "Total Goals",
 		"popular_teams": "Most Played Teams",
-		"team_win_rate": "Win Rate by Team"
+		"team_win_rate": "Win Rate by Team",
+		"game_n": "Game {n}"
 	},
 	"rematch": {
 		"title": "Rematch",
@@ -1530,7 +1553,10 @@
 		"error": {
 			"load_failed": "Failed to load trophies."
 		},
-		"profile_link": "Trophy Room"
+		"profile_link": "Trophy Room",
+		"card": {
+			"locked": "Not earned yet"
+		}
 	},
 	"season_awards": {
 		"champion": {
@@ -1648,7 +1674,9 @@
 			"persona": "{persona} says:",
 			"next_season": "FC27 is live — your starting ELO: {rating}",
 			"cta": "Go to the leaderboard"
-		}
+		},
+		"previous_slide": "Previous slide",
+		"next_slide": "Next slide"
 	},
 	"settings": {
 		"design": {

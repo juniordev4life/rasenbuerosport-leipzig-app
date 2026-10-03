@@ -1,10 +1,11 @@
 <script>
-import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
 
 /**
- * Two overlapping circular avatars with a green "&" connection dot
- * sitting between/below them. Used in the duo hero — visually anchors
- * the two players as one entity.
+ * The two players of a duo as overlapping avatars with an "&" badge
+ * between them, so the pair reads as one unit. Square in design A,
+ * round in B (from PlayerAvatar). Decorative: the names are printed
+ * next to it.
  *
  * @type {{
  *   player1: { player_id: string, username: string, avatar_url: string|null },
@@ -13,66 +14,50 @@ import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
  * }}
  */
 let { player1, player2, size = 70 } = $props();
-
-const g1 = $derived(avatarGradient(player1.player_id));
-const g2 = $derived(avatarGradient(player2.player_id));
-
-function initial(name) {
-	return (name ?? "?").charAt(0).toUpperCase();
-}
 </script>
 
-<div class="duo-avatars-wrap" style="--avatar-size: {size}px;">
-	<div class="duo-avatar" style="background: {g1.gradient}; border-color: #131822;">
-		{#if player1.avatar_url}
-			<img referrerpolicy="no-referrer" src={player1.avatar_url} alt={player1.username} />
-		{:else}
-			<span>{initial(player1.username)}</span>
-		{/if}
-	</div>
-	<div class="duo-avatar second" style="background: {g2.gradient}; border-color: #131822;">
-		{#if player2.avatar_url}
-			<img referrerpolicy="no-referrer" src={player2.avatar_url} alt={player2.username} />
-		{:else}
-			<span>{initial(player2.username)}</span>
-		{/if}
-	</div>
-	<div class="duo-connection">&amp;</div>
-</div>
+<span class="pair" style:--pair-size="{size}px">
+	<PlayerAvatar player={player1} {size} />
+	<PlayerAvatar player={player2} {size} class="pair-second" />
+	<span class="link" aria-hidden="true">&amp;</span>
+</span>
 
 <style>
-.duo-avatars-wrap {
+.pair {
 	position: relative;
+	display: inline-flex;
+	flex-shrink: 0;
+	padding-bottom: 8px;
+}
+
+.pair :global(.pair-second) {
+	margin-left: calc(var(--pair-size) / -3);
+	box-shadow: 0 0 0 3px var(--color-surface);
+}
+
+.link {
+	position: absolute;
+	left: 50%;
+	bottom: -2px;
 	display: flex;
 	align-items: center;
-}
-.duo-avatar {
-	width: var(--avatar-size);
-	height: var(--avatar-size);
-	border-radius: 50%;
-	border: 3px solid;
-	display: flex; align-items: center; justify-content: center;
-	font-size: calc(var(--avatar-size) * 0.4);
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	transform: translateX(-50%);
+	border-radius: var(--radius-badge);
+	background: var(--color-surface);
+	color: var(--color-brand);
+	box-shadow: 0 0 0 2px var(--color-brand);
+	font-family: var(--font-cond);
 	font-weight: 800;
-	color: white;
-	box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-	overflow: hidden;
-	flex-shrink: 0;
+	font-size: 15px;
+	line-height: 1;
 }
-.duo-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.duo-avatar.second { margin-left: calc(-1 * var(--avatar-size) / 3); }
-.duo-connection {
-	position: absolute;
-	bottom: -6px;
-	left: 50%; transform: translateX(-50%);
-	width: 22px; height: 22px;
-	border-radius: 50%;
-	background: #84CC16;
-	color: #131822;
-	font-size: 13px;
-	font-weight: 800;
-	display: flex; align-items: center; justify-content: center;
-	border: 2px solid #131822;
-	box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+
+:global([data-variant="b"]) .link {
+	background: var(--color-gold);
+	color: var(--color-on-gold);
+	box-shadow: 0 0 0 2px var(--color-surface);
 }
 </style>

@@ -1,10 +1,13 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import HistoryIcon from "$lib/components/icons/HistoryIcon.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 
 /**
- * Recent-matches list for the duo — five rows max. Each row carries a
- * win/loss result pill, opponent names, date, score and an ELO delta
- * (when available from `game.elo_snapshot`).
+ * The duo's latest matches together (five at most), like the home
+ * page's recent matches. Design A: an S / U / N marker left, the score
+ * in display type and the ELO change right. Design B: a dark green
+ * score chip left, the ELO change as a pill right.
  *
  * @type {{
  *   matches: Array<{
@@ -20,108 +23,131 @@ import { getTranslate } from "@tolgee/svelte";
 let { matches } = $props();
 
 const { t } = getTranslate();
+
+const RESULT = {
+	W: { key: "duo.w_short", cls: "result-w", tone: "win" },
+	D: { key: "duo.d_short", cls: "result-d", tone: "draw" },
+	L: { key: "duo.l_short", cls: "result-l", tone: "loss" },
+};
+
+/**
+ * Signed ELO change, e.g. "+12", "−8", "±0".
+ * @param {number} n
+ * @returns {string}
+ */
+function formatDelta(n) {
+	const r = Math.round(n);
+	if (r > 0) return `+${r}`;
+	if (r < 0) return `−${Math.abs(r)}`;
+	return "±0";
+}
+
+function deltaTone(n) {
+	const r = Math.round(n ?? 0);
+	return r > 0 ? "win" : r < 0 ? "loss" : "draw";
+}
 </script>
 
 {#if matches.length > 0}
-	<div class="section-card">
-		<div class="section-header">
-			<div class="section-label">⏱ {$t("duo.recent_section")}</div>
-		</div>
-		<div class="matches-list">
+	<Section title={$t("duo.recent_section")}>
+		{#snippet icon()}<HistoryIcon size={22} strokeWidth={2} />{/snippet}
+		<ul class="card rows matches">
 			{#each matches as m (m.id)}
-				<div class="match-row">
-					<div class="match-result-pill {m.result === 'W' ? 'win' : m.result === 'L' ? 'loss' : 'draw'}">
-						{m.result === "W" ? $t("duo.w_short") : m.result === "L" ? $t("duo.l_short") : $t("duo.d_short")}
-					</div>
-					<div class="match-info">
-						<div class="match-headline">vs. {m.opponentNames}</div>
-						<div class="match-meta">{m.dateLabel}</div>
-					</div>
-					<div class="match-score-mini {m.result === 'W' ? 'win' : m.result === 'L' ? 'loss' : ''}">
-						{m.score}
-					</div>
-					{#if m.eloDelta != null}
-						{@const d = Math.round(m.eloDelta)}
-						<div class="match-elo-mini {d > 0 ? 'up' : d < 0 ? 'down' : ''}">
-							{d > 0 ? `↑ +${d}` : d < 0 ? `↓ ${d}` : "± 0"}
-						</div>
-					{/if}
-				</div>
+				{@const r = RESULT[m.result] ?? RESULT.D}
+				<li class="match">
+					<span class="result marker {r.cls}">{$t(r.key)}</span>
+					<span class="score chip-score">{m.score}</span>
+					<span class="flex flex-col gap-0.5 flex-1 min-w-0">
+						<span class="font-bold truncate">vs. {m.opponentNames}</span>
+						<span class="text-[13px] text-muted">{m.dateLabel}</span>
+					</span>
+					<span class="right">
+						<span class="num score-a tone-{r.tone}">{m.score}</span>
+						{#if m.eloDelta != null}
+							<span class="delta delta-{deltaTone(m.eloDelta)}">
+								{formatDelta(m.eloDelta)} <span class="delta-unit">ELO</span>
+							</span>
+						{/if}
+					</span>
+				</li>
 			{/each}
-		</div>
-	</div>
+		</ul>
+	</Section>
 {/if}
 
 <style>
-.section-card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 14px;
+.matches {
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
-.section-header { margin-bottom: 6px; }
-.section-label {
-	font-size: 10px;
-	text-transform: uppercase; letter-spacing: 0.1em;
-	color: #6B7280;
-	font-weight: 700;
+
+.match {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-height: 68px;
+	padding: 0 16px;
 }
-.matches-list { display: flex; flex-direction: column; }
-.match-row {
-	display: flex; align-items: center;
-	gap: 10px;
-	padding: 10px 0;
-	border-bottom: 1px solid #1F2937;
+
+.marker {
+	width: 32px;
+	height: 32px;
+	font-size: 16px;
 }
-.match-row:last-child { border-bottom: none; }
-.match-result-pill {
-	width: 22px; height: 22px;
-	border-radius: 50%;
-	display: flex; align-items: center; justify-content: center;
-	font-size: 10px; font-weight: 800;
+
+.chip-score {
+	display: none;
+}
+
+.right {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 5px;
 	flex-shrink: 0;
 }
-.match-result-pill.win {
-	background: rgba(132, 204, 22, 0.15);
-	color: #84CC16;
-	border: 1.5px solid rgba(132, 204, 22, 0.4);
+
+.score-a {
+	font-size: 24px;
+	line-height: 0.8;
 }
-.match-result-pill.loss {
-	background: rgba(226, 75, 74, 0.15);
-	color: #E24B4A;
-	border: 1.5px solid rgba(226, 75, 74, 0.4);
-}
-.match-result-pill.draw {
-	background: rgba(156, 163, 175, 0.15);
-	color: #9CA3AF;
-	border: 1.5px solid rgba(156, 163, 175, 0.4);
-}
-.match-info { flex: 1; min-width: 0; }
-.match-headline {
+
+/* The ELO change is the shared `.delta`: coloured text in A, a pill in B. */
+.delta {
 	font-size: 12px;
-	font-weight: 600;
-	color: #E5E7EB;
-	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.match-meta { font-size: 10px; color: #6B7280; margin-top: 2px; }
-.match-score-mini {
+
+.tone-win {
+	color: var(--color-win);
+}
+
+.tone-loss {
+	color: var(--color-loss);
+}
+
+.tone-draw {
+	color: var(--color-muted);
+}
+
+/* Design B */
+:global([data-variant="b"]) .match {
+	min-height: 64px;
+	padding: 0;
+}
+
+:global([data-variant="b"]) .marker,
+:global([data-variant="b"]) .score-a,
+:global([data-variant="b"]) .delta-unit {
+	display: none;
+}
+
+:global([data-variant="b"]) .chip-score {
+	display: inline-flex;
+	min-width: 64px;
+}
+
+:global([data-variant="b"]) .delta {
 	font-size: 14px;
-	font-weight: 800;
-	font-variant-numeric: tabular-nums;
-	flex-shrink: 0;
-	color: #E5E7EB;
 }
-.match-score-mini.win { color: #84CC16; }
-.match-score-mini.loss { color: #E24B4A; }
-.match-elo-mini {
-	font-size: 10px;
-	font-weight: 700;
-	font-variant-numeric: tabular-nums;
-	flex-shrink: 0;
-	min-width: 42px;
-	text-align: right;
-	color: #6B7280;
-}
-.match-elo-mini.up { color: #84CC16; }
-.match-elo-mini.down { color: #E24B4A; }
 </style>

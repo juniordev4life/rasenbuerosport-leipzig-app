@@ -53,7 +53,9 @@ export function applyDesignVariant(variant) {
 	if (typeof document === "undefined") return;
 	const root = document.documentElement;
 	root.dataset.variant = variant;
-	const themeColor = getComputedStyle(root).getPropertyValue("--theme-color").trim();
+	const themeColor = getComputedStyle(root)
+		.getPropertyValue("--theme-color")
+		.trim();
 	const meta = document.querySelector('meta[name="theme-color"]');
 	if (meta && themeColor) meta.setAttribute("content", themeColor);
 	try {

@@ -15,7 +15,7 @@
 
 <style>
 .pitch {
-	--chalk: color-mix(in srgb, var(--color-white) 55%, transparent);
+	--chalk: var(--color-chalk);
 	--chalk-width: 3px;
 	position: fixed;
 	inset: 0;

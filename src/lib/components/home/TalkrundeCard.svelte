@@ -70,6 +70,7 @@ const lineup = [
 <style>
 /* ── Design A: navy block ───────────────────────────────────────────── */
 .talk {
+	--focus-ring: var(--color-on-navy);
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
@@ -137,6 +138,7 @@ const lineup = [
 
 /* ── Design B: content on the section card ──────────────────────────── */
 :global([data-variant="b"]) .talk {
+	--focus-ring: var(--color-navy);
 	gap: 14px;
 	padding: 0;
 	background: transparent;

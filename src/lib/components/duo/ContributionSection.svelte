@@ -1,12 +1,14 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
+import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 import SophieCard from "./SophieCard.svelte";
 
 /**
- * Beitragsverteilung: 4 split-bar rows for goals / assists / overall
- * contribution / red cards, plus a Sophie synthesis card at the
- * bottom summarising the distribution.
+ * Beitragsverteilung: one split bar per figure (goals, assists, …)
+ * showing each player's share, with both values printed by name, plus
+ * an optional Sophie synthesis underneath. Player 1 is
+ * `--color-chart-1`, player 2 `--color-chart-4`.
  *
  * @type {{
  *   player1: { player_id: string, username: string },
@@ -19,9 +21,6 @@ let { player1, player2, rows, synthesisQuote = null } = $props();
 
 const { t } = getTranslate();
 
-const g1 = $derived(avatarGradient(player1.player_id));
-const g2 = $derived(avatarGradient(player2.player_id));
-
 function shareOf(a, b) {
 	const total = (a ?? 0) + (b ?? 0);
 	if (total === 0) return 50;
@@ -33,78 +32,90 @@ function fmtValue(row, n) {
 }
 </script>
 
-<div class="section-card">
-	<div class="section-header">
-		<div class="section-label">⚖ {$t("duo.contribution_section")}</div>
-	</div>
-
-	{#each rows as row, i (i)}
-		{@const share1 = shareOf(row.value1, row.value2)}
-		<div class="contrib-row">
-			<div class="contrib-header">
-				<div class="contrib-name">{row.label}</div>
-				<div class="contrib-values">
-					<span class="player1-val" style="color: {g1.from};">{player1.username} {fmtValue(row, row.value1)}</span>
-					<span class="divider">·</span>
-					<span class="player2-val" style="color: {g2.from};">{player2.username} {fmtValue(row, row.value2)}</span>
+<Section title={$t("duo.contribution_section")}>
+	{#snippet icon()}<UsersIcon size={22} strokeWidth={2} />{/snippet}
+	<div class="card contrib-card">
+		{#each rows as row, i (i)}
+			{@const share1 = shareOf(row.value1, row.value2)}
+			<div class="contrib">
+				<div class="contrib-head">
+					<span class="label contrib-name">{row.label}</span>
+					<span class="contrib-values">
+						<span class="value-1">{player1.username} {fmtValue(row, row.value1)}</span>
+						<span aria-hidden="true">·</span>
+						<span class="value-2">{player2.username} {fmtValue(row, row.value2)}</span>
+					</span>
+				</div>
+				<div class="contrib-bar" aria-hidden="true">
+					<span class="share share-1" style:width="{share1}%"></span>
+					<span class="share share-2" style:width="{100 - share1}%"></span>
 				</div>
 			</div>
-			<div class="contrib-bar">
-				<div class="contrib-fill" style="width: {share1}%; background: {g1.gradient};"></div>
-				<div class="contrib-fill" style="width: {100 - share1}%; background: {g2.gradient};"></div>
-			</div>
-		</div>
-	{/each}
+		{/each}
 
-	{#if synthesisQuote}
-		<div class="synthesis-wrap">
+		{#if synthesisQuote}
 			<SophieCard quote={synthesisQuote} variant="compact" />
-		</div>
-	{/if}
-</div>
+		{/if}
+	</div>
+</Section>
 
 <style>
-.section-card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 14px;
-}
-.section-header { margin-bottom: 14px; }
-.section-label {
-	font-size: 10px;
-	text-transform: uppercase; letter-spacing: 0.1em;
-	color: #6B7280;
-	font-weight: 700;
-}
-.contrib-row { margin-bottom: 14px; }
-.contrib-row:last-of-type { margin-bottom: 4px; }
-.contrib-header {
-	display: flex; justify-content: space-between;
-	align-items: baseline;
-	margin-bottom: 6px;
-	gap: 8px;
-}
-.contrib-name {
-	font-size: 12px;
-	font-weight: 700;
-	color: #E5E7EB;
-}
-.contrib-values {
-	font-size: 11px;
-	color: #6B7280;
-	font-variant-numeric: tabular-nums;
-}
-.contrib-values .player1-val,
-.contrib-values .player2-val { font-weight: 700; }
-.contrib-values .divider { margin: 0 4px; color: #4B5563; }
-.contrib-bar {
-	height: 8px;
-	border-radius: 4px;
-	overflow: hidden;
+.contrib-card {
 	display: flex;
-	background: rgba(255,255,255,0.04);
+	flex-direction: column;
+	gap: 14px;
+	padding: 16px;
 }
-.contrib-fill { height: 100%; transition: width 0.4s ease; }
-.synthesis-wrap { margin-top: 12px; }
+
+.contrib-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 6px;
+}
+
+.contrib-values {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 0 6px;
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+	color: var(--color-muted);
+}
+
+.value-1,
+.value-2 {
+	font-weight: 700;
+}
+
+.value-1 {
+	color: var(--color-chart-1);
+}
+
+.value-2 {
+	color: var(--color-chart-4);
+}
+
+.contrib-bar {
+	display: flex;
+	gap: 2px;
+	height: var(--bar-height);
+	overflow: hidden;
+	border-radius: var(--radius-bar);
+}
+
+.share {
+	height: 100%;
+	transition: width 0.4s ease;
+}
+
+.share-1 {
+	background: var(--color-chart-1);
+}
+
+.share-2 {
+	background: var(--color-chart-4);
+}
 </style>

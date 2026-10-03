@@ -1,18 +1,18 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import TargetIcon from "$lib/components/icons/TargetIcon.svelte";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 
 /**
- * Read-only summary card of a finished penalty shootout. Renders on
- * the match-detail page when `game.penalty_shootout` is present so
- * the user can see who shot when, who hit, who saved.
+ * Read-only summary of a finished penalty shootout ("Elferkrimi") on the
+ * match-detail page, rendered when `game.penalty_shootout` is present:
+ * the final shootout score with the winning side, then one row per shot
+ * — order, shooter, their side and the outcome (Tor / gehalten /
+ * vorbei) as a labelled chip, so it never depends on colour.
  *
- * Renders the shoot-by-shoot list (snake-case as it comes off the
- * backend) plus a small header pill with the final shootout score
- * and the winning side. Players are resolved via the same
- * `game_players` list the rest of match-detail uses.
- *
- * Avatar gradient generator is intentionally the same hash as in
- * the live-step so a player's colour stays stable across screens.
+ * The shots come snake-case off the backend; players are resolved via
+ * the same `game_players` list the rest of match-detail uses.
  *
  * @type {{
  *   penaltyShootout: {
@@ -31,6 +31,7 @@ import { getTranslate } from "@tolgee/svelte";
  *   gamePlayers: Array<{ player_id: string, team: string, profiles?: { username?: string, avatar_url?: string | null } | null }>,
  *   homeTeamName?: string | null,
  *   awayTeamName?: string | null,
+ *   class?: string,
  * }}
  */
 let {
@@ -38,6 +39,7 @@ let {
 	gamePlayers,
 	homeTeamName = null,
 	awayTeamName = null,
+	class: className = "",
 } = $props();
 
 const { t } = getTranslate();
@@ -62,24 +64,20 @@ function keeperName(id) {
 	return playerById.get(id)?.username ?? null;
 }
 
-function gradientFor(id) {
-	if (!id) return "linear-gradient(135deg, #475569, #334155)";
-	const palette = [
-		["#84CC16", "#65A30D"],
-		["#E24B4A", "#C73E3D"],
-		["#6366F1", "#4338CA"],
-		["#F59E0B", "#D97706"],
-		["#06B6D4", "#0891B2"],
-		["#A78BFA", "#7C3AED"],
-		["#EC4899", "#BE185D"],
-		["#14B8A6", "#0F766E"],
-	];
-	let hash = 0;
-	for (let i = 0; i < id.length; i += 1) {
-		hash = (hash * 31 + id.charCodeAt(i)) | 0;
-	}
-	const [a, b] = palette[Math.abs(hash) % palette.length];
-	return `linear-gradient(135deg, ${a}, ${b})`;
+/** Shape PlayerAvatar reads: name, photo and the id for the colour. */
+function avatarFor(id) {
+	const player = playerById.get(id);
+	return {
+		name: player?.username ?? "?",
+		avatarUrl: player?.avatar_url ?? null,
+		id,
+	};
+}
+
+/** Three-letter side tag ("LIV"), from the team name. */
+function sideTag(team) {
+	const name = team === "home" ? homeTeamName : awayTeamName;
+	return (name ?? "—").slice(0, 3).toUpperCase();
 }
 
 const winnerName = $derived(
@@ -92,209 +90,152 @@ const finalHome = $derived(penaltyShootout?.final_score?.home ?? 0);
 const finalAway = $derived(penaltyShootout?.final_score?.away ?? 0);
 </script>
 
-<section class="card">
-	<header class="card-header">
-		<span class="badge">{$t("penalty_shootout.summary.badge")}</span>
-		<div class="header-score">
-			<span>{finalHome}</span>
-			<span class="sep">:</span>
-			<span>{finalAway}</span>
+<Section title={$t("penalty_shootout.summary.badge")} class={className}>
+	{#snippet icon()}<TargetIcon size={22} strokeWidth={2} />{/snippet}
+	<div class="card shootout">
+		<div class="summary">
+			<span class="num final">
+				{finalHome}<span class="colon">:</span>{finalAway}
+			</span>
+			<p class="winner-line">
+				{$t("penalty_shootout.summary.winner_line", { winner: winnerName })}
+			</p>
 		</div>
-		<p class="header-meta">
-			{$t("penalty_shootout.summary.winner_line", { winner: winnerName })}
-		</p>
-	</header>
 
-	<ol class="shots">
-		{#each penaltyShootout.shots as shot (shot.order)}
-			{@const isGoal = shot.result === "goal"}
-			<li class="shot">
-				<span class="order">#{shot.order}</span>
-				<span
-					class="avatar"
-					class:goal={isGoal}
-					class:missed={!isGoal}
-					style:--cell-gradient={gradientFor(shot.shooter_id)}
-				>
-					{shooterName(shot.shooter_id).charAt(0).toUpperCase()}
-				</span>
-				<div class="line">
-					<span class="line-main">
-						<span class="team-tag" class:home={shot.team === "home"} class:away={shot.team === "away"}>
-							{shot.team === "home"
-								? (homeTeamName ?? "—").slice(0, 3).toUpperCase()
-								: (awayTeamName ?? "—").slice(0, 3).toUpperCase()}
+		<ol class="rows shots">
+			{#each penaltyShootout.shots as shot (shot.order)}
+				{@const isGoal = shot.result === "goal"}
+				<li class="shot">
+					<span class="order">#{shot.order}</span>
+					<PlayerAvatar player={avatarFor(shot.shooter_id)} size={32} />
+					<span class="line">
+						<span class="line-main">
+							<span class="chip side-tag {shot.team === 'home' ? 'chip-brand' : 'chip-navy'}">
+								{sideTag(shot.team)}
+							</span>
+							<span class="shooter">{shooterName(shot.shooter_id)}</span>
 						</span>
-						<span class="shooter">{shooterName(shot.shooter_id)}</span>
-					</span>
-					<span class="line-meta">
 						{#if isGoal}
-							<span class="result-pill goal">{$t("penalty_shootout.summary.result_goal")}</span>
+							<span class="chip chip-win outcome">
+								{$t("penalty_shootout.summary.result_goal")}
+							</span>
 						{:else if shot.keeper_id}
-							<span class="result-pill missed">{$t("penalty_shootout.summary.result_saved", { keeper: keeperName(shot.keeper_id) ?? "?" })}</span>
+							<span class="chip chip-loss outcome">
+								{$t("penalty_shootout.summary.result_saved", {
+									keeper: keeperName(shot.keeper_id) ?? "?",
+								})}
+							</span>
 						{:else}
-							<span class="result-pill missed">{$t("penalty_shootout.summary.result_off_target")}</span>
+							<span class="chip chip-loss outcome">
+								{$t("penalty_shootout.summary.result_off_target")}
+							</span>
 						{/if}
 					</span>
-				</div>
-			</li>
-		{/each}
-	</ol>
-</section>
+				</li>
+			{/each}
+		</ol>
+	</div>
+</Section>
 
 <style>
-.card {
-	background: #131822;
-	border: 1px solid rgba(245, 158, 11, 0.32);
-	border-radius: 16px;
-	padding: 16px;
+.shootout {
 	display: flex;
 	flex-direction: column;
-	gap: 14px;
-	position: relative;
-	overflow: hidden;
-}
-.card::before {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 2px;
-	background: linear-gradient(90deg, transparent, #F59E0B 50%, transparent);
+	gap: 6px;
+	padding: 16px 16px 6px;
 }
 
-.card-header {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 6px;
-	text-align: center;
-}
-.badge {
-	font-size: 10px;
-	font-weight: 800;
-	color: #FBBF24;
-	background: rgba(245, 158, 11, 0.16);
-	border: 1px solid rgba(245, 158, 11, 0.4);
-	padding: 4px 12px;
-	border-radius: 999px;
-	text-transform: uppercase;
-	letter-spacing: 0.12em;
-}
-.header-score {
-	font-size: 28px;
-	font-weight: 800;
-	letter-spacing: -0.02em;
-	color: #F0F2F5;
+.summary {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	font-variant-numeric: tabular-nums;
+	gap: 14px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid var(--color-line);
 }
-.header-score .sep { color: #4B5563; font-size: 22px; }
-.header-meta {
-	font-size: 11px;
-	color: #9CA3AF;
+
+.final {
+	display: inline-flex;
+	align-items: baseline;
+	font-size: 40px;
+	white-space: nowrap;
+}
+
+.colon {
+	margin: 0 0.05em;
+}
+
+.winner-line {
 	margin: 0;
+	font-weight: 600;
+	font-size: 15px;
+	line-height: 1.35;
 }
 
 .shots {
-	list-style: none;
 	margin: 0;
 	padding: 0;
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
+	list-style: none;
 }
+
 .shot {
 	display: grid;
-	grid-template-columns: 24px 32px 1fr;
+	grid-template-columns: 30px 32px minmax(0, 1fr);
 	align-items: center;
 	gap: 10px;
-	padding: 8px 4px;
-	border-top: 1px solid rgba(255, 255, 255, 0.05);
+	padding: 10px 0;
 }
-.shot:first-child { border-top: none; }
+
 .order {
-	font-size: 10px;
+	color: var(--color-muted);
+	font-family: var(--font-cond);
 	font-weight: 700;
-	color: #6B7280;
+	font-size: 14px;
 	font-variant-numeric: tabular-nums;
-}
-.avatar {
-	width: 32px;
-	height: 32px;
-	border-radius: 50%;
-	background: var(--cell-gradient);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: white;
-	font-size: 12px;
-	font-weight: 800;
-	border: 2px solid transparent;
-	flex-shrink: 0;
-}
-.avatar.goal {
-	border-color: rgba(132, 204, 22, 0.65);
-	box-shadow: 0 0 0 2px rgba(132, 204, 22, 0.2);
-}
-.avatar.missed {
-	border-color: rgba(226, 75, 74, 0.55);
-	opacity: 0.55;
 }
 
 .line {
 	display: flex;
-	flex-direction: column;
-	gap: 2px;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6px 10px;
 	min-width: 0;
 }
+
 .line-main {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	min-width: 0;
 }
-.team-tag {
-	font-size: 9px;
-	font-weight: 800;
-	letter-spacing: 0.08em;
-	padding: 2px 6px;
-	border-radius: 4px;
-	background: rgba(255, 255, 255, 0.05);
-	color: #9CA3AF;
+
+.side-tag {
+	flex-shrink: 0;
 }
-.team-tag.home { color: #E24B4A; background: rgba(226, 75, 74, 0.1); }
-.team-tag.away { color: #84CC16; background: rgba(132, 204, 22, 0.1); }
+
 .shooter {
-	font-size: 13px;
-	font-weight: 700;
-	color: #F0F2F5;
+	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-}
-.line-meta {
-	display: flex;
-	align-items: center;
-}
-.result-pill {
-	font-size: 10px;
 	font-weight: 700;
-	padding: 2px 8px;
-	border-radius: 999px;
-	letter-spacing: 0.04em;
+	font-size: 15px;
 }
-.result-pill.goal {
-	color: #84CC16;
-	background: rgba(132, 204, 22, 0.12);
-	border: 1px solid rgba(132, 204, 22, 0.32);
+
+.outcome {
+	font-size: 12px;
 }
-.result-pill.missed {
-	color: #E24B4A;
-	background: rgba(226, 75, 74, 0.1);
-	border: 1px solid rgba(226, 75, 74, 0.32);
+
+:global([data-variant="b"]) .final {
+	padding: 6px 12px;
+	border-radius: 12px;
+	background: var(--color-score);
+	color: var(--color-on-score);
+	font-size: 30px;
+	line-height: 1;
+}
+
+:global([data-variant="b"]) .colon {
+	margin: 0 0.2em;
 }
 </style>

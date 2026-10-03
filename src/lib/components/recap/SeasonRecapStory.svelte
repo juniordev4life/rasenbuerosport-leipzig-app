@@ -1,6 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import { fly } from "svelte/transition";
+import PitchBackground from "$lib/components/layout/PitchBackground.svelte";
 import {
 	availableSlides,
 	isLastSlide,
@@ -27,6 +28,12 @@ import TimingSlide from "./slides/TimingSlide.svelte";
  * swipe and arrow-key navigation. Rendered as a modal dialog with its
  * own focus trap — the caller (the `/app/recap/[season]` route) owns
  * where to go once it's closed.
+ *
+ * Design A: the story frame alternates between brand red and navy from
+ * slide to slide, white type on both. Design B: the frame is the pitch,
+ * the content white sticker cards. From `lg` the frame becomes a
+ * phone-shaped card in the middle of the page colour, with previous /
+ * next buttons beside it; taps left or right of it step back or on.
  *
  * @type {{ recap: object, onClose: () => void }}
  */
@@ -56,10 +63,20 @@ let elapsedMs = $state(0);
 let paused = $state(false);
 let reducedMotion = $state(false);
 let dialogEl = $state(null);
+let frameEl = $state(null);
 
 const activeSlide = $derived(slides[slideIndex] ?? null);
 const progressRatios = $derived(
 	slideProgressRatios(slides.length, slideIndex, elapsedMs / SLIDE_DURATION_MS),
+);
+
+/** Design A alternates the frame colour per slide; B ignores it. */
+const tone = $derived(slideIndex % 2 === 0 ? "brand" : "navy");
+
+const storyTag = $derived(
+	[recap?.season?.game_version, $t("season_recap.title")]
+		.filter(Boolean)
+		.join(" · "),
 );
 
 // --- reduced motion ----------------------------------------------------
@@ -136,6 +153,21 @@ function isInteractiveTarget(event) {
 	return !!event.target.closest?.('a, button, audio, input, [role="button"]');
 }
 
+/**
+ * The left and right thirds of the story frame step back and on. On
+ * phones the frame is the whole screen; on desktop a tap beside the
+ * frame counts as its nearer side.
+ */
+function stepForTap(clientX) {
+	const rect = frameEl?.getBoundingClientRect();
+	const left = rect?.width ? rect.left : 0;
+	const width = rect?.width || window.innerWidth;
+	const third = width / 3;
+	const x = clientX - left;
+	if (x < third) goPrev();
+	else if (x > third * 2) goNext();
+}
+
 function handlePointerDown(event) {
 	if (isInteractiveTarget(event)) return;
 	paused = true;
@@ -158,11 +190,7 @@ function handlePointerUp(event) {
 		else goPrev();
 		return;
 	}
-	if (heldMs < TAP_MAX_MS) {
-		const third = window.innerWidth / 3;
-		if (event.clientX < third) goPrev();
-		else if (event.clientX > third * 2) goNext();
-	}
+	if (heldMs < TAP_MAX_MS) stepForTap(event.clientX);
 }
 
 // --- keyboard: Escape/arrows + a Tab focus trap -------------------------
@@ -210,7 +238,7 @@ function handleKeydown(event) {
 <svelte:window onkeydown={handleKeydown} />
 
 <div
-	class="fixed inset-0 z-50 bg-[#0B0F17] text-white select-none flex flex-col"
+	class="story"
 	role="dialog"
 	aria-modal="true"
 	aria-label={$t("season_recap.dialog_label")}
@@ -219,40 +247,325 @@ function handleKeydown(event) {
 	onpointerdown={handlePointerDown}
 	onpointerup={handlePointerUp}
 >
-	<RecapProgressBars ratios={progressRatios} />
+	<div class="frame tone-{tone}" bind:this={frameEl}>
+		<!-- The pitch of design B, scoped to the frame (hidden in A). -->
+		<PitchBackground />
 
+		<div class="frame-top">
+			<RecapProgressBars ratios={progressRatios} />
+			<div class="frame-head">
+				<span class="story-tag">
+					<img src="/logo.png" alt="" width="22" height="22" />
+					{storyTag}
+				</span>
+				<button
+					type="button"
+					class="round-btn close"
+					onclick={close}
+					aria-label={$t("season_recap.close")}
+				>
+					<svg
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2.5"
+						stroke-linecap="round"
+						width="16"
+						height="16"
+						aria-hidden="true"
+					>
+						<line x1="18" y1="6" x2="6" y2="18" />
+						<line x1="6" y1="6" x2="18" y2="18" />
+					</svg>
+				</button>
+			</div>
+		</div>
+
+		<div class="stage">
+			{#key activeSlide?.id}
+				<div
+					class="slide-wrap"
+					in:fly={{ y: reducedMotion ? 0 : 24, duration: reducedMotion ? 0 : 350 }}
+				>
+					{#if activeSlide}
+						{@const SlideComponent = SLIDE_COMPONENTS[activeSlide.id]}
+						<SlideComponent {recap} {reducedMotion} />
+					{/if}
+				</div>
+			{/key}
+		</div>
+	</div>
+
+	<!-- Desktop only: the same steps as the tap zones, as real buttons.
+	     aria-disabled, not disabled, at either end: a disabled button would
+	     drop the keyboard focus out of the dialog (the steps clamp anyway). -->
 	<button
 		type="button"
-		class="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
-		onclick={close}
-		aria-label={$t("season_recap.close")}
+		class="round-btn step step-prev"
+		onclick={goPrev}
+		aria-disabled={slideIndex === 0}
+		aria-label={$t("season_recap.previous_slide")}
 	>
 		<svg
 			viewBox="0 0 24 24"
 			fill="none"
 			stroke="currentColor"
-			stroke-width="2.5"
+			stroke-width="2.4"
 			stroke-linecap="round"
-			width="16"
-			height="16"
+			stroke-linejoin="round"
+			width="22"
+			height="22"
 			aria-hidden="true"
 		>
-			<line x1="18" y1="6" x2="6" y2="18" />
-			<line x1="6" y1="6" x2="18" y2="18" />
+			<polyline points="15 18 9 12 15 6" />
 		</svg>
 	</button>
-
-	<div class="flex-1 w-full flex items-center justify-center px-6 py-14 overflow-y-auto">
-		{#key activeSlide?.id}
-			<div
-				class="w-full max-w-md"
-				in:fly={{ y: reducedMotion ? 0 : 24, duration: reducedMotion ? 0 : 350 }}
-			>
-				{#if activeSlide}
-					{@const SlideComponent = SLIDE_COMPONENTS[activeSlide.id]}
-					<SlideComponent {recap} {reducedMotion} />
-				{/if}
-			</div>
-		{/key}
-	</div>
+	<button
+		type="button"
+		class="round-btn step"
+		onclick={goNext}
+		aria-disabled={isLastSlide(slideIndex, slides.length)}
+		aria-label={$t("season_recap.next_slide")}
+	>
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2.4"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			width="22"
+			height="22"
+			aria-hidden="true"
+		>
+			<polyline points="9 18 15 12 9 6" />
+		</svg>
+	</button>
 </div>
+
+<style>
+/* ── Overlay: the page colour around the frame (visible from lg) ────── */
+.story {
+	position: fixed;
+	inset: 0;
+	z-index: 50;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--page-bg);
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+/* ── Frame: the story itself, full screen on phones ─────────────────── */
+.frame {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	/* Paint containment makes the frame the containing block of its fixed
+	 * descendants: the pitch and the awards confetti fill the frame. */
+	contain: paint;
+	background: var(--frame-bg, var(--color-brand));
+	color: var(--frame-ink, var(--color-on-brand));
+	--focus-ring: var(--frame-ink, var(--color-on-brand));
+	transition: background-color 300ms ease;
+}
+
+.tone-brand {
+	--frame-bg: var(--color-brand);
+	--frame-ink: var(--color-on-brand);
+}
+
+.tone-navy {
+	--frame-bg: var(--color-navy);
+	--frame-ink: var(--color-on-navy);
+}
+
+/* The pitch layer belongs to B only; keep it off the A frame even before
+ * <html data-variant> is set. */
+.frame :global(.pitch) {
+	display: none;
+}
+
+:global([data-variant="b"]) .frame :global(.pitch) {
+	display: block;
+}
+
+/* Focus rings follow the surface: white on the frame (red, navy, pitch),
+ * navy on the page around it and inside white cards (RecapCard sets
+ * --focus-ring there). */
+.story :global(:focus-visible) {
+	outline-color: var(--focus-ring, var(--color-ink));
+}
+
+.frame-top {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: calc(env(safe-area-inset-top) + 10px) 12px 0;
+}
+
+.frame-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.story-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 13px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.story-tag img {
+	flex-shrink: 0;
+	width: 22px;
+	height: 22px;
+	object-fit: contain;
+}
+
+.round-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	border: 0;
+	border-radius: 999px;
+	cursor: pointer;
+}
+
+.close {
+	background: transparent;
+	color: inherit;
+	box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.close:hover {
+	background: color-mix(in srgb, currentColor 15%, transparent);
+}
+
+.stage {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto;
+	padding: 20px 24px calc(env(safe-area-inset-bottom) + 28px);
+	container-type: inline-size;
+}
+
+/* Auto margins centre the slide and still let a tall one scroll from its
+ * top (justify-content: center would clip it). */
+.slide-wrap {
+	width: 100%;
+	max-width: 28rem;
+	margin: auto;
+}
+
+.step {
+	display: none;
+	width: 52px;
+	height: 52px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	box-shadow: var(--shadow-card);
+}
+
+.step:hover:not([aria-disabled="true"]) {
+	background: var(--color-sunken);
+}
+
+.step[aria-disabled="true"] {
+	opacity: 0.4;
+	cursor: default;
+}
+
+/* ── Design B: the pitch, white stickers ────────────────────────────── */
+:global([data-variant="b"]) .frame {
+	--frame-bg: var(--color-page);
+	--frame-ink: var(--color-on-page);
+	transition: none;
+}
+
+:global([data-variant="b"]) .story-tag {
+	padding: 4px 12px 4px 6px;
+	border-radius: 999px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	box-shadow: var(--shadow-control);
+	font-size: 14px;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+:global([data-variant="b"]) .close {
+	background: var(--color-surface);
+	color: var(--color-ink);
+	box-shadow: var(--shadow-control);
+}
+
+:global([data-variant="b"]) .close:hover {
+	background: var(--color-sunken);
+}
+
+:global([data-variant="b"]) .step {
+	box-shadow: var(--shadow-control);
+}
+
+/* ── Desktop: a phone-shaped frame in the middle of the page ────────── */
+@media (min-width: 1024px) {
+	.story {
+		gap: 28px;
+		padding: 32px;
+	}
+
+	.frame {
+		flex: none;
+		width: auto;
+		height: min(880px, 100%);
+		aspect-ratio: 9 / 19;
+		border-radius: var(--radius-sheet);
+		box-shadow: var(--shadow-raised);
+	}
+
+	.frame-top {
+		padding-top: 12px;
+	}
+
+	.stage {
+		padding-bottom: 28px;
+	}
+
+	.step {
+		display: inline-flex;
+	}
+
+	.step-prev {
+		order: -1;
+	}
+
+	:global([data-variant="b"]) .frame {
+		border: 6px solid var(--color-surface);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.frame {
+		transition: none;
+	}
+}
+</style>

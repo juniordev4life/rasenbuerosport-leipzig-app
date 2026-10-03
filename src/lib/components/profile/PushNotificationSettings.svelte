@@ -1,6 +1,8 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import { onMount } from "svelte";
+import CheckIcon from "$lib/components/icons/CheckIcon.svelte";
+import PushBellIcon from "$lib/components/icons/PushBellIcon.svelte";
 import { get } from "$lib/services/api.services.js";
 import {
 	getPermissionState,
@@ -11,7 +13,8 @@ import {
 } from "$lib/services/push.services.js";
 
 /**
- * Settings tile for managing push-notification opt-in.
+ * Settings card for managing push-notification opt-in. The heading comes
+ * from the surrounding section (Settings → push.title).
  *
  * Renders three states:
  *  - Browser doesn't support push → small notice, nothing actionable.
@@ -76,36 +79,29 @@ async function deactivate() {
 }
 </script>
 
-<div class="rounded-xl bg-sunken border border-line p-4">
-	<div class="flex items-center justify-between gap-3 mb-2">
-		<div class="leading-tight">
-			<div class="text-sm font-semibold text-ink">
-				{$t("push.title")}
-			</div>
-			<div class="text-xs text-muted mt-0.5">
-				{$t("push.subtitle")}
-			</div>
-		</div>
+<div class="card push">
+	<div class="head">
+		<p class="lead">{$t("push.subtitle")}</p>
 		{#if activeSubscriptionId && permission === "granted"}
-			<span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-win bg-win/15 px-2 py-0.5 rounded-full">
-				<span class="w-1.5 h-1.5 rounded-full bg-win animate-pulse"></span>
+			<span class="chip chip-win state">
+				<CheckIcon size={12} strokeWidth={3} />
 				{$t("push.state_active")}
 			</span>
 		{/if}
 	</div>
 
 	{#if !supported}
-		<p class="text-xs text-muted">{$t("push.unsupported")}</p>
+		<p class="note">{$t("push.unsupported")}</p>
 	{:else if !pwaInstalled}
-		<p class="text-xs text-muted">{$t("push.ios_install_hint")}</p>
+		<p class="note">{$t("push.ios_install_hint")}</p>
 	{:else if permission === "denied"}
-		<p class="text-xs text-brand">{$t("push.denied_hint")}</p>
+		<p class="note warn">{$t("push.denied_hint")}</p>
 	{:else if activeSubscriptionId && permission === "granted"}
 		<button
 			type="button"
 			onclick={deactivate}
 			disabled={working}
-			class="mt-1 inline-flex items-center gap-2 text-xs font-medium text-muted hover:text-ink disabled:opacity-50"
+			class="btn btn-secondary btn-sm action"
 		>
 			{$t("push.deactivate")}
 		</button>
@@ -114,13 +110,69 @@ async function deactivate() {
 			type="button"
 			onclick={activate}
 			disabled={working}
-			class="mt-1 inline-flex items-center gap-2 rounded-lg bg-brand hover:bg-brand-strong text-white text-xs font-semibold px-3 py-2 shadow-md shadow-brand/20 disabled:opacity-50 transition-colors"
+			class="btn btn-primary btn-sm action"
 		>
-			🔔 {$t("push.activate")}
+			<PushBellIcon size={18} strokeWidth={2} />
+			{$t("push.activate")}
 		</button>
 	{/if}
 
 	{#if error}
-		<p class="mt-2 text-[11px] text-loss">{error}</p>
+		<p class="error" role="alert">{error}</p>
 	{/if}
 </div>
+
+<style>
+.push {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 14px;
+	padding: 16px;
+}
+
+.head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	align-self: stretch;
+}
+
+.lead {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.state {
+	flex-shrink: 0;
+	padding: 3px 9px;
+	font-size: 12px;
+}
+
+.note {
+	margin: 0;
+	padding: 10px 12px;
+	border-radius: var(--radius-tile);
+	background: var(--color-sunken);
+	font-size: 13px;
+	line-height: 1.4;
+	/* Ink, not muted: muted on the sunken grey of A misses 4.5:1. */
+	color: var(--color-ink);
+}
+
+/* Blocked in the browser: the user has to act, so it reads stronger. */
+.note.warn {
+	background: var(--color-loss-soft);
+	color: var(--color-loss);
+	font-weight: 500;
+}
+
+.error {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color-loss);
+}
+</style>

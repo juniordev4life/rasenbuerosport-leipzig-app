@@ -45,7 +45,7 @@ Matches without a recording simply don't show the section. If nobody logged any 
 
 The vertical timeline shows every goal chronologically — **Full-time** at the top, **Kick-off** at the bottom:
 
-- **Home goals** on the left in red, **away goals** on the right in green
+- **Home goals** on the left in red, **away goals** on the right in navy
 - **Minute bubbles** on the center line, including stoppage time (*45+2'*)
 - **Scorer** and **assist** next to the running score
 - Goals from a penalty shootout are included; cards and missed penalties are not shown here
@@ -54,7 +54,7 @@ The vertical timeline shows every goal chronologically — **Full-time** at the 
 
 ## Lineups & performance
 
-Two lineup cards (Home / Away), each with a win, draw or loss tag. Every player gets their goals and assists in this match and their ELO change — your own name shows in your accent colour.
+Two lineup cards (Home / Away), each with a win, draw or loss tag. Every player gets their goals and assists in this match and their ELO change — your own entry is marked **Ich**.
 
 ---
 

@@ -136,40 +136,26 @@ Public routes: `/`, `/auth/*`. Authenticated routes: everything under `/app/*`.
 
 ## Styling
 
-TailwindCSS 4 is configured via `src/app.css`:
+The app has two fixed designs instead of a light/dark theme: **A "Rot & Weiß"** (default; RB Leipzig red, white and navy) and **B "Fußballplatz"** (white cards on a mown pitch), picked per device in Settings. Neither follows the OS light/dark setting. **`docs/DESIGN.md` is the guide** — read it before touching UI: tokens, building-block classes, shared components, rules and a mockup-colour table.
 
-```css
-@import "tailwindcss";
-
-@theme {
-  --color-bg-primary: #f5f7fa;
-  --color-accent-red: #c41e3a;
-  --color-text-primary: #1a1d26;
-  /* ... */
-}
-
-.dark {
-  --color-bg-primary: #0f1219;
-  /* ... */
-}
-```
-
-**Rules:**
-
-- **Use the project's CSS variables**, not arbitrary Tailwind colors. Use the Tailwind utilities they generate (e.g. `bg-bg-primary`, `text-text-primary`, `text-accent-red`).
-- The theme supports **light and dark mode** via the `.dark` class on `<html>` (toggled by `theme.stores.js`). Dark variants must be considered for any new color usage.
+- `src/app.css` is the only file with colour values. `@theme` defines the colour roles with their A values (`--color-surface`, `--color-ink`, `--color-muted`, `--color-line`, `--color-brand`, `--color-win`, `--color-loss`, …) and switches the default Tailwind palette off (`--color-*: initial`), so `bg-blue-500` renders nothing. `:root[data-variant="b"]` overrides what differs in B; shape and type roles (`--radius-*`, `--shadow-*`, `--font-title`, …) sit in `:root`.
+- Use the utilities the roles generate (`bg-surface`, `text-muted`, `border-line`, `bg-brand`) or `var(--color-…)` in `<style>` blocks. No hex/rgb literals, no default-palette classes, no `dark:` variants.
+- Build from the shared pieces: classes in `app.css` (`.card`, `.chip-*`, `.result-*`, `.score`, `.btn-*`, `.field`, `.progress`, …) and `src/lib/components/ui/` (`Section`, `PlayerAvatar`, `SegmentedControl`, `Sheet`, …).
+- Variant-specific CSS goes in the component as `:global([data-variant="b"]) .thing { … }`; branch markup on `$designVariant` only where the structure differs.
+- Component `<style>` rules are unlayered and beat Tailwind utilities: never set the same property through both (e.g. `display` plus `lg:hidden`).
+- The page colour sits on `<html>` only, so B's pitch (`layout/PitchBackground.svelte`) shows through; never paint `bg-page` on a page wrapper. Text straight on the page background gets `.on-page`.
+- Fonts are self-hosted OFL stand-ins via `@fontsource` (Anton, Barlow, Barlow Condensed). The RB Leipzig house fonts, logo and pictograms are licensed for RB Leipzig assets only and must not ship; the app's crest is `static/logo.png`. The project does not use the Jersey design system.
 - Page layout: CSS Grid; content layout: Flexbox.
-- This project does **not** use the RB Leipzig brand colors or the Jersey design system. Stick to the local theme tokens.
 
 ### Charts
 
-Use Chart.js 4 directly. There is no shared chart-component package — wrap chart instances in small Svelte components under `src/lib/components/{domain}/`.
+Use Chart.js 4 directly. There is no shared chart-component package — wrap chart instances in small Svelte components under `src/lib/components/{domain}/`. Take colours and fonts from `getChartTheme()` / `getBaseChartOptions()` in `src/lib/utils/chart.utils.js`, which read the active design's roles.
 
 ## Accessibility (WCAG 2.1 Level A & AA)
 
 - All images need alt text (empty `alt=""` for decorative)
 - Never rely on color alone for meaning — pair color cues with icons/text
-- Contrast: 4.5:1 normal text, 3:1 large text (18pt+) — verify in both light and dark mode
+- Contrast: 4.5:1 normal text, 3:1 large text (18pt+) — verify in both designs (A and B)
 - All interactive elements must be keyboard accessible
 - Use semantic HTML (`<main>`, `<section>`, `<nav>`, `<article>`, `<button>` for buttons)
 - Proper ARIA on custom interactive elements
@@ -180,7 +166,7 @@ Use Chart.js 4 directly. There is no shared chart-component package — wrap cha
 
 - Use Svelte 5 stores under `src/lib/stores/`
 - `auth.stores.js` — current user + auth state (subscribes to Firebase `onAuthStateChanged`)
-- `theme.stores.js` — light/dark mode toggle (persists to `localStorage`)
+- `designVariant.stores.js` — design A or B for this device (`localStorage` key `rbl:design-variant`), applied as `<html data-variant>`; an inline script in `app.html` sets it before the first paint
 - `season.stores.js` — currently selected season for season-scoped queries
 - Prefer local `$state` in components for UI-only state; lift to a store only when shared across routes
 
@@ -199,8 +185,9 @@ Use Chart.js 4 directly. There is no shared chart-component package — wrap cha
 
 ```
 storage.rules                 # Firebase Storage security rules (deployed by hand, see CI/CD)
+docs/DESIGN.md                # Design system: tokens, classes, components, rules
 src/
-  app.css                     # Tailwind import + project @theme tokens (light + dark)
+  app.css                     # Tailwind import, design tokens (A + B), building-block classes
   app.html                    # SvelteKit shell
   service-worker.js           # Web push only (push + notificationclick), no caching
   routes/                     # SvelteKit file-based routing
@@ -218,21 +205,22 @@ src/
       history/                # Match list with filters; ROUTES.GAMES points here
       leaderboard/            # Season ELO ranking (players, duos), FC27/FC26 switch
       profile/                # Own + /[id] profiles, each with /trophies
+      recap/                  # /[season] season recap story (FC26 Rückblick)
       seasons/                # Season list + archive
-      settings/               # Edit profile, theme, push, feedback, logout
+      settings/               # Edit profile, design A/B, push, feedback, logout
       stats/                  # Personal + community stats, per season
       teams/                  # Team catalog
       wrapped/                # Weekly wrapped recap
   lib/
     components/               # PascalCase.svelte, grouped by domain
-      auth/  challenges/  charts/  compare/  dashboard/
-      duo/  games/  historie/  home/  icons/  layout/
-      leaderboard/  liveMatch/  penaltyShootout/  playerProfile/
-      profile/  season/  stats/  trophies/  ui/  wrapped/
+      auth/  challenges/  charts/  compare/  duo/  games/
+      historie/  home/  icons/  layout/  leaderboard/  liveMatch/
+      penaltyShootout/  playerProfile/  profile/  recap/  season/
+      stats/  trophies/  ui/  wrapped/
     services/                 # {name}.services.js; api = HTTP client wrapper
       api  auth  challenges  playerProfile  push
       recording  talkshow  teams  trophies  wrapped
-    stores/                   # auth, season, theme
+    stores/                   # auth, designVariant, season
     config/                   # firebase.config.js, i18n.config.js
     constants/                # liveMatch, reporters, routes, teams, trophies, upload
     utils/                    # framework-agnostic helpers
@@ -307,7 +295,7 @@ const STATIC_DIR = join(import.meta.dirname, "../../static");
 
 Never push directly to `main`. Always use feature branches and pull requests.
 
-- **Branch naming**: `<type>/<short-description>` (e.g. `feat/add-wrapped-screen`, `fix/dark-mode-card-contrast`)
+- **Branch naming**: `<type>/<short-description>` (e.g. `feat/add-wrapped-screen`, `fix/card-contrast`)
 - **PR checks**: lint + format must pass
 - **Merge strategy**: Squash merge, delete branch after merge
 
@@ -400,7 +388,7 @@ After completing any implementation, review the code for:
 - Components with more than 3 props that could be grouped into a single object prop
 - Missing error handling on `apiRequest` calls (catch + user-facing message)
 - Direct `fetch(...)` usage instead of `apiRequest`
-- Hardcoded color literals instead of theme tokens (breaks dark mode)
-- Missing dark-mode treatment for new UI surfaces
+- Hardcoded color literals or default-palette classes instead of theme tokens (breaks design B)
+- New UI not checked in both designs (A and B), at phone and desktop width
 - Each loops without a key
 - New strings shipped without `de` + `en` Tolgee keys

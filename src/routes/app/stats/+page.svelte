@@ -1,5 +1,10 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import BallIcon from "$lib/components/icons/BallIcon.svelte";
+import ClockIcon from "$lib/components/icons/ClockIcon.svelte";
+import LightningIcon from "$lib/components/icons/LightningIcon.svelte";
+import ShieldIcon from "$lib/components/icons/ShieldIcon.svelte";
+import TargetIcon from "$lib/components/icons/TargetIcon.svelte";
 import SeasonSelector from "$lib/components/season/SeasonSelector.svelte";
 import CommonScoresChart from "$lib/components/stats/CommonScoresChart.svelte";
 import GamesPerMonthChart from "$lib/components/stats/GamesPerMonthChart.svelte";
@@ -9,6 +14,7 @@ import RollingWinRateChart from "$lib/components/stats/RollingWinRateChart.svelt
 import TeamStatsChart from "$lib/components/stats/TeamStatsChart.svelte";
 import WeekdayDistributionChart from "$lib/components/stats/WeekdayDistributionChart.svelte";
 import XgVsGoalsChart from "$lib/components/stats/XgVsGoalsChart.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 import { get } from "$lib/services/api.services.js";
 import { selectedSeason } from "$lib/stores/season.stores.js";
 
@@ -55,82 +61,137 @@ $effect(() => {
 		}
 	}
 });
+
+const hasPerformance = $derived(dashboard?.rolling_win_rate?.length > 0);
+const hasMatchStats = $derived(
+	Boolean(statsMe?.career_match_stats) ||
+		dashboard?.xg_vs_goals?.games_with_xg > 0,
+);
+const hasActivity = $derived(
+	dashboard?.games_per_month?.length > 0 ||
+		dashboard?.games_per_weekday?.length > 0,
+);
+const hasGoals = $derived(
+	community?.common_scores?.length > 0 ||
+		community?.goals_distribution?.length > 0,
+);
+const hasTeams = $derived(dashboard?.team_stats?.length > 0);
+const isEmpty = $derived(
+	!dashboard?.rolling_win_rate?.length && !community?.common_scores?.length,
+);
 </script>
 
 <svelte:head>
 	<title>RasenBürosport - {$t("stats_dashboard.page_title")}</title>
 </svelte:head>
 
-<div class="flex flex-col gap-5 pb-4">
-	<!-- Header -->
-	<div class="flex items-center justify-between lg:justify-end">
-		<h1 class="text-xl font-bold text-ink lg:hidden">{$t("stats_dashboard.page_title")}</h1>
+<div class="stack pb-4 lg:pb-8">
+	<header class="hero bleed page-hero">
+		<h1 class="page-title page-hero-title">{$t("stats_dashboard.page_title")}</h1>
 		<SeasonSelector />
-	</div>
+	</header>
 
 	{#if loading}
 		<div class="flex justify-center py-12">
-			<div class="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full"></div>
+			<span class="spinner" role="status" aria-label={$t("common.loading")}></span>
 		</div>
 	{:else if error}
-		<div class="bg-surface border border-line rounded-lg p-6 text-center">
-			<p class="text-muted">{$t("stats_dashboard.error_loading")}</p>
-		</div>
+		<p class="card notice" role="alert">{$t("stats_dashboard.error_loading")}</p>
 	{:else}
-		<!-- Section A: Performance -->
-		<section class="flex flex-col gap-4">
-			<h2 class="text-sm font-bold text-ink uppercase tracking-wide">{$t("stats_dashboard.section_performance")}</h2>
-			<RollingWinRateChart data={dashboard?.rolling_win_rate} />
-		</section>
+		{#if hasPerformance}
+			<Section title={$t("stats_dashboard.section_performance")}>
+				{#snippet icon()}<LightningIcon size={22} strokeWidth={2} />{/snippet}
+				<RollingWinRateChart data={dashboard?.rolling_win_rate} />
+			</Section>
+		{/if}
 
-		<!-- Section B: Match Stats -->
-		{#if statsMe?.career_match_stats || (dashboard?.xg_vs_goals?.games_with_xg > 0)}
-			<section class="flex flex-col gap-4">
-				<h2 class="text-sm font-bold text-ink uppercase tracking-wide">{$t("stats_dashboard.section_match_stats")}</h2>
-				<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+		{#if hasMatchStats}
+			<Section title={$t("stats_dashboard.section_match_stats")}>
+				{#snippet icon()}<TargetIcon size={22} strokeWidth={2} />{/snippet}
+				<div class="chart-grid">
 					<PlayerRadarChart stats={statsMe?.career_match_stats} />
 					<XgVsGoalsChart data={dashboard?.xg_vs_goals} />
 				</div>
-			</section>
+			</Section>
 		{/if}
 
-		<!-- Section C: Activity -->
-		{#if dashboard?.games_per_month?.length > 0 || dashboard?.games_per_weekday?.length > 0}
-			<section class="flex flex-col gap-4">
-				<h2 class="text-sm font-bold text-ink uppercase tracking-wide">{$t("stats_dashboard.section_activity")}</h2>
-				<GamesPerMonthChart data={dashboard?.games_per_month} />
-				<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+		{#if hasActivity}
+			<Section title={$t("stats_dashboard.section_activity")}>
+				{#snippet icon()}<ClockIcon size={22} strokeWidth={2} />{/snippet}
+				<div class="chart-grid">
+					<GamesPerMonthChart data={dashboard?.games_per_month} />
 					<WeekdayDistributionChart data={dashboard?.games_per_weekday} />
 				</div>
-			</section>
+			</Section>
 		{/if}
 
-		<!-- Section D: Goal Analysis -->
-		{#if community?.common_scores?.length > 0 || community?.goals_distribution?.length > 0}
-			<section class="flex flex-col gap-4">
-				<h2 class="text-sm font-bold text-ink uppercase tracking-wide">{$t("stats_dashboard.section_goals")}</h2>
-				<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+		{#if hasGoals}
+			<Section title={$t("stats_dashboard.section_goals")}>
+				{#snippet icon()}<BallIcon size={22} strokeWidth={2} />{/snippet}
+				<div class="chart-grid">
 					<CommonScoresChart data={community?.common_scores} />
 					<GoalsDistributionChart data={community?.goals_distribution} />
 				</div>
-			</section>
+			</Section>
 		{/if}
 
-		<!-- Section E: Team Analysis -->
-		{#if dashboard?.team_stats?.length > 0}
-			<section class="flex flex-col gap-4">
-				<h2 class="text-sm font-bold text-ink uppercase tracking-wide">{$t("stats_dashboard.section_teams")}</h2>
-				<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+		{#if hasTeams}
+			<Section title={$t("stats_dashboard.section_teams")}>
+				{#snippet icon()}<ShieldIcon size={22} strokeWidth={2} />{/snippet}
+				<div class="chart-grid">
 					<TeamStatsChart data={dashboard?.team_stats} />
 				</div>
-			</section>
+			</Section>
 		{/if}
 
-		<!-- Empty state -->
-		{#if !dashboard?.rolling_win_rate?.length && !community?.common_scores?.length}
-			<div class="bg-surface border border-line rounded-lg p-8 text-center">
-				<p class="text-muted">{$t("stats_dashboard.no_data")}</p>
-			</div>
+		{#if isEmpty}
+			<p class="card notice">{$t("stats_dashboard.no_data")}</p>
 		{/if}
 	{/if}
 </div>
+
+<style>
+/* ── Hero: the title above the season filter ─────────────────────────── */
+.page-hero {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 16px;
+}
+
+:global([data-variant="b"]) .page-hero {
+	gap: 12px;
+}
+
+/* Charts of one section: stacked on phones, side by side from about
+ * 640 px of section width (a lone chart takes the full row). */
+.chart-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+	gap: 12px;
+}
+
+:global([data-variant="b"]) .chart-grid {
+	gap: 20px;
+}
+
+/* Desktop: the top bar carries the title, so the hero turns into a plain
+ * toolbar holding the season filter. */
+@media (min-width: 1024px) {
+	.page-hero {
+		flex-direction: row;
+		justify-content: flex-end;
+		margin: 0;
+		padding: 0;
+		background: transparent;
+	}
+
+	.page-hero-title {
+		display: none;
+	}
+
+	.chart-grid {
+		gap: var(--stack-gap);
+	}
+}
+</style>

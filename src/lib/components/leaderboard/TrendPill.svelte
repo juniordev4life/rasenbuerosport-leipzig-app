@@ -1,10 +1,13 @@
 <script>
 /**
- * Compact +Δ / −Δ / flat pill used inline in player rows and within the
- * hero card. The direction is derived from the delta sign, so callers
- * only need to pass the numeric value. Uses the theme's semantic
- * success/error/muted tokens so it stays readable in light and dark
- * mode alike.
+ * Signed rating change: "+12", "−5", "±0", or "—" when there is none.
+ * The sign carries the direction; colour only repeats it.
+ *
+ * `inline` (list rows): a small condensed figure in the win / loss /
+ * muted colour. `pill` (heroes): design A prints it as a caption in the
+ * text colour of its surroundings (white on the red hero); design B puts
+ * it in a pale green / red / grey chip. `suffix` follows the figure
+ * ("diese Woche").
  *
  * @type {{
  *   delta: number|null,
@@ -14,48 +17,77 @@
  */
 let { delta = null, variant = "inline", suffix = null } = $props();
 
-const direction = $derived(
-	delta == null ? "flat" : delta > 0 ? "up" : delta < 0 ? "down" : "flat",
-);
+const rounded = $derived(delta == null ? null : Math.round(delta));
 
-const symbol = $derived(
-	direction === "up" ? "↑" : direction === "down" ? "↓" : "—",
+const direction = $derived(
+	rounded == null || rounded === 0 ? "flat" : rounded > 0 ? "up" : "down",
 );
 
 const label = $derived.by(() => {
-	if (delta == null) return "—";
-	const abs = Math.round(Math.abs(delta));
-	const sign = direction === "up" ? "+" : direction === "down" ? "−" : "±";
-	return `${sign}${abs}`;
+	if (rounded == null) return "—";
+	if (rounded > 0) return `+${rounded}`;
+	if (rounded < 0) return `−${Math.abs(rounded)}`;
+	return "±0";
 });
-
-const inlineToneClass = $derived(
-	direction === "up"
-		? "text-win"
-		: direction === "down"
-			? "text-loss"
-			: "text-muted",
-);
-
-const pillToneClass = $derived(
-	direction === "up"
-		? "bg-win/10 border-win/30 text-win"
-		: direction === "down"
-			? "bg-loss/10 border-loss/30 text-loss"
-			: "bg-sunken border-line text-muted",
-);
 </script>
 
-{#if variant === "pill"}
-	<span
-		class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold tabular-nums whitespace-nowrap {pillToneClass}"
-	>
-		{symbol} {label}{#if suffix}&nbsp;{suffix}{/if}
-	</span>
-{:else}
-	<span
-		class="inline-flex items-center gap-0.5 text-[10px] font-bold tabular-nums whitespace-nowrap {inlineToneClass}"
-	>
-		{symbol} {label}
-	</span>
-{/if}
+<span class="trend trend-{variant} {direction}">
+	{label}{#if suffix}&nbsp;{suffix}{/if}
+</span>
+
+<style>
+.trend {
+	display: inline-flex;
+	align-items: center;
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+}
+
+.trend-inline {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 13px;
+	line-height: 1;
+}
+
+.trend-inline.up {
+	color: var(--color-win);
+}
+
+.trend-inline.down {
+	color: var(--color-loss);
+}
+
+.trend-inline.flat {
+	color: var(--color-muted);
+}
+
+/* A: a caption in the surrounding text colour. */
+.trend-pill {
+	font-size: 13px;
+	line-height: 1.25;
+}
+
+/* B: a tinted chip. */
+:global([data-variant="b"]) .trend-pill {
+	padding: 3px 10px;
+	border-radius: 999px;
+	font-weight: 500;
+	font-size: 12px;
+}
+
+:global([data-variant="b"]) .trend-pill.up {
+	background: var(--color-win-soft);
+	color: var(--color-win);
+}
+
+:global([data-variant="b"]) .trend-pill.down {
+	background: var(--color-loss-soft);
+	color: var(--color-loss);
+}
+
+:global([data-variant="b"]) .trend-pill.flat {
+	background: var(--color-sunken);
+	color: var(--color-muted);
+}
+</style>

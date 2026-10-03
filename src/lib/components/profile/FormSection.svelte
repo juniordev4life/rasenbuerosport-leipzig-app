@@ -1,16 +1,18 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import HistoryIcon from "$lib/components/icons/HistoryIcon.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 import MarcelCard from "./MarcelCard.svelte";
 
 /**
- * "Aktuelle Form" section: 5 result pills with the ELO delta, a
- * card-styled ELO sparkline with green/red point dots per match
- * outcome and a compact Marcel quote.
+ * "Aktuelle Form": the last five results as S / U / N markers with the
+ * ELO change over them, the ELO curve of those games with one dot per
+ * result, and Marcel's compact take. Design A: the curve on a grey
+ * panel. Design B: the curve chalked onto a little pitch.
  *
  * INVARIANT: `results` and `eloSeries` must describe the same matches in
- * the same order (oldest-first, left→right). The sparkline point at index
- * `i` is coloured by `results[i]`, so a mismatched order inverts the dots.
+ * the same order (oldest-first, left→right). The curve point at index
+ * `i` is marked with `results[i]`, so a mismatched order inverts them.
  *
  * @type {{
  *   results: Array<"W"|"L"|"D">,
@@ -32,175 +34,302 @@ let {
 
 const { t } = getTranslate();
 
-const deltaText = $derived.by(() => {
-	if (eloDelta > 0) return `↑ +${eloDelta}`;
-	if (eloDelta < 0) return `↓ ${eloDelta}`;
-	return "± 0";
-});
+const RESULT = {
+	W: { key: "profile.w_short", cls: "result-w", tone: "win" },
+	D: { key: "profile.d_short", cls: "result-d", tone: "draw" },
+	L: { key: "profile.l_short", cls: "result-l", tone: "loss" },
+};
 
-const deltaClass = $derived(
-	eloDelta > 0 ? "up" : eloDelta < 0 ? "down" : "flat",
+const deltaText = $derived(
+	eloDelta > 0
+		? `+${eloDelta}`
+		: eloDelta < 0
+			? `−${Math.abs(eloDelta)}`
+			: "±0",
+);
+const deltaTone = $derived(
+	eloDelta > 0 ? "win" : eloDelta < 0 ? "loss" : "draw",
 );
 
-const SPARK_WIDTH = 320;
-const SPARK_HEIGHT = 50;
+const PLOT_HEIGHT = 80;
+const PLOT_INSET = 12;
 
-const sparkPoints = $derived.by(() => {
+/** Measured width of the plot, so the SVG never stretches its dots. */
+let plotWidth = $state(300);
+const width = $derived(Math.max(plotWidth, PLOT_INSET * 4));
+
+const points = $derived.by(() => {
 	if (!eloSeries.length) return [];
+	const usable = width - PLOT_INSET * 2;
 	if (eloSeries.length === 1) {
-		return [{ x: SPARK_WIDTH / 2, y: SPARK_HEIGHT / 2, value: eloSeries[0] }];
+		return [{ x: width / 2, y: PLOT_HEIGHT / 2 }];
 	}
 	const min = Math.min(...eloSeries);
 	const max = Math.max(...eloSeries);
 	const range = max - min || 1;
-	const stepX = SPARK_WIDTH / (eloSeries.length - 1);
-	return eloSeries.map((v, i) => ({
-		x: i * stepX,
-		y: SPARK_HEIGHT - ((v - min) / range) * (SPARK_HEIGHT - 8) - 4,
-		value: v,
+	const stepX = usable / (eloSeries.length - 1);
+	return eloSeries.map((value, i) => ({
+		x: PLOT_INSET + i * stepX,
+		y:
+			PLOT_HEIGHT -
+			PLOT_INSET -
+			((value - min) / range) * (PLOT_HEIGHT - PLOT_INSET * 2),
 	}));
 });
 
 const polyline = $derived(
-	sparkPoints.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" "),
+	points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" "),
 );
 </script>
 
-<div class="section-card">
-	<div class="section-header">
-		<div class="section-label">
-			<HistoryIcon size={12} strokeWidth={1.8} />
-			<span>{$t("profile.form_section")}</span>
-		</div>
-	</div>
-
-	<div class="form-top">
-		<div class="form-pills">
-			{#each results as r, i (i)}
-				<div class="form-pill {r === 'W' ? 'win' : r === 'L' ? 'loss' : 'draw'}">
-					{r === "W" ? $t("profile.w_short") : r === "L" ? $t("profile.l_short") : $t("profile.d_short")}
-				</div>
-			{/each}
-		</div>
-		<div class="form-summary {deltaClass}">
-			<strong>{deltaText}</strong>
-			<span class="elo-label">ELO</span>
-		</div>
-	</div>
-
-	{#if eloSeries.length > 0}
-		<div class="form-sparkline-wrap">
-			<div class="form-sparkline-label">
-				<span>{$t("profile.elo_last_five")}</span>
-				{#if eloStart != null && eloEnd != null}
-					<span class="{deltaClass}">{eloStart} → {eloEnd}</span>
-				{/if}
-			</div>
-			<svg
-				class="form-sparkline-svg"
-				viewBox="0 0 {SPARK_WIDTH} {SPARK_HEIGHT}"
-				preserveAspectRatio="none"
-				aria-hidden="true"
-			>
-				<polyline
-					points={polyline}
-					fill="none"
-					stroke="#E24B4A"
-					stroke-width="2"
-					stroke-linejoin="round"
-					stroke-linecap="round"
-				/>
-				{#each sparkPoints as p, i (i)}
-					{@const result = results[i]}
-					<circle
-						cx={p.x}
-						cy={p.y}
-						r="3.5"
-						fill={result === "L" ? "#E24B4A" : result === "D" ? "#9CA3AF" : "#84CC16"}
-					/>
+<Section title={$t("profile.form_section")}>
+	{#snippet icon()}<HistoryIcon size={22} strokeWidth={2} />{/snippet}
+	<div class="card body">
+		<div class="top">
+			<div class="results">
+				{#each results as r, i (i)}
+					<span class="result marker {RESULT[r]?.cls ?? 'result-d'}">
+						{$t(RESULT[r]?.key ?? "profile.d_short")}
+					</span>
 				{/each}
-			</svg>
+			</div>
+			<span class="delta delta-{deltaTone}">
+				<span class="num delta-value">{deltaText}</span>
+				<span class="delta-unit">ELO</span>
+			</span>
 		</div>
-	{/if}
 
-	<MarcelCard quote={marcelQuote} variant="compact" />
-</div>
+		{#if eloSeries.length > 0}
+			<div class="curve">
+				<div class="curve-head">
+					<span>{$t("profile.elo_last_five")}</span>
+					{#if eloStart != null && eloEnd != null}
+						<span class="curve-range tone-{deltaTone}">{eloStart} → {eloEnd}</span>
+					{/if}
+				</div>
+				<div class="plot">
+					<div bind:clientWidth={plotWidth}>
+						<svg
+							viewBox="0 0 {width} {PLOT_HEIGHT}"
+							width="100%"
+							height={PLOT_HEIGHT}
+							aria-hidden="true"
+						>
+							<!-- Pitch markings, shown in design B only. -->
+							<g class="chalk">
+								<rect x="1" y="1" width={width - 2} height={PLOT_HEIGHT - 2} rx="4" />
+								<line x1={width / 2} y1="1" x2={width / 2} y2={PLOT_HEIGHT - 1} />
+								<circle cx={width / 2} cy={PLOT_HEIGHT / 2} r="20" />
+							</g>
+							<line
+								class="baseline"
+								x1="0"
+								y1={PLOT_HEIGHT - 0.5}
+								x2={width}
+								y2={PLOT_HEIGHT - 0.5}
+							/>
+							<polyline class="line" points={polyline} />
+							{#each points as p, i (i)}
+								<circle
+									class="dot dot-{RESULT[results[i]]?.tone ?? 'draw'}"
+									cx={p.x}
+									cy={p.y}
+									r="4"
+								/>
+							{/each}
+						</svg>
+					</div>
+				</div>
+			</div>
+		{/if}
+
+		<MarcelCard quote={marcelQuote} variant="compact" />
+	</div>
+</Section>
 
 <style>
-.section-card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 14px;
+/* ── Design A ───────────────────────────────────────────────────────── */
+.body {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding: 16px;
 }
-.section-header { margin-bottom: 14px; }
-.section-label {
-	font-size: 10px;
-	text-transform: uppercase; letter-spacing: 0.1em;
-	color: #6B7280;
-	font-weight: 700;
-	display: inline-flex;
+
+.top {
+	display: flex;
 	align-items: center;
-	gap: 6px;
+	justify-content: space-between;
+	gap: 12px;
 }
-.form-top {
-	display: flex; align-items: center;
-	gap: 10px;
-	margin-bottom: 12px;
+
+.results {
+	display: flex;
+	gap: 4px;
 }
-.form-pills { display: flex; gap: 5px; }
-.form-pill {
-	width: 28px; height: 28px;
-	border-radius: 7px;
-	display: flex; align-items: center; justify-content: center;
-	font-size: 12px; font-weight: 800;
+
+.marker {
+	width: 30px;
+	height: 30px;
+	font-size: 15px;
 }
-.form-pill.win {
-	background: rgba(132, 204, 22, 0.15);
-	color: #84CC16;
-	border: 1.5px solid rgba(132, 204, 22, 0.3);
+
+/* The change is the shared `.delta` (coloured in A, a pill in B); A sets
+ * the figure big with "ELO" under it. */
+.delta {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 4px;
+	flex-shrink: 0;
 }
-.form-pill.loss {
-	background: rgba(226, 75, 74, 0.15);
-	color: #E24B4A;
-	border: 1.5px solid rgba(226, 75, 74, 0.3);
+
+.delta-value {
+	font-size: 26px;
+	line-height: 0.8;
 }
-.form-pill.draw {
-	background: rgba(156, 163, 175, 0.15);
-	color: #9CA3AF;
-	border: 1.5px solid rgba(156, 163, 175, 0.3);
-}
-.form-summary {
-	margin-left: auto;
-	font-size: 11px;
-	color: #9CA3AF;
-	text-align: right;
-	display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
-}
-.form-summary strong { font-weight: 800; font-variant-numeric: tabular-nums; }
-.form-summary.up strong, .form-summary.up :global(span) { color: #84CC16; }
-.form-summary.down strong, .form-summary.down :global(span) { color: #E24B4A; }
-.form-summary.flat strong { color: #9CA3AF; }
-.form-summary .elo-label { font-size: 9px; color: #6B7280; }
-.form-sparkline-wrap {
-	background: rgba(0,0,0,0.2);
-	border-radius: 10px;
-	padding: 10px 12px;
-	margin-bottom: 10px;
-}
-.form-sparkline-label {
-	display: flex; justify-content: space-between;
-	font-size: 9px;
-	color: #6B7280;
-	text-transform: uppercase; letter-spacing: 0.08em;
+
+.delta-unit {
+	font-family: var(--font-cond);
 	font-weight: 700;
-	margin-bottom: 6px;
+	font-size: 11px;
+	letter-spacing: 0.03em;
 }
-.form-sparkline-label .up { color: #84CC16; }
-.form-sparkline-label .down { color: #E24B4A; }
-.form-sparkline-label .flat { color: #9CA3AF; }
-.form-sparkline-svg {
-	width: 100%; height: 50px;
+
+.curve {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 12px;
+	background: var(--color-sunken);
+}
+
+.curve-head {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	font-family: var(--font-label);
+	font-weight: var(--label-weight);
+	font-size: 12px;
+	letter-spacing: var(--label-tracking);
+	text-transform: var(--label-case);
+}
+
+/* No change stays ink: the muted grey is too faint on the grey panel. */
+.curve-range.tone-win {
+	color: var(--color-win);
+}
+
+.curve-range.tone-loss {
+	color: var(--color-loss);
+}
+
+.plot svg {
 	display: block;
+	overflow: visible;
+}
+
+.chalk {
+	display: none;
+}
+
+.baseline {
+	stroke: var(--color-line);
+	stroke-width: 1;
+}
+
+.line {
+	fill: none;
+	stroke: var(--color-brand);
+	stroke-width: 2.5;
+	stroke-linejoin: round;
+	stroke-linecap: round;
+}
+
+.dot-win {
+	fill: var(--color-win);
+}
+
+.dot-loss {
+	fill: var(--color-loss);
+}
+
+.dot-draw {
+	fill: var(--color-muted);
+}
+
+/* ── Design B: a pill for the change, the curve on a small pitch ─────── */
+:global([data-variant="b"]) .marker {
+	width: 26px;
+	height: 36px;
+	font-size: 15px;
+}
+
+:global([data-variant="b"]) .results {
+	gap: 8px;
+}
+
+:global([data-variant="b"]) .delta {
+	flex-direction: row;
+	align-items: baseline;
+	gap: 4px;
+	font-size: 14px;
+}
+
+:global([data-variant="b"]) .delta-value {
+	font-family: inherit;
+	font-weight: inherit;
+	font-size: inherit;
+	line-height: 1.2;
+}
+
+:global([data-variant="b"]) .delta-unit {
+	font-size: inherit;
+	letter-spacing: 0;
+}
+
+:global([data-variant="b"]) .curve {
+	gap: 6px;
+	padding: 0;
+	background: transparent;
+}
+
+:global([data-variant="b"]) .curve-head {
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .curve-range {
+	color: var(--color-ink);
+}
+
+:global([data-variant="b"]) .plot {
+	padding: 10px;
+	border-radius: 14px;
+	background: var(--color-pitch);
+}
+
+:global([data-variant="b"]) .chalk {
+	display: inline;
+	fill: none;
+	stroke: var(--color-chalk);
+	stroke-width: 2;
+}
+
+:global([data-variant="b"]) .baseline {
+	display: none;
+}
+
+:global([data-variant="b"]) .line {
+	stroke: var(--color-on-page);
+	stroke-width: 3;
+}
+
+:global([data-variant="b"]) .dot {
+	stroke: var(--color-on-page);
+	stroke-width: 2;
+}
+
+:global([data-variant="b"]) .dot-draw {
+	fill: var(--color-draw);
 }
 </style>

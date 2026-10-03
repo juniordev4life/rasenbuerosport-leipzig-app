@@ -5,8 +5,13 @@ import DuoAvatars from "./DuoAvatars.svelte";
 import SophieCard from "./SophieCard.svelte";
 
 /**
- * Duo hero card with overlapping avatars, name/archetype, chemistry
- * donut (or pending placeholder) and a Sophie verdict.
+ * Top of the duo profile: the two players as one unit (overlapping
+ * avatars, both names as the page heading, the archetype), the
+ * chemistry donut and Sophie's verdict. A tentative archetype gets
+ * "(?)".
+ *
+ * Design A: the red hero band (a red card from `lg`). Design B: a
+ * white card on the pitch.
  *
  * @type {{
  *   player1: object,
@@ -39,76 +44,156 @@ const archetypeText = $derived.by(() => {
 });
 </script>
 
-<div class="hero-duo">
-	<div class="hero-title-bar">
-		<div class="hero-title">⚡ {$t("duo.team_identity")}</div>
-	</div>
+<section class="hero bleed duo-hero">
+	<p class="eyebrow">{$t("duo.team_identity")}</p>
 
-	<div class="duo-faceoff">
-		<div class="avatars-slot">
-			<DuoAvatars {player1} {player2} />
-		</div>
-		<div class="duo-names-block">
-			<div class="duo-name">{player1.username} &amp; {player2.username}</div>
-			<div class="duo-archetype" class:tentative={archetypeTentative}>{archetypeText}</div>
+	<div class="identity">
+		<DuoAvatars {player1} {player2} size={64} />
+		<div class="names">
+			<h1 class="page-title duo-name">{player1.username} &amp; {player2.username}</h1>
+			<p class="duo-type" class:tentative={archetypeTentative}>{archetypeText}</p>
 		</div>
 	</div>
 
-	<ChemistryDonut score={chemistryScore} trendDelta={chemistryTrend} {rankInfo} />
-
-	<div class="sophie-wrap">
-		<SophieCard quote={sophieQuote} />
+	<div class="verdict">
+		<ChemistryDonut score={chemistryScore} trendDelta={chemistryTrend} {rankInfo} />
+		<div class="quote">
+			<SophieCard quote={sophieQuote} />
+		</div>
 	</div>
-</div>
+</section>
 
 <style>
-.hero-duo {
-	background: radial-gradient(ellipse at top right, rgba(132, 204, 22, 0.15) 0%, transparent 55%),
-		linear-gradient(180deg, #1A1F2A 0%, #131822 100%);
-	border: 1px solid rgba(132, 204, 22, 0.25);
-	border-radius: 18px;
-	padding: 20px 16px 16px;
-	position: relative;
-	overflow: hidden;
+/* ── Design A: the red hero band ────────────────────────────────────── */
+.duo-hero {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	padding-top: 20px;
+	padding-bottom: 24px;
 }
-.hero-duo::before {
-	content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-	background: linear-gradient(90deg, transparent, #84CC16 50%, transparent);
-	opacity: 0.5;
+
+.eyebrow {
+	margin: 0;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 14px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
 }
-.hero-title-bar {
-	display: flex; justify-content: space-between; align-items: center;
-	margin-bottom: 14px;
-}
-.hero-title {
-	font-size: 10px; font-weight: 800;
-	color: #84CC16;
-	text-transform: uppercase; letter-spacing: 0.12em;
-}
-.duo-faceoff {
-	display: flex; flex-direction: column;
+
+.identity {
+	display: flex;
 	align-items: center;
-	gap: 14px;
-	position: relative; z-index: 1;
+	gap: 16px;
 }
-.avatars-slot {
-	padding-bottom: 6px;
+
+.names {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
 }
-.duo-names-block {
-	text-align: center;
-}
+
 .duo-name {
-	font-size: 20px; font-weight: 800;
-	color: #FFFFFF;
-	letter-spacing: -0.01em;
-	margin-bottom: 3px;
+	margin: 0;
+	font-size: 32px;
+	overflow-wrap: anywhere;
+	text-wrap: balance;
 }
-.duo-archetype {
+
+.duo-type {
+	margin: 0;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 15px;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.verdict {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 16px;
+}
+
+.quote {
+	flex: 1 1 200px;
+	min-width: 0;
+}
+
+/* Desktop: a wide card, the pair left, chemistry and verdict right. */
+@media (min-width: 1024px) {
+	.duo-hero {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-areas:
+			"eyebrow eyebrow"
+			"identity verdict";
+		align-items: center;
+		gap: 18px 40px;
+		margin: 0;
+		padding: 24px 28px;
+		border-radius: var(--radius-card);
+	}
+
+	.eyebrow {
+		grid-area: eyebrow;
+	}
+
+	.identity {
+		grid-area: identity;
+	}
+
+	.verdict {
+		grid-area: verdict;
+	}
+
+	.duo-name {
+		font-size: 40px;
+	}
+}
+
+/* ── Design B: a white card on the pitch ────────────────────────────── */
+:global([data-variant="b"]) .duo-hero {
+	gap: 14px;
+	padding: 18px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+}
+
+:global([data-variant="b"]) .eyebrow {
+	font-family: var(--font-sans);
 	font-size: 12px;
-	color: #84CC16;
-	font-weight: 600;
-	font-style: italic;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--color-muted);
 }
-.duo-archetype.tentative { color: #9CA3AF; }
-.sophie-wrap { margin-top: 16px; }
+
+:global([data-variant="b"]) .duo-name {
+	font-size: 30px;
+}
+
+:global([data-variant="b"]) .duo-type {
+	font-family: var(--font-sans);
+	font-weight: 500;
+	font-size: 14px;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--color-brand-strong);
+}
+
+:global([data-variant="b"]) .duo-type.tentative {
+	color: var(--color-muted);
+}
+
+@media (min-width: 1024px) {
+	:global([data-variant="b"]) .duo-hero {
+		gap: 14px 40px;
+		padding: 24px;
+	}
+}
 </style>

@@ -1,49 +1,66 @@
 <script>
+import LightningIcon from "$lib/components/icons/LightningIcon.svelte";
+
 /**
- * Narrative banner on top of the Verlauf tab. The icon + colour
- * convey the streak energy without overpowering the layout.
+ * Banner on top of the History tab: how the last weeks went, as a
+ * headline and a detail line next to a gold lightning tile.
  *
  * @type {{ headline: string, detail: string }}
  */
 let { headline, detail } = $props();
 </script>
 
-<div class="banner">
-	<div class="icon" aria-hidden="true">⚡</div>
-	<div class="text">
-		<div class="headline">{headline}</div>
-		<div class="detail">{detail}</div>
+<div class="card banner">
+	<span class="icon" aria-hidden="true"><LightningIcon size={22} strokeWidth={2} /></span>
+	<div class="min-w-0">
+		<p class="headline">{headline}</p>
+		<p class="detail">{detail}</p>
 	</div>
 </div>
 
 <style>
 .banner {
-	display: flex; align-items: center; gap: 12px;
-	background: linear-gradient(135deg, rgba(245, 158, 11, 0.10), rgba(245, 158, 11, 0.02));
-	border: 1px solid rgba(245, 158, 11, 0.25);
-	border-radius: 14px;
-	padding: 12px 14px;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 14px 16px;
 }
+
 .icon {
-	width: 36px; height: 36px;
-	border-radius: 10px;
-	background: linear-gradient(135deg, #F59E0B, #D97706);
-	color: #1A1F2A;
-	font-size: 18px;
-	font-weight: 800;
-	display: flex; align-items: center; justify-content: center;
+	width: 44px;
+	height: 44px;
 	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--radius-tile);
+	background: var(--color-gold);
+	color: var(--color-on-gold);
 }
-.text { flex: 1; min-width: 0; }
+
 .headline {
-	font-size: 13px;
-	font-weight: 800;
-	color: #FFFFFF;
-	margin-bottom: 2px;
+	margin: 0;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 17px;
+	line-height: 1.15;
+	text-transform: var(--label-case);
+	letter-spacing: var(--label-tracking);
 }
+
 .detail {
-	font-size: 11px;
-	color: #9CA3AF;
+	margin: 3px 0 0;
+	font-size: 13px;
 	line-height: 1.4;
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .icon {
+	border-radius: 999px;
+}
+
+:global([data-variant="b"]) .headline {
+	font-weight: 800;
+	font-size: 19px;
 }
 </style>

@@ -1,14 +1,21 @@
 <script>
+import { getTranslate } from "@tolgee/svelte";
 import { designVariant } from "$lib/stores/designVariant.stores.js";
 
 /**
  * The signed-in player's running series (win / loss streaks, scoring,
  * clean sheets). Design A: the count in big red display type. Design B:
- * the count fanned out as cards, like a referee's hand.
+ * the count fanned out as cards, like a referee's hand. Texts come from
+ * `home.series.<type>`.
  *
- * @type {{ series: Array<{ id: string, type: string, headline: string, detail: string, count: number, label: string }> }}
+ * @type {{
+ *   series: Array<{ id: string, type: string, count: number }>,
+ *   userName?: string,
+ * }}
  */
-let { series = [] } = $props();
+let { series = [], userName = "" } = $props();
+
+const { t } = getTranslate();
 
 /** Fan of up to five cards, rotated around the middle one. */
 const FAN = [-16, -8, 0, 8, 16];
@@ -33,9 +40,11 @@ function fanFor(count) {
 				<span class="count num" aria-hidden="true">{s.count}</span>
 			{/if}
 			<div class="flex flex-col gap-1 min-w-0">
-				<span class="kicker">{s.label}</span>
-				<span class="line">{s.count} {s.label}</span>
-				<span class="text-sm leading-snug">{s.headline}</span>
+				<span class="kicker">{$t(`home.series.${s.type}.label`)}</span>
+				<span class="line">{s.count} {$t(`home.series.${s.type}.label`)}</span>
+				<span class="text-sm leading-snug">
+					{$t(`home.series.${s.type}.headline`, { name: userName })}
+				</span>
 			</div>
 		</div>
 	{/each}

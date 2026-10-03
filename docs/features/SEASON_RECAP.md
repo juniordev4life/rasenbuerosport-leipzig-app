@@ -32,7 +32,7 @@ Full-screen, story-style, ten slides — auto-advancing roughly every 7 seconds,
 
 ## Design notes
 
-The story is intentionally a fully dark, immersive screen — the same idea as the new-match wizard — rather than the app's regular light/dark theme, so it reads like a highlight reel rather than another settings page. Count-up numbers, slide transitions and the confetti burst are all skipped under the OS-level "reduce motion" setting; navigation itself still works exactly the same.
+The story is a full-screen highlight reel rather than another app page, styled per design: in A the slides alternate between the red and the navy band with white display type, in B the story plays on the pitch with white cards and gold accents. On desktop it sits in a centred phone-shaped frame with previous/next buttons beside it. Count-up numbers, slide transitions and the confetti burst are all skipped under the OS-level "reduce motion" setting; navigation itself still works exactly the same.
 
 ## Where the data comes from
 

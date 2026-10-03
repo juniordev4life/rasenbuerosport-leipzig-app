@@ -1,6 +1,8 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import OvrBadge from "$lib/components/ui/OvrBadge.svelte";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
+import Sheet from "$lib/components/ui/Sheet.svelte";
 import StarRating from "$lib/components/ui/StarRating.svelte";
 import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
 import { getTeamByName } from "$lib/services/teams.services.js";
@@ -12,10 +14,14 @@ import TeamAutocomplete from "./TeamAutocomplete.svelte";
  * Step 2 of the new-game wizard — match poster with the two teams
  * picked for the upcoming match. On mount it auto-rolls a balanced
  * pair (4–5★ default); the three action buttons re-roll, open the
- * star-range dialog or open the manual dialog, where both teams are
+ * star-range dialog or open the manual sheet, where both teams are
  * typed into autocomplete fields and applied only on confirm. The
  * big red CTA forwards to onAnpfiff, which transitions the wizard
  * into the live-match step without bumping the visible stepper.
+ *
+ * Design A: one white card, home above "VS" above away (side by side
+ * from `lg`). Design B: the teams stand on a small chalked pitch with
+ * the "VS" badge on the halfway line.
  *
  * @type {{
  *   homePlayers: string[],
@@ -144,225 +150,129 @@ function getPlayer(id) {
 	);
 }
 
-function avatarGradient(id) {
-	const palette = [
-		["#84CC16", "#65A30D"],
-		["#E24B4A", "#C73E3D"],
-		["#6366F1", "#4338CA"],
-		["#F59E0B", "#D97706"],
-		["#06B6D4", "#0891B2"],
-		["#A78BFA", "#7C3AED"],
-		["#EC4899", "#BE185D"],
-		["#14B8A6", "#0F766E"],
-	];
-	let hash = 0;
-	for (let i = 0; i < id.length; i += 1) {
-		hash = (hash * 31 + id.charCodeAt(i)) | 0;
-	}
-	const [a, b] = palette[Math.abs(hash) % palette.length];
-	return `linear-gradient(135deg, ${a}, ${b})`;
-}
+/** "vs." → "vs": the badge sets it in capitals without the dot. */
+const versus = $derived($t("new_game.random_vs").replace(/\.$/, ""));
 </script>
 
 {#snippet playerChip(id)}
 	{@const p = getPlayer(id)}
-	<div class="inline-flex items-center gap-1.5 rounded-full bg-sunken border border-line pl-0.5 pr-2.5 py-0.5 max-w-full">
-		{#if p.avatar_url}
-			<img referrerpolicy="no-referrer" src={p.avatar_url} alt={p.username} class="w-5 h-5 rounded-full object-cover" />
-		{:else}
-			<span
-				class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-				style="background: {avatarGradient(id)};"
-			>{p.username.charAt(0).toUpperCase()}</span>
-		{/if}
-		<span class="text-[11px] font-medium text-muted truncate max-w-[120px]">
-			{p.username}
-		</span>
-	</div>
+	<li class="player-chip">
+		<PlayerAvatar player={p} size={24} />
+		<span class="truncate">{p.username}</span>
+	</li>
 {/snippet}
 
-{#snippet teamBlock(team, players)}
-	<div class="relative z-10 flex flex-col items-center justify-center gap-2.5 text-center min-w-0 px-4">
-		{#if team}
-			<TeamLogo logoUrl={team.logo_url} teamName={team.name} size="lg" />
-		{:else}
-			<div class="w-14 h-14 rounded-full bg-sunken animate-pulse"></div>
-		{/if}
-		<h2 class="text-sm sm:text-base font-bold leading-tight truncate max-w-[200px]">
-			{team?.name ?? "—"}
-		</h2>
-		{#if team}
-			<div class="flex items-center gap-2">
-				{#if team.overall_rating != null}
-					<OvrBadge rating={team.overall_rating} size="sm" />
+{#snippet teamBlock(team, name, players, side)}
+	<div class="team team-{side}">
+		<div class="team-main">
+			<span class="crest">
+				{#if team || name}
+					<TeamLogo logoUrl={team?.logo_url} teamName={team?.name ?? name} size="md" />
+				{:else}
+					<span class="crest-skeleton animate-pulse"></span>
 				{/if}
-				{#if team.star_rating != null}
-					<StarRating rating={team.star_rating} size="sm" />
+			</span>
+			<div class="team-info">
+				<h2 class="team-name">{team?.name ?? (name || "—")}</h2>
+				{#if team?.overall_rating != null || team?.star_rating != null}
+					<div class="ratings">
+						{#if team.overall_rating != null}
+							<OvrBadge rating={team.overall_rating} size="sm" />
+						{/if}
+						{#if team.star_rating != null}
+							<StarRating rating={team.star_rating} size="sm" />
+						{/if}
+					</div>
 				{/if}
 			</div>
-		{/if}
-		<div class="flex flex-wrap justify-center gap-1.5 mt-1 w-full">
+		</div>
+		<ul class="players">
 			{#each players as id (id)}
 				{@render playerChip(id)}
 			{/each}
-		</div>
+		</ul>
 	</div>
 {/snippet}
 
-<div class="flex flex-col gap-3">
+<div class="poster">
 	{#if rollError}
-		<div class="text-center text-xs text-brand">{rollError}</div>
+		<p class="roll-error">{rollError}</p>
 	{/if}
 
-	<!-- Pitch with the two teams in their respective halves — same
-	     visual as the player lobby and live-match screens. -->
-	<div
-		data-onboarding="poster-teams"
-		class="relative rounded-2xl border-2 border-line overflow-hidden"
-		style="background: linear-gradient(135deg, #0d3320 0%, #0a2516 100%);"
-	>
-		<svg
-			viewBox="0 0 200 280"
-			preserveAspectRatio="none"
-			class="absolute inset-0 w-full h-full opacity-40 pointer-events-none lg:hidden"
-			aria-hidden="true"
-		>
-			<line x1="0" y1="140" x2="200" y2="140" stroke="#84CC16" stroke-width="0.5" />
-			<circle cx="100" cy="140" r="22" fill="none" stroke="#84CC16" stroke-width="0.5" />
-			<circle cx="100" cy="140" r="1.5" fill="#84CC16" />
-			<rect x="60" y="0" width="80" height="32" fill="none" stroke="#84CC16" stroke-width="0.5" />
-			<rect x="60" y="248" width="80" height="32" fill="none" stroke="#84CC16" stroke-width="0.5" />
-		</svg>
-		<svg
-			viewBox="0 0 320 200"
-			preserveAspectRatio="none"
-			class="absolute inset-0 w-full h-full opacity-40 pointer-events-none hidden lg:block"
-			aria-hidden="true"
-		>
-			<line x1="160" y1="0" x2="160" y2="200" stroke="#84CC16" stroke-width="0.5" />
-			<circle cx="160" cy="100" r="22" fill="none" stroke="#84CC16" stroke-width="0.5" />
-			<circle cx="160" cy="100" r="1.5" fill="#84CC16" />
-			<rect x="0" y="60" width="36" height="80" fill="none" stroke="#84CC16" stroke-width="0.5" />
-			<rect x="284" y="60" width="36" height="80" fill="none" stroke="#84CC16" stroke-width="0.5" />
-		</svg>
-
-		<div class="relative grid grid-cols-1 lg:grid-cols-2 grid-rows-2 lg:grid-rows-1 h-[460px] lg:h-[440px]">
-			<div class="relative min-h-0 overflow-hidden flex items-center justify-center">
-				{@render teamBlock(homeTeamData, homePlayers)}
-			</div>
-			<div class="absolute inset-x-0 top-1/2 h-px bg-white/10 lg:hidden" aria-hidden="true"></div>
-			<div class="hidden lg:block absolute inset-y-0 left-1/2 w-px bg-white/10" aria-hidden="true"></div>
-			<div class="relative min-h-0 overflow-hidden flex items-center justify-center">
-				{@render teamBlock(awayTeamData, awayPlayers)}
-			</div>
+	<!-- Both teams with their players — a card in A, a chalked pitch in B. -->
+	<div data-onboarding="poster-teams" class="versus">
+		<div class="lines" aria-hidden="true">
+			<span class="box box-home"><span class="goal-box"></span></span>
+			<span class="box box-away"><span class="goal-box"></span></span>
 		</div>
+		{@render teamBlock(homeTeamData, homeTeam, homePlayers, "home")}
+		<div class="vs" aria-hidden="true">
+			<span class="vs-badge">{versus}</span>
+		</div>
+		{@render teamBlock(awayTeamData, awayTeam, awayPlayers, "away")}
 	</div>
 
-	<!-- Generation info pill -->
-	<div class="generation-info-wrap">
-		<span class="generation-info">
-			<span class="generation-info-dot"></span>
+	<p class="gen-info">
+		<span class="gen-dot" aria-hidden="true"></span>
+		<span>
 			{$t("new_game.poster.generation_info", { min: minStars, max: maxStars })}
 			{#if sameStars && homeTeamData}
 				· {$t("new_game.poster.balanced")}
 			{/if}
 		</span>
-	</div>
+	</p>
 
-	<button
-		type="button"
-		onclick={onAnpfiff}
-		disabled={!homeTeam || !awayTeam}
-		data-onboarding="poster-anpfiff"
-		class="primary-btn"
-	>
-		<svg
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2.5"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			width="14"
-			height="14"
-			aria-hidden="true"
+	<div class="cta-block">
+		<button
+			type="button"
+			onclick={onAnpfiff}
+			disabled={!homeTeam || !awayTeam}
+			data-onboarding="poster-anpfiff"
+			class="btn btn-primary btn-lg w-full kickoff"
 		>
-			<circle cx="12" cy="12" r="9" />
-			<path d="M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13" />
-		</svg>
-		<span>{$t("new_game.poster.anpfiff_cta")}</span>
-	</button>
+			<!-- Whistle (design B only) -->
+			<svg class="kickoff-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+				<path d="M3 13a6 6 0 1 0 12 0 6 6 0 0 0-1-3.3L21 7V4h-9.5A6 6 0 0 0 3 13z" />
+				<circle cx="9" cy="13" r="2" />
+			</svg>
+			<span>{$t("new_game.poster.anpfiff_cta")}</span>
+		</button>
 
-	<!-- Secondary actions row -->
-	<div class="btn-row" data-onboarding="poster-actions">
-		<button
-			type="button"
-			onclick={roll}
-			disabled={rolling}
-			class="secondary-btn"
-		>
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				width="13"
-				height="13"
-				aria-hidden="true"
-			>
-				<polyline points="1 4 1 10 7 10" />
-				<path d="M3.51 9a9 9 0 0114.85-3.36L23 10" />
-			</svg>
-			<span>{$t("new_game.poster.action_roll")}</span>
-		</button>
-		<button
-			type="button"
-			onclick={() => (showAnpassen = true)}
-			class="secondary-btn"
-		>
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				width="13"
-				height="13"
-				aria-hidden="true"
-			>
-				<circle cx="12" cy="12" r="3" />
-				<path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
-			</svg>
-			<span>{$t("new_game.poster.action_customize")}</span>
-		</button>
-		<button
-			type="button"
-			onclick={openManuell}
-			class="secondary-btn"
-		>
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				width="13"
-				height="13"
-				aria-hidden="true"
-			>
-				<path d="M18 11V6a2 2 0 00-2-2a2 2 0 00-2 2M14 10V4a2 2 0 00-2-2a2 2 0 00-2 2v2M10 10.5V6a2 2 0 00-2-2a2 2 0 00-2 2v8M18 8a2 2 0 114 0v6a8 8 0 01-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 012.83-2.82L7 15" />
-			</svg>
-			<span>{$t("new_game.poster.action_manual")}</span>
+		<div class="actions" data-onboarding="poster-actions">
+			<button type="button" onclick={roll} disabled={rolling} class="btn btn-secondary act">
+				<!-- Dice -->
+				<svg class="act-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true">
+					<rect x="4" y="4" width="16" height="16" rx="3" />
+					<circle cx="9" cy="9" r="1.3" fill="currentColor" stroke="none" />
+					<circle cx="15" cy="9" r="1.3" fill="currentColor" stroke="none" />
+					<circle cx="9" cy="15" r="1.3" fill="currentColor" stroke="none" />
+					<circle cx="15" cy="15" r="1.3" fill="currentColor" stroke="none" />
+				</svg>
+				<span class="truncate">{$t("new_game.poster.action_roll")}</span>
+			</button>
+			<button type="button" onclick={() => (showAnpassen = true)} class="btn btn-secondary act">
+				<!-- Sliders -->
+				<svg class="act-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18" aria-hidden="true">
+					<path d="M4 7h9M19 7h1M4 17h3M13 17h7" />
+					<circle cx="16" cy="7" r="2.5" />
+					<circle cx="10" cy="17" r="2.5" />
+				</svg>
+				<span class="truncate">{$t("new_game.poster.action_customize")}</span>
+			</button>
+			<button type="button" onclick={openManuell} class="btn btn-secondary act">
+				<!-- Hand -->
+				<svg class="act-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true">
+					<path d="M8 13V6a1.5 1.5 0 0 1 3 0v5M11 11V4.5a1.5 1.5 0 0 1 3 0V11M14 11V6a1.5 1.5 0 0 1 3 0v7a7 7 0 0 1-7 7h-.5a6 6 0 0 1-4.9-2.6L3 14.5a1.5 1.5 0 0 1 2.4-1.8L8 15" />
+				</svg>
+				<span class="truncate">{$t("new_game.poster.action_manual")}</span>
+			</button>
+		</div>
+
+		<button type="button" onclick={onBack} class="back-link">
+			<span aria-hidden="true">←</span>
+			{$t("new_game.back")}
 		</button>
 	</div>
-
-	<button type="button" onclick={onBack} class="text-btn">
-		← {$t("new_game.back")}
-	</button>
 </div>
 
 {#if showAnpassen}
@@ -373,146 +283,538 @@ function avatarGradient(id) {
 {/if}
 
 {#if showManuell}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
-		onmousedown={(e) => {
-			if (e.target === e.currentTarget) showManuell = false;
-		}}
-		onkeydown={(e) => e.key === "Escape" && (showManuell = false)}
-	>
-		<div
-			class="bg-surface border-t border-line rounded-t-2xl sm:rounded-2xl sm:border w-full max-w-lg overflow-y-auto p-5 sm:mx-4"
-		>
-			<h2 class="text-lg font-bold text-ink text-center mb-5">
-				{$t("new_game.poster.action_manual")}
-			</h2>
-
-			<div class="flex flex-col gap-4 mb-5">
-				<div>
-					<label for="{uid}-home" class="text-xs font-medium text-brand mb-1.5 block tracking-[0.06em] uppercase">
-						{$t("new_game.home")}
-					</label>
-					<TeamAutocomplete id="{uid}-home" bind:value={manualHomeDraft} />
-				</div>
-				<div>
-					<label for="{uid}-away" class="text-xs font-medium text-win mb-1.5 block tracking-[0.06em] uppercase">
-						{$t("new_game.away")}
-					</label>
-					<TeamAutocomplete id="{uid}-away" bind:value={manualAwayDraft} direction="up" />
-				</div>
+	<Sheet title={$t("new_game.poster.action_manual")} onClose={() => (showManuell = false)}>
+		<div class="flex flex-col gap-4">
+			<div class="flex flex-col gap-1.5">
+				<label for="{uid}-home" class="label manual-label">
+					<span class="manual-dot home" aria-hidden="true"></span>
+					{$t("new_game.home")}
+				</label>
+				<TeamAutocomplete id="{uid}-home" bind:value={manualHomeDraft} />
 			</div>
-
-			<div class="flex gap-2">
-				<button
-					type="button"
-					onclick={() => (showManuell = false)}
-					class="flex-1 rounded-xl border border-line bg-sunken hover:bg-surface text-muted text-sm font-semibold px-4 py-2.5 transition-colors"
-				>
-					{$t("new_game.cancel")}
-				</button>
-				<button
-					type="button"
-					onclick={saveManuell}
-					disabled={!manualHomeDraft.trim() || !manualAwayDraft.trim()}
-					class="flex-1 rounded-xl bg-brand hover:bg-brand-strong text-white text-sm font-semibold px-4 py-2.5 shadow-md shadow-brand/20 disabled:opacity-40 disabled:shadow-none transition-colors"
-				>
-					{$t("live_match.editor.confirm")}
-				</button>
+			<div class="flex flex-col gap-1.5">
+				<label for="{uid}-away" class="label manual-label">
+					<span class="manual-dot away" aria-hidden="true"></span>
+					{$t("new_game.away")}
+				</label>
+				<TeamAutocomplete id="{uid}-away" bind:value={manualAwayDraft} direction="up" />
 			</div>
 		</div>
-	</div>
+
+		<div class="grid grid-cols-2 gap-2 mt-5">
+			<button type="button" onclick={() => (showManuell = false)} class="btn btn-secondary">
+				{$t("new_game.cancel")}
+			</button>
+			<button
+				type="button"
+				onclick={saveManuell}
+				disabled={!manualHomeDraft.trim() || !manualAwayDraft.trim()}
+				class="btn btn-primary"
+			>
+				{$t("live_match.editor.confirm")}
+			</button>
+		</div>
+	</Sheet>
 {/if}
 
 <style>
-.generation-info-wrap {
+.poster {
 	display: flex;
-	justify-content: center;
+	flex-direction: column;
+	gap: 14px;
 }
-.generation-info {
-	background: rgba(0, 0, 0, 0.3);
-	border: 1px solid rgba(132, 204, 22, 0.2);
-	border-radius: 999px;
-	padding: 6px 14px;
+
+.roll-error {
+	align-self: center;
+	margin: 0;
+	padding: 6px 12px;
+	border-radius: var(--radius-control);
+	background: var(--color-loss-soft);
+	color: var(--color-loss);
+	font-size: 13px;
+	font-weight: 700;
+	text-align: center;
+}
+
+/* ── Design A: one white card, home · VS · away ─────────────────────── */
+.versus {
+	position: relative;
+	display: grid;
+	grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+	gap: 14px;
+	padding: 16px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+}
+
+.team {
+	--team: var(--color-home);
+	position: relative;
 	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	min-width: 0;
+}
+
+.team-away {
+	--team: var(--color-away);
+}
+
+.team-main {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-width: 0;
+}
+
+.crest {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	flex-shrink: 0;
+	overflow: hidden;
+	background: var(--color-sunken);
+	border-radius: var(--radius-avatar);
+}
+
+.crest-skeleton {
+	width: 40px;
+	height: 40px;
+	border-radius: var(--radius-avatar);
+	background: var(--color-line);
+}
+
+.team-info {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 0;
+}
+
+.team-name {
+	margin: 0;
+	overflow: hidden;
+	font-size: 18px;
+	font-weight: 700;
+	line-height: 1.2;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.ratings {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.players {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.player-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	max-width: 100%;
+	padding: 3px 10px 3px 3px;
+	border: 1px solid var(--color-line);
+	border-radius: var(--radius-badge);
+	font-size: 13px;
+	font-weight: 700;
+}
+
+/* "VS" between the teams: a red word between two hairlines. */
+.vs {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.vs::before,
+.vs::after {
+	content: "";
+	flex: 1;
+	height: 1px;
+	background: var(--color-line);
+}
+
+.vs-badge {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 20px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: var(--color-brand);
+}
+
+.lines {
+	display: none;
+}
+
+/* ── Footer: generation note, kick-off, actions ─────────────────────── */
+.gen-info {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	color: var(--color-on-page);
+	text-shadow: var(--on-page-shadow);
+	font-size: 13px;
+}
+
+.gen-dot {
+	width: 8px;
+	height: 8px;
+	flex-shrink: 0;
+	border-radius: var(--radius-badge);
+	background: var(--color-brand);
+}
+
+.cta-block {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.kickoff-icon,
+.act-icon {
+	display: none;
+	flex-shrink: 0;
+}
+
+.actions {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 8px;
+}
+
+.act {
+	gap: 6px;
+	padding: 0 8px;
+	font-size: 14px;
+	font-weight: 400;
+}
+
+.back-link {
+	align-self: center;
+	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	font-size: 11px;
-	color: #D1D5DB;
-	font-weight: 600;
-}
-.generation-info-dot {
-	width: 6px;
-	height: 6px;
-	border-radius: 50%;
-	background: #84CC16;
-	box-shadow: 0 0 6px rgba(132, 204, 22, 0.6);
-}
-.primary-btn {
-	width: 100%;
-	background: linear-gradient(135deg, #E24B4A, #C73E3D);
-	color: white;
+	min-height: 40px;
+	padding: 0 12px;
 	border: 0;
-	border-radius: 12px;
-	padding: 14px;
+	background: none;
+	color: var(--color-on-page);
+	text-shadow: var(--on-page-shadow);
 	font-size: 14px;
-	font-weight: 800;
 	cursor: pointer;
+}
+
+.back-link:hover {
+	text-decoration: underline;
+}
+
+.manual-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--color-ink);
+}
+
+.manual-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: var(--radius-badge);
+	background: var(--color-home);
+}
+
+.manual-dot.away {
+	background: var(--color-away);
+}
+
+/* ── Design B: the teams on a small chalked pitch ───────────────────── */
+:global([data-variant="b"]) .versus {
+	--chalk: var(--color-chalk);
+	gap: 0;
+	padding: 20px 16px;
+	overflow: hidden;
+	background: var(--color-pitch);
+	color: var(--color-on-page);
+}
+
+:global([data-variant="b"]) .lines {
+	position: absolute;
+	inset: 8px;
+	display: block;
+	border: 3px solid var(--chalk);
+	pointer-events: none;
+}
+
+.box,
+.goal-box {
+	position: absolute;
+	left: 50%;
+	border: 3px solid var(--chalk);
+	transform: translateX(-50%);
+}
+
+.box {
+	width: 52%;
+	height: 44px;
+}
+
+.goal-box {
+	width: 48%;
+	height: 18px;
+}
+
+.box-home,
+.box-home .goal-box {
+	top: -3px;
+}
+
+.box-away,
+.box-away .goal-box {
+	bottom: -3px;
+}
+
+:global([data-variant="b"]) .team {
+	align-items: center;
+	gap: 8px;
+	padding: 40px 0 24px;
+	text-align: center;
+}
+
+:global([data-variant="b"]) .team-away {
+	padding: 24px 0 40px;
+}
+
+:global([data-variant="b"]) .team-main {
+	flex-direction: column;
+	gap: 6px;
+	max-width: 100%;
+}
+
+:global([data-variant="b"]) .team-info {
+	align-items: center;
+	max-width: 100%;
+}
+
+:global([data-variant="b"]) .crest {
+	background: var(--color-surface);
+	box-shadow:
+		0 0 0 3px var(--team),
+		var(--shadow-raised);
+}
+
+:global([data-variant="b"]) .team-name {
+	max-width: 100%;
+	font-family: var(--font-cond);
+	font-weight: 800;
+	font-size: 22px;
+	text-shadow: var(--on-page-shadow);
+}
+
+:global([data-variant="b"]) .ratings {
+	padding: 3px 10px 3px 3px;
+	border-radius: 999px;
+	background: var(--color-surface);
+	box-shadow: var(--shadow-control);
+}
+
+:global([data-variant="b"]) .players {
+	justify-content: center;
+}
+
+:global([data-variant="b"]) .player-chip {
+	padding-right: 12px;
+	border: 0;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	box-shadow: var(--shadow-control);
+}
+
+/* Halfway line and centre circle run through the VS badge. */
+:global([data-variant="b"]) .vs {
+	position: relative;
+	justify-content: center;
+	margin: 0 -8px;
+}
+
+:global([data-variant="b"]) .vs::before {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	height: 0;
+	border-top: 3px solid var(--chalk);
+	background: none;
+	transform: translateY(-50%);
+}
+
+:global([data-variant="b"]) .vs::after {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	flex: none;
+	width: 92px;
+	height: 92px;
+	border: 3px solid var(--chalk);
+	border-radius: 50%;
+	background: none;
+	transform: translate(-50%, -50%);
+}
+
+:global([data-variant="b"]) .vs-badge {
+	position: relative;
+	z-index: 1;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 8px;
-	box-shadow: 0 6px 18px rgba(226, 75, 74, 0.4);
-	transition: transform 0.15s, opacity 0.15s;
+	width: 48px;
+	height: 48px;
+	border: 3px solid var(--color-surface);
+	border-radius: 999px;
+	background: var(--color-brand);
+	color: var(--color-on-brand);
+	font-weight: 800;
+	font-size: 16px;
+	letter-spacing: 0;
+	box-shadow: var(--shadow-raised);
 }
-.primary-btn:not(:disabled):hover { transform: translateY(-1px); }
-.primary-btn:disabled {
-	background: rgba(226, 75, 74, 0.25);
-	color: rgba(255, 255, 255, 0.4);
-	box-shadow: none;
-	cursor: not-allowed;
-}
-.btn-row {
-	display: flex;
-	gap: 8px;
-}
-.secondary-btn {
-	flex: 1;
-	background: #131822;
-	color: #D1D5DB;
-	border: 1px solid #1F2937;
-	border-radius: 12px;
-	padding: 11px;
+
+:global([data-variant="b"]) .gen-info {
+	align-self: center;
+	padding: 6px 14px;
+	border-radius: 999px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	text-shadow: none;
 	font-size: 12px;
 	font-weight: 700;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	transition: background-color 0.15s, border-color 0.15s, transform 0.1s;
+	box-shadow: var(--shadow-control);
 }
-.secondary-btn:hover:not(:disabled) {
-	background: #1A1F2A;
-	border-color: #2A3142;
-}
-.secondary-btn:active:not(:disabled) { transform: scale(0.98); }
-.secondary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.text-btn {
-	width: 100%;
-	background: none;
-	color: #6B7280;
-	border: 0;
-	font-size: 12px;
-	font-weight: 600;
-	padding: 12px;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 4px;
-}
-.text-btn:hover { color: #D1D5DB; }
-</style>
 
+:global([data-variant="b"]) .gen-dot {
+	background: var(--color-progress);
+}
+
+:global([data-variant="b"]) .kickoff {
+	box-shadow: var(--shadow-control);
+}
+
+:global([data-variant="b"]) .kickoff-icon,
+:global([data-variant="b"]) .act-icon {
+	display: block;
+}
+
+:global([data-variant="b"]) .act {
+	font-weight: 700;
+}
+
+:global([data-variant="b"]) .back-link {
+	font-weight: 700;
+}
+
+/* ── Desktop: home and away side by side ────────────────────────────── */
+@media (min-width: 1024px) {
+	.versus {
+		grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+		grid-template-rows: auto;
+		align-items: start;
+		gap: 24px;
+		padding: 24px;
+	}
+
+	.vs {
+		flex-direction: column;
+		align-self: stretch;
+	}
+
+	.vs::before,
+	.vs::after {
+		width: 1px;
+		height: auto;
+	}
+
+	.gen-info {
+		align-self: center;
+	}
+
+	.cta-block {
+		align-self: center;
+		width: min(100%, 32rem);
+	}
+
+	:global([data-variant="b"]) .versus {
+		align-items: center;
+		padding: 24px;
+	}
+
+	:global([data-variant="b"]) .team,
+	:global([data-variant="b"]) .team-away {
+		padding: 24px 56px;
+	}
+
+	/* Reach the touchlines (8px inside the card's edge). */
+	:global([data-variant="b"]) .vs {
+		margin: -16px 0;
+		align-self: stretch;
+	}
+
+	:global([data-variant="b"]) .vs::before {
+		left: 50%;
+		right: auto;
+		top: 0;
+		bottom: 0;
+		width: 0;
+		height: auto;
+		border-top: 0;
+		border-left: 3px solid var(--chalk);
+		transform: translateX(-50%);
+	}
+
+	:global([data-variant="b"]) .vs::after {
+		width: 110px;
+		height: 110px;
+	}
+
+	.box {
+		left: auto;
+		top: 50%;
+		width: 52px;
+		height: 50%;
+		transform: translateY(-50%);
+	}
+
+	.goal-box {
+		left: auto;
+		top: 50%;
+		width: 20px;
+		height: 48%;
+		transform: translateY(-50%);
+	}
+
+	.box-home,
+	.box-home .goal-box {
+		top: 50%;
+		left: -3px;
+	}
+
+	.box-away,
+	.box-away .goal-box {
+		top: 50%;
+		bottom: auto;
+		right: -3px;
+	}
+}
+</style>

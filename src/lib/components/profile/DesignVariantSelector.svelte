@@ -5,19 +5,28 @@ import { designVariant } from "$lib/stores/designVariant.stores.js";
 /**
  * Settings → Design: pick look A ("Rot & Weiß", the default) or B
  * ("Fußballplatz"). Native radio buttons, so arrow keys work without
- * extra code. The choice is stored on this device only.
+ * extra code. The choice is stored on this device only. It sits in the
+ * Settings section titled "Design", so the legend is for screen readers.
  */
 
 const { t } = getTranslate();
 
 const OPTIONS = [
-	{ value: "a", nameKey: "settings.design.a_name", hintKey: "settings.design.a_hint" },
-	{ value: "b", nameKey: "settings.design.b_name", hintKey: "settings.design.b_hint" },
+	{
+		value: "a",
+		nameKey: "settings.design.a_name",
+		hintKey: "settings.design.a_hint",
+	},
+	{
+		value: "b",
+		nameKey: "settings.design.b_name",
+		hintKey: "settings.design.b_hint",
+	},
 ];
 </script>
 
 <fieldset class="flex flex-col gap-3">
-	<legend class="section-title mb-1">{$t("settings.design.title")}</legend>
+	<legend class="sr-only">{$t("settings.design.title")}</legend>
 	<p class="text-sm text-muted">{$t("settings.design.body")}</p>
 	<div class="grid grid-cols-2 gap-3">
 		{#each OPTIONS as option (option.value)}
@@ -31,11 +40,11 @@ const OPTIONS = [
 					class="sr-only"
 				/>
 				<img
-					src="/images/design/variant-{option.value}.png"
+					src="/images/design/variant-{option.value}.webp"
 					alt=""
 					class="preview"
-					width="360"
-					height="440"
+					width="358"
+					height="438"
 					loading="lazy"
 				/>
 				<span class="flex items-center gap-2">
@@ -73,7 +82,7 @@ const OPTIONS = [
 	display: block;
 	width: 100%;
 	height: auto;
-	aspect-ratio: 360 / 440;
+	aspect-ratio: 358 / 438;
 	object-fit: cover;
 	object-position: top;
 	border-radius: calc(var(--radius-card) - 4px);

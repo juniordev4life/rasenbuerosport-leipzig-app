@@ -28,23 +28,47 @@ async function loadArchive() {
 	<title>RasenBürosport - {$t("season.archive_title")}</title>
 </svelte:head>
 
-<div class="flex flex-col gap-4">
-	<h1 class="text-xl font-bold text-ink lg:hidden">{$t("season.archive_title")}</h1>
+<div class="stack pb-4 lg:pb-8">
+	<header class="hero bleed page-hero">
+		<h1 class="page-title page-hero-title">{$t("season.archive_title")}</h1>
+	</header>
 
 	{#if loading}
-		<div class="flex justify-center py-8">
-			<div
-				class="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full"
-			></div>
+		<div class="flex justify-center py-12">
+			<span class="spinner" role="status" aria-label={$t("common.loading")}></span>
 		</div>
 	{:else if archive.length === 0}
-		<p class="text-muted text-center py-8">{$t("season.no_completed")}</p>
+		<p class="card notice">{$t("season.no_completed")}</p>
 	{:else}
-		<!-- `contents` keeps the mobile stack; tiles the podiums on desktop. -->
-		<div class="contents lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-4">
+		<div class="season-grid">
 			{#each archive as season (season.season)}
 				<SeasonPodium {season} />
 			{/each}
 		</div>
 	{/if}
 </div>
+
+<style>
+.season-grid {
+	display: grid;
+	gap: var(--stack-gap);
+	align-items: start;
+}
+
+/* Desktop: the top bar carries the title; the podiums tile the width. */
+@media (min-width: 1024px) {
+	.page-hero {
+		display: none;
+	}
+
+	.season-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 1280px) {
+	.season-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+</style>

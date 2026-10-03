@@ -1,16 +1,29 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import BallIcon from "$lib/components/icons/BallIcon.svelte";
+import BarChartIcon from "$lib/components/icons/BarChartIcon.svelte";
+import CheckIcon from "$lib/components/icons/CheckIcon.svelte";
+import ClockIcon from "$lib/components/icons/ClockIcon.svelte";
+import HistoryIcon from "$lib/components/icons/HistoryIcon.svelte";
+import LightningIcon from "$lib/components/icons/LightningIcon.svelte";
+import ShieldIcon from "$lib/components/icons/ShieldIcon.svelte";
+import TargetIcon from "$lib/components/icons/TargetIcon.svelte";
+import TrendDownIcon from "$lib/components/icons/TrendDownIcon.svelte";
+import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
+import UserIcon from "$lib/components/icons/UserIcon.svelte";
+import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
 import {
-	AWARD_EMOJI,
 	formatAwardValue,
 	orderAwards,
 } from "$lib/constants/seasonAwards.constants.js";
-import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
 import ConfettiBurst from "../ConfettiBurst.svelte";
+import RecapSlide from "../RecapSlide.svelte";
 
 /**
  * Slide 9 — the season's league-wide awards. Awards the viewer won
- * (`awards_won`) are highlighted, with a confetti burst to celebrate.
+ * (`awards_won`) are highlighted in gold and marked with a check, with
+ * a confetti burst to celebrate.
  *
  * @type {{ recap: object, reducedMotion: boolean }}
  */
@@ -18,65 +31,166 @@ let { recap, reducedMotion } = $props();
 
 const { t } = getTranslate();
 
+/** Line icon per award key; unknown (future) awards get the trophy. */
+const AWARD_ICONS = {
+	champion: TrophyIcon,
+	top_scorer: BallIcon,
+	top_assister: LightningIcon,
+	dream_duo: UsersIcon,
+	wall: ShieldIcon,
+	fair_play: CheckIcon,
+	penalty_king: TargetIcon,
+	form_of_the_year: BarChartIcon,
+	marathon: UserIcon,
+	lunch_king: ClockIcon,
+	comeback_king: HistoryIcon,
+	unlucky: TrendDownIcon,
+};
+
 const ordered = $derived(orderAwards(recap.league?.awards ?? []));
 const wonKeys = $derived(new Set(recap.awards_won ?? []));
 const wonAnyAward = $derived(wonKeys.size > 0);
-
-function initial(name) {
-	return (name ?? "?").charAt(0).toUpperCase();
-}
 </script>
 
-<div class="flex flex-col items-center text-center gap-4 w-full">
+<RecapSlide title={$t("season_recap.awards.title")}>
 	{#if wonAnyAward}
 		<ConfettiBurst reduced={reducedMotion} />
 	{/if}
-	<h2 class="text-xs uppercase tracking-[0.2em] text-white/50 font-bold">
-		{$t("season_recap.awards.title")}
-	</h2>
 
-	<div class="grid grid-cols-2 gap-2.5 w-full">
+	<ul class="awards">
 		{#each ordered as award (award.key)}
-			<div
-				class="rounded-xl p-3 text-left border {wonKeys.has(award.key)
-					? 'bg-[#F59E0B]/15 border-[#F59E0B]/40'
-					: 'bg-white/5 border-transparent'}"
-			>
-				<div class="flex items-center gap-1.5 mb-1.5">
-					<span aria-hidden="true">{AWARD_EMOJI[award.key] ?? "\u{1F3C6}"}</span>
-					<span class="text-[9px] uppercase tracking-wide text-white/50 font-bold truncate">
-						{$t(`season_awards.${award.key}.label`)}
+			{@const AwardIcon = AWARD_ICONS[award.key] ?? TrophyIcon}
+			<li class="award" class:won={wonKeys.has(award.key)}>
+				<span class="award-head">
+					<span class="award-icon" aria-hidden="true">
+						<AwardIcon size={16} strokeWidth={2} />
 					</span>
-				</div>
+					<span class="award-label">{$t(`season_awards.${award.key}.label`)}</span>
+					{#if wonKeys.has(award.key)}
+						<span class="won-mark" aria-hidden="true"><CheckIcon size={12} /></span>
+					{/if}
+				</span>
 				{#if award.players?.[0]}
-					<div class="flex items-center gap-1.5">
-						{#if award.players[0].avatar_url}
-							<img referrerpolicy="no-referrer"
-								src={award.players[0].avatar_url}
-								alt=""
-								class="w-5 h-5 rounded-full object-cover shrink-0"
-							/>
-						{:else}
-							<span
-								class="w-5 h-5 rounded-full text-[9px] font-bold flex items-center justify-center shrink-0"
-								style:background={avatarGradient(
-									award.players[0].player_id ?? award.players[0].username,
-								).gradient}
-							>
-								{initial(award.players[0].username)}
-							</span>
-						{/if}
-						<span class="text-[11px] font-bold truncate">
+					<span class="award-player">
+						<PlayerAvatar player={award.players[0]} size={22} />
+						<span class="award-names">
 							{award.players.map((p) => p.username).join(" & ")}
 						</span>
-					</div>
+					</span>
 				{/if}
-				<div class="text-sm font-extrabold mt-1">{formatAwardValue(award.value, award.unit)}</div>
-			</div>
+				<span class="award-value">{formatAwardValue(award.value, award.unit)}</span>
+			</li>
 		{/each}
-	</div>
+	</ul>
 
 	{#if wonAnyAward}
-		<p class="text-[13px] text-[#F59E0B] font-bold mt-1">{$t("season_recap.awards.you_won")}</p>
+		<p class="recap-pill">{$t("season_recap.awards.you_won")}</p>
 	{/if}
-</div>
+</RecapSlide>
+
+<style>
+.awards {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.award {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 0;
+	padding: 10px 12px;
+	border-radius: var(--radius-tile);
+	background: var(--color-surface);
+	color: var(--color-ink);
+}
+
+.award.won {
+	background: var(--color-gold);
+	color: var(--color-on-gold);
+}
+
+.award-head {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+
+.award-icon {
+	display: inline-flex;
+	flex-shrink: 0;
+	color: var(--color-brand);
+}
+
+.won .award-icon {
+	color: inherit;
+}
+
+.award-label {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: var(--font-label);
+	font-weight: var(--label-weight);
+	text-transform: var(--label-case);
+	letter-spacing: var(--label-tracking);
+	font-size: 11px;
+	line-height: 1.2;
+}
+
+.won-mark {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 18px;
+	height: 18px;
+	border-radius: var(--radius-badge);
+	background: var(--color-navy);
+	color: var(--color-on-navy);
+}
+
+.award-player {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+
+.award-names {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: 700;
+	font-size: 12px;
+}
+
+.award-value {
+	font-family: var(--font-num);
+	font-weight: var(--num-weight);
+	font-variant-numeric: tabular-nums;
+	font-size: 22px;
+	line-height: 1;
+}
+
+:global([data-variant="b"]) .award {
+	border-radius: 16px;
+	box-shadow: var(--shadow-control);
+}
+
+:global([data-variant="b"]) .award-label {
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .won .award-label {
+	color: inherit;
+}
+</style>

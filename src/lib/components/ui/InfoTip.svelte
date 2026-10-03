@@ -88,4 +88,10 @@ function handleClick(event) {
 	opacity: 1;
 	background: color-mix(in srgb, currentColor 10%, transparent);
 }
+
+/* Dimmed white drops below 3:1 on the red band and the pitch. */
+:global(.hero) .info-tip,
+:global(.on-page) .info-tip {
+	opacity: 1;
+}
 </style>

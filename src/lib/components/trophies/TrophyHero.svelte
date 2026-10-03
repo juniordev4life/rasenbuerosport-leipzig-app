@@ -1,196 +1,260 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
 import { RARITY_META } from "$lib/constants/trophies.constants.js";
+import TrophyMedal from "./TrophyMedal.svelte";
 
 /**
- * Trophy-room hero — the topmost block summarising the player's
- * collection: total / unlocked, per-rarity counts, and a
- * gradient progress bar.
+ * Top block of the trophy room: unlocked of total, completion, the
+ * count per rarity and a bar split by tier. Design A: the red hero band
+ * with a white stats box. Design B: a white card under a gold "Deine
+ * Sammlung" strip, a metallic disc above each count.
  *
- * @type {{ summary: { total: number, unlocked: number, byRarity: Record<string, number> } }}
+ * @type {{ summary: { total: number, unlocked: number, byRarity?: Record<string, number> } }}
  */
 let { summary } = $props();
 
 const { t } = getTranslate();
 
-const percent = $derived.by(() => {
-	if (!summary?.total) return 0;
-	return Math.round((summary.unlocked / summary.total) * 100);
-});
+const uid = $props.id();
+const titleId = `trophy-hero-${uid}`;
 
-const rarityOrder = ["bronze", "silver", "gold", "diamond"];
+const RARITY_ORDER = ["bronze", "silver", "gold", "diamond"];
+
+const total = $derived(summary?.total ?? 0);
+const unlocked = $derived(summary?.unlocked ?? 0);
+const percent = $derived(total ? Math.round((unlocked / total) * 100) : 0);
+
+const tiers = $derived(
+	RARITY_ORDER.map((rarity) => {
+		const count = summary?.byRarity?.[rarity] ?? 0;
+		return {
+			rarity,
+			count,
+			share: total ? (count / total) * 100 : 0,
+			color: RARITY_META[rarity].color,
+			labelKey: RARITY_META[rarity].i18nKey,
+		};
+	}),
+);
 </script>
 
-<div class="trophaeen-hero">
-	<div class="hero-tag">
-		<svg
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			width="11"
-			height="11"
-			aria-hidden="true"
-		>
-			<path
-				d="M8 21h8M12 17v4M7 4h10v3a5 5 0 01-10 0V4zM7 4H4v2a3 3 0 003 3M17 4h3v2a3 3 0 01-3 3"
-			/>
-		</svg>
+<section class="th hero bleed" aria-labelledby={titleId}>
+	<p class="tag">
+		<span class="tag-icon" aria-hidden="true"><TrophyIcon size={20} strokeWidth={2} /></span>
 		{$t("trophies.hero.tag")}
-	</div>
-	<div class="hero-title">{$t("trophies.hero.title")}</div>
-	<div class="hero-subtitle">
-		<span class="count-current">{summary?.unlocked ?? 0}</span>
-		<span class="count-total">
-			{$t("trophies.hero.of")}
-			{summary?.total ?? 0}
-			{$t("trophies.hero.total_label")}
-		</span>
-		<span class="dot">·</span>
-		<span class="percent">{percent}{$t("trophies.hero.percent_complete")}</span>
-	</div>
-	<div class="hero-progress-section">
-		<div class="hero-progress-row">
-			{#each rarityOrder as rarity (rarity)}
-				<div class="rarity-stat">
-					<div
-						class="rarity-stat-num"
-						style:color={RARITY_META[rarity].color}
-					>
-						{summary?.byRarity?.[rarity] ?? 0}
+	</p>
+
+	<div class="body">
+		<h1 id={titleId} class="page-title title">{$t("trophies.hero.title")}</h1>
+		<p class="sub">
+			<strong><span>{unlocked}</span> {$t("trophies.hero.of")} {total} {$t("trophies.hero.total_label")}</strong>
+			· {percent}{$t("trophies.hero.percent_complete")}
+		</p>
+
+		<div class="box">
+			<div class="tiers">
+				{#each tiers as tier (tier.rarity)}
+					<div class="tier">
+						<TrophyMedal rarity={tier.rarity} />
+						<span class="num count">{tier.count}</span>
+						<span class="tier-label">{$t(tier.labelKey)}</span>
 					</div>
-					<div class="rarity-stat-label">
-						{$t(RARITY_META[rarity].i18nKey)}
-					</div>
-				</div>
-			{/each}
-		</div>
-		<div class="hero-progress-bar">
-			<div class="hero-progress-fill" style:width="{percent}%"></div>
+				{/each}
+			</div>
+			<!-- The counts above say the same in text. -->
+			<div class="bar" aria-hidden="true">
+				{#each tiers as tier (tier.rarity)}
+					<span style:width="{tier.share}%" style:background={tier.color}></span>
+				{/each}
+			</div>
 		</div>
 	</div>
-</div>
+</section>
 
 <style>
-	.trophaeen-hero {
-		margin-bottom: 16px;
-		background:
-			radial-gradient(
-				ellipse at top right,
-				rgba(245, 158, 11, 0.22) 0%,
-				transparent 60%
-			),
-			radial-gradient(
-				ellipse at bottom left,
-				rgba(245, 158, 11, 0.08) 0%,
-				transparent 50%
-			),
-			linear-gradient(180deg, #1f1810 0%, #131822 100%);
-		border: 1px solid rgba(245, 158, 11, 0.3);
-		border-radius: 20px;
-		padding: 18px;
-		position: relative;
-		overflow: hidden;
-		color: #e5e7eb;
-	}
-	.trophaeen-hero::before {
-		content: "";
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 2px;
-		background: linear-gradient(
-			90deg,
-			transparent,
-			#f59e0b 50%,
-			transparent
-		);
-		opacity: 0.7;
-	}
-	.hero-tag {
-		font-size: 10px;
-		font-weight: 800;
-		color: #fbbf24;
-		text-transform: uppercase;
-		letter-spacing: 0.12em;
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		margin-bottom: 8px;
-	}
-	.hero-title {
-		font-size: 26px;
-		font-weight: 800;
-		letter-spacing: -0.02em;
-		margin-bottom: 4px;
-		color: white;
-	}
-	.hero-subtitle {
-		font-size: 13px;
-		color: #d1d5db;
-		margin-bottom: 16px;
-	}
-	.hero-subtitle .count-current {
-		color: #fbbf24;
-		font-weight: 700;
-	}
-	.hero-subtitle .count-total,
-	.hero-subtitle .dot {
-		color: #9ca3af;
-	}
-	.hero-subtitle .percent {
-		color: #d1d5db;
-	}
-	.hero-progress-section {
-		background: rgba(0, 0, 0, 0.25);
-		border: 1px solid rgba(255, 255, 255, 0.06);
-		border-radius: 12px;
-		padding: 12px;
-	}
-	.hero-progress-row {
-		display: grid;
-		grid-template-columns: 1fr 1fr 1fr 1fr;
-		gap: 8px;
-		margin-bottom: 10px;
-	}
-	.rarity-stat {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 3px;
-	}
-	.rarity-stat-num {
-		font-size: 16px;
-		font-weight: 800;
-		font-variant-numeric: tabular-nums;
-		line-height: 1;
-	}
-	.rarity-stat-label {
-		font-size: 8px;
-		color: #6b7280;
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		font-weight: 700;
-	}
-	.hero-progress-bar {
-		height: 5px;
-		background: rgba(255, 255, 255, 0.05);
-		border-radius: 3px;
-		overflow: hidden;
-	}
-	.hero-progress-fill {
+/* ── Design A: red band, white stats box ────────────────────────────── */
+.th {
+	display: flex;
+	flex-direction: column;
+	padding-top: 22px;
+	padding-bottom: 24px;
+}
+
+.tag {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 14px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
+.tag-icon {
+	display: none;
+}
+
+.body {
+	display: flex;
+	flex-direction: column;
+}
+
+.title {
+	margin: 8px 0 0;
+	font-size: 40px;
+}
+
+.sub {
+	margin: 10px 0 0;
+	font-size: 15px;
+}
+
+.sub strong {
+	font-weight: 700;
+}
+
+.box {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	margin-top: 18px;
+	padding: 14px;
+	border-radius: var(--radius-tile);
+	background: var(--color-surface);
+	color: var(--color-ink);
+}
+
+.tiers {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 8px;
+}
+
+/* A: the count on top, a small tier swatch in front of the name. */
+.tier {
+	--medal-size: 10px;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	grid-template-areas:
+		"count count"
+		"medal label";
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+
+.tier :global(.medal) {
+	grid-area: medal;
+}
+
+.count {
+	grid-area: count;
+	font-size: 28px;
+	line-height: 0.85;
+}
+
+.tier-label {
+	grid-area: label;
+	min-width: 0;
+	font-family: var(--font-label);
+	font-weight: var(--label-weight);
+	font-size: 12px;
+	letter-spacing: var(--label-tracking);
+	text-transform: var(--label-case);
+	overflow-wrap: anywhere;
+}
+
+.bar {
+	display: flex;
+	height: 8px;
+	overflow: hidden;
+	border-radius: var(--radius-bar);
+	background: var(--color-sunken);
+}
+
+.bar > span {
+	display: block;
+	height: 100%;
+}
+
+@media (min-width: 1024px) {
+	.th {
 		height: 100%;
-		background: linear-gradient(
-			90deg,
-			#cd7f32 0%,
-			#c0c0c0 30%,
-			#fbbf24 60%,
-			#67e8f9 100%
-		);
-		border-radius: 3px;
-		transition: width 0.4s ease;
+		box-sizing: border-box;
+		margin: 0;
+		padding: 24px;
+		border-radius: var(--radius-card);
 	}
+}
+
+/* ── Design B: white card under a gold strip ────────────────────────── */
+:global([data-variant="b"]) .th {
+	overflow: hidden;
+	padding: 0;
+	border-radius: var(--radius-card);
+	background: var(--color-surface);
+	color: var(--color-ink);
+	box-shadow: var(--shadow-card);
+}
+
+:global([data-variant="b"]) .tag {
+	padding: 8px 18px;
+	background: var(--color-gold);
+	color: var(--color-on-gold);
+	font-weight: 800;
+	font-size: 16px;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+:global([data-variant="b"]) .tag-icon {
+	display: inline-flex;
+}
+
+:global([data-variant="b"]) .body {
+	gap: 14px;
+	padding: 16px 18px 18px;
+}
+
+:global([data-variant="b"]) .title {
+	margin: 0;
+	font-size: 32px;
+}
+
+:global([data-variant="b"]) .sub {
+	margin: -10px 0 0;
+	font-size: 14px;
+}
+
+:global([data-variant="b"]) .box {
+	margin: 0;
+	padding: 0;
+	background: transparent;
+}
+
+:global([data-variant="b"]) .tier {
+	--medal-size: 34px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	text-align: center;
+}
+
+:global([data-variant="b"]) .count {
+	font-size: 22px;
+	line-height: 1.1;
+}
+
+:global([data-variant="b"]) .tier-label {
+	font-size: 11px;
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .bar {
+	height: 10px;
+}
 </style>

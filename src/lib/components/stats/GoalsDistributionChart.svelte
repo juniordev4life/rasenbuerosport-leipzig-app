@@ -2,8 +2,14 @@
 import { getTranslate } from "@tolgee/svelte";
 import { getBaseChartOptions, getChartTheme } from "$lib/utils/chart.utils.js";
 import ChartCanvas from "./ChartCanvas.svelte";
+import ChartCard from "./ChartCard.svelte";
 
-/** @type {{ data?: Array<{total_goals: number, count: number}> }} */
+/**
+ * How many games ended with a given number of total goals; the most
+ * frequent total is drawn in the emphasis colour.
+ *
+ * @type {{ data?: Array<{total_goals: number, count: number}> }}
+ */
 let { data = [] } = $props();
 
 const { t } = getTranslate();
@@ -15,7 +21,7 @@ const chartConfig = $derived.by(() => {
 
 	const maxVal = Math.max(...data.map((d) => d.count));
 	const colors = data.map((d) =>
-		d.count === maxVal && maxVal > 0 ? theme.brand : `${theme.muted}50`,
+		d.count === maxVal && maxVal > 0 ? theme.chart4 : theme.chart1,
 	);
 
 	return {
@@ -26,7 +32,7 @@ const chartConfig = $derived.by(() => {
 				{
 					data: data.map((d) => d.count),
 					backgroundColor: colors,
-					borderRadius: 4,
+					maxBarThickness: 32,
 				},
 			],
 		},
@@ -40,7 +46,7 @@ const chartConfig = $derived.by(() => {
 						display: true,
 						text: $t("stats_dashboard.total_goals_axis"),
 						color: theme.muted,
-						font: { size: 10 },
+						font: { family: theme.fontCond, size: 12, weight: 700 },
 					},
 				},
 				y: {
@@ -67,8 +73,11 @@ const chartConfig = $derived.by(() => {
 </script>
 
 {#if data.length > 0 && chartConfig}
-	<div class="bg-surface border border-line rounded-lg p-4">
-		<h3 class="text-sm font-medium text-muted mb-3">{$t("stats_dashboard.goals_distribution")}</h3>
-		<ChartCanvas config={chartConfig} height="h-40" />
-	</div>
+	<ChartCard title={$t("stats_dashboard.goals_distribution")}>
+		<ChartCanvas
+			config={chartConfig}
+			height="h-48"
+			label={$t("stats_dashboard.goals_distribution")}
+		/>
+	</ChartCard>
 {/if}

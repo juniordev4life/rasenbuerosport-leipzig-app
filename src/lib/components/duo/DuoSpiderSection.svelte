@@ -1,13 +1,17 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import SpiderChart from "$lib/components/charts/SpiderChart.svelte";
+import ClockIcon from "$lib/components/icons/ClockIcon.svelte";
+import TargetIcon from "$lib/components/icons/TargetIcon.svelte";
 import TagsList from "$lib/components/profile/TagsList.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 
 /**
- * Duo spider section — six-axis radar with the league baseline as a
- * dashed overlay plus auto-generated tag groups. When `tentative` is
- * true the section dims and shows the "Werte stabilisieren sich"
- * banner from the lifecycle "finding" phase.
+ * The duo's play style: a six-axis radar of the duo (red) over the
+ * league average (dashed navy), a legend and the generated tag groups
+ * (TagsList draws its own separator line). While the duo is still
+ * "finding" itself (`tentative`), a pale gold note says the values are
+ * still settling. Same look as the profile's character section.
  *
  * @type {{
  *   values: number[],
@@ -43,7 +47,7 @@ const datasets = $derived([
 		id: "league",
 		label: $t("duo.league_average"),
 		values: leagueValues ?? AXIS_KEYS.map(() => 50),
-		strokeColor: "rgba(255, 255, 255, 0.4)",
+		strokeColor: "var(--color-ink)",
 		fillColor: null,
 		dashed: true,
 		showPoints: false,
@@ -52,8 +56,8 @@ const datasets = $derived([
 		id: "duo",
 		label: duoName,
 		values,
-		strokeColor: "#84CC16",
-		fillColor: "rgba(132, 204, 22, 0.22)",
+		strokeColor: "var(--color-brand)",
+		fillColor: "color-mix(in srgb, var(--color-brand) 14%, transparent)",
 	},
 ]);
 
@@ -61,82 +65,97 @@ const strengths = $derived(tags.strengths.map((label) => ({ label })));
 const weaknesses = $derived(tags.weaknesses.map((label) => ({ label })));
 </script>
 
-<div class="section-card" class:tentative>
-	<div class="section-header">
-		<div class="section-label">{"\u{1F3AF}"} {$t("duo.spider_section")}</div>
-	</div>
+<Section title={$t("duo.spider_section")}>
+	{#snippet icon()}<TargetIcon size={22} strokeWidth={2} />{/snippet}
+	<div class="card spider-card">
+		{#if tentative}
+			<p class="tentative">
+				<ClockIcon size={16} />
+				{$t("duo.tentative_banner")}
+			</p>
+		{/if}
 
-	{#if tentative}
-		<div class="tentative-banner">⚠ {$t("duo.tentative_banner")}</div>
-	{/if}
-
-	<div class="spider-wrap">
-		<SpiderChart axes={labels} {datasets} />
-	</div>
-
-	<div class="spider-legend">
-		<div class="legend-item">
-			<div class="legend-swatch duo"></div>
-			<span>{duoName}</span>
+		<div class="spider-wrap">
+			<SpiderChart axes={labels} {datasets} />
 		</div>
-		<div class="legend-item">
-			<div class="legend-swatch league"></div>
-			<span>{$t("duo.league_average")}</span>
-		</div>
-	</div>
 
-	<TagsList {strengths} {weaknesses} character={tags.character} />
-</div>
+		<div class="legend">
+			<span class="legend-item">
+				<span class="swatch swatch-duo" aria-hidden="true"></span>
+				{duoName}
+			</span>
+			<span class="legend-item">
+				<span class="swatch swatch-league" aria-hidden="true"></span>
+				{$t("duo.league_average")}
+			</span>
+		</div>
+
+		<TagsList {strengths} {weaknesses} character={tags.character} />
+	</div>
+</Section>
 
 <style>
-.section-card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 14px;
+.spider-card {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding: 16px;
 }
-.section-card.tentative { opacity: 0.85; }
-.section-header { margin-bottom: 14px; }
-.section-label {
-	font-size: 10px;
-	text-transform: uppercase; letter-spacing: 0.1em;
-	color: #6B7280;
-	font-weight: 700;
+
+.tentative {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	padding: 10px 12px;
+	border-radius: var(--radius-tile);
+	background: var(--color-gold-soft);
+	color: var(--color-ink);
+	font-weight: 500;
+	font-size: 13px;
+	line-height: 1.35;
 }
-.tentative-banner {
-	background: rgba(245, 158, 11, 0.08);
-	border: 1px solid rgba(245, 158, 11, 0.2);
-	border-radius: 8px;
-	padding: 8px 12px;
-	margin-bottom: 12px;
-	font-size: 11px;
-	color: #F59E0B;
-	font-weight: 600;
-}
+
+/* Matches SpiderChart's text-label viewBox (516 × 340). */
 .spider-wrap {
-	position: relative;
 	width: 100%;
-	aspect-ratio: 1;
-	max-width: 320px;
+	max-width: 460px;
+	aspect-ratio: 129 / 85;
 	margin: 0 auto;
 }
-.spider-legend {
-	display: flex; justify-content: center; gap: 18px;
-	margin-top: 10px;
-	padding-top: 10px;
-	border-top: 1px solid #1F2937;
+
+.legend {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 8px 20px;
+	font-size: 13px;
 }
+
 .legend-item {
-	display: flex; align-items: center; gap: 6px;
-	font-size: 11px;
-	color: #9CA3AF;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
 }
-.legend-swatch {
-	width: 16px; height: 4px; border-radius: 2px;
+
+.swatch {
+	width: 18px;
+	flex-shrink: 0;
 }
-.legend-swatch.duo { background: #84CC16; }
-.legend-swatch.league {
-	background: transparent;
-	border-top: 1.5px dashed rgba(255, 255, 255, 0.4);
+
+.swatch-duo {
+	height: 3px;
+	border-radius: var(--radius-bar);
+	background: var(--color-brand);
+}
+
+.swatch-league {
+	height: 0;
+	border-top: 2px dashed var(--color-ink);
+}
+
+:global([data-variant="b"]) .swatch-duo {
+	height: 4px;
 }
 </style>

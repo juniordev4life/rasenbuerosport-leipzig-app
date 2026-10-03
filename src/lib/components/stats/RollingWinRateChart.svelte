@@ -2,8 +2,14 @@
 import { getTranslate } from "@tolgee/svelte";
 import { getBaseChartOptions, getChartTheme } from "$lib/utils/chart.utils.js";
 import ChartCanvas from "./ChartCanvas.svelte";
+import ChartCard from "./ChartCard.svelte";
 
-/** @type {{ data?: Array<{game_number: number, win_rate_10: number|null, win_rate_20: number|null}> }} */
+/**
+ * Win rate over the last 10 games (main line) and, once there are enough
+ * games, over the last 20 (dashed second line), game by game.
+ *
+ * @type {{ data?: Array<{game_number: number, win_rate_10: number|null, win_rate_20: number|null}> }}
+ */
 let { data = [] } = $props();
 
 const { t } = getTranslate();
@@ -17,9 +23,14 @@ const chartConfig = $derived.by(() => {
 		{
 			label: $t("stats_dashboard.window_10"),
 			data: data.map((d) => d.win_rate_10),
-			borderColor: theme.brand,
-			borderWidth: 2,
-			pointRadius: data.length > 30 ? 1 : 3,
+			borderColor: theme.chart1,
+			backgroundColor: theme.chart1,
+			borderWidth: 2.5,
+			pointRadius: data.length > 30 ? 0 : 3,
+			pointHoverRadius: 4,
+			pointBackgroundColor: theme.surface,
+			pointBorderColor: theme.chart1,
+			pointBorderWidth: 2,
 			tension: 0.3,
 			fill: false,
 		},
@@ -30,9 +41,10 @@ const chartConfig = $derived.by(() => {
 		datasets.push({
 			label: $t("stats_dashboard.window_20"),
 			data: data.map((d) => d.win_rate_20),
-			borderColor: `${theme.muted}80`,
-			borderWidth: 1.5,
-			borderDash: [4, 4],
+			borderColor: theme.chart2,
+			backgroundColor: theme.chart2,
+			borderWidth: 2,
+			borderDash: [5, 4],
 			pointRadius: 0,
 			tension: 0.3,
 			fill: false,
@@ -68,16 +80,18 @@ const chartConfig = $derived.by(() => {
 				legend: {
 					display: has20,
 					position: "top",
+					align: "start",
 					labels: {
-						color: theme.muted,
-						font: { size: 10 },
-						boxWidth: 12,
+						color: theme.ink,
+						font: { family: theme.fontSans, size: 12, weight: 700 },
+						boxWidth: 16,
+						boxHeight: 3,
 					},
 				},
 				tooltip: {
 					...base.plugins.tooltip,
 					callbacks: {
-						title: (ctx) => `Spiel ${ctx[0].label}`,
+						title: (ctx) => $t("stats_dashboard.game_n", { n: ctx[0].label }),
 						label: (ctx) => `${ctx.dataset.label}: ${ctx.raw}%`,
 					},
 				},
@@ -88,8 +102,11 @@ const chartConfig = $derived.by(() => {
 </script>
 
 {#if data.length > 0 && chartConfig}
-	<div class="bg-surface border border-line rounded-lg p-4">
-		<h3 class="text-sm font-medium text-muted mb-3">{$t("stats_dashboard.rolling_win_rate")}</h3>
-		<ChartCanvas config={chartConfig} height="h-48" />
-	</div>
+	<ChartCard title={$t("stats_dashboard.rolling_win_rate")}>
+		<ChartCanvas
+			config={chartConfig}
+			height="h-52 lg:h-64"
+			label={$t("stats_dashboard.rolling_win_rate")}
+		/>
+	</ChartCard>
 {/if}

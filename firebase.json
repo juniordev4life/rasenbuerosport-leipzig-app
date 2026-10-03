@@ -35,6 +35,9 @@
 	"emulators": {
 		"storage": {
 			"port": 9199
+		},
+		"auth": {
+			"port": 9099
 		}
 	}
 }

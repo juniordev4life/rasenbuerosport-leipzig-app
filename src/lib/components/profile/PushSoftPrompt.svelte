@@ -1,6 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import { onMount } from "svelte";
+import PushBellIcon from "$lib/components/icons/PushBellIcon.svelte";
 import {
 	getPermissionState,
 	isIOSStandalone,
@@ -27,6 +28,10 @@ import {
  *  - "Ja, gerne"   → kicks off `subscribeForPushNotifications`
  *  - "Nein, danke" → 14 d cooldown
  *  - X (close)     → same cooldown
+ *
+ * Non-modal: a floating card that leaves the page usable. On phones it
+ * sits above the bottom navigation (and its raised ball button); from
+ * `lg` it docks to the bottom-right corner.
  */
 
 const { t } = getTranslate();
@@ -86,50 +91,139 @@ async function accept() {
 </script>
 
 {#if visible}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		class="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 sm:px-4 sm:pb-4 lg:left-auto lg:right-4 lg:bottom-4 lg:w-[360px]"
+		class="card soft-prompt"
 		role="dialog"
 		aria-modal="false"
 		aria-labelledby="push-soft-prompt-title"
 	>
-		<div class="bg-surface border border-line rounded-2xl shadow-2xl p-4">
-			<div class="flex items-start gap-3">
-				<span class="w-10 h-10 rounded-full bg-brand/15 text-brand flex items-center justify-center text-lg shrink-0" aria-hidden="true">🔔</span>
-				<div class="flex-1 min-w-0">
-					<h3 id="push-soft-prompt-title" class="text-sm font-bold">
-						{$t("push.soft_prompt.title")}
-					</h3>
-					<p class="text-xs text-muted mt-1">
-						{$t("push.soft_prompt.body")}
-					</p>
-				</div>
-				<button
-					type="button"
-					onclick={defer}
-					class="shrink-0 w-7 h-7 rounded-full bg-sunken text-muted text-sm flex items-center justify-center hover:bg-surface"
-					aria-label={$t("common.close")}
-				>×</button>
+		<div class="head">
+			<span class="icon" aria-hidden="true"><PushBellIcon size={22} strokeWidth={2} /></span>
+			<div class="flex-1 min-w-0">
+				<h2 id="push-soft-prompt-title" class="title">
+					{$t("push.soft_prompt.title")}
+				</h2>
+				<p class="body">{$t("push.soft_prompt.body")}</p>
 			</div>
+			<button
+				type="button"
+				onclick={defer}
+				class="btn btn-ghost btn-icon close"
+				aria-label={$t("common.close")}
+			>
+				<svg
+					viewBox="0 0 24 24"
+					width="18"
+					height="18"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2.5"
+					stroke-linecap="round"
+					aria-hidden="true"
+				>
+					<line x1="18" y1="6" x2="6" y2="18" />
+					<line x1="6" y1="6" x2="18" y2="18" />
+				</svg>
+			</button>
+		</div>
 
-			<div class="flex gap-2 mt-4">
-				<button
-					type="button"
-					onclick={defer}
-					class="flex-1 rounded-lg border border-line bg-sunken hover:bg-surface text-muted text-sm font-semibold px-3 py-2"
-				>
-					{$t("push.soft_prompt.deny")}
-				</button>
-				<button
-					type="button"
-					onclick={accept}
-					disabled={working}
-					class="flex-1 rounded-lg bg-brand hover:bg-brand-strong text-white text-sm font-semibold px-3 py-2 shadow-md shadow-brand/20 disabled:opacity-50"
-				>
-					{$t("push.soft_prompt.accept")}
-				</button>
-			</div>
+		<div class="actions">
+			<button type="button" onclick={defer} class="btn btn-secondary btn-sm">
+				{$t("push.soft_prompt.deny")}
+			</button>
+			<button
+				type="button"
+				onclick={accept}
+				disabled={working}
+				class="btn btn-primary btn-sm"
+			>
+				{$t("push.soft_prompt.accept")}
+			</button>
 		</div>
 	</div>
 {/if}
+
+<style>
+.soft-prompt {
+	position: fixed;
+	left: 12px;
+	right: 12px;
+	/* Clear the bottom nav and the ball button that rises above it. */
+	bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
+	z-index: 40;
+	max-width: 30rem;
+	margin-inline: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding: 16px;
+	box-shadow: var(--shadow-raised);
+}
+
+.head {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+}
+
+.icon {
+	width: 40px;
+	height: 40px;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--radius-tile);
+	background: var(--color-brand);
+	color: var(--color-on-brand);
+}
+
+.title {
+	margin: 0;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 17px;
+	line-height: 1.15;
+	text-transform: var(--label-case);
+	letter-spacing: var(--label-tracking);
+}
+
+.body {
+	margin: 4px 0 0;
+	font-size: 13px;
+	line-height: 1.4;
+	color: var(--color-muted);
+}
+
+.close {
+	flex-shrink: 0;
+	width: 36px;
+	height: 36px;
+	margin: -6px -8px 0 0;
+}
+
+.actions {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+}
+
+:global([data-variant="b"]) .icon {
+	border-radius: 999px;
+}
+
+:global([data-variant="b"]) .title {
+	font-weight: 800;
+	font-size: 19px;
+}
+
+@media (min-width: 1024px) {
+	.soft-prompt {
+		left: auto;
+		right: 24px;
+		bottom: 24px;
+		width: 360px;
+		margin: 0;
+	}
+}
+</style>

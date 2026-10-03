@@ -207,7 +207,7 @@ const lastFiveResults = $derived.by(() => {
 	return out;
 });
 
-const series = $derived(detectUserSeries(myGames, userId, userName));
+const series = $derived(detectUserSeries(myGames, userId));
 
 /**
  * Project the latest talkshow episode into the shape TalkrundeCard
@@ -357,7 +357,7 @@ const top3 = $derived(
 			{#if series.length > 0}
 				<Section title={$t("home.sections.series")} class="span-12">
 					{#snippet icon()}<LightningIcon size={22} strokeWidth={2} />{/snippet}
-					<SeriesList {series} />
+					<SeriesList {series} {userName} />
 				</Section>
 			{/if}
 

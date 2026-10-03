@@ -15,7 +15,7 @@
  * @property {string} imageUrl - Public path to the photo asset.
  * @property {string} accentClass - Text colour utility for the persona accent (a theme token).
  * @property {string} ringClass - Ring colour utility for the avatar (a theme token).
- * @property {Array<{ iconKey: string, labelKey: string }>} pills
+ * @property {Array<{ labelKey: string }>} pills - i18n keys of the short fact chips in the bio.
  * @property {string[]} bioKeys - i18n keys, one per bio paragraph.
  * @property {string} quoteKey - i18n key for the pull quote.
  */
@@ -31,11 +31,8 @@ export const REPORTERS = {
 		accentClass: "text-brand",
 		ringClass: "ring-brand",
 		pills: [
-			{
-				iconKey: "📺",
-				labelKey: "match_report.reporter_bio.marcel.pill_experience",
-			},
-			{ iconKey: "🎙", labelKey: "match_report.reporter_bio.marcel.pill_role" },
+			{ labelKey: "match_report.reporter_bio.marcel.pill_experience" },
+			{ labelKey: "match_report.reporter_bio.marcel.pill_role" },
 		],
 		bioKeys: [
 			"match_report.reporter_bio.marcel.bio_1",
@@ -52,14 +49,8 @@ export const REPORTERS = {
 		accentClass: "text-navy",
 		ringClass: "ring-aqua",
 		pills: [
-			{
-				iconKey: "📊",
-				labelKey: "match_report.reporter_bio.sophie.pill_field",
-			},
-			{
-				iconKey: "🎓",
-				labelKey: "match_report.reporter_bio.sophie.pill_degree",
-			},
+			{ labelKey: "match_report.reporter_bio.sophie.pill_field" },
+			{ labelKey: "match_report.reporter_bio.sophie.pill_degree" },
 		],
 		bioKeys: [
 			"match_report.reporter_bio.sophie.bio_1",
@@ -76,11 +67,8 @@ export const REPORTERS = {
 		accentClass: "text-brand",
 		ringClass: "ring-gold",
 		pills: [
-			{
-				iconKey: "🔥",
-				labelKey: "match_report.reporter_bio.frank.pill_experience",
-			},
-			{ iconKey: "⚽", labelKey: "match_report.reporter_bio.frank.pill_role" },
+			{ labelKey: "match_report.reporter_bio.frank.pill_experience" },
+			{ labelKey: "match_report.reporter_bio.frank.pill_role" },
 		],
 		bioKeys: [
 			"match_report.reporter_bio.frank.bio_1",

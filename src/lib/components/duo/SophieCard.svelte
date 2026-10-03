@@ -1,66 +1,114 @@
 <script>
+import { REPORTERS } from "$lib/constants/reporters.constants.js";
+
 /**
- * Reporter-quote card for Sophie the analyst. Visual twin of
- * `MarcelCard` but with the duo-page accent (midnight-blue stripe,
- * blue typographical quotes). Used twice on the duo page — for the
- * Hero verdict and the Beitragsverteilung-Synthese.
+ * A reporter verdict: Sophie's photo, the quote and her name. Used in
+ * the duo hero, the H2H hero and (compact) under the contribution bars.
+ * Design A: a white box — it sits on the red hero band — or a grey one
+ * in its compact form on white cards. Design B: a pale gold speech
+ * bubble.
  *
  * @type {{ quote: string, variant?: "normal"|"compact" }}
  */
 let { quote, variant = "normal" } = $props();
 
-const isCompact = $derived(variant === "compact");
+const sophie = REPORTERS.analyst;
 </script>
 
-<div class="sophie-card" class:compact={isCompact}>
-	<div class="sophie-avatar">
-		<img src="/images/reporter/sophie.webp" alt="Sophie" />
-		<span class="sophie-badge" aria-hidden="true">{"\u{1F4CA}"}</span>
-	</div>
-	<div class="sophie-quote">{quote}</div>
-</div>
+<figure class="sophie" class:compact={variant === "compact"}>
+	<img class="sophie-pic" src={sophie.imageUrl} alt="" loading="lazy" />
+	<blockquote class="sophie-quote">{quote}</blockquote>
+	<figcaption class="sophie-name">{sophie.name}</figcaption>
+</figure>
 
 <style>
-.sophie-card {
-	background: rgba(0,0,0,0.3);
-	border-left: 2.5px solid #1E3A8A;
-	border-radius: 8px;
-	padding: 10px 12px;
-	display: flex; align-items: center; gap: 10px;
+.sophie {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: start;
+	gap: 6px 12px;
+	margin: 0;
+	padding: 14px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	border-radius: var(--radius-tile);
 }
-.sophie-card.compact { padding: 8px 10px; }
-.sophie-avatar {
-	position: relative;
-	width: 30px; height: 30px;
-	border-radius: 50%;
-	flex-shrink: 0;
-	box-shadow: 0 0 0 1.5px rgba(99, 132, 215, 0.4);
-}
-.sophie-card.compact .sophie-avatar { width: 24px; height: 24px; }
-.sophie-avatar img {
-	width: 100%; height: 100%;
-	border-radius: 50%;
+
+.sophie-pic {
+	grid-row: span 2;
+	width: 36px;
+	height: 36px;
 	object-fit: cover;
+	background: var(--color-navy);
+	border-radius: var(--radius-avatar);
 }
-.sophie-badge {
-	position: absolute;
-	bottom: -2px; right: -2px;
-	width: 14px; height: 14px;
-	background: #1E3A8A;
-	border-radius: 50%;
-	border: 1.5px solid #131822;
-	display: flex; align-items: center; justify-content: center;
-	font-size: 8px;
-	line-height: 1;
-}
-.sophie-card.compact .sophie-badge { width: 12px; height: 12px; font-size: 6px; }
+
 .sophie-quote {
+	margin: 0;
+	font-size: 15px;
+	line-height: 1.35;
+}
+
+.sophie-quote::before {
+	content: "„";
+}
+
+.sophie-quote::after {
+	content: "“";
+}
+
+.sophie-name {
+	font-family: var(--font-cond);
+	font-weight: 700;
 	font-size: 12px;
-	color: #D1D5DB;
-	font-style: italic;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: var(--color-brand);
+}
+
+/* Compact: on white cards, so a grey box instead of a white one. */
+.compact {
+	gap: 4px 10px;
+	padding: 10px 12px;
+	background: var(--color-sunken);
+}
+
+.compact .sophie-pic {
+	width: 28px;
+	height: 28px;
+}
+
+.compact .sophie-quote {
+	font-size: 13px;
+}
+
+/* Design B: a pale gold speech bubble. */
+:global([data-variant="b"]) .sophie {
+	gap: 4px 10px;
+	padding: 12px;
+	background: var(--color-gold-soft);
+}
+
+:global([data-variant="b"]) .sophie-pic {
+	width: 32px;
+	height: 32px;
+}
+
+:global([data-variant="b"]) .sophie-quote {
+	font-weight: 500;
+	font-size: 14px;
 	line-height: 1.4;
 }
-.sophie-card.compact .sophie-quote { font-size: 11px; }
-.sophie-quote::before { content: '„'; color: #93C5FD; margin-right: 1px; }
-.sophie-quote::after { content: '"'; color: #93C5FD; margin-left: 1px; }
+
+:global([data-variant="b"]) .sophie-name {
+	font-family: var(--font-sans);
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .compact .sophie-pic {
+	width: 26px;
+	height: 26px;
+}
 </style>

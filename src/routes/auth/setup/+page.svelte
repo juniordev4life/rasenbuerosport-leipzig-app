@@ -59,30 +59,67 @@ async function handleSubmit(e) {
 	<title>RasenBürosport - {$t("auth.invite.setup_title")}</title>
 </svelte:head>
 
-<img src="/logo.png" alt="RasenBürosport Logo" class="w-40 h-auto mb-6" />
+<div class="intro">
+	<h1 class="page-title title">{$t("auth.invite.setup_title")}</h1>
+	<p class="subtitle">{$t("auth.invite.setup_subtitle")}</p>
+</div>
 
-<h1 class="text-2xl font-bold text-center mb-2 text-ink">
-	{$t("auth.invite.setup_title")}
-</h1>
-<p class="text-muted text-sm text-center mb-8">
-	{$t("auth.invite.setup_subtitle")}
-</p>
-
-<form onsubmit={handleSubmit} class="flex flex-col gap-4 w-full">
-	<Input
-		id="username"
-		type="text"
-		placeholder={$t("auth.register.username_placeholder")}
-		bind:value={username}
-		required
-		autocomplete="username"
-	/>
+<form onsubmit={handleSubmit} class="setup-form">
+	<div class="w-full">
+		<Input
+			id="username"
+			type="text"
+			label={$t("auth.register.username_placeholder")}
+			placeholder={$t("auth.register.username_placeholder")}
+			bind:value={username}
+			required
+			autocomplete="username"
+		/>
+	</div>
 
 	{#if error}
-		<p class="text-loss text-sm text-center">{error}</p>
+		<p class="error" role="alert">{error}</p>
 	{/if}
 
 	<Button type="submit" {loading}>
 		{$t("auth.invite.setup_title")}
 	</Button>
 </form>
+
+<style>
+.intro {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.title {
+	margin: 0;
+	font-size: 32px;
+	color: var(--color-ink);
+}
+
+.subtitle {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.4;
+	color: var(--color-muted);
+}
+
+.setup-form {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	width: 100%;
+	text-align: left;
+}
+
+.error {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.4;
+	text-align: center;
+	color: var(--color-loss);
+}
+</style>

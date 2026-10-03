@@ -17,24 +17,29 @@ export const CATEGORY_META = {
 };
 
 /**
- * Rarity metadata: the tier colour as a CSS custom property (it follows
- * the active design variant) and the display label key.
+ * Rarity metadata: the tier colour and the text colour that reads on it,
+ * as CSS custom properties (they follow the active design variant), and
+ * the display label key.
  */
 export const RARITY_META = {
 	bronze: {
 		color: "var(--color-tier-bronze)",
+		onColor: "var(--color-on-tier-bronze)",
 		i18nKey: "trophies.rarity.bronze",
 	},
 	silver: {
 		color: "var(--color-tier-silver)",
+		onColor: "var(--color-on-tier-silver)",
 		i18nKey: "trophies.rarity.silver",
 	},
 	gold: {
 		color: "var(--color-tier-gold)",
+		onColor: "var(--color-on-tier-gold)",
 		i18nKey: "trophies.rarity.gold",
 	},
 	diamond: {
 		color: "var(--color-tier-diamond)",
+		onColor: "var(--color-on-tier-diamond)",
 		i18nKey: "trophies.rarity.diamond",
 	},
 };

@@ -5,6 +5,7 @@ import AccountMenu from "$lib/components/layout/AccountMenu.svelte";
 import FeedbackSheet from "$lib/components/ui/FeedbackSheet.svelte";
 import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
 import { user } from "$lib/stores/auth.stores.js";
+import { goBack, hasBackButton } from "$lib/utils/backNavigation.utils.js";
 import { isoWeek } from "$lib/utils/isoWeek.utils.js";
 
 /**
@@ -34,29 +35,7 @@ function openFeedback() {
 	}, 80);
 }
 
-/** The four bottom-nav tabs: no back button there. */
-const ROOT_ROUTES = new Set([
-	"/app/dashboard",
-	"/app/leaderboard",
-	"/app/history",
-	"/app/profile",
-]);
-
-const showBack = $derived.by(() => {
-	const path = page.url?.pathname ?? "";
-	if (!path.startsWith("/app/")) return false;
-	return !ROOT_ROUTES.has(path);
-});
-
-function goBack() {
-	// history.back keeps deep links from other apps working; the fallback
-	// covers a page opened directly.
-	if (typeof history !== "undefined" && history.length > 1) {
-		history.back();
-		return;
-	}
-	window.location.assign("/app/dashboard");
-}
+const showBack = $derived(hasBackButton(page.url?.pathname, "mobile"));
 </script>
 
 <header class="app-header">

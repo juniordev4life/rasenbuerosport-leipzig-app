@@ -12,7 +12,12 @@ import MatchReporterAwaitingCard from "$lib/components/games/MatchReporterAwaiti
 import MatchReporterCardNew from "$lib/components/games/MatchReporterCardNew.svelte";
 import MatchTeaserPlaceholder from "$lib/components/games/MatchTeaserPlaceholder.svelte";
 import MatchTimelineNew from "$lib/components/games/MatchTimelineNew.svelte";
+import MicIcon from "$lib/components/icons/MicIcon.svelte";
+import ShieldIcon from "$lib/components/icons/ShieldIcon.svelte";
 import PenaltyShootoutSummary from "$lib/components/penaltyShootout/PenaltyShootoutSummary.svelte";
+import Button from "$lib/components/ui/Button.svelte";
+import Section from "$lib/components/ui/Section.svelte";
+import Sheet from "$lib/components/ui/Sheet.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { del, get } from "$lib/services/api.services.js";
 import { getTeamByName } from "$lib/services/teams.services.js";
@@ -157,9 +162,16 @@ const isAutoAnalyzed = $derived(
 		game?.video_status === "processing",
 );
 
-// Drives the desktop "cinema" layout: a ready reel renders large with
-// the key stats beside it. Shared predicate with the dashboard tile.
+// A ready reel pulls the key stats up next to it (right below it on
+// phones). Shared predicate with the dashboard tile.
 const hasHighlightGame = $derived(hasHighlight(game));
+
+// Key stats show beside a ready reel, otherwise once all stats are in.
+const showKeyStats = $derived(
+	Boolean(game?.match_stats) && (hasHighlightGame || allUploaded),
+);
+
+const userId = $derived($user?.uid ?? null);
 
 // The reporter narrates the finished match, so the text must wait for the
 // real result: never while the game is pending, and for recorded games not
@@ -176,288 +188,391 @@ const reportBlocked = $derived(isReportBlocked(game));
 	<title>RasenBürosport - {$t("game_detail.title")}</title>
 </svelte:head>
 
-<div class="flex flex-col gap-3 max-w-5xl lg:max-w-none xl:max-w-[1280px] mx-auto px-1 pt-0 pb-8">
-	{#if loading}
-		<div class="flex justify-center py-8">
-			<div class="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full"></div>
+{#snippet notice(titleKey, hintKey, className = "")}
+	<div class="card notice {className}" role="status">
+		<span class="spinner spinner-sm" aria-hidden="true"></span>
+		<div>
+			<p class="notice-title">{$t(titleKey)}</p>
+			<p>{$t(hintKey)}</p>
 		</div>
-	{:else if error || !game}
-		<div class="text-center py-8">
-			<p class="text-muted">{$t("game_detail.not_found")}</p>
-		</div>
-	{:else}
-		<MatchHeroNew
-			{game}
-			homeTeam={homeTeamData}
-			awayTeam={awayTeamData}
-			{homeTeamName}
-			{awayTeamName}
-			{homePlayers}
-			{awayPlayers}
-			currentUserId={$user?.uid ?? null}
-			{resultSuffix}
-			{rematchUrl}
-		/>
+	</div>
+{/snippet}
 
-		{#if game.penalty_shootout}
-			<PenaltyShootoutSummary
-				penaltyShootout={game.penalty_shootout}
-				gamePlayers={game.game_players ?? []}
+{#snippet reporterCard()}
+	<MatchReporterCardNew
+		{gameId}
+		existingReport={game.match_report}
+		existingAudioUrl={game.match_report_audio_url}
+		existingReporterId={game.reporter_id}
+		onReportGenerated={(report) => { game = { ...game, match_report: report, match_report_audio_url: null }; }}
+		onAudioGenerated={(url) => { game = { ...game, match_report_audio_url: url }; }}
+		onReporterAssigned={(rid) => { game = { ...game, reporter_id: rid }; }}
+	/>
+{/snippet}
+
+{#snippet awaitingCard()}
+	<MatchReporterAwaitingCard
+		{gameId}
+		{hasOverview}
+		{hasPasses}
+		{hasDefense}
+		onStatsExtracted={() => loadGame()}
+		onAllUploaded={() => loadGame()}
+	/>
+{/snippet}
+
+{#if loading}
+	<div class="state">
+		<span class="spinner" role="status" aria-label={$t("common.loading")}></span>
+	</div>
+{:else if error || !game}
+	<p class="card notice">{$t("game_detail.not_found")}</p>
+{:else}
+	<!-- Phones: one column; the two wrappers dissolve (display: contents)
+	     and `order` keeps the reading order. Desktop: main column (match,
+	     report, timeline, lineups) and a side column (highlights, stats). -->
+	<div class="detail">
+		<div class="col">
+			<MatchHeroNew
+				class="o-hero"
+				{game}
+				homeTeam={homeTeamData}
+				awayTeam={awayTeamData}
 				{homeTeamName}
 				{awayTeamName}
+				{homePlayers}
+				{awayPlayers}
+				currentUserId={userId}
+				{resultSuffix}
+				{rematchUrl}
 			/>
-		{/if}
 
-		{#if game.pending}
-			<section
-				class="rounded-xl border border-line bg-surface px-4 py-4 flex items-center gap-3"
-			>
-				<div
-					class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-brand border-t-transparent"
-					aria-hidden="true"
-				></div>
-				<div>
-					<div class="text-sm font-semibold text-ink">
-						{$t("game_detail.pending.title")}
-					</div>
-					<div class="text-xs text-muted mt-0.5">
-						{$t("game_detail.pending.hint")}
-					</div>
-				</div>
-			</section>
-		{/if}
-
-		{#if hasHighlightGame}
-			<!-- Cinema theater on desktop: the highlight reel goes large with
-			     the key stats beside it; stacks to one column on mobile. -->
-			<div class="lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(300px,1fr)] lg:gap-6 lg:items-start">
-				<MatchHighlightReel
-					videoStatus={game.video_status}
-					highlightUrl={game.highlight_url}
+			{#if game.penalty_shootout}
+				<PenaltyShootoutSummary
+					class="o-penalty"
+					penaltyShootout={game.penalty_shootout}
+					gamePlayers={game.game_players ?? []}
+					{homeTeamName}
+					{awayTeamName}
 				/>
-				{#if game.match_stats}
-					<MatchKeyStatsNew matchStats={game.match_stats} />
-				{/if}
-			</div>
-		{:else}
-			<MatchHighlightReel
-				videoStatus={game.video_status}
-				highlightUrl={game.highlight_url}
-			/>
-		{/if}
+			{/if}
 
-		{#snippet timelineAndLineups()}
+			{#if game.pending}
+				{@render notice("game_detail.pending.title", "game_detail.pending.hint", "o-pending")}
+			{/if}
+
+			<Section title={$t("game_detail.section.report")} class="o-report">
+				{#snippet icon()}<MicIcon size={22} strokeWidth={2} />{/snippet}
+				{#if allUploaded}
+					{#if !game.match_report && reportBlocked}
+						<!-- Recorded game still analyzing: result/stats are not final yet,
+						     so the reporter text must NOT be generated (it would narrate a
+						     0:0 with an empty timeline). The API generates it once the
+						     pipeline finishes (video_status ready/failed); until then show
+						     a preparing notice — same cue as the other analysis placeholders. -->
+						{@render notice("game_detail.report_preparing.title", "game_detail.report_preparing.hint")}
+					{:else}
+						{@render reporterCard()}
+					{/if}
+				{:else if isAutoAnalyzed}
+					<!-- Recorded game whose stats never arrived. While the pipeline is
+					     genuinely still running, the preparing notice is right. Once it
+					     reached a terminal status the stats will NEVER arrive — a failed
+					     capture has no post-match screens to read — so claiming
+					     "preparing" would be a spinner that spins forever. Show the
+					     report instead: the API generates it on that final status, and it
+					     narrates the tapped timeline, which does not need stats images.
+					     The collapsed fallback below stays for adding stats by hand. -->
+					{#if reportBlocked}
+						{@render notice("game_detail.report_preparing.title", "game_detail.report_preparing.hint")}
+					{:else}
+						{@render reporterCard()}
+					{/if}
+
+					<details class="manual">
+						<summary class="btn btn-secondary btn-sm manual-toggle">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true">
+								<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+								<polyline points="17 8 12 3 7 8" />
+								<line x1="12" x2="12" y1="3" y2="15" />
+							</svg>
+							{$t("game_detail.report_preparing.manual_toggle")}
+							<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true">
+								<polyline points="6 9 12 15 18 9" />
+							</svg>
+						</summary>
+						<div class="manual-body">
+							{@render awaitingCard()}
+						</div>
+					</details>
+				{:else}
+					{@render awaitingCard()}
+				{/if}
+			</Section>
+
 			<!-- Timeline and lineups come from the game row itself (tapped
 			     score_timeline, game_players) — they never needed the stats
 			     screenshots. Gating them behind those hid real match data, and
 			     permanently so for a game whose capture failed: no screens to
 			     read means the gate never opens. Rendered in every branch. -->
 			<MatchTimelineNew
+				class="o-timeline"
 				timeline={game.score_timeline || []}
 				gamePlayers={game.game_players ?? []}
-				currentUserId={$user?.uid ?? null}
+				currentUserId={userId}
 			/>
 
 			<MatchLineupsNew
+				class="o-lineups"
 				{game}
 				{homePlayers}
 				{awayPlayers}
 				{homeTeamName}
 				{awayTeamName}
-				currentUserId={$user?.uid ?? null}
+				currentUserId={userId}
 			/>
-		{/snippet}
 
-		{#if allUploaded}
-			{#if !game.match_report && reportBlocked}
-				<!-- Recorded game still analyzing: result/stats are not final yet,
-				     so the reporter text must NOT be generated (it would narrate a
-				     0:0 with an empty timeline). The API generates it once the
-				     pipeline finishes (video_status ready/failed); until then show
-				     a preparing notice — same cue as the other analysis placeholders. -->
-				<section
-					class="rounded-xl border border-line bg-surface px-4 py-4 flex items-center gap-3"
-				>
-					<div
-						class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-brand border-t-transparent"
-						aria-hidden="true"
-					></div>
-					<div>
-						<div class="text-sm font-semibold text-ink">
-							{$t("game_detail.report_preparing.title")}
-						</div>
-						<div class="text-xs text-muted mt-0.5">
-							{$t("game_detail.report_preparing.hint")}
-						</div>
+			{#if isAdmin}
+				<Section title={$t("game_detail.section.danger_zone")} class="o-admin">
+					{#snippet icon()}<ShieldIcon size={22} strokeWidth={2} />{/snippet}
+					<div class="card danger">
+						<p class="danger-text">{$t("game_detail.danger_zone.description")}</p>
+						<button
+							type="button"
+							onclick={() => (showDeleteConfirm = true)}
+							class="btn btn-sm danger-btn"
+						>
+							{$t("game_detail.delete")}
+						</button>
 					</div>
-				</section>
-			{:else}
-				<MatchReporterCardNew
-					{gameId}
-					existingReport={game.match_report}
-					existingAudioUrl={game.match_report_audio_url}
-					existingReporterId={game.reporter_id}
-					onReportGenerated={(report) => { game = { ...game, match_report: report, match_report_audio_url: null }; }}
-					onAudioGenerated={(url) => { game = { ...game, match_report_audio_url: url }; }}
-					onReporterAssigned={(rid) => { game = { ...game, reporter_id: rid }; }}
-				/>
+				</Section>
 			{/if}
+		</div>
 
-			{@render timelineAndLineups()}
-
-			{#if game.match_stats && !hasHighlightGame}
-				<MatchKeyStatsNew matchStats={game.match_stats} />
-			{/if}
-
-			<MatchPassCharacterCard
-				homePassNetwork={game.home_pass_network}
-				awayPassNetwork={game.away_pass_network}
-				{homeTeamName}
-				{awayTeamName}
+		<div class="col">
+			<MatchHighlightReel
+				class="o-reel"
+				videoStatus={game.video_status}
+				highlightUrl={game.highlight_url}
 			/>
 
-			{#if game.match_stats}
-				<MatchDetailStatsNew
+			{#if showKeyStats}
+				<MatchKeyStatsNew
+					class={hasHighlightGame ? "o-kpis-top" : "o-kpis"}
 					matchStats={game.match_stats}
-					homeTeamLabel={homeTeamName}
-					awayTeamLabel={awayTeamName}
-				/>
-			{/if}
-		{:else if isAutoAnalyzed}
-			<!-- Recorded game whose stats never arrived. While the pipeline is
-			     genuinely still running, the preparing notice is right. Once it
-			     reached a terminal status the stats will NEVER arrive — a failed
-			     capture has no post-match screens to read — so claiming
-			     "preparing" would be a spinner that spins forever. Show the
-			     report instead: the API generates it on that final status, and it
-			     narrates the tapped timeline, which does not need stats images.
-			     The collapsed fallback below stays for adding stats by hand. -->
-			{#if reportBlocked}
-				<section
-					class="rounded-xl border border-line bg-surface px-4 py-4 flex items-center gap-3"
-				>
-					<div
-						class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-brand border-t-transparent"
-						aria-hidden="true"
-					></div>
-					<div>
-						<div class="text-sm font-semibold text-ink">
-							{$t("game_detail.report_preparing.title")}
-						</div>
-						<div class="text-xs text-muted mt-0.5">
-							{$t("game_detail.report_preparing.hint")}
-						</div>
-					</div>
-				</section>
-			{:else}
-				<MatchReporterCardNew
-					{gameId}
-					existingReport={game.match_report}
-					existingAudioUrl={game.match_report_audio_url}
-					existingReporterId={game.reporter_id}
-					onReportGenerated={(report) => { game = { ...game, match_report: report, match_report_audio_url: null }; }}
-					onAudioGenerated={(url) => { game = { ...game, match_report_audio_url: url }; }}
-					onReporterAssigned={(rid) => { game = { ...game, reporter_id: rid }; }}
 				/>
 			{/if}
 
-			<details class="rounded-xl border border-line bg-surface overflow-hidden">
-				<summary
-					class="cursor-pointer select-none px-4 py-3 text-sm text-muted flex items-center gap-2 hover:text-ink transition-colors"
-				>
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true">
-						<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-						<polyline points="17 8 12 3 7 8" />
-						<line x1="12" x2="12" y1="3" y2="15" />
-					</svg>
-					{$t("game_detail.report_preparing.manual_toggle")}
-				</summary>
-				<div class="px-1 pb-1">
-					<MatchReporterAwaitingCard
-						{gameId}
-						{hasOverview}
-						{hasPasses}
-						{hasDefense}
-						onStatsExtracted={() => loadGame()}
-						onAllUploaded={() => loadGame()}
+			{#if allUploaded}
+				<MatchPassCharacterCard
+					class="o-pass"
+					homePassNetwork={game.home_pass_network}
+					awayPassNetwork={game.away_pass_network}
+					{homeTeamName}
+					{awayTeamName}
+				/>
+
+				{#if game.match_stats}
+					<MatchDetailStatsNew
+						class="o-detail"
+						matchStats={game.match_stats}
+						homeTeamLabel={homeTeamName}
+						awayTeamLabel={awayTeamName}
 					/>
-				</div>
-			</details>
-
-			{@render timelineAndLineups()}
-
-			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_stats")} />
-		{:else}
-			<MatchReporterAwaitingCard
-				{gameId}
-				{hasOverview}
-				{hasPasses}
-				{hasDefense}
-				onStatsExtracted={() => loadGame()}
-				onAllUploaded={() => loadGame()}
-			/>
-
-			{@render timelineAndLineups()}
-
-			<MatchTeaserPlaceholder label={$t("awaiting_report.teaser_stats")} />
-		{/if}
-
-		{#if isAdmin}
-			<div class="mt-2 rounded-xl border border-brand/30 px-4 sm:px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between">
-				<div class="leading-tight">
-					<div class="text-[10px] tracking-[0.08em] uppercase text-muted mb-1 font-semibold">
-						{$t("game_detail.section.danger_zone")}
-					</div>
-					<div class="text-sm text-muted">
-						{$t("game_detail.danger_zone.description")}
-					</div>
-				</div>
-				<button
-					type="button"
-					onclick={() => (showDeleteConfirm = true)}
-					class="shrink-0 px-4 py-2.5 rounded-lg border border-brand/40 text-brand text-sm font-medium hover:bg-brand/10 transition-colors"
-				>
-					{$t("game_detail.delete")}
-				</button>
-			</div>
-		{/if}
-	{/if}
-</div>
-
-{#if showDeleteConfirm}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-		onclick={() => (showDeleteConfirm = false)}
-	>
-		<div
-			class="bg-surface border border-line rounded-xl p-6 w-full max-w-sm"
-			onclick={(e) => e.stopPropagation()}
-		>
-			<h3 class="text-lg font-bold text-ink mb-2">
-				{$t("game_detail.delete_confirm_title")}
-			</h3>
-			<p class="text-sm text-muted mb-6">
-				{$t("game_detail.delete_confirm_message")}
-			</p>
-			<div class="flex gap-3">
-				<button
-					type="button"
-					onclick={() => (showDeleteConfirm = false)}
-					class="flex-1 py-2 px-4 rounded-lg bg-sunken border border-line text-ink text-sm font-medium hover:bg-surface transition-colors"
-				>
-					{$t("game_detail.delete_cancel")}
-				</button>
-				<button
-					type="button"
-					onclick={handleDeleteGame}
-					disabled={deleting}
-					class="flex-1 py-2 px-4 rounded-lg bg-loss text-white text-sm font-medium hover:bg-loss/90 disabled:opacity-50 transition-colors"
-				>
-					{deleting ? $t("common.loading") : $t("game_detail.delete_confirm")}
-				</button>
-			</div>
+				{/if}
+			{:else}
+				<MatchTeaserPlaceholder
+					class="o-teaser"
+					label={$t("awaiting_report.teaser_stats")}
+				/>
+			{/if}
 		</div>
 	</div>
 {/if}
+
+{#if showDeleteConfirm}
+	<Sheet
+		title={$t("game_detail.delete_confirm_title")}
+		onClose={() => (showDeleteConfirm = false)}
+		size="sm"
+	>
+		<p class="confirm-text">{$t("game_detail.delete_confirm_message")}</p>
+		<div class="confirm-actions">
+			<Button loading={deleting} onclick={handleDeleteGame}>
+				{deleting ? $t("common.loading") : $t("game_detail.delete_confirm")}
+			</Button>
+			<Button variant="secondary" onclick={() => (showDeleteConfirm = false)}>
+				{$t("game_detail.delete_cancel")}
+			</Button>
+		</div>
+	</Sheet>
+{/if}
+
+<style>
+.state {
+	display: flex;
+	justify-content: center;
+	padding: 48px 0;
+}
+
+/* ── Layout ────────────────────────────────────────────────────────── */
+.detail {
+	display: flex;
+	flex-direction: column;
+	gap: var(--stack-gap);
+	padding-bottom: 8px;
+}
+
+.col {
+	display: contents;
+}
+
+/* Phone reading order (the columns are dissolved); on desktop the same
+ * values keep each column in DOM order. */
+.detail :global(.o-hero) {
+	order: 1;
+}
+.detail :global(.o-penalty) {
+	order: 2;
+}
+.detail :global(.o-pending) {
+	order: 3;
+}
+.detail :global(.o-reel) {
+	order: 4;
+}
+.detail :global(.o-kpis-top) {
+	order: 5;
+}
+.detail :global(.o-report) {
+	order: 6;
+}
+.detail :global(.o-timeline) {
+	order: 7;
+}
+.detail :global(.o-lineups) {
+	order: 8;
+}
+.detail :global(.o-kpis) {
+	order: 9;
+}
+.detail :global(.o-pass) {
+	order: 10;
+}
+.detail :global(.o-detail) {
+	order: 11;
+}
+.detail :global(.o-teaser) {
+	order: 12;
+}
+.detail :global(.o-admin) {
+	order: 13;
+}
+
+@media (min-width: 1024px) {
+	.detail {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(300px, 34%);
+		align-items: start;
+		gap: 24px;
+		padding-bottom: 32px;
+	}
+
+	.col {
+		display: flex;
+		flex-direction: column;
+		gap: var(--stack-gap);
+		min-width: 0;
+	}
+}
+
+@media (min-width: 1280px) {
+	.detail {
+		gap: 32px;
+	}
+}
+
+/* ── Manual stats upload (recorded games) ──────────────────────────── */
+.manual-toggle {
+	list-style: none;
+	user-select: none;
+}
+
+.manual-toggle::-webkit-details-marker {
+	display: none;
+}
+
+.chevron {
+	transition: transform 150ms;
+}
+
+.manual[open] .chevron {
+	transform: rotate(180deg);
+}
+
+.manual-body {
+	margin-top: 12px;
+}
+
+/* B's white pill would vanish on the white section card. */
+:global([data-variant="b"]) .manual-toggle {
+	background: var(--color-sunken);
+	box-shadow: none;
+}
+
+:global([data-variant="b"]) .manual-toggle:hover {
+	background: var(--color-line);
+}
+
+/* ── Admin danger zone ─────────────────────────────────────────────── */
+.danger {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 16px;
+}
+
+.danger-text {
+	margin: 0;
+	color: var(--color-muted);
+	font-size: 14px;
+	line-height: 1.45;
+}
+
+.danger-btn {
+	background: transparent;
+	color: var(--color-loss);
+	box-shadow: inset 0 0 0 1px var(--color-loss);
+}
+
+.danger-btn:hover {
+	background: var(--color-loss-soft);
+}
+
+@media (min-width: 640px) {
+	.danger {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.danger-btn {
+		flex-shrink: 0;
+	}
+}
+
+/* ── Delete confirmation ───────────────────────────────────────────── */
+.confirm-text {
+	margin: 0 0 20px;
+	color: var(--color-muted);
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+.confirm-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+</style>

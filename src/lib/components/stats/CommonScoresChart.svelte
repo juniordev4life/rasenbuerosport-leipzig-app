@@ -2,8 +2,14 @@
 import { getTranslate } from "@tolgee/svelte";
 import { getBaseChartOptions, getChartTheme } from "$lib/utils/chart.utils.js";
 import ChartCanvas from "./ChartCanvas.svelte";
+import ChartCard from "./ChartCard.svelte";
 
-/** @type {{ data?: Array<{score: string, count: number}> }} */
+/**
+ * Most frequent final scores as horizontal bars; the most common one is
+ * drawn in the emphasis colour.
+ *
+ * @type {{ data?: Array<{score: string, count: number}> }}
+ */
 let { data = [] } = $props();
 
 const { t } = getTranslate();
@@ -15,7 +21,7 @@ const chartConfig = $derived.by(() => {
 
 	const maxVal = Math.max(...data.map((d) => d.count));
 	const colors = data.map((d) =>
-		d.count === maxVal ? theme.brand : `${theme.muted}60`,
+		d.count === maxVal ? theme.chart4 : theme.chart1,
 	);
 
 	return {
@@ -26,8 +32,7 @@ const chartConfig = $derived.by(() => {
 				{
 					data: data.map((d) => d.count),
 					backgroundColor: colors,
-					borderRadius: 4,
-					barThickness: 20,
+					barThickness: 18,
 				},
 			],
 		},
@@ -37,7 +42,7 @@ const chartConfig = $derived.by(() => {
 			scales: {
 				x: {
 					...base.scales.x,
-					grid: { color: `${theme.line}30` },
+					grid: { color: theme.line },
 					ticks: { ...base.scales.x.ticks, stepSize: 1 },
 				},
 				y: { ...base.scales.y, grid: { display: false } },
@@ -60,8 +65,11 @@ const chartHeight = $derived(data.length > 6 ? "h-64" : "h-52");
 </script>
 
 {#if data.length > 0 && chartConfig}
-	<div class="bg-surface border border-line rounded-lg p-4">
-		<h3 class="text-sm font-medium text-muted mb-3">{$t("stats_dashboard.common_scores")}</h3>
-		<ChartCanvas config={chartConfig} height={chartHeight} />
-	</div>
+	<ChartCard title={$t("stats_dashboard.common_scores")}>
+		<ChartCanvas
+			config={chartConfig}
+			height={chartHeight}
+			label={$t("stats_dashboard.common_scores")}
+		/>
+	</ChartCard>
 {/if}

@@ -24,7 +24,7 @@ const podium = $derived(
 </script>
 
 {#if top3.length === 0}
-	<div class="card px-4 py-5 text-center text-sm text-muted">—</div>
+	<div class="card notice">—</div>
 {:else if $designVariant === "b"}
 	<div class="podium">
 		{#each podium as { player, place } (player.id)}

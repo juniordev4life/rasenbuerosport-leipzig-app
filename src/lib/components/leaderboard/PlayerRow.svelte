@@ -1,19 +1,29 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
+import LightningIcon from "$lib/components/icons/LightningIcon.svelte";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
 import RankIndicator from "./RankIndicator.svelte";
 import Sparkline from "./Sparkline.svelte";
 import TrendPill from "./TrendPill.svelte";
 
 /**
- * A single row in the Skill-Rating player list. Composes rank
- * indicator, avatar, name/badges, stats line, sparkline and the
- * rating + delta pill. The row is a button so callers can hook into
- * clicks (e.g. open the player's profile).
+ * One row of the Skill-Rating player list: rank, avatar, name with
+ * badges (win streak, "Ich"), the season line, a sparkline and the
+ * rating with its change. The row is a button so callers can hook into
+ * clicks (open the player's profile).
+ *
+ * Phone: the season line reads "47 Spiele · 33S 0U 14N". Desktop
+ * (≥ 1024 px): games, S/U/N and goals get their own columns. Columns and
+ * gap follow `--cols` / `--col-gap` set on the list (the leaderboard
+ * page), so its header row lines up; the fallback is the phone layout.
+ * A win streak of 3+ shows as a compact gold chip (icon and count; the
+ * full "4er-Streak" is there for screen readers).
  *
  * Players with no rated game in the selected season still show their
- * rating, but the S/U/N · Spiele · Tore line collapses to "—" instead
- * of an all-zero line.
+ * rating, but the season figures collapse to "—". `dimmed` (and an
+ * unqualified player) mutes the rank and rating instead of fading the
+ * row, which would drop the text contrast. Design A highlights the own
+ * row in navy; design B in pale gold.
  *
  * @type {{
  *   rank: number,
@@ -44,9 +54,9 @@ const { t } = getTranslate();
 
 const hasSeasonGames = $derived(player.games > 0);
 
-const streakLabel = $derived(
+const winStreak = $derived(
 	player.streak?.type === "W" && player.streak.count >= 3
-		? `${"\u{1F525}"} ${player.streak.count}`
+		? player.streak.count
 		: null,
 );
 
@@ -54,20 +64,12 @@ const displayedDelta = $derived(
 	sort === "form" ? player.form_delta : player.delta_season,
 );
 
-const trendDirection = $derived(
-	displayedDelta == null || displayedDelta === 0
-		? "flat"
-		: displayedDelta > 0
-			? "up"
-			: "down",
+const trendDown = $derived(
+	displayedDelta != null && Math.round(displayedDelta) < 0,
 );
 
-const sparkStroke = $derived(
-	trendDirection === "down" ? "var(--color-loss)" : "var(--color-win)",
-);
-
-const fallbackGradient = $derived(
-	avatarGradient(player.player_id ?? player.username).gradient,
+const record = $derived(
+	`${player.wins}${$t("leaderboard.w_short")} ${player.draws}${$t("leaderboard.d_short")} ${player.losses}${$t("leaderboard.l_short")}`,
 );
 
 function handleClick() {
@@ -78,71 +80,217 @@ function handleClick() {
 <button
 	type="button"
 	onclick={handleClick}
-	class="w-full flex items-center gap-2.5 rounded-xl border px-3 py-2.5 mb-2 text-left transition-colors {isCurrentUser
-		? 'border-brand/30 bg-brand/5'
-		: 'border-line bg-surface hover:bg-sunken'} {dimmed || player.qualified === false
-		? 'opacity-70'
-		: ''}"
+	class="row"
+	class:self={isCurrentUser}
+	class:muted={dimmed || player.qualified === false}
+	aria-current={isCurrentUser ? "true" : undefined}
 >
-	<RankIndicator {rank} />
-
-	{#if player.avatar_url}
-		<img referrerpolicy="no-referrer"
-			src={player.avatar_url}
-			alt={player.username}
-			class="w-[42px] h-[42px] rounded-full object-cover shrink-0"
-		/>
-	{:else}
-		<div
-			class="w-[42px] h-[42px] rounded-full flex items-center justify-center text-[15px] font-bold text-white shrink-0"
-			style:background={fallbackGradient}
-		>
-			{(player.username ?? "?").charAt(0).toUpperCase()}
-		</div>
-	{/if}
-
-	<div class="flex-1 min-w-0">
-		<div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
-			<span class="text-sm font-bold text-ink truncate">{player.username}</span>
-			{#if streakLabel}
-				<span class="shrink-0 text-[10px] font-bold text-brand">{streakLabel}</span>
-			{/if}
-			{#if isCurrentUser}
-				<span
-					class="shrink-0 rounded-full border border-brand/30 bg-brand/10 px-1.5 py-px text-[8px] font-bold uppercase tracking-wide text-brand"
-				>
-					{$t("leaderboard.you")}
-				</span>
-			{/if}
-		</div>
-		<div class="text-[10px] text-muted tabular-nums">
-			{#if hasSeasonGames}
-				{player.wins}{$t("leaderboard.w_short")} ·
-				{player.draws}{$t("leaderboard.d_short")} ·
-				{player.losses}{$t("leaderboard.l_short")} ·
-				{player.games} {$t("leaderboard.games_short")} ·
-				{player.goals} {$t("leaderboard.goals_short")}
-			{:else}
-				{"—"}
-			{/if}
-		</div>
-	</div>
-
-	<div class="shrink-0">
-		<Sparkline
-			points={player.history}
-			width={50}
-			height={18}
-			stroke={sparkStroke}
-			strokeWidth={1.3}
-			opacity={0.85}
-		/>
-	</div>
-
-	<div class="shrink-0 text-right flex flex-col items-end gap-0.5">
-		<div class="text-[17px] font-extrabold leading-none tabular-nums text-ink">
-			{player.rating ?? "—"}
-		</div>
-		<TrendPill delta={displayedDelta} />
-	</div>
+	<span class="cols">
+		<RankIndicator {rank} />
+		<PlayerAvatar {player} size={40} self={isCurrentUser} />
+		<span class="who">
+			<span class="name-line">
+				<span class="name">{player.username}</span>
+				{#if winStreak}
+					<!-- Icon and count on screen; "4er-Streak" for screen readers. -->
+					<span class="chip chip-gold">
+						<LightningIcon size={11} strokeWidth={2.4} />
+						{winStreak}<span class="sr-only">{$t("leaderboard.streak_suffix")}</span>
+					</span>
+				{/if}
+				{#if isCurrentUser}
+					<span class="chip chip-outline me">{$t("leaderboard.you")}</span>
+				{/if}
+			</span>
+			<span class="meta">
+				{#if hasSeasonGames}
+					{player.games} {$t("leaderboard.games_short")} · {record}
+				{:else}
+					—
+				{/if}
+			</span>
+		</span>
+		<span class="cell">{hasSeasonGames ? player.games : "—"}</span>
+		<span class="cell">{hasSeasonGames ? record : "—"}</span>
+		<span class="cell">{hasSeasonGames ? player.goals : "—"}</span>
+		<span class="spark" class:down={trendDown}>
+			<Sparkline points={player.history} width={48} height={20} strokeWidth={1.5} fluid />
+		</span>
+		<span class="value">
+			<span class="rating">{player.rating ?? "—"}</span>
+			<TrendPill delta={displayedDelta} />
+		</span>
+	</span>
 </button>
+
+<style>
+/* No border reset: the list's `.rows` hairlines sit on these buttons
+ * (preflight already zeroes the button border). */
+.row {
+	display: block;
+	width: 100%;
+	padding: 8px 12px;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.row:hover {
+	background: var(--color-sunken);
+}
+
+.cols {
+	display: grid;
+	grid-template-columns: var(--cols, 26px 40px minmax(0, 1fr) 44px 52px);
+	align-items: center;
+	column-gap: var(--col-gap, 8px);
+	min-height: 48px;
+}
+
+.who {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	min-width: 0;
+}
+
+.name-line {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+
+.name {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: 700;
+	font-size: 15px;
+}
+
+.chip {
+	flex-shrink: 0;
+}
+
+.meta {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 12px;
+	color: var(--color-muted);
+}
+
+/* Desktop-only columns. */
+.cell {
+	display: none;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 15px;
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+	white-space: nowrap;
+}
+
+.spark {
+	display: flex;
+	color: var(--color-chart-1);
+}
+
+.value {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 4px;
+}
+
+.rating {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 20px;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+}
+
+.muted {
+	--rank-color: var(--color-muted);
+}
+
+.muted .rating {
+	color: var(--color-muted);
+}
+
+@media (min-width: 1024px) {
+	.cell {
+		display: block;
+	}
+
+	.meta {
+		display: none;
+	}
+}
+
+/* Design A: the own row is a navy band. */
+:global([data-variant="a"]) .self,
+:global([data-variant="a"]) .self:hover {
+	--rank-color: currentColor;
+	background: var(--color-navy);
+	color: var(--color-on-navy);
+}
+
+:global([data-variant="a"]) .self .meta,
+:global([data-variant="a"]) .self .spark,
+:global([data-variant="a"]) .self .rating,
+:global([data-variant="a"]) .self :global(.trend) {
+	color: inherit;
+}
+
+/* Design B: rows sit flush in the section card; the own row is a pale
+ * gold pill that reaches a little into the card's padding. */
+:global([data-variant="b"]) .row {
+	padding: 6px 0;
+}
+
+:global([data-variant="b"]) .row:hover {
+	background: transparent;
+}
+
+:global([data-variant="b"]) .row:hover .name {
+	text-decoration: underline;
+}
+
+:global([data-variant="b"]) .rating {
+	font-weight: 800;
+}
+
+:global([data-variant="b"]) .meta {
+	font-size: 11.5px;
+}
+
+:global([data-variant="b"]) .spark {
+	color: var(--color-win);
+}
+
+:global([data-variant="b"]) .spark.down {
+	color: var(--color-loss);
+}
+
+:global([data-variant="b"]) .self,
+:global([data-variant="b"]) .self:hover {
+	width: calc(100% + 16px);
+	margin: 0 -8px;
+	padding-inline: 8px;
+	border-top-color: transparent;
+	border-radius: 12px;
+	background: var(--color-gold-soft);
+}
+
+:global([data-variant="b"]) .me {
+	background: var(--color-navy);
+	color: var(--color-on-navy);
+	box-shadow: none;
+}
+</style>

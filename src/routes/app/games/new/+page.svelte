@@ -496,177 +496,151 @@ function replayTourForCurrentStep() {
 	<title>RasenBürosport - {isRematch ? $t("rematch.title") : $t("new_game.title")}</title>
 </svelte:head>
 
-{#if step === 1 || step === 2 || step === 3}
-	<div class="screen-banner">
-		<!-- Invisible spacer matches the button's width so the centred
-		     label is geometrically balanced between the left and right
-		     edges. Without it the label would lean right because the
-		     button takes up real space on the right but not the left. -->
-		<span class="screen-banner-spacer" aria-hidden="true"></span>
-		<span class="screen-banner-label">
-			{step === 1
-				? $t("new_game.banner.step_1")
-				: step === 2
-					? $t("new_game.banner.step_2")
-					: $t("new_game.banner.step_3")}
+{#snippet stepItem(n, label)}
+	{@const stepState = visibleStep === n ? "current" : visibleStep > n ? "done" : "todo"}
+	<li class="step" data-state={stepState} aria-current={stepState === "current" ? "step" : undefined}>
+		<span class="step-num">
+			{#if stepState === "done"}
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true">
+					<polyline points="20 6 9 17 4 12" />
+				</svg>
+			{:else}
+				{n}
+			{/if}
 		</span>
-		<button
-			type="button"
-			class="replay-tour-btn"
-			onclick={replayTourForCurrentStep}
-			aria-label={$t("new_game.replay_tour")}
-			title={$t("new_game.replay_tour")}
-		>
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				width="14"
-				height="14"
-				aria-hidden="true"
-			>
-				<circle cx="12" cy="12" r="10" />
-				<path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4" />
-				<line x1="12" y1="17" x2="12" y2="17.01" />
-			</svg>
-		</button>
-	</div>
-{/if}
+		<span class="step-name">{label}</span>
+	</li>
+{/snippet}
 
-<div class="flex flex-col gap-5 lg:gap-7 max-w-4xl mx-auto w-full pt-4">
-	{#if step !== 3}
-		<header class="text-center">
-			<h1 class="screen-hero-title">
+<div class="wizard step-{step}">
+	{#if step === 1 || step === 2 || step === 3}
+		<!-- The wizard runs without the app header ("immersive"), so this
+		     bar takes the status-bar inset and shows the step plus the
+		     button that replays the step's onboarding tour. -->
+		<header class="step-bar bleed">
+			<span class="step-label">
+				{step === 1
+					? $t("new_game.banner.step_1")
+					: step === 2
+						? $t("new_game.banner.step_2")
+						: $t("new_game.banner.step_3")}
+			</span>
+			<button
+				type="button"
+				class="help"
+				onclick={replayTourForCurrentStep}
+				aria-label={$t("new_game.replay_tour")}
+				title={$t("new_game.replay_tour")}
+			>
+				<svg
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					width="20"
+					height="20"
+					aria-hidden="true"
+				>
+					<circle cx="12" cy="12" r="10" />
+					<path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4" />
+					<line x1="12" y1="17" x2="12" y2="17.01" />
+				</svg>
+			</button>
+			<img src="/logo.png" alt="" class="crest" width="56" height="56" />
+		</header>
+	{/if}
+
+	{#if step === 1 || step === 2}
+		<!-- Hero: red band in A, white text on the pitch in B. The stepper
+		     stops at "Anpfiff"; the live step keeps the bar only. -->
+		<section class="wizard-hero hero bleed">
+			<h1 class="page-title hero-title">
 				{step === 1
 					? $t("new_game.lobby.page_title")
 					: $t("new_game.poster.page_title")}
 			</h1>
-			<p class="screen-hero-subtitle">
+			<p class="hero-subtitle">
 				{step === 1
 					? $t("new_game.lobby.page_subtitle")
 					: $t("new_game.poster.page_subtitle")}
 			</p>
-		</header>
+			<ol class="stepper">
+				{@render stepItem(1, $t("new_game.lobby.step_label"))}
+				<li class="step-line" class:done={visibleStep > 1} aria-hidden="true"></li>
+				{@render stepItem(2, $t("new_game.poster.step_label"))}
+			</ol>
+		</section>
 	{/if}
 
-	<!-- 2-step indicator (hidden on live screen for screen real-estate) -->
-	{#if step !== 3}
-		<div style="max-width: 280px; margin: 0 auto; padding: 0 8px; width: 100%;">
-			<div style="display: flex; align-items: center; gap: 8px;">
-				<div
-					class="step-circle {visibleStep === 1 ? 'active' : 'complete'}"
-					style="flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; border: 2px solid; color: white; {visibleStep === 1 ? 'background: linear-gradient(135deg, #E24B4A, #C73E3D); border-color: rgba(226, 75, 74, 0.4); box-shadow: 0 4px 14px rgba(226, 75, 74, 0.35);' : 'background: linear-gradient(135deg, #84CC16, #65A30D); border-color: rgba(132, 204, 22, 0.4); box-shadow: 0 4px 14px rgba(132, 204, 22, 0.35);'}"
-				>
-					{#if visibleStep === 1}
-						1
-					{:else}
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true">
-							<polyline points="20 6 9 17 4 12" />
-						</svg>
-					{/if}
-				</div>
-				<div style="flex: 1; height: 2px; background: #1A1F2A; border-radius: 1px; overflow: hidden; position: relative;">
-					<div style="height: 100%; background: linear-gradient(90deg, #84CC16, #65A30D); border-radius: 1px; width: {visibleStep === 1 ? '0%' : '100%'}; transition: width 0.4s ease;"></div>
-				</div>
-				<div
-					style="flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; border: 2px solid; {visibleStep === 2 ? 'background: linear-gradient(135deg, #E24B4A, #C73E3D); border-color: rgba(226, 75, 74, 0.4); color: white; box-shadow: 0 4px 14px rgba(226, 75, 74, 0.35);' : 'background: #1A1F2A; border-color: #2A3142; color: #6B7280;'}"
-				>
-					2
-				</div>
+	<div class="wizard-body">
+		{#if loading}
+			<div class="flex justify-center py-10">
+				<span class="spinner" role="status" aria-label={$t("common.loading")}></span>
 			</div>
-			<div style="display: flex; justify-content: space-between; margin-top: 6px;">
-				<div style="width: 32px; text-align: center; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: {visibleStep === 1 ? '#E24B4A' : '#84CC16'};">
-					{$t("new_game.lobby.step_label")}
-				</div>
-				<div style="width: 32px; text-align: center; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: {visibleStep === 2 ? '#E24B4A' : '#6B7280'};">
-					{$t("new_game.poster.step_label")}
-				</div>
-			</div>
-		</div>
-	{/if}
-
-	{#if loading}
-		<div class="flex justify-center py-8">
-			<div class="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full"></div>
-		</div>
-	{:else if step === 1}
-		<PlayerLobbyStep
-			{allPlayers}
-			bind:homePlayers
-			bind:awayPlayers
-			onNext={() => goToStep(2)}
-			onCancel={cancel}
-		/>
-	{:else if step === 2}
-		<MatchPosterStep
-			{homePlayers}
-			{awayPlayers}
-			{allPlayers}
-			bind:homeTeam
-			bind:awayTeam
-			onAnpfiff={() => goToStep(3)}
-			onBack={goBack}
-		/>
-	{:else if step === 3}
-		<LiveMatchStep
-			{homePlayers}
-			{awayPlayers}
-			{allPlayers}
-			{homeTeam}
-			{awayTeam}
-			ending={saving}
-			onEndMatch={saveGame}
-			onStartPenaltyShootout={handleStartPenaltyShootout}
-			onBack={requestCancel}
-		/>
-	{:else if step === 4 && preShootout}
-		<PenaltyStep
-			{homeTeam}
-			{awayTeam}
-			{homePlayers}
-			{awayPlayers}
-			{allPlayers}
-			scoreHome={preShootout.scoreHome}
-			scoreAway={preShootout.scoreAway}
-			ending={saving}
-			onComplete={handlePenaltyComplete}
-			onAbort={handlePenaltyAbort}
-		/>
-	{/if}
+		{:else if step === 1}
+			<PlayerLobbyStep
+				{allPlayers}
+				bind:homePlayers
+				bind:awayPlayers
+				onNext={() => goToStep(2)}
+				onCancel={cancel}
+			/>
+		{:else if step === 2}
+			<MatchPosterStep
+				{homePlayers}
+				{awayPlayers}
+				{allPlayers}
+				bind:homeTeam
+				bind:awayTeam
+				onAnpfiff={() => goToStep(3)}
+				onBack={goBack}
+			/>
+		{:else if step === 3}
+			<LiveMatchStep
+				{homePlayers}
+				{awayPlayers}
+				{allPlayers}
+				{homeTeam}
+				{awayTeam}
+				ending={saving}
+				onEndMatch={saveGame}
+				onStartPenaltyShootout={handleStartPenaltyShootout}
+				onBack={requestCancel}
+			/>
+		{:else if step === 4 && preShootout}
+			<PenaltyStep
+				{homeTeam}
+				{awayTeam}
+				{homePlayers}
+				{awayPlayers}
+				{allPlayers}
+				scoreHome={preShootout.scoreHome}
+				scoreAway={preShootout.scoreAway}
+				ending={saving}
+				onComplete={handlePenaltyComplete}
+				onAbort={handlePenaltyAbort}
+			/>
+		{/if}
+	</div>
 
 	{#if recordingStatus === "starting"}
 		<!-- Blocking connect overlay: stops players from logging goals before we
 		     know the capture box is actually recording. Clears itself once the
 		     agent confirms 'recording'; on failure/timeout the error dialog takes
 		     over. The skip button avoids having to wait out the offline timeout. -->
-		<div
-			class="fixed inset-0 z-[90] flex flex-col items-center justify-center gap-5 bg-page/95 backdrop-blur-sm px-8 text-center"
-			transition:fade
-			role="status"
-			aria-live="polite"
-		>
-			<div
-				class="h-11 w-11 animate-spin rounded-full border-[3px] border-brand border-t-transparent"
-				aria-hidden="true"
-			></div>
-			<div>
-				<p class="text-base font-semibold text-ink">
-					{$t("new_game.recording_connecting")}
-				</p>
-				<p class="mt-1.5 text-sm text-muted">
-					{$t("new_game.recording_connecting_hint")}
-				</p>
+		<div class="scrim connect-overlay" transition:fade role="status" aria-live="polite">
+			<div class="card connect-card">
+				<span class="spinner" aria-hidden="true"></span>
+				<div>
+					<p class="connect-title">{$t("new_game.recording_connecting")}</p>
+					<p class="connect-hint">{$t("new_game.recording_connecting_hint")}</p>
+				</div>
+				<button type="button" onclick={playWithoutRecording} class="btn btn-ghost btn-sm connect-skip">
+					{$t("new_game.recording_skip")}
+				</button>
 			</div>
-			<button
-				type="button"
-				onclick={playWithoutRecording}
-				class="mt-1 text-sm font-medium text-muted underline underline-offset-4 hover:text-ink"
-			>
-				{$t("new_game.recording_skip")}
-			</button>
 		</div>
 	{/if}
 
@@ -693,70 +667,388 @@ function replayTourForCurrentStep() {
 </div>
 
 <style>
-.screen-banner {
-	/* Step label sits dead-centre between the spacer (left) and the
-	 * replay button (right), both 28 px wide. Tap-target on the
-	 * button is intentionally larger than the 14 px icon for mobile
-	 * reachability.
-	 *
-	 * `padding-top` includes `env(safe-area-inset-top)` because this
-	 * page runs in the app layout's "immersive" mode where the
-	 * regular Header (which normally owns the iOS status-bar inset)
-	 * is hidden. Without this padding the banner slides under the
-	 * notch / status bar on iOS PWAs. Negative horizontal margin
-	 * keeps the band edge-to-edge against the page padding. */
+/* Width of the wizard column on desktop, per step: the lobby and poster
+ * put home and away side by side, the live step puts the pitch next to
+ * its controls, the shootout stays a single column. */
+.wizard {
+	--wizard-width: 56rem;
+	display: flex;
+	flex-direction: column;
+	padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+}
+
+.wizard.step-3 {
+	--wizard-width: 76rem;
+}
+
+.wizard.step-4 {
+	--wizard-width: 42rem;
+}
+
+/* ── Step bar ───────────────────────────────────────────────────────── */
+/* A: a white bar like the app header, flush with the top edge (the
+ * negative margin cancels the main area's top padding). */
+.step-bar {
+	position: relative;
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	gap: 8px;
-	padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px 8px;
-	background: rgba(226, 75, 74, 0.08);
-	border-bottom: 1px solid rgba(226, 75, 74, 0.2);
-	margin: 0 -1rem;
+	gap: 4px;
+	min-height: 64px;
+	margin-top: -0.5rem;
+	padding-top: env(safe-area-inset-top, 0px);
+	background: var(--header-bg);
+	color: var(--color-ink);
 }
-.screen-banner-spacer {
-	width: 28px;
-	flex-shrink: 0;
-}
-.screen-banner-label {
-	font-size: 11px;
-	color: #9CA3AF;
+
+.step-label {
+	min-width: 0;
+	overflow: hidden;
+	font-family: var(--font-cond);
 	font-weight: 700;
+	font-size: 15px;
+	letter-spacing: 0.02em;
+	text-overflow: ellipsis;
 	text-transform: uppercase;
-	letter-spacing: 0.1em;
-	text-align: center;
-	flex: 1;
+	white-space: nowrap;
+	color: var(--color-brand);
 }
-.replay-tour-btn {
+
+.help {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 28px;
-	height: 28px;
+	width: 40px;
+	height: 40px;
 	flex-shrink: 0;
 	border: 0;
-	background: none;
-	color: rgba(255, 255, 255, 0.4);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--color-ink);
 	cursor: pointer;
-	border-radius: 50%;
-	transition: color 0.15s, background-color 0.15s;
 }
-.replay-tour-btn:hover,
-.replay-tour-btn:focus-visible {
-	color: rgba(255, 255, 255, 0.95);
-	background: rgba(255, 255, 255, 0.06);
-	outline: none;
+
+.help:hover {
+	background: var(--color-sunken);
 }
-.screen-hero-title {
-	font-size: 22px;
-	font-weight: 800;
-	letter-spacing: -0.02em;
-	margin: 0 0 4px;
-	color: #FFFFFF;
+
+.crest {
+	width: 56px;
+	height: 56px;
+	margin: -4px -6px -4px auto;
+	flex-shrink: 0;
+	object-fit: contain;
 }
-.screen-hero-subtitle {
-	font-size: 12px;
-	color: #9CA3AF;
+
+/* ── Hero ───────────────────────────────────────────────────────────── */
+.wizard-hero {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	/* Under the step bar, which already cancels the top padding. */
+	margin-top: 0;
+	padding-top: 22px;
+	padding-bottom: 24px;
+	text-shadow: var(--on-page-shadow);
+}
+
+.hero-title {
 	margin: 0;
+	font-size: 36px;
+	text-wrap: balance;
+}
+
+.hero-subtitle {
+	margin: 0;
+	font-size: 15px;
+	line-height: 1.35;
+}
+
+/* Two-step indicator; the current step carries aria-current. A: white
+ * squares on the red band, filled for the current step. */
+.stepper {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 12px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.step {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.step-num {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	flex-shrink: 0;
+	border: 1px solid currentColor;
+	border-radius: var(--radius-badge);
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 16px;
+}
+
+.step[data-state="current"] .step-num {
+	border-color: var(--color-surface);
+	background: var(--color-surface);
+	color: var(--color-brand);
+}
+
+.step-name {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 13px;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.step-line {
+	flex: 1;
+	height: 1px;
+	background: currentColor;
+}
+
+.step-line.done {
+	height: 3px;
+}
+
+/* ── Body ───────────────────────────────────────────────────────────── */
+.wizard-body {
+	padding-top: 16px;
+}
+
+/* A: the live scoreboard's red band sits flush under the step bar; the
+ * shootout has no step bar, its scoreboard starts the page. */
+.wizard.step-3 .wizard-body,
+.wizard.step-4 .wizard-body {
+	padding-top: 0;
+}
+
+/* ── Recording connect overlay ──────────────────────────────────────── */
+.connect-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 90;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+}
+
+.connect-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+	width: min(100%, 22rem);
+	padding: 28px 24px 18px;
+	text-align: center;
+}
+
+.connect-title {
+	margin: 0;
+	font-weight: 700;
+	font-size: 16px;
+}
+
+.connect-hint {
+	margin: 6px 0 0;
+	color: var(--color-muted);
+	font-size: 14px;
+}
+
+.connect-skip {
+	color: var(--color-muted);
+	font-weight: 500;
+	text-decoration: underline;
+	text-underline-offset: 4px;
+}
+
+/* ── Design B: everything stands on the pitch ───────────────────────── */
+:global([data-variant="b"]) .step-bar {
+	justify-content: center;
+	min-height: 60px;
+}
+
+:global([data-variant="b"]) .step-label {
+	padding: 6px 14px;
+	border-radius: 999px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	font-size: 14px;
+	letter-spacing: 0;
+	text-transform: none;
+	box-shadow: var(--shadow-control);
+}
+
+:global([data-variant="b"]) .help {
+	position: absolute;
+	right: 0;
+	bottom: 10px;
+	width: 38px;
+	height: 38px;
+	background: var(--color-surface);
+	box-shadow: var(--shadow-control);
+}
+
+:global([data-variant="b"]) .help:hover {
+	background: var(--color-sunken);
+}
+
+:global([data-variant="b"]) .crest {
+	display: none;
+}
+
+:global([data-variant="b"]) .wizard-hero {
+	align-items: center;
+	gap: 4px;
+	padding-top: 4px;
+	padding-bottom: 0;
+	text-align: center;
+}
+
+:global([data-variant="b"]) .hero-title {
+	font-size: 34px;
+}
+
+:global([data-variant="b"]) .hero-subtitle {
+	font-weight: 700;
+	font-size: 16px;
+}
+
+/* B: the stepper is a white pill: red current step, green done step. */
+:global([data-variant="b"]) .stepper {
+	align-self: stretch;
+	margin-top: 12px;
+	padding: 8px 14px;
+	border-radius: 999px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	text-shadow: none;
+	box-shadow: var(--shadow-control);
+}
+
+:global([data-variant="b"]) .step-num {
+	width: 30px;
+	height: 30px;
+	border: 0;
+	background: var(--color-line);
+	color: var(--color-muted);
+	font-weight: 800;
+	font-size: 15px;
+}
+
+:global([data-variant="b"]) .step[data-state="current"] .step-num {
+	background: var(--color-brand);
+	color: var(--color-on-brand);
+}
+
+:global([data-variant="b"]) .step[data-state="done"] .step-num {
+	background: var(--color-win);
+	color: var(--color-on-win);
+}
+
+:global([data-variant="b"]) .step-name {
+	font-family: var(--font-sans);
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .step[data-state="current"] .step-name {
+	color: var(--color-brand);
+}
+
+:global([data-variant="b"]) .step[data-state="done"] .step-name {
+	color: var(--color-win);
+}
+
+:global([data-variant="b"]) .step-line {
+	height: 3px;
+	border-radius: 999px;
+	background: var(--color-line);
+}
+
+:global([data-variant="b"]) .step-line.done {
+	background: var(--color-win);
+}
+
+:global([data-variant="b"]) .wizard-body {
+	padding-top: 14px;
+}
+
+:global([data-variant="b"]) .wizard.step-3 .wizard-body {
+	padding-top: 4px;
+}
+
+:global([data-variant="b"]) .wizard.step-4 .wizard-body {
+	padding-top: 8px;
+}
+
+/* ── Desktop: a centred column; the bar loses its background ───────── */
+@media (min-width: 1024px) {
+	.step-bar,
+	.wizard-hero,
+	.wizard-body {
+		width: 100%;
+		max-width: var(--wizard-width);
+		margin-inline: auto;
+	}
+
+	.step-bar {
+		min-height: 44px;
+		margin-top: 0;
+		padding: 0;
+		background: transparent;
+	}
+
+	.crest {
+		display: none;
+	}
+
+	.wizard-hero {
+		margin-top: 12px;
+		padding: 28px 32px;
+		border-radius: var(--radius-card);
+	}
+
+	.wizard-body,
+	.wizard.step-3 .wizard-body {
+		padding-top: 24px;
+	}
+
+	.wizard.step-4 .wizard-body,
+	:global([data-variant="b"]) .wizard.step-4 .wizard-body {
+		padding-top: 0;
+	}
+
+	:global([data-variant="b"]) .step-bar {
+		min-height: 48px;
+	}
+
+	:global([data-variant="b"]) .help {
+		bottom: 5px;
+	}
+
+	:global([data-variant="b"]) .wizard-hero {
+		margin-top: 4px;
+		padding: 8px 0 0;
+	}
+
+	:global([data-variant="b"]) .stepper {
+		align-self: center;
+		width: min(100%, 30rem);
+	}
+
+	:global([data-variant="b"]) .wizard-body,
+	:global([data-variant="b"]) .wizard.step-3 .wizard-body {
+		padding-top: 20px;
+	}
 }
 </style>

@@ -43,7 +43,7 @@ function deltaTone(n) {
 </script>
 
 {#if matches.length === 0}
-	<div class="card px-4 py-5 text-center text-sm text-muted">
+	<div class="card notice">
 		{$t("home.recent_matches.empty")}
 	</div>
 {:else}
@@ -60,7 +60,7 @@ function deltaTone(n) {
 				<span class="right">
 					<span class="num score-a tone-{r?.tone ?? 'draw'}">{match.score}</span>
 					{#if match.eloDelta != null}
-						<span class="delta tone-{deltaTone(match.eloDelta)}">
+						<span class="delta delta-{deltaTone(match.eloDelta)}">
 							{formatDelta(match.eloDelta)} <span class="delta-unit">ELO</span>
 						</span>
 					{/if}
@@ -108,11 +108,9 @@ function deltaTone(n) {
 	line-height: 0.8;
 }
 
+/* The ELO change is the shared `.delta`: coloured text in A, a pill in B. */
 .delta {
-	font-family: var(--font-cond);
-	font-weight: 700;
 	font-size: 12px;
-	white-space: nowrap;
 }
 
 .tone-win {
@@ -145,20 +143,6 @@ function deltaTone(n) {
 }
 
 :global([data-variant="b"]) .delta {
-	padding: 4px 10px;
-	border-radius: 999px;
 	font-size: 14px;
-}
-
-:global([data-variant="b"]) .delta.tone-win {
-	background: var(--color-win-soft);
-}
-
-:global([data-variant="b"]) .delta.tone-loss {
-	background: var(--color-loss-soft);
-}
-
-:global([data-variant="b"]) .delta.tone-draw {
-	background: var(--color-sunken);
 }
 </style>

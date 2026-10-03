@@ -9,10 +9,10 @@
 			// Apply the stored design variant before the first paint, so the
 			// page never flashes the other look (designVariant.stores.js).
 			(() => {
-				var v = 'a';
+				let v = 'a';
 				try {
-					var s = localStorage.getItem('rbl:design-variant');
-					if (s === 'a' || s === 'b') v = s;
+					const stored = localStorage.getItem('rbl:design-variant');
+					if (stored === 'a' || stored === 'b') v = stored;
 				} catch (e) {}
 				document.documentElement.dataset.variant = v;
 				if (v === 'b') document.querySelector('meta[name="theme-color"]').setAttribute('content', '#3a9441');

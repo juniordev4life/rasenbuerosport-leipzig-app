@@ -78,7 +78,7 @@ const text = $derived(
 		</span>
 	</div>
 
-	<div class="verdict">
+	<div class="verdict bubble">
 		<p class="verdict-headline">{headline}</p>
 		<p class="verdict-text">{text}</p>
 	</div>
@@ -109,7 +109,6 @@ const text = $derived(
 	display: flex;
 	flex-direction: column;
 	gap: 18px;
-	margin-top: -8px;
 	padding-top: 24px;
 	padding-bottom: 28px;
 }
@@ -245,7 +244,6 @@ const text = $derived(
 /* ── Design B: white card with a speech bubble ──────────────────────── */
 :global([data-variant="b"]) .week {
 	gap: 14px;
-	margin-top: 0;
 	padding: 18px;
 	background: var(--color-surface);
 	color: var(--color-ink);
@@ -274,23 +272,10 @@ const text = $derived(
 	display: none;
 }
 
+/* The speech bubble itself is the shared `.bubble`; headline and text
+ * run on as one paragraph inside it. */
 :global([data-variant="b"]) .verdict {
-	position: relative;
 	display: block;
-	padding: 14px 16px;
-	border-radius: 16px;
-	background: var(--color-gold-soft);
-}
-
-:global([data-variant="b"]) .verdict::before {
-	content: "";
-	position: absolute;
-	left: 22px;
-	top: -7px;
-	width: 14px;
-	height: 14px;
-	background: var(--color-gold-soft);
-	transform: rotate(45deg);
 }
 
 :global([data-variant="b"]) .verdict-headline,

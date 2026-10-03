@@ -30,12 +30,12 @@ function formatDelta(n) {
 	return "±0";
 }
 
-const deltaClass = $derived(
+const deltaTone = $derived(
 	eloDelta == null || Math.round(eloDelta) === 0
-		? "chip-muted"
+		? "draw"
 		: eloDelta > 0
-			? "chip-win"
-			: "chip-loss",
+			? "win"
+			: "loss",
 );
 </script>
 
@@ -46,7 +46,7 @@ const deltaClass = $derived(
 			<InfoTip titleKey="info_tips.elo.title" bodyKey="info_tips.elo.body" />
 		</div>
 		{#if eloDelta != null}
-			<span class="delta chip {deltaClass}">
+			<span class="delta delta-{deltaTone}">
 				{formatDelta(eloDelta)} {$t("home.quick_stats.this_week")}
 			</span>
 		{/if}
@@ -79,34 +79,20 @@ const deltaClass = $derived(
 	line-height: 0.8;
 }
 
-/* A: the change reads as a plain caption. */
-.delta {
-	padding: 0;
-	background: transparent;
+/* The change is the shared `.delta`: a tinted pill in B. In A it reads as
+ * a plain caption rather than a coloured figure. */
+:global(:root:not([data-variant="b"])) .delta {
 	color: var(--color-muted);
 	font-family: var(--font-sans);
 	font-weight: 400;
 	font-size: 13px;
-	text-transform: none;
-	letter-spacing: 0;
 }
 
+/* B: a small sans pill, as in the canvas ("±0 diese Woche"). */
 :global([data-variant="b"]) .delta {
 	padding: 3px 10px;
+	font-family: var(--font-sans);
+	font-weight: 400;
 	font-size: 12px;
-}
-
-:global([data-variant="b"]) .delta.chip-muted {
-	background: var(--color-sunken);
-}
-
-:global([data-variant="b"]) .delta.chip-win {
-	background: var(--color-win-soft);
-	color: var(--color-win);
-}
-
-:global([data-variant="b"]) .delta.chip-loss {
-	background: var(--color-loss-soft);
-	color: var(--color-loss);
 }
 </style>

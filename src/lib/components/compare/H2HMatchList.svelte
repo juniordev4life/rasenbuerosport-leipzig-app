@@ -1,10 +1,12 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import HistoryIcon from "$lib/components/icons/HistoryIcon.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 
 /**
- * List of recent direct duels between the two players. Each row carries
- * the date, both player initials with their accent colours, the
- * winner-coloured score and the per-player ELO movement.
+ * The latest direct duels of the two players: date, both names around
+ * the score chip (the winner's name in bold ink, the other muted) and
+ * each player's ELO change with ↑ / ↓ and a sign.
  *
  * @type {{
  *   matches: Array<{
@@ -23,112 +25,121 @@ let { matches = [], playerAName, playerBName } = $props();
 
 const { t } = getTranslate();
 
-const COLOR_A = "#F59E0B";
-const COLOR_B = "#06B6D4";
-
+/**
+ * Signed ELO change with an arrow, e.g. "↑ +12", "↓ −8", "±0".
+ * @param {number|null} d
+ * @returns {string}
+ */
 function deltaText(d) {
 	if (d == null) return "—";
 	const r = Math.round(d);
 	if (r > 0) return `↑ +${r}`;
-	if (r < 0) return `↓ ${r}`;
-	return "± 0";
+	if (r < 0) return `↓ −${Math.abs(r)}`;
+	return "±0";
 }
 
-function deltaClass(d) {
-	if (d == null) return "flat";
-	if (d > 0) return "up";
-	if (d < 0) return "down";
-	return "flat";
+function deltaTone(d) {
+	const r = d == null ? 0 : Math.round(d);
+	if (r > 0) return "win";
+	if (r < 0) return "loss";
+	return "draw";
 }
 </script>
 
 {#if matches.length > 0}
-	<div class="section-card">
-		<div class="section-header">
-			<div class="section-label">⏱ {$t("compare.matches_section")}</div>
-		</div>
-
-		<div class="list">
+	<Section title={$t("compare.matches_section")}>
+		{#snippet icon()}<HistoryIcon size={22} strokeWidth={2} />{/snippet}
+		<ul class="card rows duels">
 			{#each matches as m (m.id)}
 				{@const aWon = m.scoreA > m.scoreB}
 				{@const bWon = m.scoreB > m.scoreA}
-				<div class="row">
-					<div class="date">{m.date}</div>
-					<div class="line">
-						<span class="name-a" style="color: {COLOR_A};">{playerAName}</span>
-						<span class="score">
-							<span class="num" style="color: {aWon ? COLOR_A : '#6B7280'};">{m.scoreA}</span>
-							<span class="sep">:</span>
-							<span class="num" style="color: {bWon ? COLOR_B : '#6B7280'};">{m.scoreB}</span>
-						</span>
-						<span class="name-b" style="color: {COLOR_B};">{playerBName}</span>
+				<li class="duel">
+					<span class="label duel-date">{m.date}</span>
+					<div class="duel-line">
+						<span class="duel-name duel-name-a" class:won={aWon}>{playerAName}</span>
+						<span class="score duel-score">{m.scoreA}:{m.scoreB}</span>
+						<span class="duel-name duel-name-b" class:won={bWon}>{playerBName}</span>
 					</div>
-					<div class="elo-line">
-						<span class="elo-mini {deltaClass(m.eloDeltaA)}" style:--accent={COLOR_A}>{deltaText(m.eloDeltaA)}</span>
-						<span class="dot">·</span>
-						<span class="elo-mini {deltaClass(m.eloDeltaB)}" style:--accent={COLOR_B}>{deltaText(m.eloDeltaB)}</span>
+					<div class="duel-elo">
+						<span class="delta delta-{deltaTone(m.eloDeltaA)}">{deltaText(m.eloDeltaA)}</span>
+						<span class="delta delta-{deltaTone(m.eloDeltaB)}">{deltaText(m.eloDeltaB)}</span>
 					</div>
-				</div>
+				</li>
 			{/each}
-		</div>
-	</div>
+		</ul>
+	</Section>
 {/if}
 
 <style>
-.section-card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 14px;
+.duels {
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
-.section-header { margin-bottom: 8px; }
-.section-label {
-	font-size: 10px;
-	text-transform: uppercase; letter-spacing: 0.1em;
-	color: #6B7280;
-	font-weight: 700;
+
+.duel {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 12px 16px;
 }
-.list { display: flex; flex-direction: column; }
-.row {
-	padding: 10px 0;
-	border-bottom: 1px solid #1F2937;
+
+.duel-date {
+	text-align: center;
+	color: var(--color-muted);
 }
-.row:last-child { border-bottom: none; }
-.date {
-	font-size: 10px;
-	color: #6B7280;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	font-weight: 700;
-	margin-bottom: 4px;
-}
-.line {
+
+.duel-line,
+.duel-elo {
 	display: grid;
-	grid-template-columns: 1fr auto 1fr;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	align-items: center;
 	gap: 12px;
-	align-items: baseline;
 }
-.name-a, .name-b {
-	font-size: 12px; font-weight: 700;
-	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+
+.duel-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: 500;
+	font-size: 14px;
+	color: var(--color-muted);
 }
-.name-a { text-align: right; }
-.name-b { text-align: left; }
-.score {
-	display: flex; align-items: baseline; gap: 4px;
-	font-variant-numeric: tabular-nums;
-}
-.score .num { font-size: 18px; font-weight: 800; }
-.score .sep { font-size: 12px; color: #4B5563; }
-.elo-line {
-	display: flex; justify-content: center; gap: 10px;
-	font-size: 10px;
+
+.duel-name.won {
 	font-weight: 700;
-	margin-top: 3px;
-	font-variant-numeric: tabular-nums;
+	color: var(--color-ink);
 }
-.elo-mini.up { color: #84CC16; }
-.elo-mini.down { color: #E24B4A; }
-.elo-mini.flat { color: #6B7280; }
-.dot { color: #4B5563; }
+
+.duel-name-a {
+	text-align: right;
+}
+
+.duel-score {
+	min-width: 3.75rem;
+	font-size: 17px;
+}
+
+/* ELO changes line up under the names: the shared `.delta`, coloured text
+ * in A, a pill in B. */
+.duel-elo {
+	grid-template-columns: minmax(0, 1fr) 3.75rem minmax(0, 1fr);
+}
+
+.duel-elo .delta {
+	font-size: 13px;
+}
+
+.duel-elo .delta:first-child {
+	justify-self: end;
+}
+
+.duel-elo .delta:last-child {
+	grid-column: 3;
+	justify-self: start;
+}
+
+:global([data-variant="b"]) .duel {
+	padding: 12px 0;
+}
 </style>

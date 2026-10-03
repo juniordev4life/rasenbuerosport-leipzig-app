@@ -1,12 +1,16 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
 import { sortPlayersByGamesPlayed } from "$lib/utils/lobbyPlayers.utils.js";
 
 /**
- * Step 1 of the new-game wizard — players pick their side directly on
- * the pitch. The same avatar set is rendered in both halves; tapping
- * an avatar on a side toggles assignment there, and once a player is
- * picked on one side they are dimmed/disabled on the other.
+ * Step 1 of the new-game wizard — players pick their side in two team
+ * cards (home, away; stacked on phones, side by side from `lg`). The
+ * same avatar set is rendered in both cards as a two-row strip that
+ * scrolls sideways; tapping an avatar toggles assignment to that side,
+ * and once a player is picked on one side they are dimmed/disabled on
+ * the other. A picked tile shows a red bar under the name (design A)
+ * or a ring and a check mark in the team colour (design B).
  *
  * Players are ordered by games played, so the regulars fill the tiles
  * that are visible without scrolling.
@@ -32,6 +36,7 @@ let {
 } = $props();
 
 const { t } = getTranslate();
+const uid = $props.id();
 
 const MAX_PER_SIDE = 5;
 const GUEST_HOME_ID = "__guest__home";
@@ -66,28 +71,6 @@ function toggleOnSide(id, side) {
 		awayPlayers = [...awayPlayers, id];
 	}
 }
-
-/** Deterministic gradient so the same user always gets the same colour. */
-function avatarGradient(id) {
-	const palette = [
-		["#84CC16", "#65A30D"],
-		["#E24B4A", "#C73E3D"],
-		["#6366F1", "#4338CA"],
-		["#F59E0B", "#D97706"],
-		["#06B6D4", "#0891B2"],
-		["#A78BFA", "#7C3AED"],
-		["#EC4899", "#BE185D"],
-		["#14B8A6", "#0F766E"],
-	];
-	let hash = 0;
-	for (let i = 0; i < id.length; i += 1) {
-		hash = (hash * 31 + id.charCodeAt(i)) | 0;
-	}
-	const [a, b] = palette[Math.abs(hash) % palette.length];
-	return `linear-gradient(135deg, ${a}, ${b})`;
-}
-
-const GUEST_GRADIENT = "linear-gradient(135deg, #6B7280, #4B5563)";
 
 /**
  * Whether each side's avatar strip is currently overflowing its
@@ -126,166 +109,104 @@ function trackHorizontalOverflow(node, onChange) {
 }
 </script>
 
-{#snippet avatarTile(id, name, gradient, side, avatarUrl, onboardingId)}
+{#snippet avatarTile(id, name, side, avatarUrl, onboardingId)}
 	{@const currentSide = getPlayerSide(id)}
 	{@const onThisSide = currentSide === side}
 	{@const onOtherSide = currentSide !== null && currentSide !== side}
-	{@const accent = side === "home" ? "ring-brand" : "ring-win"}
 	<button
 		type="button"
 		disabled={onOtherSide}
 		onclick={() => toggleOnSide(id, side)}
 		data-onboarding={onboardingId ?? null}
-		class="flex flex-col items-center justify-end gap-1.5 h-full select-none transition-all focus:outline-none {onOtherSide
-			? 'opacity-25 cursor-not-allowed'
-			: 'active:scale-95'}"
+		class="tile"
+		class:guest={id === GUEST_HOME_ID || id === GUEST_AWAY_ID}
 		aria-pressed={onThisSide}
 		aria-label={name}
 	>
-		<span
-			class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-base sm:text-lg font-bold text-white overflow-hidden {onThisSide
-				? `ring-4 ${accent} shadow-lg`
-				: `ring-2 ring-line`} transition-all"
-			style={avatarUrl ? "" : `background: ${gradient};`}
-		>
-			{#if avatarUrl}
-				<img referrerpolicy="no-referrer" src={avatarUrl} alt={name} class="w-full h-full rounded-full object-cover" />
-			{:else}
-				{name.charAt(0).toUpperCase()}
-			{/if}
+		<span class="tile-avatar">
+			<PlayerAvatar player={{ id, name, avatarUrl }} size={48} />
+			<span class="tile-check" aria-hidden="true">
+				<svg viewBox="0 0 10 10" width="10" height="10"><path d="M1.5 5.2l2.3 2.3 4.7-5" /></svg>
+			</span>
 		</span>
-		<span class="text-[10px] sm:text-[11px] font-semibold text-ink max-w-[80px] truncate">
-			{name}
-		</span>
+		<span class="tile-name">{name}</span>
+		<span class="tile-bar" aria-hidden="true"></span>
 	</button>
 {/snippet}
 
 {#snippet pickerSide(side)}
 	{@const guestId = side === "home" ? GUEST_HOME_ID : GUEST_AWAY_ID}
-	{@const contentAlign = side === "home"
-		? "content-start lg:content-center"
-		: "content-end lg:content-center"}
-	<!--
-		`grid-template-rows: auto auto` lets the two rows shrink to
-		content height; the leftover vertical space goes to `align-
-		content` (`content-start` on home, `content-end` on away) so
-		the avatar block hugs the outer pitch edge instead of sitting
-		next to the centre-line hint.
+	{@const picked = side === "home" ? homePlayers.length : awayPlayers.length}
+	{@const overflow = side === "home" ? homePickerOverflow : awayPickerOverflow}
+	<section class="card team-card team-{side}" aria-labelledby="{uid}-{side}">
+		<header class="team-head">
+			<span class="team-dot" aria-hidden="true"></span>
+			<h2 id="{uid}-{side}" class="section-title team-title">
+				{side === "home" ? $t("new_game.home") : $t("new_game.away")}
+			</h2>
+			<span class="team-count">{picked} {$t("new_game.lobby.of")} {MAX_PER_SIDE}</span>
+		</header>
 
-		`auto-cols` is sized just under 1/3 of the visible width so a
-		7th-player column peeks ~10 % into the viewport — a stronger
-		swipe cue than relying on the scroll-hint alone.
-	-->
-	<div
-		data-onboarding={side === "home" ? "lobby-home" : "lobby-away"}
-		use:trackHorizontalOverflow={(can) => {
-			if (side === "home") homePickerOverflow = can;
-			else awayPickerOverflow = can;
-		}}
-		class="relative h-full grid [grid-template-rows:auto_auto] grid-flow-col auto-cols-[calc((100%-2rem)/3.3)] gap-x-3 gap-y-4 overflow-x-auto px-3 py-4 {contentAlign} [&::-webkit-scrollbar]:hidden [scrollbar-width:none]"
-	>
-		{#each orderedPlayers as player (player.id)}
-			{@render avatarTile(
-				player.id,
-				player.username,
-				avatarGradient(player.id),
-				side,
-				player.avatar_url ?? null,
-				null,
-			)}
-		{/each}
+		<div class="strip-wrap">
+			<!--
+				Two rows that fill column by column and scroll sideways.
+				Columns are sized just under 1/3 of the visible width so a
+				7th-player column peeks into view — a stronger swipe cue
+				than relying on the scroll hint alone.
+			-->
+			<div
+				data-onboarding={side === "home" ? "lobby-home" : "lobby-away"}
+				use:trackHorizontalOverflow={(can) => {
+					if (side === "home") homePickerOverflow = can;
+					else awayPickerOverflow = can;
+				}}
+				class="strip"
+			>
+				{#each orderedPlayers as player (player.id)}
+					{@render avatarTile(
+						player.id,
+						player.username,
+						side,
+						player.avatar_url ?? null,
+						null,
+					)}
+				{/each}
 
-		<!-- Guest tile comes LAST: it is the least-used slot, so the
-		     visible tiles go to the regulars. The onboarding tour
-		     scrolls it into view for its tip (see runOnboardingTour).
-		     The home guest doubles as the onboarding anchor; the away
-		     copy passes `null` so the tour has a single, unambiguous
-		     target. -->
-		{@render avatarTile(
-			guestId,
-			$t("new_game.guest"),
-			GUEST_GRADIENT,
-			side,
-			null,
-			side === "home" ? "lobby-guest" : null,
-		)}
-	</div>
+				<!-- Guest tile comes LAST: it is the least-used slot, so the
+				     visible tiles go to the regulars. The onboarding tour
+				     scrolls it into view for its tip (see runOnboardingTour).
+				     The home guest doubles as the onboarding anchor; the away
+				     copy passes `null` so the tour has a single, unambiguous
+				     target. -->
+				{@render avatarTile(
+					guestId,
+					$t("new_game.guest"),
+					side,
+					null,
+					side === "home" ? "lobby-guest" : null,
+				)}
+			</div>
+
+			{#if overflow}
+				<span class="scroll-hint" aria-hidden="true">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+						<polyline points="9 18 15 12 9 6" />
+					</svg>
+				</span>
+			{/if}
+		</div>
+	</section>
 {/snippet}
 
-<div class="flex flex-col gap-4">
-	<div
-		class="relative rounded-2xl border-2 border-line overflow-hidden"
-		style="background: linear-gradient(135deg, #0d3320 0%, #0a2516 100%);"
-	>
-		<!-- Pitch markings -->
-		<svg
-			viewBox="0 0 200 280"
-			preserveAspectRatio="none"
-			class="absolute inset-0 w-full h-full opacity-40 pointer-events-none lg:hidden"
-			aria-hidden="true"
-		>
-			<line x1="0" y1="140" x2="200" y2="140" stroke="#84CC16" stroke-width="0.5" />
-			<circle cx="100" cy="140" r="22" fill="none" stroke="#84CC16" stroke-width="0.5" />
-			<circle cx="100" cy="140" r="1.5" fill="#84CC16" />
-			<rect x="60" y="0" width="80" height="32" fill="none" stroke="#84CC16" stroke-width="0.5" />
-			<rect x="60" y="248" width="80" height="32" fill="none" stroke="#84CC16" stroke-width="0.5" />
-		</svg>
-		<svg
-			viewBox="0 0 320 200"
-			preserveAspectRatio="none"
-			class="absolute inset-0 w-full h-full opacity-40 pointer-events-none hidden lg:block"
-			aria-hidden="true"
-		>
-			<line x1="160" y1="0" x2="160" y2="200" stroke="#84CC16" stroke-width="0.5" />
-			<circle cx="160" cy="100" r="22" fill="none" stroke="#84CC16" stroke-width="0.5" />
-			<circle cx="160" cy="100" r="1.5" fill="#84CC16" />
-			<rect x="0" y="60" width="36" height="80" fill="none" stroke="#84CC16" stroke-width="0.5" />
-			<rect x="284" y="60" width="36" height="80" fill="none" stroke="#84CC16" stroke-width="0.5" />
-		</svg>
+<div class="lobby">
+	{@render pickerSide("home")}
 
-		<div class="relative grid grid-cols-1 lg:grid-cols-2 grid-rows-2 lg:grid-rows-1 h-[460px] lg:h-[440px]">
-			<div class="relative min-h-0 overflow-hidden">
-				{@render pickerSide("home")}
-				{#if homePickerOverflow}
-					<span class="scroll-hint" aria-hidden="true">
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
-							<polyline points="9 18 15 12 9 6" />
-						</svg>
-					</span>
-				{/if}
-			</div>
-			<div class="absolute inset-x-0 top-1/2 h-px bg-white/10 lg:hidden" aria-hidden="true"></div>
-			<div class="hidden lg:block absolute inset-y-0 left-1/2 w-px bg-white/10" aria-hidden="true"></div>
-			<div class="relative min-h-0 overflow-hidden">
-				{@render pickerSide("away")}
-				{#if awayPickerOverflow}
-					<span class="scroll-hint" aria-hidden="true">
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
-							<polyline points="9 18 15 12 9 6" />
-						</svg>
-					</span>
-				{/if}
-			</div>
+	<p class="center-hint">{$t("new_game.lobby.center_hint")}</p>
 
-			<!--
-				Centre-line hint, identical pattern to the live-match
-				screen. Sits on top of the divider and gently pushes the
-				avatar rows in each half away from the middle.
-			-->
-			<div class="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none z-20">
-				<span class="bg-black/60 border border-line/40 text-[10px] text-muted font-medium px-2.5 py-1 rounded-full">
-					{$t("new_game.lobby.center_hint")}
-				</span>
-			</div>
-		</div>
-	</div>
+	{@render pickerSide("away")}
 
-	<div class="flex gap-3">
-		<button
-			type="button"
-			onclick={onCancel}
-			class="flex-shrink-0 px-5 py-3 rounded-xl bg-sunken border border-line text-sm font-semibold text-muted hover:bg-surface"
-		>
+	<div class="actions">
+		<button type="button" onclick={onCancel} class="btn btn-secondary btn-lg">
 			{$t("new_game.cancel")}
 		</button>
 		<button
@@ -293,46 +214,308 @@ function trackHorizontalOverflow(node, onChange) {
 			onclick={onNext}
 			disabled={!isValid}
 			data-onboarding="lobby-next"
-			class="flex-1 px-5 py-3 rounded-xl bg-brand text-white text-sm font-semibold shadow-lg shadow-brand/25 disabled:opacity-40 disabled:shadow-none hover:bg-brand-strong transition-all"
+			class="btn btn-primary btn-lg"
 		>
-			{$t("new_game.next")} →
+			{$t("new_game.next")}
+			<span aria-hidden="true">→</span>
 		</button>
 	</div>
 </div>
 
 <style>
-/* Right-edge swipe hint shown only when the picker strip is actually
- * scrollable (toggled from the `trackHorizontalOverflow` action). The
- * gradient softens the cut-off avatar peeking in from the right, the
- * chevron tells the user the gesture is horizontal, and the gentle
- * bob keeps the cue alive without being noisy. */
-.scroll-hint {
-	position: absolute;
-	right: 0;
-	top: 0;
-	bottom: 0;
-	width: 36px;
+.lobby {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+/* ── Team card ──────────────────────────────────────────────────────── */
+.team-card {
+	--team: var(--color-home);
+	--on-team: var(--color-on-home);
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	min-width: 0;
+	padding: 14px 0 8px;
+}
+
+.team-away {
+	--team: var(--color-away);
+	--on-team: var(--color-on-away);
+}
+
+.team-head {
 	display: flex;
 	align-items: center;
-	justify-content: flex-end;
-	padding-right: 6px;
+	gap: 8px;
+	padding: 0 14px;
+}
+
+.team-title {
+	flex: 1;
+	min-width: 0;
+	margin: 0;
+}
+
+.team-count {
+	flex-shrink: 0;
+	color: var(--color-muted);
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+}
+
+.team-dot {
+	display: none;
+	width: 12px;
+	height: 12px;
+	flex-shrink: 0;
+	border-radius: 999px;
+	background: var(--team);
+}
+
+/* ── Avatar strip ───────────────────────────────────────────────────── */
+.strip-wrap {
+	position: relative;
+}
+
+.strip {
+	display: grid;
+	grid-template-rows: auto auto;
+	grid-auto-flow: column;
+	grid-auto-columns: calc((100% - 2 * 10px) / 3.3);
+	gap: 14px 10px;
+	padding: 8px 14px 6px;
+	overflow-x: auto;
+	scroll-padding-inline: 14px;
+	scrollbar-width: none;
+}
+
+.strip::-webkit-scrollbar {
+	display: none;
+}
+
+.tile {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--color-ink);
+	user-select: none;
+	cursor: pointer;
+	transition: transform 120ms;
+}
+
+.tile:active:not(:disabled) {
+	transform: scale(0.95);
+}
+
+.tile:disabled {
+	opacity: 0.35;
+	cursor: not-allowed;
+}
+
+.tile-avatar {
+	position: relative;
+	display: inline-flex;
+}
+
+.tile-name {
+	max-width: 100%;
+	overflow: hidden;
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.25;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* A: picked tiles turn red — avatar, name and the bar under it. */
+.tile-bar {
+	width: 24px;
+	height: 3px;
+	background: transparent;
+}
+
+.tile[aria-pressed="true"] .tile-name {
+	color: var(--color-brand);
+}
+
+.tile[aria-pressed="true"] .tile-bar {
+	background: var(--color-brand);
+}
+
+.tile.guest :global(.avatar) {
+	--avatar-bg: var(--color-muted);
+	--avatar-fg: var(--color-surface);
+}
+
+:global(:root:not([data-variant="b"])) .tile[aria-pressed="true"] :global(.avatar) {
+	--avatar-bg: var(--color-brand);
+	--avatar-fg: var(--color-on-brand);
+}
+
+.tile-check {
+	position: absolute;
+	top: -6px;
+	right: -10px;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border: 2px solid var(--color-surface);
+	border-radius: 999px;
+	background: var(--team);
+	color: var(--on-team);
+}
+
+.tile-check path {
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+/* Right-edge swipe cue, only while the strip actually overflows
+ * (toggled from the `trackHorizontalOverflow` action). */
+.scroll-hint {
+	position: absolute;
+	right: 8px;
+	top: 50%;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	margin-top: -15px;
+	border: 1px solid var(--color-line);
+	border-radius: 999px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	box-shadow: var(--shadow-raised);
 	pointer-events: none;
-	z-index: 10;
-	background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.55));
-	color: rgba(255, 255, 255, 0.9);
 	animation: scroll-hint-bob 1.8s ease-in-out infinite;
 }
-.scroll-hint :global(svg) {
-	filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.7));
-}
+
 @keyframes scroll-hint-bob {
-	0%, 100% {
-		opacity: 0.55;
-		transform: translateX(0);
-	}
 	50% {
-		opacity: 1;
 		transform: translateX(3px);
+	}
+}
+
+/* ── Hint + actions ─────────────────────────────────────────────────── */
+.center-hint {
+	margin: 0;
+	color: var(--color-on-page);
+	text-shadow: var(--on-page-shadow);
+	font-size: 14px;
+	text-align: center;
+}
+
+.actions {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+	gap: 10px;
+	margin-top: 4px;
+}
+
+/* ── Design B: sticker cards, round avatars with a team ring ────────── */
+:global([data-variant="b"]) .team-card {
+	padding-top: 16px;
+}
+
+:global([data-variant="b"]) .team-dot {
+	display: inline-block;
+}
+
+:global([data-variant="b"]) .team-title {
+	flex: 0 1 auto;
+	font-size: 20px;
+}
+
+:global([data-variant="b"]) .team-count {
+	margin-left: auto;
+	padding: 3px 10px;
+	border-radius: 999px;
+	background: var(--color-win-soft);
+	color: var(--color-win);
+	font-weight: 700;
+}
+
+:global([data-variant="b"]) .tile-bar {
+	display: none;
+}
+
+:global([data-variant="b"]) .tile[aria-pressed="true"] .tile-name {
+	color: var(--color-ink);
+}
+
+:global([data-variant="b"]) .tile[aria-pressed="true"] :global(.avatar) {
+	box-shadow:
+		0 0 0 2px var(--color-surface),
+		0 0 0 5px var(--team);
+}
+
+:global([data-variant="b"]) .tile[aria-pressed="true"] .tile-check {
+	display: flex;
+}
+
+:global([data-variant="b"]) .center-hint {
+	align-self: center;
+	padding: 7px 14px;
+	border-radius: 999px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	text-shadow: none;
+	font-size: 13px;
+	font-weight: 700;
+	box-shadow: var(--shadow-control);
+}
+
+/* ── Desktop: home and away side by side ────────────────────────────── */
+@media (min-width: 1024px) {
+	.lobby {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-areas:
+			"hint hint"
+			"home away"
+			"actions actions";
+		gap: 16px 20px;
+	}
+
+	.team-home {
+		grid-area: home;
+	}
+
+	.team-away {
+		grid-area: away;
+	}
+
+	.center-hint {
+		grid-area: hint;
+	}
+
+	:global([data-variant="b"]) .center-hint {
+		justify-self: center;
+	}
+
+	.actions {
+		grid-area: actions;
+		justify-self: end;
+		width: min(100%, 28rem);
+	}
+
+	/* Fixed tile width: as many columns as the card has room for. */
+	.strip {
+		grid-auto-columns: 96px;
 	}
 }
 </style>

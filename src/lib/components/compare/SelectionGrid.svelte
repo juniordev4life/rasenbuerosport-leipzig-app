@@ -1,11 +1,16 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
+import CheckIcon from "$lib/components/icons/CheckIcon.svelte";
+import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 
 /**
- * Four-column grid of all players, sorted by ELO descending. The
- * logged-in user appears with a "Du"-label, dimmed and disabled.
- * The currently selected opponent shows a cyan border + check.
+ * The opponent picker: every other player, sorted by ELO descending,
+ * as a grid of avatar buttons (four columns on phones, more on wider
+ * screens). The chosen opponent is pressed (`aria-pressed`) and carries
+ * a check badge; design A also turns the avatar red and underlines the
+ * name, design B rings the avatar in red.
  *
  * @type {{
  *   players: Array<{ id: string, username: string, avatarUrl: string|null, elo: number|null }>,
@@ -23,118 +28,157 @@ const sorted = $derived(
 		.filter((p) => p.id !== currentUserId)
 		.sort((a, b) => (b.elo ?? 0) - (a.elo ?? 0)),
 );
-
-function initial(name) {
-	return (name ?? "?").charAt(0).toUpperCase();
-}
 </script>
 
-<div class="grid-wrap">
-	<div class="grid-label">{$t("compare.grid_label")}</div>
-	<div class="grid">
-		{#each sorted as p (p.id)}
-			{@const isSelf = p.id === currentUserId}
-			{@const isSelected = p.id === selectedId}
-			{@const g = avatarGradient(p.id)}
-			<button
-				type="button"
-				class="player-card"
-				class:self={isSelf}
-				class:selected={isSelected}
-				disabled={isSelf}
-				onclick={() => !isSelf && onSelect(p.id)}
-			>
-				{#if isSelected}
-					<div class="check" aria-hidden="true">✓</div>
-				{/if}
-				<div class="avatar" style="background: {g.gradient};">
-					{#if p.avatarUrl}
-						<img referrerpolicy="no-referrer" src={p.avatarUrl} alt={p.username} />
-					{:else}
-						<span>{initial(p.username)}</span>
-					{/if}
-				</div>
-				<div class="name">{p.username}</div>
-				<div class="elo">{p.elo ?? "—"}</div>
-			</button>
-		{/each}
+<Section title={$t("compare.grid_label")}>
+	{#snippet icon()}<UsersIcon size={22} strokeWidth={2} />{/snippet}
+	<div class="card picker">
+		<div class="grid">
+			{#each sorted as p (p.id)}
+				{@const isSelf = p.id === currentUserId}
+				{@const isSelected = p.id === selectedId}
+				<button
+					type="button"
+					class="pick"
+					aria-pressed={isSelected}
+					disabled={isSelf}
+					onclick={() => !isSelf && onSelect(p.id)}
+				>
+					<span class="pick-pic">
+						<PlayerAvatar
+							player={{ id: p.id, username: p.username, avatarUrl: p.avatarUrl }}
+							size={48}
+							class="pick-avatar"
+						/>
+						{#if isSelected}
+							<span class="check" aria-hidden="true"><CheckIcon size={12} strokeWidth={3} /></span>
+						{/if}
+					</span>
+					<span class="pick-name">{p.username}</span>
+					<span class="pick-elo">{p.elo ?? "—"}</span>
+				</button>
+			{/each}
+		</div>
 	</div>
-</div>
+</Section>
 
 <style>
-.grid-wrap { margin-top: 4px; }
-.grid-label {
-	font-size: 10px;
-	text-transform: uppercase;
-	letter-spacing: 0.1em;
-	color: #6B7280;
-	font-weight: 700;
-	margin-bottom: 10px;
+.picker {
+	padding: 14px;
 }
+
 .grid {
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	gap: 8px;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 14px 8px;
 }
-.player-card {
+
+.pick {
 	position: relative;
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 12px;
-	padding: 10px 6px;
-	display: flex; flex-direction: column;
+	display: flex;
+	flex-direction: column;
 	align-items: center;
-	justify-content: flex-start;
-	gap: 5px;
-	height: 102px;
+	gap: 4px;
 	min-width: 0;
+	padding: 6px 2px 8px;
+	border: 0;
+	border-radius: var(--radius-tile);
+	background: transparent;
+	color: var(--color-ink);
+	font: inherit;
 	cursor: pointer;
-	transition: border-color .15s, background-color .15s, transform .1s;
-	overflow: hidden;
 }
-.player-card:hover:not(:disabled) { border-color: rgba(6, 182, 212, 0.4); }
-.player-card:active:not(:disabled) { transform: scale(0.98); }
-.player-card.self { opacity: 0.5; cursor: not-allowed; }
-.player-card.selected {
-	border-color: #06B6D4;
-	box-shadow: 0 0 0 1px #06B6D4 inset, 0 4px 12px rgba(6, 182, 212, 0.18);
+
+.pick:hover:not(:disabled) {
+	background: var(--color-sunken);
 }
-.avatar {
-	width: 40px; height: 40px;
-	border-radius: 50%;
-	display: flex; align-items: center; justify-content: center;
-	color: white;
-	font-size: 15px;
-	font-weight: 700;
-	overflow: hidden;
-	box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-	flex-shrink: 0;
+
+.pick:disabled {
+	cursor: not-allowed;
 }
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
-.name {
-	font-size: 12px;
-	font-weight: 700;
-	color: #E5E7EB;
-	width: 100%;
-	max-width: 100%;
-	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-	text-align: center;
+
+.pick-pic {
+	position: relative;
+	display: flex;
+	margin-bottom: 2px;
 }
-.elo {
-	font-size: 10px;
-	color: #6B7280;
-	font-variant-numeric: tabular-nums;
-}
+
 .check {
 	position: absolute;
-	top: 4px; right: 4px;
-	width: 18px; height: 18px;
-	border-radius: 50%;
-	background: #06B6D4;
-	color: #0F1419;
-	font-size: 11px;
+	top: -6px;
+	right: -8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border: 2px solid var(--color-surface);
+	border-radius: 999px;
+	background: var(--color-brand);
+	color: var(--color-on-brand);
+}
+
+.pick-name {
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: 700;
+	font-size: 13px;
+}
+
+.pick-elo {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+	color: var(--color-muted);
+}
+
+/* A: the pick turns red and gets an underline bar. */
+.pick::after {
+	content: "";
+	width: 24px;
+	height: 3px;
+	margin-top: 2px;
+	background: transparent;
+}
+
+.pick[aria-pressed="true"] .pick-name {
+	color: var(--color-brand);
+}
+
+.pick[aria-pressed="true"]::after {
+	background: var(--color-brand);
+}
+
+:global([data-variant="a"]) .pick[aria-pressed="true"] :global(.pick-avatar) {
+	--avatar-bg: var(--color-brand);
+	--avatar-fg: var(--color-on-brand);
+}
+
+@media (min-width: 640px) {
+	.grid {
+		grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+	}
+}
+
+/* B: round avatars with a red ring around the pick. */
+:global([data-variant="b"]) .pick::after {
+	display: none;
+}
+
+:global([data-variant="b"]) .pick[aria-pressed="true"] .pick-name {
+	color: var(--color-ink);
+}
+
+:global([data-variant="b"]) .pick[aria-pressed="true"] :global(.pick-avatar) {
+	box-shadow:
+		0 0 0 2px var(--color-surface),
+		0 0 0 5px var(--color-brand);
+}
+
+:global([data-variant="b"]) .pick-elo {
 	font-weight: 800;
-	display: flex; align-items: center; justify-content: center;
-	border: 2px solid #131822;
 }
 </style>

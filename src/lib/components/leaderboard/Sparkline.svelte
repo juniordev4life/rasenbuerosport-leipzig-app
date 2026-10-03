@@ -1,14 +1,18 @@
 <script>
 /**
- * Minimal area-line sparkline rendered as an SVG `<polyline>` pair.
- * Auto-scales the input series into the viewBox. A dashed grey line is
- * drawn when too few points are available (cold start).
+ * Minimal line sparkline (an SVG polyline), auto-scaled into its
+ * viewBox. A dashed flat line stands in when there are fewer than two
+ * points (cold start).
  *
- * `fluid` makes the SVG fill its container horizontally (`width: 100%`)
- * — useful for the hero blocks on the profile + leaderboard pages
- * where there's spare room beside the ELO number. The internal
- * viewBox keeps using `width` so the geometry math is unchanged; the
- * SVG just scales non-proportionally to fit the container width.
+ * Colours come from the surroundings: `stroke` defaults to
+ * `currentColor`, so a parent colours the line with `color` — or passes
+ * a token such as `var(--color-win)`. `area` adds a soft fill under the
+ * line in the same colour (its strength is `--spark-area-opacity`,
+ * default 0.14); `fillId` keeps the older fading gradient fill.
+ *
+ * `fluid` makes the SVG fill its container's width. The viewBox keeps
+ * `width`, so the geometry is unchanged and only the rendering scales;
+ * the stroke keeps its width while scaling.
  *
  * @type {{
  *   points?: number[],
@@ -16,6 +20,7 @@
  *   height?: number,
  *   stroke?: string,
  *   fillId?: string|null,
+ *   area?: boolean,
  *   dashed?: boolean,
  *   strokeWidth?: number,
  *   opacity?: number,
@@ -26,11 +31,12 @@ let {
 	points = [],
 	width = 50,
 	height = 18,
-	stroke = "#84CC16",
+	stroke = "currentColor",
 	fillId = null,
+	area = false,
 	dashed = false,
 	strokeWidth = 1.3,
-	opacity = 0.7,
+	opacity = 1,
 	fluid = false,
 } = $props();
 
@@ -46,45 +52,69 @@ const geom = $derived.by(() => {
 		return [x, y];
 	});
 	const line = coords.map(([x, y]) => `${x},${y}`).join(" ");
-	const area = `${line} ${width},${height} 0,${height}`;
-	return { line, area };
+	const fill = `${line} ${width},${height} 0,${height}`;
+	return { line, fill };
 });
 </script>
 
 <svg
+	class="sparkline"
 	viewBox="0 0 {width} {height}"
 	preserveAspectRatio="none"
-	style="width: {fluid ? '100%' : `${width}px`}; height: {height}px; opacity: {opacity};"
+	style:width={fluid ? "100%" : `${width}px`}
+	style:height="{height}px"
+	style:opacity
 	aria-hidden="true"
 >
 	{#if geom}
 		{#if fillId}
 			<defs>
 				<linearGradient id={fillId} x1="0%" y1="0%" x2="0%" y2="100%">
-					<stop offset="0%" stop-color={stroke} />
-					<stop offset="100%" stop-color={stroke} stop-opacity="0" />
+					<stop offset="0%" style:stop-color={stroke} />
+					<stop offset="100%" style:stop-color={stroke} stop-opacity="0" />
 				</linearGradient>
 			</defs>
-			<polyline points={geom.area} fill="url(#{fillId})" opacity="0.35" />
+			<polyline points={geom.fill} fill="url(#{fillId})" opacity="0.35" />
+		{:else if area}
+			<polyline class="area" points={geom.fill} style:fill={stroke} />
 		{/if}
 		<polyline
 			points={geom.line}
 			fill="none"
-			stroke={stroke}
+			style:stroke
 			stroke-width={strokeWidth}
 			stroke-linejoin="round"
 			stroke-linecap="round"
 			stroke-dasharray={dashed ? "2,2" : null}
+			vector-effect="non-scaling-stroke"
 		/>
 	{:else}
 		<line
+			class="cold"
 			x1="0"
 			y1={height / 2}
 			x2={width}
 			y2={height / 2}
-			stroke="#6B7280"
 			stroke-width="1.2"
 			stroke-dasharray="2,2"
+			vector-effect="non-scaling-stroke"
 		/>
 	{/if}
 </svg>
+
+<style>
+.sparkline {
+	display: block;
+	overflow: visible;
+}
+
+.area {
+	fill-opacity: var(--spark-area-opacity, 0.14);
+}
+
+/* No history yet: a faint dashed line in the surrounding colour. */
+.cold {
+	stroke: currentColor;
+	stroke-opacity: 0.45;
+}
+</style>

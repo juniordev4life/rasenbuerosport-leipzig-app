@@ -19,10 +19,10 @@ import MatchAudioPlayer from "./MatchAudioPlayer.svelte";
 const AUDIO_ENABLED = publicEnv.PUBLIC_AUDIO_REPORT_ENABLED === "true";
 
 /**
- * New Spielbericht reporter card. Border-left in the active reporter's
- * accent colour, 44px reporter avatar with a 2px ring in the same
- * accent, larger reporter name (16px), persona role line, the report
- * text, and the custom audio player at the bottom.
+ * The AI match report: the reporter's photo (opens their bio) with a
+ * ring in the persona's colour, name and role, the report text and the
+ * audio player. Design A: plain text on the white card. Design B: the
+ * text in a pale gold speech bubble, like Frank on the home page.
  *
  * The report and audio are auto-generated on first mount when missing,
  * mirroring the previous `MatchReportCard` behaviour, so the page
@@ -62,31 +62,6 @@ let audioError = $state(false);
 let bioOpen = $state(false);
 
 const reporter = $derived(getReporter(reporterId));
-
-const PALETTE = {
-	klassiker: {
-		border: "#E24B4A",
-		role: "#E24B4A",
-		avatarRing: "rgba(226, 75, 74, 0.45)",
-		avatarBg: "linear-gradient(135deg, #4A1F22, #2A1014)",
-		quoteColor: "#E24B4A",
-	},
-	analyst: {
-		border: "#93C5FD",
-		role: "#93C5FD",
-		avatarRing: "rgba(147, 197, 253, 0.45)",
-		avatarBg: "linear-gradient(135deg, #1E3A8A, #0F1F4D)",
-		quoteColor: "#93C5FD",
-	},
-	euphoriker: {
-		border: "#F59E0B",
-		role: "#FBBF24",
-		avatarRing: "rgba(245, 158, 11, 0.45)",
-		avatarBg: "linear-gradient(135deg, #4A3320, #2A1F0E)",
-		quoteColor: "#FBBF24",
-	},
-};
-const skin = $derived(PALETTE[reporterId] ?? PALETTE.analyst);
 
 $effect(() => {
 	if (!report && !generating && !reportError) generateReport();
@@ -136,75 +111,83 @@ async function generateAudio() {
 }
 </script>
 
-<div class="card" style="border-left: 3px solid {skin.border};">
-	<div class="header">
+{#snippet role()}
+	<span class="role">
+		<span>{$t("game_detail.report.reporter_role")}</span>
+		<InfoTip
+			titleKey="info_tips.reporter.title"
+			bodyKey="info_tips.reporter.body"
+			size={14}
+		/>
+	</span>
+{/snippet}
+
+<div class="card report">
+	<div class="head">
 		{#if reporter}
 			<button
 				type="button"
-				class="avatar-btn"
-				style="background: {skin.avatarBg}; box-shadow: 0 0 0 2px {skin.avatarRing};"
+				class="photo ring-2 {reporter.ringClass}"
 				onclick={() => (bioOpen = true)}
 				aria-label={$t("match_report.reporter_bio_cta", { name: reporter.name })}
 			>
 				<img src={reporter.imageUrl} alt={reporter.name} />
 			</button>
 			<div class="info">
-				<div class="name">{reporter.name}</div>
-				<div class="role" style="color: {skin.role};">
-					<span>{$t("game_detail.report.reporter_role")}</span>
-					<InfoTip
-						titleKey="info_tips.reporter.title"
-						bodyKey="info_tips.reporter.body"
-						size={12}
-					/>
-				</div>
+				<span class="name">{reporter.name}</span>
+				{@render role()}
 			</div>
 		{:else}
-			<div class="avatar-btn placeholder">?</div>
+			<span class="photo placeholder" aria-hidden="true">?</span>
 			<div class="info">
-				<div class="name">{$t("game_detail.report.reporter_unknown")}</div>
-				<div class="role" style="color: {skin.role};">
-					<span>{$t("game_detail.report.reporter_role")}</span>
-					<InfoTip
-						titleKey="info_tips.reporter.title"
-						bodyKey="info_tips.reporter.body"
-						size={12}
-					/>
-				</div>
+				<span class="name">{$t("game_detail.report.reporter_unknown")}</span>
+				{@render role()}
 			</div>
 		{/if}
 	</div>
 
 	{#if generating && !report}
-		<div class="text loading">{$t("match_report.generating")}</div>
+		<p class="status">
+			<span class="spinner spinner-sm" aria-hidden="true"></span>
+			{$t("match_report.generating")}
+		</p>
 	{:else if reportError && !report}
-		<div class="text error">
+		<div class="problem">
 			<span>{$t("match_report.error")}</span>
 			<button
 				type="button"
-				class="retry"
-				onclick={() => { reportError = false; generateReport(); }}
+				class="btn btn-sm btn-secondary"
+				onclick={() => {
+					reportError = false;
+					generateReport();
+				}}
 				disabled={generating}
 			>
 				{$t("match_report.retry")}
 			</button>
 		</div>
 	{:else if report}
-		<div class="text">{report}</div>
+		<p class="text bubble">{report}</p>
 	{/if}
 
 	{#if AUDIO_ENABLED}
 		{#if audioUrl}
-			<MatchAudioPlayer audioUrl={audioUrl} />
+			<MatchAudioPlayer {audioUrl} />
 		{:else if audioLoading}
-			<div class="audio-hint">{$t("match_report.generating_audio")}</div>
+			<p class="status">
+				<span class="spinner spinner-sm" aria-hidden="true"></span>
+				{$t("match_report.generating_audio")}
+			</p>
 		{:else if audioError}
-			<div class="audio-hint audio-error">
+			<div class="problem">
 				<span>{$t("match_report.audio_error")}</span>
 				<button
 					type="button"
-					class="retry"
-					onclick={() => { audioError = false; generateAudio(); }}
+					class="btn btn-sm btn-secondary"
+					onclick={() => {
+						audioError = false;
+						generateAudio();
+					}}
 					disabled={audioLoading}
 				>
 					{$t("match_report.audio_retry")}
@@ -215,92 +198,117 @@ async function generateAudio() {
 </div>
 
 {#if reporter && bioOpen}
-	<ReporterBioModal reporter={reporter} onClose={() => (bioOpen = false)} />
+	<ReporterBioModal {reporter} onClose={() => (bioOpen = false)} />
 {/if}
 
 <style>
-.card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 18px;
+.report {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 	padding: 16px;
 }
-.header {
-	display: flex; align-items: center; gap: 12px;
-	margin-bottom: 14px;
+
+.head {
+	display: flex;
+	align-items: center;
+	gap: 12px;
 }
-.avatar-btn {
-	width: 44px; height: 44px;
-	border-radius: 50%;
-	border: 0;
-	overflow: hidden;
+
+.photo {
+	width: 52px;
+	height: 52px;
 	flex-shrink: 0;
-	cursor: pointer;
-	padding: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: #9CA3AF;
-	font-size: 18px;
-	font-weight: 800;
-}
-.avatar-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.avatar-btn.placeholder { background: #1F2937; }
-.info { flex: 1; min-width: 0; }
-.name {
-	font-size: 16px;
-	font-weight: 800;
-	color: #FFFFFF;
-	line-height: 1.1;
-	margin-bottom: 2px;
-}
-.role {
-	font-size: 11px;
-	font-style: italic;
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-}
-.text {
-	font-size: 13px;
-	line-height: 1.65;
-	color: #D1D5DB;
-	margin-bottom: 14px;
-	white-space: pre-line;
-}
-.text.loading { color: #9CA3AF; font-style: italic; }
-.text.error {
-	color: #E24B4A;
-	display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
-}
-.retry {
-	background: rgba(226, 75, 74, 0.12);
-	border: 1px solid rgba(226, 75, 74, 0.3);
-	color: #E24B4A;
-	font-size: 11px;
-	font-weight: 700;
-	padding: 4px 10px;
-	border-radius: 999px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	border-radius: var(--radius-avatar);
+	background: var(--color-sunken);
 	cursor: pointer;
 }
-.retry:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
+
+.photo img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
 }
-.audio-hint {
-	font-size: 11px;
-	color: #6B7280;
-	font-style: italic;
-	padding: 8px 12px;
-	background: rgba(0,0,0,0.2);
-	border-radius: 10px;
+
+.photo.placeholder {
+	color: var(--color-ink);
+	font-family: var(--font-cond);
+	font-weight: 800;
+	font-size: 20px;
+	cursor: default;
 }
-.audio-hint.audio-error {
+
+.info {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	flex: 1;
+	min-width: 0;
+}
+
+.name {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 18px;
+	letter-spacing: 0.03em;
+	line-height: 1.1;
+	text-transform: uppercase;
+}
+
+.role {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--color-muted);
+	font-size: 13px;
+}
+
+.text {
+	margin: 0;
+	font-size: 16px;
+	line-height: 1.55;
+	white-space: pre-line;
+}
+
+.status {
 	display: flex;
 	align-items: center;
+	gap: 10px;
+	margin: 0;
+	color: var(--color-muted);
+	font-size: 14px;
+	font-style: italic;
+}
+
+.problem {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
 	justify-content: space-between;
-	gap: 12px;
-	color: #E24B4A;
-	font-style: normal;
+	gap: 10px;
+	padding: 10px 12px;
+	border-radius: var(--radius-tile);
+	background: var(--color-loss-soft);
+	color: var(--color-loss);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+/* Design B: bold name, the report in the shared pale gold `.bubble`. */
+:global([data-variant="b"]) .name {
+	font-weight: 800;
+	font-size: 21px;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+:global([data-variant="b"]) .text {
+	font-weight: 500;
 }
 </style>

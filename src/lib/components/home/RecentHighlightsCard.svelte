@@ -48,7 +48,7 @@ function dateLabel(iso) {
 </script>
 
 {#if items.length === 0}
-	<div class="card px-4 py-6 text-center text-[13px] text-muted">
+	<div class="card notice">
 		{$t("home.highlights.empty")}
 	</div>
 {:else}

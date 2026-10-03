@@ -1,10 +1,11 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import FootballIcon from "$lib/components/icons/FootballIcon.svelte";
 
 /**
- * Onboarding card shown in the duo "fresh" lifecycle (<5 matches).
- * Tells the user how many more matches unlock the full profile and
- * shows a small green progress bar.
+ * Shown while a duo is "fresh" (fewer than 5 matches): how many more
+ * matches unlock the full profile, plus a progress bar towards the
+ * target.
  *
  * @type {{ matchCount: number, target?: number }}
  */
@@ -16,77 +17,76 @@ const remaining = $derived(Math.max(0, target - matchCount));
 const progressRatio = $derived(Math.min(1, matchCount / target));
 </script>
 
-<div class="onboarding-card">
-	<div class="onboarding-icon">⚽</div>
-	<div class="onboarding-headline">
-		{$t("duo.onboarding_headline", { remaining })}
-	</div>
-	<div class="onboarding-body">
-		{$t("duo.onboarding_body")}
-	</div>
-	<div class="progress-pill">
-		<span>{matchCount} / {target}</span>
-		<div class="progress-bar-mini">
-			<div class="progress-bar-mini-fill" style="width: {progressRatio * 100}%;"></div>
+<div class="card onboarding">
+	<FootballIcon size={44} />
+	<p class="headline">{$t("duo.onboarding_headline", { remaining })}</p>
+	<p class="body">{$t("duo.onboarding_body")}</p>
+	<div class="meter">
+		<span class="count">{matchCount} / {target}</span>
+		<div class="progress bar" aria-hidden="true">
+			<span style:width="{progressRatio * 100}%"></span>
 		</div>
 	</div>
 </div>
 
 <style>
-.onboarding-card {
-	background: linear-gradient(135deg, rgba(132, 204, 22, 0.08), rgba(132, 204, 22, 0.02));
-	border: 1px solid rgba(132, 204, 22, 0.25);
-	border-radius: 14px;
-	padding: 18px 16px;
-	text-align: center;
-	position: relative;
-	overflow: hidden;
-}
-.onboarding-card::before {
-	content: '';
-	position: absolute;
-	top: -30px; right: -30px;
-	width: 100px; height: 100px;
-	background: radial-gradient(circle, rgba(132, 204, 22, 0.15), transparent 70%);
-	border-radius: 50%;
-}
-.onboarding-icon { font-size: 28px; margin-bottom: 10px; position: relative; z-index: 1; }
-.onboarding-headline {
-	font-size: 15px;
-	font-weight: 800;
-	color: #FFFFFF;
-	margin-bottom: 6px;
-	position: relative; z-index: 1;
-}
-.onboarding-body {
-	font-size: 12px;
-	color: #9CA3AF;
-	line-height: 1.5;
-	position: relative; z-index: 1;
-}
-.progress-pill {
-	display: inline-flex;
+.onboarding {
+	display: flex;
+	flex-direction: column;
 	align-items: center;
-	gap: 6px;
-	background: rgba(132, 204, 22, 0.12);
-	border: 1px solid rgba(132, 204, 22, 0.3);
-	padding: 6px 12px;
-	border-radius: 999px;
-	margin-top: 12px;
-	font-size: 11px;
+	gap: 10px;
+	padding: 24px 18px;
+	text-align: center;
+}
+
+.headline {
+	max-width: 22rem;
+	margin: 0;
+	font-family: var(--font-cond);
 	font-weight: 700;
-	color: #84CC16;
-	position: relative; z-index: 1;
+	font-size: 20px;
+	line-height: 1.15;
+	text-transform: var(--label-case);
+	letter-spacing: var(--label-tracking);
+	text-wrap: balance;
 }
-.progress-bar-mini {
-	width: 80px; height: 4px;
-	background: rgba(255,255,255,0.06);
-	border-radius: 2px;
-	overflow: hidden;
+
+.body {
+	max-width: 22rem;
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.45;
+	color: var(--color-muted);
 }
-.progress-bar-mini-fill {
-	height: 100%;
-	background: linear-gradient(90deg, #84CC16, #65A30D);
-	border-radius: 2px;
+
+.meter {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+	max-width: 16rem;
+	margin-top: 6px;
+}
+
+.count {
+	flex-shrink: 0;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 15px;
+	font-variant-numeric: tabular-nums;
+}
+
+.bar {
+	flex: 1;
+}
+
+:global([data-variant="b"]) .headline {
+	font-weight: 800;
+	font-size: 22px;
+}
+
+:global([data-variant="b"]) .count {
+	font-weight: 800;
+	color: var(--color-win);
 }
 </style>

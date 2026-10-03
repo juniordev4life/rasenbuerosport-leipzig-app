@@ -1,5 +1,9 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import CheckIcon from "$lib/components/icons/CheckIcon.svelte";
+import RecapCard from "../RecapCard.svelte";
+import RecapHeroNumber from "../RecapHeroNumber.svelte";
+import RecapSlide from "../RecapSlide.svelte";
 
 /**
  * Slide 8 — "the new ELO": old rating vs the live League-ELO v2
@@ -43,25 +47,70 @@ const hints = $derived.by(() => {
 });
 </script>
 
-<div class="flex flex-col items-center text-center gap-5 w-full">
-	<h2 class="text-xs uppercase tracking-[0.2em] text-white/50 font-bold">
-		{$t("season_recap.new_elo.title")}
-	</h2>
-
+<RecapSlide title={$t("season_recap.new_elo.title")}>
 	{#if elo.old_rating != null}
-		<div class="flex items-center gap-3 text-2xl font-extrabold tabular-nums">
-			<span class="text-white/50">{elo.old_rating}</span>
-			<span class="text-white/30 text-lg">{"→"}</span>
-			<span class="text-[#84CC16]">{elo.new_rating}</span>
-		</div>
-		<p class="text-[13px] text-white/60 max-w-xs">{$t("season_recap.new_elo.explainer")}</p>
+		<RecapCard>
+			<RecapHeroNumber
+				from={elo.old_rating}
+				value={elo.new_rating}
+				countUp={false}
+				accent
+			/>
+			<p class="recap-note">{$t("season_recap.new_elo.explainer")}</p>
+		</RecapCard>
 	{/if}
 
 	{#if hints.length > 0}
-		<ul class="w-full flex flex-col gap-2 text-left">
-			{#each hints as hint (hint)}
-				<li class="rounded-xl bg-white/5 px-3 py-2 text-[13px] text-white/80">{hint}</li>
-			{/each}
-		</ul>
+		<RecapCard panel>
+			<ul class="hints rows">
+				{#each hints as hint (hint)}
+					<li class="hint">
+						<span class="hint-icon" aria-hidden="true">
+							<CheckIcon size={14} />
+						</span>
+						<span>{hint}</span>
+					</li>
+				{/each}
+			</ul>
+		</RecapCard>
 	{/if}
-</div>
+</RecapSlide>
+
+<style>
+.hints {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.hint {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 10px 0;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.hint:first-child {
+	padding-top: 0;
+}
+
+.hint:last-child {
+	padding-bottom: 0;
+}
+
+.hint-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 22px;
+	height: 22px;
+	border-radius: var(--radius-badge);
+	background: var(--color-win);
+	color: var(--color-on-win);
+}
+</style>

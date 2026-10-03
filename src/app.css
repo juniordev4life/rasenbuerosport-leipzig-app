@@ -2,9 +2,10 @@
 
 /*
  * Self-hosted, OFL-licensed stand-ins for the RB Leipzig house fonts. The
- * originals are licensed for club assets only (roadmap/THEMES-PLAN.md), so
- * the app never ships them: Anton ≈ RBL Display, Barlow Condensed ≈ Bull
- * Condensed, Barlow ≈ Bull Text. Bundled by Vite, no third-party requests.
+ * originals are licensed for RB Leipzig assets only and this app is a
+ * private project, so it never ships them: Anton ≈ RBL Display, Barlow
+ * Condensed ≈ Bull Condensed, Barlow ≈ Bull Text. Bundled by Vite, no
+ * third-party requests.
  */
 @import "@fontsource/anton/400.css";
 @import "@fontsource/barlow/400.css";
@@ -45,7 +46,7 @@
 	--color-surface: #ffffff; /* cards, sheets, nav bars */
 	--color-sunken: #f6f6f6; /* inputs, inner tiles, inactive controls */
 	--color-ink: #001f47; /* primary text */
-	--color-muted: #6a7484; /* secondary text, captions */
+	--color-muted: #606a7a; /* secondary text, captions (≥ 4.5:1 on page and sunken) */
 	--color-line: #dadada; /* hairlines, dividers, input borders */
 	--color-on-page: #001f47; /* text placed straight on the page background */
 
@@ -58,7 +59,17 @@
 	--color-gold: #ffcc00; /* highlights: leader, "neu", streaks */
 	--color-on-gold: #001f47;
 	--color-gold-soft: #fff7d6; /* pale gold: speech bubbles, gentle highlights */
-	--color-aqua: #3698ca; /* info, second data colour */
+	--color-aqua: #3698ca; /* info, second data colour; graphics only, too light for small text */
+
+	/* Teams: home and away sides on the pitch, timeline, stats */
+	--color-home: #d2003c;
+	--color-on-home: #ffffff;
+	--color-away: #001f47;
+	--color-on-away: #ffffff;
+
+	/* Drawn pitches (live match, poster, B page background) */
+	--color-pitch: #ffffff; /* surface of a drawn pitch */
+	--color-chalk: #dadada; /* its markings */
 
 	/* Results and deltas (always paired with S/U/N or +/− text) */
 	--color-win: #001f47;
@@ -80,11 +91,15 @@
 	--color-chart-3: #a9bdd4;
 	--color-chart-4: #d2003c;
 
-	/* Trophy tiers */
+	/* Trophy tiers, with the text colour that reads on each */
 	--color-tier-bronze: #811d39;
 	--color-tier-silver: #dadada;
 	--color-tier-gold: #ffcc00;
 	--color-tier-diamond: #3698ca;
+	--color-on-tier-bronze: #ffffff;
+	--color-on-tier-silver: #001f47;
+	--color-on-tier-gold: #001f47;
+	--color-on-tier-diamond: #001f47;
 
 	/* Initials avatars (picked per player, see avatarColor.utils.js) */
 	--color-avatar-0: #001f47;
@@ -172,6 +187,8 @@
 	--color-on-draw: #ffffff;
 
 	--color-score: #0f3d1f;
+	--color-pitch: #31813a; /* grass a shade darker than the page */
+	--color-chalk: #ffffff8c; /* white chalk at 55 % */
 	--color-progress: #41a048;
 	--color-track: #e8f5e9;
 	--color-chart-1: #1d6b2a;
@@ -183,6 +200,7 @@
 	--color-tier-silver: #b5bec9;
 	--color-tier-gold: #e0a800;
 	--color-tier-diamond: #7cc8ee;
+	--color-on-tier-bronze: #001f47;
 
 	--color-avatar-0: #3698ca;
 	--color-avatar-1: #ff8a3d;
@@ -269,13 +287,11 @@
 		-moz-osx-font-smoothing: grayscale;
 	}
 
+	/* Navy reads on white, grey and the pitch. Dark surfaces (the red hero,
+	 * navy blocks) switch the ring to white via --focus-ring. */
 	:focus-visible {
-		outline: 2px solid var(--color-navy);
+		outline: 2px solid var(--focus-ring, var(--color-navy));
 		outline-offset: 2px;
-	}
-
-	[data-variant="b"] :focus-visible {
-		outline-color: var(--color-gold);
 	}
 }
 
@@ -305,8 +321,14 @@
 	/* Page hero: red band in A (bleeds to the screen edges), plain text on
 	 * the pitch in B. */
 	.hero {
+		--focus-ring: var(--hero-ink);
 		background: var(--hero-bg);
 		color: var(--hero-ink);
+	}
+
+	.bg-navy,
+	.bg-brand {
+		--focus-ring: var(--color-white);
 	}
 
 	.bleed {
@@ -319,10 +341,53 @@
 		padding-inline: 0;
 	}
 
-	/* Text placed straight on the page background (B: white on the pitch). */
+	/* A's hero band sits flush under the header: it cancels the main
+	 * column's top padding on phones (py-2 in app/+layout.svelte). */
+	.hero.bleed {
+		margin-top: -0.5rem;
+	}
+	[data-variant="b"] .hero.bleed {
+		margin-top: 0;
+	}
+	@media (min-width: 1024px) {
+		.hero.bleed {
+			margin-top: 0;
+		}
+	}
+
+	/* Hero of a list page (Historie, Statistiken, Teams, …): a red band
+	 * with a big title in A, the title straight on the pitch in B.
+	 * <header class="hero bleed page-hero">
+	 *   <h1 class="page-title page-hero-title">…</h1> */
+	.page-hero {
+		padding-top: 22px;
+		padding-bottom: 24px;
+	}
+	.page-hero-title {
+		margin: 0;
+		font-size: clamp(34px, 11vw, 44px);
+		text-wrap: balance;
+		text-shadow: var(--on-page-shadow);
+	}
+	[data-variant="b"] .page-hero {
+		padding-top: 4px;
+		padding-bottom: 0;
+	}
+	[data-variant="b"] .page-hero-title {
+		font-size: 40px;
+	}
+
+	/* Text placed straight on the page background (B: white on the pitch).
+	 * A section title keeps its red in A and turns white on B's pitch. */
 	.on-page {
 		color: var(--color-on-page);
 		text-shadow: var(--on-page-shadow);
+	}
+	.section-title.on-page {
+		color: var(--section-color);
+	}
+	[data-variant="b"] .section-title.on-page {
+		color: var(--color-on-page);
 	}
 
 	/* Type */
@@ -468,6 +533,10 @@
 		background: var(--color-loss-soft);
 		color: var(--color-loss);
 	}
+	.chip-aqua {
+		background: var(--color-aqua);
+		color: var(--color-ink);
+	}
 	.chip-outline {
 		background: transparent;
 		color: inherit;
@@ -504,6 +573,37 @@
 	.result-l {
 		background: var(--color-loss);
 		color: var(--color-on-loss);
+	}
+
+	/* ELO change with its sign (+12, −4, ±0): coloured text in A, a soft
+	 * pill in B. */
+	.delta {
+		font-family: var(--font-cond);
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+	.delta-win {
+		color: var(--color-win);
+	}
+	.delta-loss {
+		color: var(--color-loss);
+	}
+	.delta-draw {
+		color: var(--color-muted);
+	}
+	[data-variant="b"] .delta {
+		padding: 4px 10px;
+		border-radius: 999px;
+	}
+	[data-variant="b"] .delta-win {
+		background: var(--color-win-soft);
+	}
+	[data-variant="b"] .delta-loss {
+		background: var(--color-loss-soft);
+	}
+	[data-variant="b"] .delta-draw {
+		background: var(--color-sunken);
 	}
 
 	/* Score chip ("2:3"). */
@@ -622,6 +722,23 @@
 		background: var(--color-gold);
 		filter: brightness(1.05);
 	}
+	/* Confirm / finish a step in a flow (save event, end match): red in A,
+	 * "done" green in B. */
+	.btn-confirm {
+		background: var(--color-brand);
+		color: var(--color-on-brand);
+	}
+	.btn-confirm:hover:not(:disabled) {
+		background: var(--color-brand-strong);
+	}
+	[data-variant="b"] .btn-confirm:not(:disabled) {
+		background: var(--color-win);
+		color: var(--color-on-win);
+		box-shadow: var(--shadow-control);
+	}
+	[data-variant="b"] .btn-confirm:hover:not(:disabled) {
+		filter: brightness(1.1);
+	}
 	.btn-ghost {
 		background: transparent;
 		color: var(--color-ink);
@@ -679,7 +796,8 @@
 	 * <div class="seg" role="tablist"><button class="seg-option" aria-selected="true">…</button></div> */
 	.seg {
 		display: flex;
-		gap: 24px;
+		flex-wrap: wrap;
+		gap: 4px 24px;
 		border-bottom: 1px solid currentColor;
 	}
 	.seg-option {
@@ -704,6 +822,36 @@
 	}
 	.seg-option:hover {
 		opacity: 1;
+	}
+	/* Dimmed white on the red band drops below 4.5:1; there the underline
+	 * alone marks the active tab. */
+	.hero .seg-option {
+		opacity: 1;
+	}
+	/* Two-line option: a title with a small caption ("FC27" / "läuft").
+	 * <button class="seg-option seg-option-2"><span class="seg-title">…</span>
+	 * <span class="seg-sub">…</span></button> */
+	.seg-option-2 {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 3px;
+		padding: 0 0 10px;
+		opacity: 1;
+	}
+	.seg-title {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 17px;
+		line-height: 1;
+	}
+	.seg-sub {
+		font-family: var(--font-sans);
+		font-weight: 400;
+		font-size: 12px;
+		letter-spacing: 0;
+		text-transform: none;
 	}
 	[data-variant="b"] .seg {
 		display: grid;
@@ -734,6 +882,23 @@
 		background: var(--color-navy);
 		color: var(--color-on-navy);
 	}
+	[data-variant="b"] .seg-option-2 {
+		align-items: center;
+		justify-content: center;
+		gap: 1px;
+		min-height: 48px;
+		padding: 0 12px;
+	}
+	[data-variant="b"] .seg-title {
+		gap: 6px;
+		font-size: 15px;
+	}
+	[data-variant="b"] .seg-sub {
+		font-size: 11px;
+	}
+	[data-variant="b"] .seg-option-2[aria-selected="false"] .seg-sub {
+		color: var(--color-muted);
+	}
 	[data-variant="b"] .seg-brand .seg-option[aria-selected="true"],
 	[data-variant="b"] .seg-brand .seg-option[aria-pressed="true"] {
 		background: var(--color-brand);
@@ -747,6 +912,47 @@
 		gap: var(--stack-gap);
 	}
 
+	/* A reporter's words: plain text in A, a pale gold speech bubble with
+	 * a pointer at its top left in B. */
+	.bubble {
+		position: relative;
+	}
+	[data-variant="b"] .bubble {
+		padding: 14px 16px;
+		border-radius: 16px;
+		background: var(--color-gold-soft);
+		color: var(--color-ink);
+	}
+	[data-variant="b"] .bubble::before {
+		content: "";
+		position: absolute;
+		left: 22px;
+		top: -7px;
+		width: 14px;
+		height: 14px;
+		background: var(--color-gold-soft);
+		transform: rotate(45deg);
+	}
+
+	/* Loading, empty and error states: <div class="card notice">, with an
+	 * optional .notice-title. Inside a B Section the card frame drops away. */
+	.notice {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+		padding: 24px 16px;
+		text-align: center;
+		font-size: 14px;
+		line-height: 1.45;
+		color: var(--color-muted);
+	}
+	.notice-title {
+		font-weight: 700;
+		font-size: 15px;
+		color: var(--color-ink);
+	}
+
 	/* Rows inside a card, separated by hairlines. */
 	.rows > * + * {
 		border-top: 1px solid var(--color-line);
@@ -754,7 +960,7 @@
 
 	/* Overlays */
 	.scrim {
-		background: rgb(0 31 71 / 0.6);
+		background: color-mix(in srgb, var(--color-navy) 60%, transparent);
 	}
 	.sheet {
 		background: var(--color-surface);

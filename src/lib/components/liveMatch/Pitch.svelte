@@ -6,11 +6,14 @@ import MinuteEditor from "./MinuteEditor.svelte";
 import PitchPlayer from "./PitchPlayer.svelte";
 
 /**
- * Pitch wrapper that places the two halves side-by-side on desktop
- * and stacked on mobile, with subtle SVG markings (centre circle,
- * penalty boxes, goals). The half opposite the active player turns
- * into the minute editor — see `MinuteEditor`. Awaiting-player modes
- * surface a centred hint text instead of opening the editor.
+ * The live pitch: two halves, stacked on phones and side by side from
+ * `lg`, with chalk markings, a team label in each half and the players
+ * as tap targets. The half opposite the active player turns into the
+ * minute editor — see `MinuteEditor`. Awaiting-player modes show a hint
+ * on the halfway line and pulse the eligible players.
+ *
+ * Design A: a white card with grey markings. Design B: a darker grass
+ * card with white chalk on the pitch background.
  *
  * @type {{
  *   homePlayers: Array<{ id: string, name: string, avatar_url?: string|null }>,
@@ -19,7 +22,6 @@ import PitchPlayer from "./PitchPlayer.svelte";
  *   awayTeam?: { name: string, logo_url?: string|null }|null,
  *   state: import('$lib/utils/liveMatchState.utils.js').LiveMatchState,
  *   saving?: boolean,
- *   gradientFor: (id: string) => string,
  *   onSelectPlayer: (playerId: string, side: "home"|"away") => void,
  *   onLongPressPlayer: (playerId: string, side: "home"|"away") => void,
  *   onMinuteChange: (minute: number) => void,
@@ -36,7 +38,6 @@ let {
 	awayTeam = null,
 	state,
 	saving = false,
-	gradientFor,
 	onSelectPlayer,
 	onLongPressPlayer,
 	onMinuteChange,
@@ -90,16 +91,8 @@ const glowColor = $derived(
 			: null,
 );
 
-const borderClass = $derived(
-	state.mode === MODE.CARD_AWAITING_PLAYER
-		? state.pendingCardColor === "red"
-			? "border-brand/60"
-			: "border-gold/60"
-		: state.mode === MODE.PENALTY_MISS_AWAITING_PLAYER ||
-				state.mode === MODE.PENALTY_MISS_AWAITING_KEEPER
-			? "border-gold/60"
-			: "border-line",
-);
+const homeLabel = $derived(homeTeam?.name || $t("new_game.home"));
+const awayLabel = $derived(awayTeam?.name || $t("new_game.away"));
 
 function isPlayerScorer(id) {
 	if (state.mode === MODE.PENALTY_MISS_AWAITING_KEEPER) {
@@ -137,25 +130,25 @@ function isPlayerAssistHint(id, side) {
 </script>
 
 {#snippet halfPlayers(players, side)}
-	<!-- 3-col grid for consistent spacing:
+	<!-- Three columns for consistent spacing:
 	     1 player  → centre column,
 	     2 players → outer columns,
-	     3 players → all three. -->
+	     3 players → all three; four or five get a column each. -->
 	{@const slotCols = players.length === 1
 		? ["2"]
 		: players.length === 2
 			? ["1", "3"]
-			: players.length === 3
-				? ["1", "2", "3"]
-				: players.map((_, i) => String(i + 1))}
-	<div class="relative z-10 grid grid-cols-3 items-center w-full px-2 sm:px-4">
+			: players.map((_, i) => String(i + 1))}
+	<div
+		class="players"
+		style="grid-template-columns: repeat({Math.max(3, players.length)}, minmax(0, 1fr));"
+	>
 		{#each players as p, i (p.id)}
-			<div class="flex justify-center" style="grid-column-start: {slotCols[i] ?? '2'};">
+			<div class="flex justify-center min-w-0" style="grid-column-start: {slotCols[i] ?? '2'};">
 				<PitchPlayer
 					playerId={p.id}
 					name={p.name}
 					avatarUrl={p.avatar_url}
-					gradient={gradientFor(p.id)}
 					{side}
 					isScorer={isPlayerScorer(p.id)}
 					isAssister={isPlayerAssister(p.id)}
@@ -173,141 +166,407 @@ function isPlayerAssistHint(id, side) {
 	</div>
 {/snippet}
 
-<div
-	class="relative rounded-2xl border-2 {borderClass} overflow-hidden transition-colors"
-	style="background: linear-gradient(135deg, #0d3320 0%, #0a2516 100%);"
->
-
-	<!-- Pitch markings -->
-	<svg
-		viewBox="0 0 200 280"
-		preserveAspectRatio="none"
-		class="absolute inset-0 w-full h-full opacity-40 pointer-events-none lg:hidden"
-		aria-hidden="true"
-	>
-		<line x1="0" y1="140" x2="200" y2="140" stroke="#84CC16" stroke-width="0.5" />
-		<circle cx="100" cy="140" r="22" fill="none" stroke="#84CC16" stroke-width="0.5" />
-		<circle cx="100" cy="140" r="1.5" fill="#84CC16" />
-		<rect x="60" y="0" width="80" height="32" fill="none" stroke="#84CC16" stroke-width="0.5" />
-		<rect x="60" y="248" width="80" height="32" fill="none" stroke="#84CC16" stroke-width="0.5" />
-	</svg>
-	<svg
-		viewBox="0 0 320 200"
-		preserveAspectRatio="none"
-		class="absolute inset-0 w-full h-full opacity-40 pointer-events-none hidden lg:block"
-		aria-hidden="true"
-	>
-		<line x1="160" y1="0" x2="160" y2="200" stroke="#84CC16" stroke-width="0.5" />
-		<circle cx="160" cy="100" r="22" fill="none" stroke="#84CC16" stroke-width="0.5" />
-		<circle cx="160" cy="100" r="1.5" fill="#84CC16" />
-		<rect x="0" y="60" width="36" height="80" fill="none" stroke="#84CC16" stroke-width="0.5" />
-		<rect x="284" y="60" width="36" height="80" fill="none" stroke="#84CC16" stroke-width="0.5" />
-	</svg>
-
-	<!--
-		Two halves, asymmetric when the editor is active so the avatar
-		half stays visible without scrolling. Mobile vertical:
-		- idle           → 1fr | 1fr
-		- editor in home → 2fr | 1fr   (avatars below stay compact)
-		- editor in away → 1fr | 2fr
-		Desktop horizontal: always 50 / 50, the editor fits sideways.
-	-->
-	<!-- Both halves keep a strict 50/50 share even when the editor is
-	     open. `overflow-hidden` on each half stops the editor from
-	     spilling past the centre line. -->
-	<div class="relative grid grid-cols-1 lg:grid-cols-2 grid-rows-2 lg:grid-rows-1 h-[460px] lg:h-[440px]">
-		<!-- Home half -->
-		<div
-			class="relative flex flex-col items-center justify-center p-3 lg:p-4 min-h-0 overflow-hidden"
-		>
-			{#if homeTeam?.logo_url}
-				<img
-					src={homeTeam.logo_url}
-					alt=""
-					class="absolute inset-0 m-auto w-44 h-44 object-contain opacity-[0.08] pointer-events-none select-none"
-					aria-hidden="true"
-				/>
-			{/if}
-			<!-- Avatars always mount; only the editor overlay toggles, so
-			     PitchPlayer instances keep their state and don't trigger
-			     image reloads when the user closes the editor. -->
-			<div class="w-full" class:invisible={editorSide === "home"}>
-				{@render halfPlayers(homePlayers, "home")}
-			</div>
-			{#if editorSide === "home"}
-				<div class="absolute inset-2 z-10 overflow-hidden rounded-xl bg-surface border border-line p-3 shadow-xl">
-					<MinuteEditor
-						minute={state.minute}
-						stoppageMinutes={state.stoppageMinutes}
-						goalType={state.goalType}
-						previousEvents={state.events}
-						eventKind={eventKind}
-						cardColor={state.pendingCardColor}
-						isOwnGoal={state.isOwnGoal}
-						{saving}
-						onMinuteChange={(m) => onMinuteChange(m)}
-						onStoppageChange={(s) => onStoppageChange(s)}
-						{onGoalTypeClick}
-						{onCancel}
-						{onConfirm}
-					/>
-				</div>
-			{/if}
+{#snippet half(side, players, team, label)}
+	<div class="half half-{side}">
+		{#if team?.logo_url}
+			<img src={team.logo_url} alt="" class="watermark" aria-hidden="true" />
+		{/if}
+		<span class="half-label">
+			<span class="half-dot" aria-hidden="true"></span>
+			<span class="truncate">{label}</span>
+		</span>
+		<!-- Avatars always mount; only the editor overlay toggles, so
+		     PitchPlayer instances keep their state and don't trigger
+		     image reloads when the user closes the editor. -->
+		<div class="w-full" class:invisible={editorSide === side}>
+			{@render halfPlayers(players, side)}
 		</div>
-
-		<!-- Center divider -->
-		<div class="absolute inset-x-0 top-1/2 h-px bg-white/10 lg:hidden" aria-hidden="true"></div>
-		<div class="hidden lg:block absolute inset-y-0 left-1/2 w-px bg-white/10" aria-hidden="true"></div>
-
-		<!-- Away half -->
-		<div
-			class="relative flex flex-col items-center justify-center p-3 lg:p-4 min-h-0 overflow-hidden"
-		>
-			{#if awayTeam?.logo_url}
-				<img
-					src={awayTeam.logo_url}
-					alt=""
-					class="absolute inset-0 m-auto w-44 h-44 object-contain opacity-[0.08] pointer-events-none select-none"
-					aria-hidden="true"
+		{#if editorSide === side}
+			<div class="editor-card">
+				<MinuteEditor
+					minute={state.minute}
+					stoppageMinutes={state.stoppageMinutes}
+					goalType={state.goalType}
+					previousEvents={state.events}
+					{eventKind}
+					cardColor={state.pendingCardColor}
+					isOwnGoal={state.isOwnGoal}
+					{saving}
+					onMinuteChange={(m) => onMinuteChange(m)}
+					onStoppageChange={(s) => onStoppageChange(s)}
+					{onGoalTypeClick}
+					{onCancel}
+					{onConfirm}
 				/>
-			{/if}
-			<div class="w-full" class:invisible={editorSide === "away"}>
-				{@render halfPlayers(awayPlayers, "away")}
 			</div>
-			{#if editorSide === "away"}
-				<div class="absolute inset-2 z-10 overflow-hidden rounded-xl bg-surface border border-line p-3 shadow-xl">
-					<MinuteEditor
-						minute={state.minute}
-						stoppageMinutes={state.stoppageMinutes}
-						goalType={state.goalType}
-						previousEvents={state.events}
-						eventKind={eventKind}
-						cardColor={state.pendingCardColor}
-						isOwnGoal={state.isOwnGoal}
-						{saving}
-						onMinuteChange={(m) => onMinuteChange(m)}
-						onStoppageChange={(s) => onStoppageChange(s)}
-						{onGoalTypeClick}
-						{onCancel}
-						{onConfirm}
-					/>
-				</div>
-			{/if}
-		</div>
+		{/if}
+	</div>
+{/snippet}
+
+<div class="pitch" data-glow={glowColor}>
+	<div class="lines" aria-hidden="true">
+		<span class="halfway"></span>
+		<span class="circle"></span>
+		<span class="spot"></span>
+		<span class="box box-home"><span class="goal-box"></span></span>
+		<span class="box box-away"><span class="goal-box"></span></span>
 	</div>
 
-	<!-- Awaiting-player hint -->
+	<div class="halves">
+		{@render half("home", homePlayers, homeTeam, homeLabel)}
+		{@render half("away", awayPlayers, awayTeam, awayLabel)}
+	</div>
+
 	{#if awaitingHint}
-		<div class="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none">
-			<span class="bg-black/70 border border-line text-[11px] text-ink font-semibold px-3 py-1.5 rounded-full">
-				{awaitingHint}
-			</span>
+		<div class="center-hint">
+			<span class="hint-pill tone-{glowColor}">{awaitingHint}</span>
 		</div>
 	{:else if state.mode === MODE.IDLE && state.events.length === 0}
-		<div class="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none">
-			<span class="bg-black/50 border border-line/40 text-[10px] text-muted font-medium px-2.5 py-1 rounded-full">
-				{$t("live_match.hint.idle")}
-			</span>
+		<div class="center-hint">
+			<span class="hint-pill">{$t("live_match.hint.idle")}</span>
 		</div>
 	{/if}
 </div>
+
+<style>
+/* ── Surface ────────────────────────────────────────────────────────── */
+.pitch {
+	--chalk: var(--color-chalk);
+	--chalk-width: 2px;
+	position: relative;
+	overflow: hidden;
+	background: var(--color-pitch);
+	color: var(--color-ink);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+	transition: box-shadow 150ms;
+}
+
+/* Armed card / missed-penalty mode: a coloured rim around the pitch. */
+.pitch[data-glow="red"] {
+	box-shadow:
+		var(--shadow-card),
+		inset 0 0 0 3px var(--color-brand);
+}
+
+.pitch[data-glow="yellow"],
+.pitch[data-glow="orange"] {
+	box-shadow:
+		var(--shadow-card),
+		inset 0 0 0 3px var(--color-gold);
+}
+
+:global([data-variant="b"]) .pitch {
+	--chalk-width: 3px;
+	color: var(--color-on-page);
+}
+
+/* ── Chalk markings (portrait on phones, landscape from lg) ─────────── */
+.lines {
+	position: absolute;
+	inset: 10px;
+	border: var(--chalk-width) solid var(--chalk);
+	pointer-events: none;
+}
+
+.lines > span,
+.goal-box {
+	position: absolute;
+}
+
+.halfway {
+	left: 0;
+	right: 0;
+	top: 50%;
+	border-top: var(--chalk-width) solid var(--chalk);
+	transform: translateY(-50%);
+}
+
+.circle {
+	left: 50%;
+	top: 50%;
+	width: 84px;
+	height: 84px;
+	border: var(--chalk-width) solid var(--chalk);
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.spot {
+	left: 50%;
+	top: 50%;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--chalk);
+	transform: translate(-50%, -50%);
+}
+
+/* Penalty and goal areas sit on the goal line; their outer edge
+ * overlaps the touchline, so they read as three-sided boxes. */
+.box {
+	left: 50%;
+	width: 52%;
+	height: 52px;
+	border: var(--chalk-width) solid var(--chalk);
+	transform: translateX(-50%);
+}
+
+.box-home {
+	top: calc(var(--chalk-width) * -1);
+}
+
+.box-away {
+	bottom: calc(var(--chalk-width) * -1);
+}
+
+.goal-box {
+	left: 50%;
+	width: 48%;
+	height: 22px;
+	border: var(--chalk-width) solid var(--chalk);
+	transform: translateX(-50%);
+}
+
+.box-home .goal-box {
+	top: calc(var(--chalk-width) * -1);
+}
+
+.box-away .goal-box {
+	bottom: calc(var(--chalk-width) * -1);
+}
+
+/* ── Halves ─────────────────────────────────────────────────────────── */
+/* Both halves keep a strict 50/50 share even when the editor is open;
+ * `overflow: hidden` stops the editor from spilling past the centre. */
+.halves {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows: repeat(2, minmax(0, 1fr));
+	height: 460px;
+}
+
+.half {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 0;
+	padding: 12px;
+	overflow: hidden;
+}
+
+.watermark {
+	position: absolute;
+	inset: 0;
+	width: 168px;
+	height: 168px;
+	margin: auto;
+	object-fit: contain;
+	opacity: 0.08;
+	pointer-events: none;
+	user-select: none;
+}
+
+.players {
+	position: relative;
+	z-index: 2;
+	display: grid;
+	align-items: center;
+	width: 100%;
+	padding: 0 8px;
+}
+
+/* Team name in the outer corner of its half. A: condensed caps in the
+ * team colour; B: a white pill with a team-coloured dot. */
+.half-label {
+	--team: var(--color-home);
+	position: absolute;
+	z-index: 1;
+	left: 20px;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	max-width: calc(100% - 40px);
+	padding: 0 4px;
+	background: var(--color-surface);
+	color: var(--team);
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 14px;
+	letter-spacing: 0.02em;
+	line-height: 1.4;
+	text-transform: uppercase;
+}
+
+.half-home .half-label {
+	top: 18px;
+}
+
+.half-away .half-label {
+	--team: var(--color-away);
+	bottom: 18px;
+}
+
+.half-dot {
+	display: none;
+	width: 8px;
+	height: 8px;
+	flex-shrink: 0;
+	border-radius: 999px;
+	background: var(--team);
+}
+
+:global([data-variant="b"]) .half-label {
+	padding: 3px 10px;
+	border-radius: 999px;
+	color: var(--color-ink);
+	font-family: var(--font-sans);
+	font-size: 12px;
+	letter-spacing: 0;
+	text-transform: none;
+	box-shadow: var(--shadow-control);
+}
+
+:global([data-variant="b"]) .half-dot {
+	display: inline-block;
+}
+
+/* Minute editor over the half opposite the active player. */
+.editor-card {
+	position: absolute;
+	inset: 8px;
+	z-index: 10;
+	overflow: hidden;
+	padding: 12px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	border: 1px solid var(--color-line);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-raised);
+}
+
+:global([data-variant="b"]) .editor-card {
+	border: 0;
+	border-radius: 16px;
+}
+
+/* ── Hint on the halfway line ───────────────────────────────────────── */
+.center-hint {
+	position: absolute;
+	inset-inline: 12px;
+	top: 50%;
+	z-index: 20;
+	display: flex;
+	justify-content: center;
+	transform: translateY(-50%);
+	pointer-events: none;
+}
+
+.hint-pill {
+	max-width: 100%;
+	padding: 5px 12px;
+	border: 1px solid var(--color-line);
+	border-radius: var(--radius-control);
+	background: var(--color-surface);
+	color: var(--color-ink);
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.3;
+	text-align: center;
+}
+
+.hint-pill.tone-red {
+	border-color: transparent;
+	background: var(--color-brand);
+	color: var(--color-on-brand);
+}
+
+.hint-pill.tone-yellow,
+.hint-pill.tone-orange {
+	border-color: transparent;
+	background: var(--color-gold);
+	color: var(--color-on-gold);
+}
+
+:global([data-variant="b"]) .hint-pill {
+	border: 0;
+	padding: 7px 14px;
+	box-shadow: var(--shadow-control);
+}
+
+/* ── Desktop: landscape pitch, home left, away right ─────────────────── */
+@media (min-width: 1024px) {
+	.halves {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-rows: minmax(0, 1fr);
+		height: 440px;
+	}
+
+	.half {
+		padding: 16px;
+	}
+
+	.half-away .half-label {
+		top: 18px;
+		bottom: auto;
+		left: auto;
+		right: 20px;
+	}
+
+	.halfway {
+		left: 50%;
+		right: auto;
+		top: 0;
+		bottom: 0;
+		border-top: 0;
+		border-left: var(--chalk-width) solid var(--chalk);
+		transform: translateX(-50%);
+	}
+
+	.circle {
+		width: 110px;
+		height: 110px;
+	}
+
+	.box {
+		left: auto;
+		top: 50%;
+		width: 64px;
+		height: 48%;
+		transform: translateY(-50%);
+	}
+
+	.box-home {
+		top: 50%;
+		left: calc(var(--chalk-width) * -1);
+	}
+
+	.box-away {
+		top: 50%;
+		bottom: auto;
+		right: calc(var(--chalk-width) * -1);
+	}
+
+	.goal-box {
+		left: auto;
+		top: 50%;
+		width: 26px;
+		height: 46%;
+		transform: translateY(-50%);
+	}
+
+	.box-home .goal-box {
+		top: 50%;
+		left: calc(var(--chalk-width) * -1);
+	}
+
+	.box-away .goal-box {
+		top: 50%;
+		bottom: auto;
+		right: calc(var(--chalk-width) * -1);
+	}
+}
+</style>

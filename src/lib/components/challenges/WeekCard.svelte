@@ -1,11 +1,11 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import CheckIcon from "$lib/components/icons/CheckIcon.svelte";
 
 /**
- * One past-week record on the Verlauf tab. Header shows the date
- * range, a colour-coded "X / Y" ratio, and a mini bar; below it three
- * (or however many) compact rows with check / cross icons per
- * challenge.
+ * One past week on the History tab: the date range, an "X / Y" chip with
+ * a small bar (tone by completion rate), then one row per challenge with
+ * a check or a cross and its final count.
  *
  * @type {{
  *   week: {
@@ -23,6 +23,13 @@ import { getTranslate } from "@tolgee/svelte";
 let { week, locale = "de" } = $props();
 
 const { t } = getTranslate();
+
+const TONE_CHIP = {
+	perfect: "chip-win",
+	good: "chip-gold",
+	poor: "chip-loss",
+	none: "chip-muted",
+};
 
 const total = $derived(week.challenges?.length ?? 0);
 const completed = $derived(week.completed_count ?? 0);
@@ -54,121 +61,160 @@ function labelOf(c) {
 }
 </script>
 
-<div class="card">
-	<div class="head">
-		<div class="range">{dateRange}</div>
-		<div class="meta">
-			<span class="rate {tone}">{completed} / {total}</span>
-			<div class="mini-bar">
-				<div class="mini-fill {tone}" style="width: {rate * 100}%;"></div>
+<article class="card week">
+	<header class="head">
+		<h2 class="label range">{dateRange}</h2>
+		<div class="summary">
+			<span class="chip rate {TONE_CHIP[tone]}">{completed} / {total}</span>
+			<div class="progress mini tone-{tone}" aria-hidden="true">
+				<span style="width: {rate * 100}%"></span>
 			</div>
 		</div>
-	</div>
+	</header>
 
-	<div class="rows">
+	<ul class="list">
 		{#each week.challenges ?? [] as c, i (i)}
 			{@const done = c.progress?.completed}
-			<div class="row">
-				<div class="check {done ? 'done' : 'missed'}" aria-hidden="true">
-					{done ? "✓" : "✗"}
-				</div>
-				<div class="name" class:missed={!done}>{labelOf(c)}</div>
-				<div class="score {done ? 'done' : ''}">
-					{c.progress?.current ?? 0} / {c.progress?.target ?? 0}
-				</div>
-			</div>
+			<li class="row" class:missed={!done}>
+				<span class="mark" aria-hidden="true">
+					{#if done}
+						<CheckIcon size={12} strokeWidth={3} />
+					{:else}
+						<svg
+							viewBox="0 0 24 24"
+							width="10"
+							height="10"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="3.5"
+							stroke-linecap="round"
+						>
+							<line x1="18" y1="6" x2="6" y2="18" />
+							<line x1="6" y1="6" x2="18" y2="18" />
+						</svg>
+					{/if}
+				</span>
+				<span class="name">
+					{labelOf(c)}
+					{#if done}<span class="sr-only">— {$t("challenges.done_label")}</span>{/if}
+				</span>
+				<span class="score">{c.progress?.current ?? 0} / {c.progress?.target ?? 0}</span>
+			</li>
 		{/each}
-	</div>
-</div>
+	</ul>
+</article>
 
 <style>
-.card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 12px 14px;
+.week {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 14px 16px;
 }
+
 .head {
-	display: flex; justify-content: space-between; align-items: center;
-	margin-bottom: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	gap: 12px;
 }
+
 .range {
-	font-size: 11px;
-	color: #9CA3AF;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
+	margin: 0;
+	font-size: 13px;
+	color: var(--color-muted);
 }
-.meta {
-	display: flex; align-items: center; gap: 8px;
+
+.summary {
+	display: flex;
+	align-items: center;
+	gap: 8px;
 	flex-shrink: 0;
 }
+
 .rate {
-	font-size: 14px;
-	font-weight: 800;
-	font-variant-numeric: tabular-nums;
-}
-.rate.perfect { color: #84CC16; }
-.rate.good { color: #F59E0B; }
-.rate.poor { color: #E24B4A; }
-.rate.none { color: #6B7280; }
-.mini-bar {
-	width: 56px; height: 4px;
-	background: rgba(255,255,255,0.05);
-	border-radius: 2px;
-	overflow: hidden;
-}
-.mini-fill {
-	height: 100%;
-	border-radius: 2px;
-	transition: width 0.4s ease;
-}
-.mini-fill.perfect { background: #84CC16; }
-.mini-fill.good { background: #F59E0B; }
-.mini-fill.poor { background: #E24B4A; }
-.mini-fill.none { background: #4B5563; }
-.rows {
-	display: flex; flex-direction: column;
-	gap: 6px;
-	padding-top: 6px;
-	border-top: 1px solid #1F2937;
-}
-.row {
-	display: flex; align-items: center; gap: 8px;
-}
-.check {
-	width: 16px; height: 16px;
-	border-radius: 50%;
-	display: flex; align-items: center; justify-content: center;
-	font-size: 10px;
-	font-weight: 800;
-	flex-shrink: 0;
-}
-.check.done {
-	background: rgba(132, 204, 22, 0.15);
-	color: #84CC16;
-	border: 1px solid rgba(132, 204, 22, 0.3);
-}
-.check.missed {
-	background: rgba(107, 114, 128, 0.12);
-	color: #6B7280;
-	border: 1px solid rgba(107, 114, 128, 0.2);
-}
-.name {
-	flex: 1; min-width: 0;
 	font-size: 12px;
-	font-weight: 600;
-	color: #D1D5DB;
-	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.name.missed { color: #6B7280; }
-.score {
-	font-size: 11px;
-	font-weight: 700;
-	color: #6B7280;
 	font-variant-numeric: tabular-nums;
-	flex-shrink: 0;
 }
-.score.done { color: #84CC16; }
+
+.mini {
+	width: 56px;
+	--bar-height: 6px;
+}
+
+.tone-perfect > span {
+	background: var(--color-win);
+}
+
+.tone-good > span {
+	background: var(--color-gold);
+}
+
+.tone-poor > span {
+	background: var(--color-loss);
+}
+
+.list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 0;
+	padding: 12px 0 0;
+	list-style: none;
+	border-top: 1px solid var(--color-line);
+}
+
+.row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 14px;
+}
+
+.mark {
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--radius-result);
+	background: var(--color-win);
+	color: var(--color-on-win);
+}
+
+.missed .mark {
+	background: var(--color-sunken);
+	color: var(--color-muted);
+}
+
+.name {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: 700;
+}
+
+.missed .name {
+	font-weight: 500;
+	color: var(--color-muted);
+}
+
+.score {
+	flex-shrink: 0;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 14px;
+	font-variant-numeric: tabular-nums;
+}
+
+.missed .score {
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .mark {
+	border-radius: 999px;
+}
 </style>
