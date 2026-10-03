@@ -23,11 +23,11 @@ import RecapSlide from "../RecapSlide.svelte";
 /**
  * Slide 9 — the season's league-wide awards. Awards the viewer won
  * (`awards_won`) are highlighted in gold and marked with a check, with
- * a confetti burst to celebrate.
+ * a confetti burst to celebrate. Decimal values follow `locale`.
  *
- * @type {{ recap: object, reducedMotion: boolean }}
+ * @type {{ recap: object, reducedMotion: boolean, locale?: string }}
  */
-let { recap, reducedMotion } = $props();
+let { recap, reducedMotion, locale = "de-DE" } = $props();
 
 const { t } = getTranslate();
 
@@ -78,7 +78,7 @@ const wonAnyAward = $derived(wonKeys.size > 0);
 						</span>
 					</span>
 				{/if}
-				<span class="award-value">{formatAwardValue(award.value, award.unit)}</span>
+				<span class="award-value">{formatAwardValue(award.value, award.unit, locale)}</span>
 			</li>
 		{/each}
 	</ul>

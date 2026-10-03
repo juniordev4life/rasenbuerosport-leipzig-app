@@ -79,8 +79,10 @@ describe("LiveMatchStep onboarding demo", () => {
 
 		// Assert
 		expect(queryMinuteField()).toBeInTheDocument();
-		expect(screen.getByText("Schütze")).toBeInTheDocument();
-		expect(screen.queryByText("Vorlage")).not.toBeInTheDocument();
+		expect(screen.getByText("live_match.role.scorer")).toBeInTheDocument();
+		expect(
+			screen.queryByText("live_match.role.assister"),
+		).not.toBeInTheDocument();
 	});
 
 	it("creates the demo event in a 1v1 game", async () => {
@@ -108,6 +110,6 @@ describe("LiveMatchStep onboarding demo", () => {
 
 		// Assert
 		expect(queryMinuteField()).toBeInTheDocument();
-		expect(screen.getByText("Vorlage")).toBeInTheDocument();
+		expect(screen.getByText("live_match.role.assister")).toBeInTheDocument();
 	});
 });

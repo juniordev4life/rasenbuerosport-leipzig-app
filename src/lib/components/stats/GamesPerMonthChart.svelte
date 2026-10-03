@@ -1,42 +1,26 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import { getBaseChartOptions, getChartTheme } from "$lib/utils/chart.utils.js";
+import { monthShortLabel } from "$lib/utils/dateLabels.utils.js";
 import ChartCanvas from "./ChartCanvas.svelte";
 import ChartCard from "./ChartCard.svelte";
 
 /**
- * Games per calendar month as vertical bars in the main series colour.
+ * Games per calendar month as vertical bars in the main series colour,
+ * with month names in the given locale.
  *
- * @type {{ data?: Array<{month: string, count: number}> }}
+ * @type {{ data?: Array<{month: string, count: number}>, locale?: string }}
  */
-let { data = [] } = $props();
+let { data = [], locale = "de-DE" } = $props();
 
 const { t } = getTranslate();
-
-const MONTHS_DE = [
-	"Jan",
-	"Feb",
-	"Mär",
-	"Apr",
-	"Mai",
-	"Jun",
-	"Jul",
-	"Aug",
-	"Sep",
-	"Okt",
-	"Nov",
-	"Dez",
-];
 
 const chartConfig = $derived.by(() => {
 	if (!data || data.length === 0) return null;
 	const theme = getChartTheme();
 	const base = getBaseChartOptions(theme);
 
-	const labels = data.map((d) => {
-		const [, month] = d.month.split("-");
-		return MONTHS_DE[Number.parseInt(month, 10) - 1] || d.month;
-	});
+	const labels = data.map((d) => monthShortLabel(d.month, locale));
 
 	return {
 		type: "bar",

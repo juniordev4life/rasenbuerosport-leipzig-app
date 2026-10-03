@@ -12,10 +12,11 @@ import { relativeTime } from "$lib/utils/relativeTime.utils.js";
  *     set in bold, the losing side muted. Under the score: extra time or
  *     the shootout result, and the player's ELO change.
  * Design A: the score in display type. Design B: a dark green score chip.
+ * The time ("heute, 14:32" / "today, 14:32") follows `locale`.
  *
- * @type {{ game: object, currentUserId: string|null }}
+ * @type {{ game: object, currentUserId: string|null, locale?: "de"|"en" }}
  */
-let { game, currentUserId } = $props();
+let { game, currentUserId, locale = "de" } = $props();
 
 const { t } = getTranslate();
 
@@ -152,7 +153,7 @@ function teamLabel(entries, fallbackName) {
 	return fallbackName || "?";
 }
 
-const time = $derived(relativeTime(game.played_at));
+const time = $derived(relativeTime(game.played_at, locale));
 
 const markerLabel = $derived.by(() => {
 	if (!marker) return null;

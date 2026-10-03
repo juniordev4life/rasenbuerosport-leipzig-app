@@ -2,6 +2,7 @@
 import { getTranslate } from "@tolgee/svelte";
 import { fly } from "svelte/transition";
 import PitchBackground from "$lib/components/layout/PitchBackground.svelte";
+import { tolgee } from "$lib/config/i18n.config.js";
 import {
 	availableSlides,
 	isLastSlide,
@@ -34,12 +35,24 @@ import TimingSlide from "./slides/TimingSlide.svelte";
  * the content white sticker cards. From `lg` the frame becomes a
  * phone-shaped card in the middle of the page colour, with previous /
  * next buttons beside it; taps left or right of it step back or on.
+ * Every slide gets the recap, the reduced-motion flag and the locale.
  *
  * @type {{ recap: object, onClose: () => void }}
  */
 let { recap, onClose } = $props();
 
 const { t } = getTranslate();
+
+let currentLanguage = $state(tolgee.getLanguage());
+
+$effect(() => {
+	const update = () => {
+		currentLanguage = tolgee.getLanguage();
+	};
+	tolgee.on("language", update);
+});
+
+const currentLocale = $derived(currentLanguage === "de" ? "de-DE" : "en-US");
 
 const SLIDE_DURATION_MS = 7000;
 
@@ -289,7 +302,7 @@ function handleKeydown(event) {
 				>
 					{#if activeSlide}
 						{@const SlideComponent = SLIDE_COMPONENTS[activeSlide.id]}
-						<SlideComponent {recap} {reducedMotion} />
+						<SlideComponent {recap} {reducedMotion} locale={currentLocale} />
 					{/if}
 				</div>
 			{/key}
