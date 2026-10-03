@@ -31,9 +31,12 @@ let showSuggestions = $state(false);
 let highlightIndex = $state(-1);
 let suggestions = $state([]);
 
-// Preload teams cache on mount
+// Preload teams cache on mount. Without the catalogue the field still
+// takes a typed name; it just offers no suggestions.
 $effect(() => {
-	getAllTeams();
+	getAllTeams().catch((err) => {
+		console.warn("Team suggestions unavailable:", err);
+	});
 });
 
 // Search suggestions when input changes
@@ -42,9 +45,13 @@ $effect(() => {
 		suggestions = [];
 		return;
 	}
-	searchTeams(inputValue, 8).then((results) => {
-		suggestions = results;
-	});
+	searchTeams(inputValue, 8)
+		.then((results) => {
+			suggestions = results;
+		})
+		.catch(() => {
+			suggestions = [];
+		});
 });
 
 function selectTeam(team) {

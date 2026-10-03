@@ -1,11 +1,14 @@
 /**
- * Component test for the poster's manual team dialog: each team field
- * is named by its visible "Home" / "Away" label, so screen readers do
- * not announce two unnamed "Select team" fields.
+ * Component test for the match poster:
+ *   - the manual team dialog names each team field by its visible
+ *     "Home" / "Away" label, so screen readers do not announce two
+ *     unnamed "Select team" fields;
+ *   - an auto-roll that cannot reach the team catalogue shows the load
+ *     error instead of ending in an unhandled rejection.
  */
 
 import { fireEvent, render, screen } from "@testing-library/svelte";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@tolgee/svelte", async () => {
 	const { readable } = await import("svelte/store");
@@ -27,6 +30,7 @@ vi.mock("$lib/utils/randomTeams.utils.js", () => ({
 }));
 
 import MatchPosterStep from "../../../../src/lib/components/games/MatchPosterStep.svelte";
+import { rollRandomTeams } from "../../../../src/lib/utils/randomTeams.utils.js";
 
 /** Renders the poster with both teams set and opens the manual dialog. */
 async function openManualDialog() {
@@ -54,5 +58,34 @@ describe("MatchPosterStep — manual team dialog", () => {
 
 		// Assert
 		expect(screen.getByRole("textbox", { name: label })).toHaveValue(team);
+	});
+});
+
+describe("MatchPosterStep — auto-roll", () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it("shows the load error when the team catalogue is unreachable", async () => {
+		// Arrange
+		vi.mocked(rollRandomTeams).mockRejectedValueOnce(new Error("offline"));
+		vi.spyOn(console, "error").mockImplementation(() => {});
+
+		// Act: no teams yet, so mounting rolls a pair
+		render(MatchPosterStep, {
+			homePlayers: ["jay"],
+			awayPlayers: ["flo"],
+			allPlayers: [],
+			homeTeam: "",
+			awayTeam: "",
+			onAnpfiff: vi.fn(),
+			onBack: vi.fn(),
+		});
+
+		// Assert
+		expect(await screen.findByText("teams.error_loading")).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "new_game.poster.action_roll" }),
+		).toBeEnabled();
 	});
 });

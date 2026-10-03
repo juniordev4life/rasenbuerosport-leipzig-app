@@ -124,6 +124,10 @@ async function roll() {
 		awayTeam = pair.away.name;
 		homeTeamData = pair.home;
 		awayTeamData = pair.away;
+	} catch (err) {
+		// Catalogue unreachable: say so; "Manuell" still works without it.
+		console.error("Failed to roll teams:", err);
+		rollError = $t("teams.error_loading");
 	} finally {
 		rolling = false;
 	}

@@ -77,13 +77,25 @@ export async function searchTeams(query, limit = 8) {
 }
 
 /**
- * Finds a team by exact name match.
+ * Finds a team by exact name match. Callers only decorate a team name
+ * with it (crest, ratings), so it never rejects: when the catalogue
+ * cannot be loaded it resolves `undefined`, like an unknown name, and
+ * the caller keeps the plain name with the fallback crest. The next
+ * call fetches the catalogue again.
  * @param {string} teamName
  * @returns {Promise<TeamData|undefined>}
+ * @example
+ *   const team = await getTeamByName("RB Leipzig");
+ *   team?.logo_url; // crest URL, or undefined when unknown or offline
  */
 export async function getTeamByName(teamName) {
 	if (!teamName) return undefined;
-	await getAllTeams();
+	try {
+		await getAllTeams();
+	} catch (err) {
+		console.warn("Team catalogue unavailable:", err);
+		return undefined;
+	}
 	return teamsByNameCache.get(teamName);
 }
 

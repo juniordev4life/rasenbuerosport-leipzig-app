@@ -57,7 +57,14 @@ async function searchRandomTeams() {
 		return;
 	}
 
-	const teams = await getAllTeams();
+	let teams;
+	try {
+		teams = await getAllTeams();
+	} catch (err) {
+		console.error("Failed to load teams:", err);
+		error = $t("teams.error_loading");
+		return;
+	}
 	const inRange = teams.filter(
 		(t) =>
 			t.star_rating !== null &&
