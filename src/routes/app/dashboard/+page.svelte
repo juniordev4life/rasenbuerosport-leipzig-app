@@ -1,11 +1,11 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import ActiveChallengesCard from "$lib/components/challenges/ActiveChallengesCard.svelte";
+import RecentMatchesList from "$lib/components/historie/RecentMatchesList.svelte";
 import FrankCard from "$lib/components/home/FrankCard.svelte";
 import QuickStats from "$lib/components/home/QuickStats.svelte";
 import RecapReadyCard from "$lib/components/home/RecapReadyCard.svelte";
 import RecentHighlightsCard from "$lib/components/home/RecentHighlightsCard.svelte";
-import RecentMatchesList from "$lib/components/home/RecentMatchesList.svelte";
 import SeriesList from "$lib/components/home/SeriesList.svelte";
 import TalkrundeCard from "$lib/components/home/TalkrundeCard.svelte";
 import Top3List from "$lib/components/home/Top3List.svelte";
@@ -385,7 +385,10 @@ const top3 = $derived(
 			>
 				{#snippet icon()}<HistoryIcon size={22} strokeWidth={2} />{/snippet}
 				<div data-onboarding="dashboard-recent">
-					<RecentMatchesList matches={recentMatches} />
+					<RecentMatchesList
+						matches={recentMatches}
+						emptyText={$t("home.recent_matches.empty")}
+					/>
 				</div>
 			</Section>
 

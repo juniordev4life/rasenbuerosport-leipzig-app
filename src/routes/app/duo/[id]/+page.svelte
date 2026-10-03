@@ -1,12 +1,13 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import { page } from "$app/state";
-import ContributionSection from "$lib/components/duo/ContributionSection.svelte";
 import DuoHero from "$lib/components/duo/DuoHero.svelte";
 import DuoSpiderSection from "$lib/components/duo/DuoSpiderSection.svelte";
 import KpiRow from "$lib/components/duo/KpiRow.svelte";
 import OnboardingCard from "$lib/components/duo/OnboardingCard.svelte";
-import RecentMatchesSection from "$lib/components/duo/RecentMatchesSection.svelte";
+import RecentMatchesList from "$lib/components/historie/RecentMatchesList.svelte";
+import HistoryIcon from "$lib/components/icons/HistoryIcon.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 import { get } from "$lib/services/api.services.js";
 import {
 	computeLifecycle,
@@ -173,7 +174,7 @@ const recentRows = $derived.by(() => {
 		const my = side === "home" ? g.score_home : g.score_away;
 		const opp = side === "home" ? g.score_away : g.score_home;
 		const isDraw = my === opp;
-		const result = isDraw ? "D" : my > opp ? "W" : "L";
+		const result = isDraw ? "draw" : my > opp ? "win" : "loss";
 		const opponentNames = (g.game_players ?? [])
 			.filter((p) => p.team !== side)
 			.map((p) => p.profiles?.username ?? "?")
@@ -191,7 +192,7 @@ const recentRows = $derived.by(() => {
 		return {
 			id: g.id,
 			result,
-			opponentNames: opponentNames || "—",
+			opponent: opponentNames || "—",
 			dateLabel: formatDate(g.played_at),
 			score: `${my}:${opp}`,
 			eloDelta,
@@ -206,13 +207,6 @@ function formatDate(iso) {
 		month: "short",
 	});
 }
-
-/**
- * Per-player contribution rows. The backend does not yet break goals /
- * assists down per player on the duo endpoint, so the section stays
- * hidden until that data is wired in.
- */
-const contributionRows = $derived.by(() => []);
 </script>
 
 <svelte:head>
@@ -256,19 +250,16 @@ const contributionRows = $derived.by(() => []);
 						{tags}
 						tentative={lifecycle === "finding"}
 					/>
-
-					{#if contributionRows.length > 0}
-						<ContributionSection
-							player1={detail.player1}
-							player2={detail.player2}
-							rows={contributionRows}
-						/>
-					{/if}
 				{/if}
 			</div>
 
 			<div class="area-recent">
-				<RecentMatchesSection matches={recentRows} />
+				{#if recentRows.length > 0}
+					<Section title={$t("duo.recent_section")}>
+						{#snippet icon()}<HistoryIcon size={22} strokeWidth={2} />{/snippet}
+						<RecentMatchesList matches={recentRows} />
+					</Section>
+				{/if}
 			</div>
 		</div>
 	{/if}

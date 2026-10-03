@@ -72,7 +72,7 @@ Tap **Compare** at the top right of the leaderboard, pick your opponent and tap 
 
 ### What the H2H shows
 
-- **Duel card** — both players with avatar, player type and current ELO, and your head-to-head wins in the middle. A 👑 marks whoever leads by 2+ wins, a 🔥 badge counts a run of 2+ duel wins in a row, and a one-line verdict sums up the rivalry
+- **Duel card** — both players with avatar, player type and current ELO, and your head-to-head wins in the middle. A 👑 marks whoever leads by 2+ wins, a 🔥 badge counts a run of 2+ duel wins in a row, and Sophie, the analyst among the reporters, sums up the rivalry in one line
 - **ELO delta over time** — the rating gap between you two after each direct duel (shown from 3 duels on)
 - **Character compared** — both player radars (Finisher, Playmaker, Clutch, Consistency, Discipline, Winner) overlaid in one chart
 - **Stat compare** — goals per game in your duels, plus career win rate, total wins, assists per game and total games

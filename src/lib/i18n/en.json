@@ -732,7 +732,6 @@
 		"load_more": "Load more matches",
 		"load_more_remaining": "Load {count} more",
 		"load_more_loading": "Loading …",
-		"load_more_hint": "Tap to load",
 		"load_error": "Could not load matches.",
 		"filter_who_title": "Who played?",
 		"filter_zeit_title": "Which time range?",
@@ -767,8 +766,6 @@
 			"today": "Nothing played today — the league is resting.",
 			"me_thisweek": "No matches of your own this week — time for a game!",
 			"me_default": "No matches of your own in this filter.",
-			"comebacks": "No comebacks documented yet.",
-			"hattricks": "No hat-tricks yet — who'll score the first?",
 			"reset": "Reset filters"
 		}
 	},
@@ -1152,7 +1149,6 @@
 		"team_identity": "Team identity",
 		"archetype_placeholder": "Rising duo",
 		"w_short": "W",
-		"d_short": "D",
 		"l_short": "L",
 		"invalid_id": "Invalid duo id",
 		"load_error": "Could not load duo.",
@@ -1161,11 +1157,10 @@
 		"chemistry_pending_sub": "Chemistry unlocks at 10 shared matches",
 		"league_average": "League average",
 		"spider_section": "Playstyle as a duo",
-		"contribution_section": "Contribution split",
 		"recent_section": "Recent shared games",
 		"tentative_banner": "Values stabilise with more matches",
 		"onboarding_headline": "{remaining} more matches to a full profile",
-		"onboarding_body": "Play more games together to unlock playstyle, chemistry and the contribution split.",
+		"onboarding_body": "Play more games together to unlock playstyle and chemistry.",
 		"axes": {
 			"offensive": "Offence",
 			"possession": "Possession",
@@ -1182,12 +1177,6 @@
 			"matches_meta_fresh": "Brand new pairing",
 			"matches_meta_some": "{count} shared matches",
 			"based_on_recent": "across the last 5 games"
-		},
-		"contrib": {
-			"wins": "Wins",
-			"matches": "Matches",
-			"goals": "Goals",
-			"assists": "Assists"
 		},
 		"archetypes": {
 			"fresh": "Fresh duo",
@@ -1263,12 +1252,11 @@
 		"character_section": "Character compared",
 		"stat_section": "Stat compare",
 		"matches_section": "Recent direct duels",
-		"marcel_empty": "No data yet — the head-to-head is waiting for its first match.",
-		"marcel_dominance_a": "Clear data: {a} dominates the duel {winsA} to {winsB}.",
-		"marcel_dominance_b": "The numbers favour {b} — {winsB} to {winsA}.",
-		"marcel_tied": "Balanced split — {winsA} to {winsB}, neither player pulls away.",
-		"marcel_close": "Tight profile — {winsA} to {winsB}, every detail can tip it.",
-		"marcel_lead": "{leader} leads the duel {winsA} to {winsB}, but the gap is closeable.",
+		"sophie_dominance_a": "Clear data: {a} dominates the duel {winsA} to {winsB}.",
+		"sophie_dominance_b": "The numbers favour {b} — {winsB} to {winsA}.",
+		"sophie_tied": "Balanced split — {winsA} to {winsB}, neither player pulls away.",
+		"sophie_close": "Tight profile — {winsA} to {winsB}, every detail can tip it.",
+		"sophie_lead": "{leader} leads the duel {winsA} to {winsB}, but the gap is closeable.",
 		"stats": {
 			"goals_per_game": "Goals / game",
 			"assists_per_game": "Assists / game",

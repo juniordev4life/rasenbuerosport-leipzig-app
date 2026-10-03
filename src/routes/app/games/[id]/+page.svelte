@@ -140,13 +140,6 @@ const resultSuffix = $derived.by(() => {
 	return "";
 });
 
-/** Lookup profile for any player in the game by player_id. */
-function getProfile(playerId) {
-	if (!playerId || !game?.game_players) return null;
-	const gp = game.game_players.find((p) => p.player_id === playerId);
-	return gp?.profiles || null;
-}
-
 const hasOverview = $derived(!!game?.stats_image_url);
 const hasPasses = $derived(!!game?.passes_image_url);
 const hasDefense = $derived(!!game?.defense_image_url);
