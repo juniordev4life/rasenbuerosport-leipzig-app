@@ -6,7 +6,6 @@ import QuickStats from "$lib/components/home/QuickStats.svelte";
 import RecapReadyCard from "$lib/components/home/RecapReadyCard.svelte";
 import RecentHighlightsCard from "$lib/components/home/RecentHighlightsCard.svelte";
 import RecentMatchesList from "$lib/components/home/RecentMatchesList.svelte";
-import SectionHeader from "$lib/components/home/SectionHeader.svelte";
 import SeriesList from "$lib/components/home/SeriesList.svelte";
 import TalkrundeCard from "$lib/components/home/TalkrundeCard.svelte";
 import Top3List from "$lib/components/home/Top3List.svelte";
@@ -17,6 +16,7 @@ import LightningIcon from "$lib/components/icons/LightningIcon.svelte";
 import MicIcon from "$lib/components/icons/MicIcon.svelte";
 import PlayIcon from "$lib/components/icons/PlayIcon.svelte";
 import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import { get } from "$lib/services/api.services.js";
 import {
@@ -26,6 +26,7 @@ import {
 } from "$lib/services/seasons.services.js";
 import { getLatestTalkshowEpisode } from "$lib/services/talkshow.services.js";
 import { user } from "$lib/stores/auth.stores.js";
+import { isoWeek } from "$lib/utils/isoWeek.utils.js";
 import {
 	isOnboardingDone,
 	ONBOARDING_KEYS,
@@ -118,16 +119,6 @@ $effect(() => {
 		});
 	});
 });
-
-/** ISO week number (Mon–Sun) for the German UI. */
-function isoWeek(date) {
-	const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-	const dayNum = (d.getDay() + 6) % 7;
-	d.setDate(d.getDate() - dayNum + 3);
-	const firstThursday = new Date(d.getFullYear(), 0, 4);
-	const diff = d - firstThursday;
-	return 1 + Math.round(diff / (7 * 24 * 60 * 60 * 1000));
-}
 
 const today = new Date();
 const kalenderwoche = isoWeek(today);
@@ -307,27 +298,16 @@ const top3 = $derived(
 	<title>RasenBürosport</title>
 </svelte:head>
 
-<div class="flex flex-col pb-2 lg:pb-8">
+<div class="stack pb-2 lg:pb-8">
 	{#if loading}
 		<div class="flex justify-center py-12">
-			<div class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"></div>
+			<span class="spinner" role="status"></span>
 		</div>
 	{:else}
-		<!-- `contents` keeps the mobile single-column stack byte-for-byte;
-		     at `lg` the wrapper becomes the bento grid. -->
-		<div class="contents lg:grid lg:grid-cols-12 lg:auto-rows-min lg:gap-4 lg:items-start">
-			{#if recapCard}
-				<!-- mb-4 on mobile only: the stack has no gap there, at lg the grid's gap-4 spaces it. -->
-				<div class="mb-4 lg:mb-0 lg:col-span-12">
-					<RecapReadyCard
-						seasonId={recapCard.seasonId}
-						gameVersion={recapCard.gameVersion}
-						withTalkrunde={recapCard.withTalkrunde}
-					/>
-				</div>
-			{/if}
-
-			<div data-onboarding="dashboard-week" class="lg:col-span-5">
+		<!-- On phones the wrapper dissolves (`display: contents`) and every
+		     block joins the page stack; at lg it becomes the bento grid. -->
+		<div class="bento">
+			<div data-onboarding="dashboard-week" class="span-5">
 				<FrankCard
 					{userName}
 					wins={weekStats.wins}
@@ -338,49 +318,56 @@ const top3 = $derived(
 				/>
 			</div>
 
-			<!-- Desktop-only: browse recent highlight reels on the laptop. -->
-			<div class="hidden lg:flex lg:flex-col lg:col-span-7">
-				<SectionHeader title={$t("home.sections.highlights")}>
-					{#snippet icon()}<PlayIcon size={11} />{/snippet}
-				</SectionHeader>
-				<RecentHighlightsCard {games} />
-			</div>
-
-			<div class="lg:col-span-6 lg:flex lg:flex-col">
-				<SectionHeader title={$t("home.sections.challenges")}>
-					{#snippet icon()}<CheckIcon size={11} strokeWidth={1.8} />{/snippet}
-				</SectionHeader>
-				<ActiveChallengesCard />
-			</div>
-
-			<div class="lg:col-span-6 lg:flex lg:flex-col">
-				<SectionHeader
-					title={$t("home.sections.talkrunde")}
-					href={ROUTES.WRAPPED}
-					actionLabel={$t("home.sections.talkrunde_action")}
-				>
-					{#snippet icon()}<MicIcon size={11} strokeWidth={1.8} />{/snippet}
-				</SectionHeader>
-				<TalkrundeCard {talkrunde} />
-			</div>
-
-			{#if series.length > 0}
-				<div class="lg:col-span-12 lg:flex lg:flex-col">
-					<SectionHeader title={$t("home.sections.series")}>
-						{#snippet icon()}<LightningIcon size={11} strokeWidth={1.8} />{/snippet}
-					</SectionHeader>
-					<SeriesList {series} />
+			{#if recapCard}
+				<div class="span-12 recap-slot">
+					<RecapReadyCard
+						seasonId={recapCard.seasonId}
+						gameVersion={recapCard.gameVersion}
+						withTalkrunde={recapCard.withTalkrunde}
+					/>
 				</div>
 			{/if}
 
-			<div class="lg:col-span-4 lg:flex lg:flex-col">
-				<SectionHeader
-					title={$t("home.sections.quick_stats")}
-					href={ROUTES.PROFILE}
-					actionLabel={$t("home.sections.action_profile")}
-				>
-					{#snippet icon()}<ClockIcon size={11} strokeWidth={1.8} />{/snippet}
-				</SectionHeader>
+			<!-- Desktop only: browse recent highlight reels on the laptop. -->
+			<Section title={$t("home.sections.highlights")} class="span-7 desktop-only">
+				{#snippet icon()}<PlayIcon size={22} strokeWidth={2} />{/snippet}
+				<RecentHighlightsCard {games} />
+			</Section>
+
+			<Section
+				title={$t("home.sections.challenges")}
+				href={ROUTES.CHALLENGES}
+				actionLabel={$t("challenges.dashboard_open")}
+				class="span-6"
+			>
+				{#snippet icon()}<CheckIcon size={22} strokeWidth={2} />{/snippet}
+				<ActiveChallengesCard />
+			</Section>
+
+			<Section
+				title={$t("home.sections.talkrunde")}
+				href={ROUTES.WRAPPED}
+				actionLabel={$t("home.sections.talkrunde_action")}
+				class="span-6"
+			>
+				{#snippet icon()}<MicIcon size={22} strokeWidth={2} />{/snippet}
+				<TalkrundeCard {talkrunde} />
+			</Section>
+
+			{#if series.length > 0}
+				<Section title={$t("home.sections.series")} class="span-12">
+					{#snippet icon()}<LightningIcon size={22} strokeWidth={2} />{/snippet}
+					<SeriesList {series} />
+				</Section>
+			{/if}
+
+			<Section
+				title={$t("home.sections.quick_stats")}
+				href={ROUTES.PROFILE}
+				actionLabel={$t("home.sections.action_profile")}
+				class="span-4"
+			>
+				{#snippet icon()}<ClockIcon size={22} strokeWidth={2} />{/snippet}
 				<div data-onboarding="dashboard-quickstats">
 					<QuickStats
 						elo={myCurrentElo}
@@ -388,33 +375,79 @@ const top3 = $derived(
 						lastFive={lastFiveResults}
 					/>
 				</div>
-			</div>
+			</Section>
 
-			<div class="lg:col-span-4 lg:flex lg:flex-col">
-				<SectionHeader
-					title={$t("home.sections.recent_matches")}
-					href={ROUTES.GAMES}
-					actionLabel={$t("home.sections.action_all")}
-				>
-					{#snippet icon()}<HistoryIcon size={11} strokeWidth={1.8} />{/snippet}
-				</SectionHeader>
+			<Section
+				title={$t("home.sections.recent_matches")}
+				href={ROUTES.GAMES}
+				actionLabel={$t("home.sections.action_all")}
+				class="span-4"
+			>
+				{#snippet icon()}<HistoryIcon size={22} strokeWidth={2} />{/snippet}
 				<div data-onboarding="dashboard-recent">
 					<RecentMatchesList matches={recentMatches} />
 				</div>
-			</div>
+			</Section>
 
-			<div class="lg:col-span-4 lg:flex lg:flex-col">
-				<SectionHeader
-					title={$t("home.sections.top3")}
-					href={ROUTES.LEADERBOARD}
-					actionLabel={$t("home.sections.action_ranking")}
-				>
-					{#snippet icon()}<TrophyIcon size={11} strokeWidth={1.8} />{/snippet}
-				</SectionHeader>
+			<Section
+				title={$t("home.sections.top3")}
+				href={ROUTES.LEADERBOARD}
+				actionLabel={$t("home.sections.action_ranking")}
+				class="span-4"
+			>
+				{#snippet icon()}<TrophyIcon size={22} strokeWidth={2} />{/snippet}
 				<div data-onboarding="dashboard-top3">
 					<Top3List {top3} />
 				</div>
-			</div>
+			</Section>
 		</div>
 	{/if}
 </div>
+
+<style>
+.bento {
+	display: contents;
+}
+
+.bento :global(.desktop-only) {
+	display: none;
+}
+
+@media (min-width: 1024px) {
+	.bento {
+		display: grid;
+		grid-template-columns: repeat(12, minmax(0, 1fr));
+		gap: var(--stack-gap);
+	}
+
+	.bento :global(.desktop-only) {
+		display: flex;
+	}
+
+	/* The recap banner leads the grid on desktop; on phones it follows
+	 * Frank, whose red band in A sits flush under the header. */
+	.recap-slot {
+		order: -1;
+	}
+
+	.bento > :global(.span-4) {
+		grid-column: span 4;
+	}
+
+	.bento > :global(.span-5) {
+		grid-column: span 5;
+	}
+
+	.bento > :global(.span-6) {
+		grid-column: span 6;
+	}
+
+	.bento > :global(.span-7) {
+		grid-column: span 7;
+	}
+
+	.bento > :global(.span-12) {
+		grid-column: span 12;
+	}
+}
+</style>

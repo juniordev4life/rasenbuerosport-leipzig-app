@@ -13,9 +13,8 @@
  * @property {string} name - First name shown in the card header.
  * @property {string} titleKey - i18n key for the role title (e.g. "Der Chronist").
  * @property {string} imageUrl - Public path to the photo asset.
- * @property {string} accentClass - Tailwind class for the accent colour.
- * @property {string} ringClass - Tailwind ring class for the avatar.
- * @property {string} gradientFromClass - Tailwind gradient-from for the card.
+ * @property {string} accentClass - Text colour utility for the persona accent (a theme token).
+ * @property {string} ringClass - Ring colour utility for the avatar (a theme token).
  * @property {Array<{ iconKey: string, labelKey: string }>} pills
  * @property {string[]} bioKeys - i18n keys, one per bio paragraph.
  * @property {string} quoteKey - i18n key for the pull quote.
@@ -29,9 +28,8 @@ export const REPORTERS = {
 		name: "Marcel",
 		titleKey: "match_report.reporter_bio.marcel.title",
 		imageUrl: "/images/reporter/marcel.webp",
-		accentClass: "text-accent-red",
-		ringClass: "ring-accent-red",
-		gradientFromClass: "from-accent-red/10",
+		accentClass: "text-brand",
+		ringClass: "ring-brand",
 		pills: [
 			{
 				iconKey: "📺",
@@ -51,9 +49,8 @@ export const REPORTERS = {
 		name: "Sophie",
 		titleKey: "match_report.reporter_bio.sophie.title",
 		imageUrl: "/images/reporter/sophie.webp",
-		accentClass: "text-blue-400",
-		ringClass: "ring-blue-400",
-		gradientFromClass: "from-blue-400/10",
+		accentClass: "text-navy",
+		ringClass: "ring-aqua",
 		pills: [
 			{
 				iconKey: "📊",
@@ -76,9 +73,8 @@ export const REPORTERS = {
 		name: "Frank",
 		titleKey: "match_report.reporter_bio.frank.title",
 		imageUrl: "/images/reporter/frank.webp",
-		accentClass: "text-warning",
-		ringClass: "ring-warning",
-		gradientFromClass: "from-warning/10",
+		accentClass: "text-brand",
+		ringClass: "ring-gold",
 		pills: [
 			{
 				iconKey: "🔥",

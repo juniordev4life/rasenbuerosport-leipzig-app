@@ -179,11 +179,11 @@ const reportBlocked = $derived(isReportBlocked(game));
 <div class="flex flex-col gap-3 max-w-5xl lg:max-w-none xl:max-w-[1280px] mx-auto px-1 pt-0 pb-8">
 	{#if loading}
 		<div class="flex justify-center py-8">
-			<div class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"></div>
+			<div class="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full"></div>
 		</div>
 	{:else if error || !game}
 		<div class="text-center py-8">
-			<p class="text-text-secondary">{$t("game_detail.not_found")}</p>
+			<p class="text-muted">{$t("game_detail.not_found")}</p>
 		</div>
 	{:else}
 		<MatchHeroNew
@@ -210,17 +210,17 @@ const reportBlocked = $derived(isReportBlocked(game));
 
 		{#if game.pending}
 			<section
-				class="rounded-xl border border-border bg-bg-card px-4 py-4 flex items-center gap-3"
+				class="rounded-xl border border-line bg-surface px-4 py-4 flex items-center gap-3"
 			>
 				<div
-					class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-accent-red border-t-transparent"
+					class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-brand border-t-transparent"
 					aria-hidden="true"
 				></div>
 				<div>
-					<div class="text-sm font-semibold text-text-primary">
+					<div class="text-sm font-semibold text-ink">
 						{$t("game_detail.pending.title")}
 					</div>
-					<div class="text-xs text-text-secondary mt-0.5">
+					<div class="text-xs text-muted mt-0.5">
 						{$t("game_detail.pending.hint")}
 					</div>
 				</div>
@@ -276,17 +276,17 @@ const reportBlocked = $derived(isReportBlocked(game));
 				     pipeline finishes (video_status ready/failed); until then show
 				     a preparing notice — same cue as the other analysis placeholders. -->
 				<section
-					class="rounded-xl border border-border bg-bg-card px-4 py-4 flex items-center gap-3"
+					class="rounded-xl border border-line bg-surface px-4 py-4 flex items-center gap-3"
 				>
 					<div
-						class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-accent-red border-t-transparent"
+						class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-brand border-t-transparent"
 						aria-hidden="true"
 					></div>
 					<div>
-						<div class="text-sm font-semibold text-text-primary">
+						<div class="text-sm font-semibold text-ink">
 							{$t("game_detail.report_preparing.title")}
 						</div>
-						<div class="text-xs text-text-secondary mt-0.5">
+						<div class="text-xs text-muted mt-0.5">
 							{$t("game_detail.report_preparing.hint")}
 						</div>
 					</div>
@@ -334,17 +334,17 @@ const reportBlocked = $derived(isReportBlocked(game));
 			     The collapsed fallback below stays for adding stats by hand. -->
 			{#if reportBlocked}
 				<section
-					class="rounded-xl border border-border bg-bg-card px-4 py-4 flex items-center gap-3"
+					class="rounded-xl border border-line bg-surface px-4 py-4 flex items-center gap-3"
 				>
 					<div
-						class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-accent-red border-t-transparent"
+						class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-brand border-t-transparent"
 						aria-hidden="true"
 					></div>
 					<div>
-						<div class="text-sm font-semibold text-text-primary">
+						<div class="text-sm font-semibold text-ink">
 							{$t("game_detail.report_preparing.title")}
 						</div>
-						<div class="text-xs text-text-secondary mt-0.5">
+						<div class="text-xs text-muted mt-0.5">
 							{$t("game_detail.report_preparing.hint")}
 						</div>
 					</div>
@@ -361,9 +361,9 @@ const reportBlocked = $derived(isReportBlocked(game));
 				/>
 			{/if}
 
-			<details class="rounded-xl border border-border bg-bg-card overflow-hidden">
+			<details class="rounded-xl border border-line bg-surface overflow-hidden">
 				<summary
-					class="cursor-pointer select-none px-4 py-3 text-sm text-text-secondary flex items-center gap-2 hover:text-text-primary transition-colors"
+					class="cursor-pointer select-none px-4 py-3 text-sm text-muted flex items-center gap-2 hover:text-ink transition-colors"
 				>
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true">
 						<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -403,19 +403,19 @@ const reportBlocked = $derived(isReportBlocked(game));
 		{/if}
 
 		{#if isAdmin}
-			<div class="mt-2 rounded-xl border border-accent-red/30 px-4 sm:px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between">
+			<div class="mt-2 rounded-xl border border-brand/30 px-4 sm:px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between">
 				<div class="leading-tight">
-					<div class="text-[10px] tracking-[0.08em] uppercase text-text-muted mb-1 font-semibold">
+					<div class="text-[10px] tracking-[0.08em] uppercase text-muted mb-1 font-semibold">
 						{$t("game_detail.section.danger_zone")}
 					</div>
-					<div class="text-sm text-text-secondary">
+					<div class="text-sm text-muted">
 						{$t("game_detail.danger_zone.description")}
 					</div>
 				</div>
 				<button
 					type="button"
 					onclick={() => (showDeleteConfirm = true)}
-					class="shrink-0 px-4 py-2.5 rounded-lg border border-accent-red/40 text-accent-red text-sm font-medium hover:bg-accent-red/10 transition-colors"
+					class="shrink-0 px-4 py-2.5 rounded-lg border border-brand/40 text-brand text-sm font-medium hover:bg-brand/10 transition-colors"
 				>
 					{$t("game_detail.delete")}
 				</button>
@@ -432,20 +432,20 @@ const reportBlocked = $derived(isReportBlocked(game));
 		onclick={() => (showDeleteConfirm = false)}
 	>
 		<div
-			class="bg-bg-secondary border border-border rounded-xl p-6 w-full max-w-sm"
+			class="bg-surface border border-line rounded-xl p-6 w-full max-w-sm"
 			onclick={(e) => e.stopPropagation()}
 		>
-			<h3 class="text-lg font-bold text-text-primary mb-2">
+			<h3 class="text-lg font-bold text-ink mb-2">
 				{$t("game_detail.delete_confirm_title")}
 			</h3>
-			<p class="text-sm text-text-secondary mb-6">
+			<p class="text-sm text-muted mb-6">
 				{$t("game_detail.delete_confirm_message")}
 			</p>
 			<div class="flex gap-3">
 				<button
 					type="button"
 					onclick={() => (showDeleteConfirm = false)}
-					class="flex-1 py-2 px-4 rounded-lg bg-bg-input border border-border text-text-primary text-sm font-medium hover:bg-bg-secondary transition-colors"
+					class="flex-1 py-2 px-4 rounded-lg bg-sunken border border-line text-ink text-sm font-medium hover:bg-surface transition-colors"
 				>
 					{$t("game_detail.delete_cancel")}
 				</button>
@@ -453,7 +453,7 @@ const reportBlocked = $derived(isReportBlocked(game));
 					type="button"
 					onclick={handleDeleteGame}
 					disabled={deleting}
-					class="flex-1 py-2 px-4 rounded-lg bg-error text-white text-sm font-medium hover:bg-error/90 disabled:opacity-50 transition-colors"
+					class="flex-1 py-2 px-4 rounded-lg bg-loss text-white text-sm font-medium hover:bg-loss/90 disabled:opacity-50 transition-colors"
 				>
 					{deleting ? $t("common.loading") : $t("game_detail.delete_confirm")}
 				</button>

@@ -27,8 +27,8 @@ const chartConfig = $derived.by(() => {
 				{
 					data: [data.total_xg, data.total_goals],
 					backgroundColor: [
-						`${theme.textSecondary}50`,
-						isOver ? theme.success : theme.error,
+						`${theme.muted}50`,
+						isOver ? theme.win : theme.loss,
 					],
 					borderRadius: 6,
 					barThickness: 40,
@@ -56,10 +56,10 @@ const chartConfig = $derived.by(() => {
 </script>
 
 {#if data && data.games_with_xg > 0 && chartConfig}
-	<div class="bg-bg-secondary border border-border rounded-lg p-4">
+	<div class="bg-surface border border-line rounded-lg p-4">
 		<div class="flex items-center justify-between mb-3">
-			<h3 class="text-sm font-medium text-text-secondary">{$t("stats_dashboard.xg_vs_goals")}</h3>
-			<span class="text-xs font-bold {isOver ? 'text-success' : 'text-error'}">
+			<h3 class="text-sm font-medium text-muted">{$t("stats_dashboard.xg_vs_goals")}</h3>
+			<span class="text-xs font-bold {isOver ? 'text-win' : 'text-loss'}">
 				{isOver ? "+" : ""}{diff > 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1)}
 			</span>
 		</div>

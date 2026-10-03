@@ -93,12 +93,12 @@ const glowColor = $derived(
 const borderClass = $derived(
 	state.mode === MODE.CARD_AWAITING_PLAYER
 		? state.pendingCardColor === "red"
-			? "border-accent-red/60"
-			: "border-warning/60"
+			? "border-brand/60"
+			: "border-gold/60"
 		: state.mode === MODE.PENALTY_MISS_AWAITING_PLAYER ||
 				state.mode === MODE.PENALTY_MISS_AWAITING_KEEPER
-			? "border-warning/60"
-			: "border-border",
+			? "border-gold/60"
+			: "border-line",
 );
 
 function isPlayerScorer(id) {
@@ -235,7 +235,7 @@ function isPlayerAssistHint(id, side) {
 				{@render halfPlayers(homePlayers, "home")}
 			</div>
 			{#if editorSide === "home"}
-				<div class="absolute inset-2 z-10 overflow-hidden rounded-xl bg-bg-card border border-border p-3 shadow-xl">
+				<div class="absolute inset-2 z-10 overflow-hidden rounded-xl bg-surface border border-line p-3 shadow-xl">
 					<MinuteEditor
 						minute={state.minute}
 						stoppageMinutes={state.stoppageMinutes}
@@ -275,7 +275,7 @@ function isPlayerAssistHint(id, side) {
 				{@render halfPlayers(awayPlayers, "away")}
 			</div>
 			{#if editorSide === "away"}
-				<div class="absolute inset-2 z-10 overflow-hidden rounded-xl bg-bg-card border border-border p-3 shadow-xl">
+				<div class="absolute inset-2 z-10 overflow-hidden rounded-xl bg-surface border border-line p-3 shadow-xl">
 					<MinuteEditor
 						minute={state.minute}
 						stoppageMinutes={state.stoppageMinutes}
@@ -299,13 +299,13 @@ function isPlayerAssistHint(id, side) {
 	<!-- Awaiting-player hint -->
 	{#if awaitingHint}
 		<div class="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none">
-			<span class="bg-black/70 border border-border text-[11px] text-text-primary font-semibold px-3 py-1.5 rounded-full">
+			<span class="bg-black/70 border border-line text-[11px] text-ink font-semibold px-3 py-1.5 rounded-full">
 				{awaitingHint}
 			</span>
 		</div>
 	{:else if state.mode === MODE.IDLE && state.events.length === 0}
 		<div class="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none">
-			<span class="bg-black/50 border border-border/40 text-[10px] text-text-muted font-medium px-2.5 py-1 rounded-full">
+			<span class="bg-black/50 border border-line/40 text-[10px] text-muted font-medium px-2.5 py-1 rounded-full">
 				{$t("live_match.hint.idle")}
 			</span>
 		</div>

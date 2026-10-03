@@ -82,7 +82,7 @@ function handleClose() {
 {#if loading}
 	<div class="loading">
 		<div
-			class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"
+			class="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full"
 		></div>
 	</div>
 {:else if errorMessage}

@@ -40,7 +40,7 @@ const chartConfig = $derived.by(() => {
 			datasets: [
 				{
 					data: data.map((d) => d.count),
-					backgroundColor: `${theme.accentRed}cc`,
+					backgroundColor: `${theme.brand}cc`,
 					borderRadius: 4,
 				},
 			],
@@ -72,8 +72,8 @@ const chartConfig = $derived.by(() => {
 </script>
 
 {#if data.length > 0 && chartConfig}
-	<div class="bg-bg-secondary border border-border rounded-lg p-4">
-		<h3 class="text-sm font-medium text-text-secondary mb-3">{$t("stats_dashboard.games_per_month")}</h3>
+	<div class="bg-surface border border-line rounded-lg p-4">
+		<h3 class="text-sm font-medium text-muted mb-3">{$t("stats_dashboard.games_per_month")}</h3>
 		<ChartCanvas config={chartConfig} height="h-48" />
 	</div>
 {/if}

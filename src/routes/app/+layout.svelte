@@ -1,4 +1,5 @@
 <script>
+import { getTranslate } from "@tolgee/svelte";
 import { browser } from "$app/environment";
 import { goto } from "$app/navigation";
 import { page } from "$app/state";
@@ -13,6 +14,8 @@ import { get } from "$lib/services/api.services.js";
 import { logout } from "$lib/services/auth.services.js";
 
 let { children } = $props();
+
+const { t } = getTranslate();
 let authorized = $state(false);
 let checking = $state(true);
 
@@ -58,21 +61,19 @@ $effect(() => {
 </script>
 
 {#if checking}
-	<div class="min-h-screen bg-bg-primary flex items-center justify-center">
-		<div
-			class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"
-		></div>
+	<div class="min-h-screen flex items-center justify-center">
+		<div class="spinner" role="status" aria-label={$t("common.loading")}></div>
 	</div>
 {:else if authorized}
-	<div class="min-h-screen bg-bg-primary flex flex-col lg:flex-row">
+	<div class="app-shell min-h-screen flex flex-col lg:flex-row">
 		<Sidebar />
 
-		<div class="flex flex-col flex-1 {isImmersive ? '' : 'pb-16 lg:pb-0'}">
+		<div class="flex flex-col flex-1 min-w-0 {isImmersive ? '' : 'pb-28 lg:pb-0'}">
 			{#if !isImmersive}
 				<Header />
 				<Topbar />
 			{/if}
-			<main class="flex-1 px-4 lg:px-10 xl:px-12 py-2 lg:py-8 max-w-lg lg:max-w-none xl:max-w-[1400px] 2xl:max-w-[1600px] mx-auto w-full">
+			<main class="app-main flex-1 py-2 lg:py-8 max-w-lg lg:max-w-none xl:max-w-[1400px] 2xl:max-w-[1600px] mx-auto w-full">
 				{@render children()}
 			</main>
 		</div>
@@ -87,3 +88,27 @@ $effect(() => {
 		<SeasonRecapLauncher />
 	</div>
 {/if}
+
+<style>
+/* Side gutter of the page content. Hero bands in design A use it to
+ * bleed to the screen edge (`.bleed` in app.css). */
+.app-shell {
+	--page-gutter: 1rem;
+}
+
+.app-main {
+	padding-inline: var(--page-gutter);
+}
+
+@media (min-width: 1024px) {
+	.app-shell {
+		--page-gutter: 2.5rem;
+	}
+}
+
+@media (min-width: 1280px) {
+	.app-shell {
+		--page-gutter: 3rem;
+	}
+}
+</style>

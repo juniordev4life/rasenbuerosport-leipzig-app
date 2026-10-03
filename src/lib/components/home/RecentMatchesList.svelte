@@ -2,9 +2,9 @@
 import { getTranslate } from "@tolgee/svelte";
 
 /**
- * Last 3 of the user's matches as compact rows. Each row carries the
- * result pill, the opponent line, the score in the winner's colour
- * and the player's ELO delta on the right.
+ * The signed-in player's last three matches. Design A: S / U / N marker
+ * left, the score in display type and the ELO change right. Design B:
+ * a dark green score chip left, the ELO change as a pill right.
  *
  * @type {{
  *   matches: Array<{
@@ -12,7 +12,7 @@ import { getTranslate } from "@tolgee/svelte";
  *     opponent: string,
  *     dateLabel: string,
  *     mode: string,
- *     result: "win"|"loss"|"draw",
+ *     result: "win"|"loss"|"draw"|null,
  *     score: string,
  *     eloDelta: number|null,
  *   }>,
@@ -22,69 +22,143 @@ let { matches = [] } = $props();
 
 const { t } = getTranslate();
 
+const RESULT = {
+	win: { letter: "S", cls: "result-w", tone: "win" },
+	draw: { letter: "U", cls: "result-d", tone: "draw" },
+	loss: { letter: "N", cls: "result-l", tone: "loss" },
+};
+
 function formatDelta(n) {
 	if (n === null || n === undefined) return null;
 	const r = Math.round(n);
-	if (r > 0) return `↑ +${r}`;
-	if (r < 0) return `↓ −${Math.abs(r)}`;
+	if (r > 0) return `+${r}`;
+	if (r < 0) return `−${Math.abs(r)}`;
 	return "±0";
+}
+
+function deltaTone(n) {
+	const r = Math.round(n ?? 0);
+	return r > 0 ? "win" : r < 0 ? "loss" : "draw";
 }
 </script>
 
-<div class="flex flex-col gap-1.5">
-	{#each matches as match (match.id)}
-		<a
-			href={`/app/games/${match.id}`}
-			class="bg-bg-card border border-border rounded-xl px-3 py-2.5 flex items-center gap-3 hover:bg-bg-input transition-colors"
-		>
-			{#if match.result}
-				<span
-					class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-extrabold border-[1.5px] {match.result === 'win'
-						? 'bg-success/15 text-success border-success/40'
-						: match.result === 'loss'
-							? 'bg-accent-red/15 text-accent-red border-accent-red/40'
-							: 'bg-warning/15 text-warning border-warning/40'}"
-				>
-					{match.result === "win" ? "S" : match.result === "loss" ? "N" : "U"}
+{#if matches.length === 0}
+	<div class="card px-4 py-5 text-center text-sm text-muted">
+		{$t("home.recent_matches.empty")}
+	</div>
+{:else}
+	<div class="card rows matches">
+		{#each matches as match (match.id)}
+			{@const r = RESULT[match.result]}
+			<a href={`/app/games/${match.id}`} class="match">
+				<span class="result marker {r?.cls ?? 'result-d'}">{r?.letter ?? "–"}</span>
+				<span class="score chip-score">{match.score}</span>
+				<span class="flex flex-col gap-0.5 flex-1 min-w-0">
+					<span class="font-bold truncate">vs. {match.opponent}</span>
+					<span class="text-[13px] text-muted">{match.dateLabel} · {match.mode}</span>
 				</span>
-			{:else}
-				<span class="w-6 h-6 shrink-0" aria-hidden="true"></span>
-			{/if}
-			<div class="flex-1 min-w-0">
-				<div class="text-[12px] font-semibold text-text-primary truncate">
-					vs. {match.opponent}
-				</div>
-				<div class="text-[10px] text-text-muted">
-					{match.dateLabel} · {match.mode}
-				</div>
-			</div>
-			<div
-				class="text-[14px] font-extrabold tabular-nums shrink-0 {match.result === 'win'
-					? 'text-success'
-					: match.result === 'loss'
-						? 'text-accent-red'
-						: match.result === 'draw'
-							? 'text-warning'
-							: 'text-text-primary'}"
-			>
-				{match.score}
-			</div>
-			{#if match.eloDelta != null}
-				<div
-					class="text-[10px] font-bold tabular-nums shrink-0 min-w-[40px] text-right {match.eloDelta > 0
-						? 'text-success'
-						: match.eloDelta < 0
-							? 'text-accent-red'
-							: 'text-text-muted'}"
-				>
-					{formatDelta(match.eloDelta)}
-				</div>
-			{/if}
-		</a>
-	{/each}
-	{#if matches.length === 0}
-		<div class="text-center text-[11px] text-text-muted italic py-3">
-			{$t("home.recent_matches.empty")}
-		</div>
-	{/if}
-</div>
+				<span class="right">
+					<span class="num score-a tone-{r?.tone ?? 'draw'}">{match.score}</span>
+					{#if match.eloDelta != null}
+						<span class="delta tone-{deltaTone(match.eloDelta)}">
+							{formatDelta(match.eloDelta)} <span class="delta-unit">ELO</span>
+						</span>
+					{/if}
+				</span>
+			</a>
+		{/each}
+	</div>
+{/if}
+
+<style>
+.match {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-height: 68px;
+	padding: 0 16px;
+	text-decoration: none;
+	color: inherit;
+}
+
+.match:hover {
+	background: var(--color-sunken);
+}
+
+.marker {
+	width: 32px;
+	height: 32px;
+	font-size: 16px;
+}
+
+.chip-score {
+	display: none;
+}
+
+.right {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 5px;
+	flex-shrink: 0;
+}
+
+.score-a {
+	font-size: 24px;
+	line-height: 0.8;
+}
+
+.delta {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.tone-win {
+	color: var(--color-win);
+}
+
+.tone-loss {
+	color: var(--color-loss);
+}
+
+.tone-draw {
+	color: var(--color-muted);
+}
+
+/* Design B */
+:global([data-variant="b"]) .match {
+	min-height: 64px;
+	padding: 0;
+}
+
+:global([data-variant="b"]) .marker,
+:global([data-variant="b"]) .score-a,
+:global([data-variant="b"]) .delta-unit {
+	display: none;
+}
+
+:global([data-variant="b"]) .chip-score {
+	display: inline-flex;
+	min-width: 64px;
+}
+
+:global([data-variant="b"]) .delta {
+	padding: 4px 10px;
+	border-radius: 999px;
+	font-size: 14px;
+}
+
+:global([data-variant="b"]) .delta.tone-win {
+	background: var(--color-win-soft);
+}
+
+:global([data-variant="b"]) .delta.tone-loss {
+	background: var(--color-loss-soft);
+}
+
+:global([data-variant="b"]) .delta.tone-draw {
+	background: var(--color-sunken);
+}
+</style>

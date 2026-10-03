@@ -311,16 +311,16 @@ const filterGroups = $derived([
 	<!-- Persistent filter rail (desktop only); reuses the same setters as
 	     the mobile filter sheet, so there is no duplicated filter logic. -->
 	<aside class="hidden lg:flex lg:flex-col lg:gap-4 lg:sticky lg:top-20">
-		<div class="rounded-xl border border-border bg-bg-card p-4 flex flex-col gap-4">
+		<div class="rounded-xl border border-line bg-surface p-4 flex flex-col gap-4">
 			<div>
-				<div class="text-[22px] font-extrabold tabular-nums text-text-primary leading-none">
+				<div class="text-[22px] font-extrabold tabular-nums text-ink leading-none">
 					{totalCount}
 				</div>
-				<div class="text-[11px] text-text-secondary mt-1">{$t("historie.matches")}</div>
+				<div class="text-[11px] text-muted mt-1">{$t("historie.matches")}</div>
 			</div>
 			{#each filterGroups as group (group.key)}
 				<div>
-					<div class="text-[10px] font-bold uppercase tracking-[0.1em] text-text-muted mb-1.5">
+					<div class="text-[10px] font-bold uppercase tracking-[0.1em] text-muted mb-1.5">
 						{$t(group.titleKey)}
 					</div>
 					<div class="flex flex-wrap gap-1.5">
@@ -329,8 +329,8 @@ const filterGroups = $derived([
 								type="button"
 								onclick={() => setFilter(group.key, opt.value)}
 								class="px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors {group.current === opt.value
-									? 'bg-accent-red/10 text-accent-red border-accent-red/30'
-									: 'bg-bg-input text-text-secondary border-border hover:text-text-primary'}"
+									? 'bg-brand/10 text-brand border-brand/30'
+									: 'bg-sunken text-muted border-line hover:text-ink'}"
 							>
 								{opt.label}
 							</button>

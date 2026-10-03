@@ -46,7 +46,7 @@ function handleChange(event) {
 <select
 	value={$selectedSeason}
 	onchange={handleChange}
-	class="bg-bg-secondary border border-border text-text-primary text-sm rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-accent-red"
+	class="bg-surface border border-line text-ink text-sm rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-brand"
 	aria-label={$t("season.season_label")}
 >
 	{#each options as option (option.value)}

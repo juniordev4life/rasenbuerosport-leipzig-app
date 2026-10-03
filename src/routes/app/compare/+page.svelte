@@ -110,8 +110,8 @@ function startCompare() {
 
 <div class="mx-auto max-w-3xl lg:max-w-none xl:max-w-[1100px] px-3 lg:px-0 pb-48 lg:pb-8 pt-0 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-x-6 lg:items-start">
 	<header class="mb-2 lg:hidden">
-		<h1 class="text-2xl font-extrabold tracking-tight text-text-primary whitespace-nowrap">{pageTitle}</h1>
-		<p class="text-xs text-text-secondary mt-1">{pageSub}</p>
+		<h1 class="text-2xl font-extrabold tracking-tight text-ink whitespace-nowrap">{pageTitle}</h1>
+		<p class="text-xs text-muted mt-1">{pageSub}</p>
 	</header>
 
 	<div class="mb-3 lg:mb-0 lg:col-start-1 lg:row-start-1">
@@ -162,7 +162,7 @@ function startCompare() {
 	<div class="lg:col-start-1 lg:row-start-2">
 	{#if loading}
 		<div class="flex justify-center py-12">
-			<div class="animate-spin h-8 w-8 border-2 border-warning border-t-transparent rounded-full"></div>
+			<div class="animate-spin h-8 w-8 border-2 border-gold border-t-transparent rounded-full"></div>
 		</div>
 	{:else}
 		<SelectionGrid

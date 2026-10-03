@@ -22,7 +22,7 @@ const chartConfig = $derived.by(() => {
 
 	const maxVal = Math.max(...values);
 	const colors = values.map((v) =>
-		v === maxVal && maxVal > 0 ? theme.accentRed : `${theme.textSecondary}50`,
+		v === maxVal && maxVal > 0 ? theme.brand : `${theme.muted}50`,
 	);
 
 	return {
@@ -63,8 +63,8 @@ const chartConfig = $derived.by(() => {
 </script>
 
 {#if data.length > 0 && chartConfig}
-	<div class="bg-bg-secondary border border-border rounded-lg p-4">
-		<h3 class="text-sm font-medium text-text-secondary mb-3">{$t("stats_dashboard.weekday_distribution")}</h3>
+	<div class="bg-surface border border-line rounded-lg p-4">
+		<h3 class="text-sm font-medium text-muted mb-3">{$t("stats_dashboard.weekday_distribution")}</h3>
 		<ChartCanvas config={chartConfig} height="h-40" />
 	</div>
 {/if}

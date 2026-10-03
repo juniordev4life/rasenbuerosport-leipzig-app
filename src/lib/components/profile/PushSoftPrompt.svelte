@@ -94,21 +94,21 @@ async function accept() {
 		aria-modal="false"
 		aria-labelledby="push-soft-prompt-title"
 	>
-		<div class="bg-bg-secondary border border-border rounded-2xl shadow-2xl p-4">
+		<div class="bg-surface border border-line rounded-2xl shadow-2xl p-4">
 			<div class="flex items-start gap-3">
-				<span class="w-10 h-10 rounded-full bg-accent-red/15 text-accent-red flex items-center justify-center text-lg shrink-0" aria-hidden="true">🔔</span>
+				<span class="w-10 h-10 rounded-full bg-brand/15 text-brand flex items-center justify-center text-lg shrink-0" aria-hidden="true">🔔</span>
 				<div class="flex-1 min-w-0">
 					<h3 id="push-soft-prompt-title" class="text-sm font-bold">
 						{$t("push.soft_prompt.title")}
 					</h3>
-					<p class="text-xs text-text-secondary mt-1">
+					<p class="text-xs text-muted mt-1">
 						{$t("push.soft_prompt.body")}
 					</p>
 				</div>
 				<button
 					type="button"
 					onclick={defer}
-					class="shrink-0 w-7 h-7 rounded-full bg-bg-input text-text-secondary text-sm flex items-center justify-center hover:bg-bg-card"
+					class="shrink-0 w-7 h-7 rounded-full bg-sunken text-muted text-sm flex items-center justify-center hover:bg-surface"
 					aria-label={$t("common.close")}
 				>×</button>
 			</div>
@@ -117,7 +117,7 @@ async function accept() {
 				<button
 					type="button"
 					onclick={defer}
-					class="flex-1 rounded-lg border border-border bg-bg-input hover:bg-bg-card text-text-secondary text-sm font-semibold px-3 py-2"
+					class="flex-1 rounded-lg border border-line bg-sunken hover:bg-surface text-muted text-sm font-semibold px-3 py-2"
 				>
 					{$t("push.soft_prompt.deny")}
 				</button>
@@ -125,7 +125,7 @@ async function accept() {
 					type="button"
 					onclick={accept}
 					disabled={working}
-					class="flex-1 rounded-lg bg-accent-red hover:bg-accent-red-hover text-white text-sm font-semibold px-3 py-2 shadow-md shadow-accent-red/20 disabled:opacity-50"
+					class="flex-1 rounded-lg bg-brand hover:bg-brand-strong text-white text-sm font-semibold px-3 py-2 shadow-md shadow-brand/20 disabled:opacity-50"
 				>
 					{$t("push.soft_prompt.accept")}
 				</button>

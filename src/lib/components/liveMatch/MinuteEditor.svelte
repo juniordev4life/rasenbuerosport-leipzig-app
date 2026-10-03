@@ -187,7 +187,7 @@ const goalTypeLabel = $derived.by(() => {
 
 <form class="flex flex-col gap-1.5 h-full" novalidate onsubmit={handleSubmit}>
 	<div class="flex items-center justify-between gap-2">
-		<span class="inline-flex items-center gap-1.5 text-[11px] tracking-[0.06em] uppercase font-bold text-text-secondary truncate">
+		<span class="inline-flex items-center gap-1.5 text-[11px] tracking-[0.06em] uppercase font-bold text-muted truncate">
 			{#if labelKind.variant === "goal"}
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
 					<circle cx="12" cy="12" r="9" />
@@ -210,7 +210,7 @@ const goalTypeLabel = $derived.by(() => {
 				type="button"
 				onclick={onGoalTypeClick}
 				data-onboarding="live-goaltype-pill"
-				class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-bg-input border border-border text-[11px] font-semibold whitespace-nowrap"
+				class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sunken border border-line text-[11px] font-semibold whitespace-nowrap"
 				aria-label={$t("new_game.goal_type_title")}
 			>
 				{#if goalType === GOAL_TYPE.CORNER}
@@ -266,9 +266,9 @@ const goalTypeLabel = $derived.by(() => {
 					onfocus={selectAll}
 					aria-invalid={showError && timeError.reason !== "stoppage_range"}
 					aria-describedby="{uid}-hint"
-					class="time-input minute bg-bg-input text-text-primary {showError && timeError.reason !== 'stoppage_range' ? 'border-error' : 'border-border'}"
+					class="time-input minute bg-sunken text-ink {showError && timeError.reason !== 'stoppage_range' ? 'border-loss' : 'border-line'}"
 				/>
-				<span class="time-suffix text-text-muted" aria-hidden="true">'</span>
+				<span class="time-suffix text-muted" aria-hidden="true">'</span>
 			</div>
 		</div>
 		<div class="flex flex-col gap-1 w-[76px] shrink-0 transition-opacity {stoppageEnabled ? '' : 'opacity-40'}">
@@ -276,7 +276,7 @@ const goalTypeLabel = $derived.by(() => {
 				{$t("live_match.editor.stoppage_label")}
 			</label>
 			<div class="relative">
-				<span class="time-prefix text-text-muted" aria-hidden="true">+</span>
+				<span class="time-prefix text-muted" aria-hidden="true">+</span>
 				<input
 					bind:this={stoppageInput}
 					id="{uid}-stoppage"
@@ -292,7 +292,7 @@ const goalTypeLabel = $derived.by(() => {
 					onfocus={selectAll}
 					aria-invalid={showError && timeError.reason === "stoppage_range"}
 					aria-describedby="{uid}-hint"
-					class="time-input stoppage bg-bg-input text-text-primary {showError && timeError.reason === 'stoppage_range' ? 'border-error' : 'border-border'}"
+					class="time-input stoppage bg-sunken text-ink {showError && timeError.reason === 'stoppage_range' ? 'border-loss' : 'border-line'}"
 				/>
 			</div>
 		</div>
@@ -300,7 +300,7 @@ const goalTypeLabel = $derived.by(() => {
 
 	<p
 		id="{uid}-hint"
-		class="min-h-[14px] text-[11px] leading-[14px] truncate {showError ? 'text-error font-semibold' : 'text-text-muted'}"
+		class="min-h-[14px] text-[11px] leading-[14px] truncate {showError ? 'text-loss font-semibold' : 'text-muted'}"
 		aria-live="polite"
 	>
 		{hintText}
@@ -330,7 +330,7 @@ const goalTypeLabel = $derived.by(() => {
 	font-weight: 700;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
-	color: var(--color-text-secondary);
+	color: var(--color-muted);
 }
 .time-input {
 	width: 100%;

@@ -1,5 +1,9 @@
 import { initializeApp } from "firebase/app";
-import { GoogleAuthProvider, getAuth } from "firebase/auth";
+import {
+	connectAuthEmulator,
+	GoogleAuthProvider,
+	getAuth,
+} from "firebase/auth";
 import { getStorage } from "firebase/storage";
 import {
 	PUBLIC_FIREBASE_API_KEY,
@@ -19,5 +23,14 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+
+// Local design reviews only: sign in against the Firebase Auth emulator
+// instead of Google when VITE_AUTH_EMULATOR_URL is set (DEVELOPMENT.md →
+// "Local login without Google"). Never part of a production build.
+if (import.meta.env.DEV && import.meta.env.VITE_AUTH_EMULATOR_URL) {
+	connectAuthEmulator(auth, import.meta.env.VITE_AUTH_EMULATOR_URL, {
+		disableWarnings: true,
+	});
+}
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();

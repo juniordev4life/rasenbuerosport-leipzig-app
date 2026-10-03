@@ -17,7 +17,7 @@ const chartConfig = $derived.by(() => {
 		{
 			label: $t("stats_dashboard.window_10"),
 			data: data.map((d) => d.win_rate_10),
-			borderColor: theme.accentRed,
+			borderColor: theme.brand,
 			borderWidth: 2,
 			pointRadius: data.length > 30 ? 1 : 3,
 			tension: 0.3,
@@ -30,7 +30,7 @@ const chartConfig = $derived.by(() => {
 		datasets.push({
 			label: $t("stats_dashboard.window_20"),
 			data: data.map((d) => d.win_rate_20),
-			borderColor: `${theme.textSecondary}80`,
+			borderColor: `${theme.muted}80`,
 			borderWidth: 1.5,
 			borderDash: [4, 4],
 			pointRadius: 0,
@@ -69,7 +69,7 @@ const chartConfig = $derived.by(() => {
 					display: has20,
 					position: "top",
 					labels: {
-						color: theme.textSecondary,
+						color: theme.muted,
 						font: { size: 10 },
 						boxWidth: 12,
 					},
@@ -88,8 +88,8 @@ const chartConfig = $derived.by(() => {
 </script>
 
 {#if data.length > 0 && chartConfig}
-	<div class="bg-bg-secondary border border-border rounded-lg p-4">
-		<h3 class="text-sm font-medium text-text-secondary mb-3">{$t("stats_dashboard.rolling_win_rate")}</h3>
+	<div class="bg-surface border border-line rounded-lg p-4">
+		<h3 class="text-sm font-medium text-muted mb-3">{$t("stats_dashboard.rolling_win_rate")}</h3>
 		<ChartCanvas config={chartConfig} height="h-48" />
 	</div>
 {/if}

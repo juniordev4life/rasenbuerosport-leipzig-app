@@ -15,9 +15,7 @@ const chartConfig = $derived.by(() => {
 
 	const maxVal = Math.max(...data.map((d) => d.count));
 	const colors = data.map((d) =>
-		d.count === maxVal && maxVal > 0
-			? theme.accentRed
-			: `${theme.textSecondary}50`,
+		d.count === maxVal && maxVal > 0 ? theme.brand : `${theme.muted}50`,
 	);
 
 	return {
@@ -41,7 +39,7 @@ const chartConfig = $derived.by(() => {
 					title: {
 						display: true,
 						text: $t("stats_dashboard.total_goals_axis"),
-						color: theme.textSecondary,
+						color: theme.muted,
 						font: { size: 10 },
 					},
 				},
@@ -69,8 +67,8 @@ const chartConfig = $derived.by(() => {
 </script>
 
 {#if data.length > 0 && chartConfig}
-	<div class="bg-bg-secondary border border-border rounded-lg p-4">
-		<h3 class="text-sm font-medium text-text-secondary mb-3">{$t("stats_dashboard.goals_distribution")}</h3>
+	<div class="bg-surface border border-line rounded-lg p-4">
+		<h3 class="text-sm font-medium text-muted mb-3">{$t("stats_dashboard.goals_distribution")}</h3>
 		<ChartCanvas config={chartConfig} height="h-40" />
 	</div>
 {/if}

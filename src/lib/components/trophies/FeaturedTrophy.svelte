@@ -53,7 +53,7 @@ const dateText = $derived(
 	</header>
 	<div
 		class="featured-card"
-		style:--rarity-color={rarityMeta?.colorHex}
+		style:--rarity-color={rarityMeta?.color}
 	>
 		<div class="featured-trophy-icon">
 			<TrophyCategoryIcon
@@ -116,7 +116,7 @@ const dateText = $derived(
 	.section-meta-tag {
 		font-size: 9px;
 		font-weight: 800;
-		color: var(--color-warning);
+		color: var(--color-gold);
 		text-transform: uppercase;
 		letter-spacing: 0.12em;
 		display: flex;

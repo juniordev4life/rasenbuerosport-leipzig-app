@@ -258,10 +258,10 @@ function goBack() {
 <div class="mx-auto max-w-3xl px-3 pb-4 pt-0">
 	{#if loading}
 		<div class="flex justify-center py-12">
-			<div class="animate-spin h-8 w-8 border-2 border-warning border-t-transparent rounded-full"></div>
+			<div class="animate-spin h-8 w-8 border-2 border-gold border-t-transparent rounded-full"></div>
 		</div>
 	{:else if errorMsg}
-		<div class="bg-bg-secondary border border-error/60 rounded-2xl p-6 text-center text-error">
+		<div class="bg-surface border border-loss/60 rounded-2xl p-6 text-center text-loss">
 			{errorMsg}
 		</div>
 	{:else if matchCount === 0}

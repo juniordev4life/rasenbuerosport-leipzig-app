@@ -590,7 +590,7 @@ function replayTourForCurrentStep() {
 
 	{#if loading}
 		<div class="flex justify-center py-8">
-			<div class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"></div>
+			<div class="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full"></div>
 		</div>
 	{:else if step === 1}
 		<PlayerLobbyStep
@@ -643,27 +643,27 @@ function replayTourForCurrentStep() {
 		     agent confirms 'recording'; on failure/timeout the error dialog takes
 		     over. The skip button avoids having to wait out the offline timeout. -->
 		<div
-			class="fixed inset-0 z-[90] flex flex-col items-center justify-center gap-5 bg-bg-primary/95 backdrop-blur-sm px-8 text-center"
+			class="fixed inset-0 z-[90] flex flex-col items-center justify-center gap-5 bg-page/95 backdrop-blur-sm px-8 text-center"
 			transition:fade
 			role="status"
 			aria-live="polite"
 		>
 			<div
-				class="h-11 w-11 animate-spin rounded-full border-[3px] border-accent-red border-t-transparent"
+				class="h-11 w-11 animate-spin rounded-full border-[3px] border-brand border-t-transparent"
 				aria-hidden="true"
 			></div>
 			<div>
-				<p class="text-base font-semibold text-text-primary">
+				<p class="text-base font-semibold text-ink">
 					{$t("new_game.recording_connecting")}
 				</p>
-				<p class="mt-1.5 text-sm text-text-secondary">
+				<p class="mt-1.5 text-sm text-muted">
 					{$t("new_game.recording_connecting_hint")}
 				</p>
 			</div>
 			<button
 				type="button"
 				onclick={playWithoutRecording}
-				class="mt-1 text-sm font-medium text-text-secondary underline underline-offset-4 hover:text-text-primary"
+				class="mt-1 text-sm font-medium text-muted underline underline-offset-4 hover:text-ink"
 			>
 				{$t("new_game.recording_skip")}
 			</button>

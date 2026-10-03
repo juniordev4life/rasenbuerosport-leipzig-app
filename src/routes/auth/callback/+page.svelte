@@ -36,12 +36,12 @@ async function handleCallback() {
 }
 </script>
 
-<div class="min-h-screen bg-bg-primary flex items-center justify-center">
+<div class="min-h-screen bg-page flex items-center justify-center">
 	{#if error}
-		<p class="text-error text-sm text-center px-6">{error}</p>
+		<p class="text-loss text-sm text-center px-6">{error}</p>
 	{:else}
 		<div
-			class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"
+			class="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full"
 		></div>
 	{/if}
 </div>

@@ -75,7 +75,7 @@ function handlePointerCancel() {
 	pressTimer = null;
 }
 
-const sideRing = side === "home" ? "ring-accent-red" : "ring-success";
+const sideRing = side === "home" ? "ring-brand" : "ring-win";
 const glowClass = $derived(
 	glowColor === "yellow"
 		? "shadow-[0_0_0_4px_rgba(251,191,36,0.25)]"
@@ -87,15 +87,15 @@ const glowClass = $derived(
 );
 const stateRing = $derived(
 	isScorer
-		? "ring-4 ring-warning"
+		? "ring-4 ring-gold"
 		: isAssister
-			? "ring-4 ring-success"
+			? "ring-4 ring-win"
 			: isKeeper
 				? "ring-4 ring-blue-400"
 				: awaitingTarget && glowColor
 					? "ring-2 ring-current animate-pulse"
 					: assistHint
-						? "ring-2 ring-success/40 animate-pulse"
+						? "ring-2 ring-win/40 animate-pulse"
 						: `ring-2 ${sideRing}`,
 );
 </script>
@@ -122,15 +122,15 @@ const stateRing = $derived(
 			{name.charAt(0).toUpperCase()}
 		{/if}
 	</span>
-	<span class="text-[11px] font-semibold text-text-primary max-w-[88px] truncate">
+	<span class="text-[11px] font-semibold text-ink max-w-[88px] truncate">
 		{name}
 	</span>
 	<!-- Fixed-height slot so the avatar doesn't shift when a role is assigned. -->
 	<span class="h-[14px] text-[10px] font-bold uppercase tracking-[0.06em] leading-none">
 		{#if isScorer}
-			<span class="text-warning">{isOwnGoal ? "Eigentor" : "Schütze"}</span>
+			<span class="text-brand">{isOwnGoal ? "Eigentor" : "Schütze"}</span>
 		{:else if isAssister}
-			<span class="text-success">Vorlage</span>
+			<span class="text-win">Vorlage</span>
 		{:else if isKeeper}
 			<span class="text-blue-400">Keeper</span>
 		{/if}

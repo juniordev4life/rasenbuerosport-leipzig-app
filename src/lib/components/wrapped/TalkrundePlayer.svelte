@@ -45,7 +45,7 @@ const lineup = [
 		</div>
 	</header>
 
-	<MatchAudioPlayer {audioUrl} reporterId="klassiker" />
+	<MatchAudioPlayer {audioUrl} />
 </section>
 
 <style>

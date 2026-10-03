@@ -66,7 +66,7 @@ function handleKey(event) {
 		in:fly={{ y: 280, duration: 260, easing: cubicOut }}
 		out:fly={{ y: 280, duration: 200, easing: cubicOut }}
 		class="sheet w-full sm:max-w-md max-h-[80vh] overflow-y-auto"
-		style:--rarity-color={rarityMeta?.colorHex}
+		style:--rarity-color={rarityMeta?.color}
 		onclick={(event) => event.stopPropagation()}
 	>
 		<div class="handle" aria-hidden="true"></div>
@@ -99,18 +99,15 @@ function handleKey(event) {
 		<div class="meta-row">
 			<span
 				class="pill rarity-pill"
-				style:color={rarityMeta?.colorHex}
-				style:border-color="color-mix(in srgb, {rarityMeta?.colorHex} 40%, transparent)"
-				style:background="color-mix(in srgb, {rarityMeta?.colorHex} 15%, transparent)"
+				style:color={rarityMeta?.color}
+				style:border-color="color-mix(in srgb, {rarityMeta?.color} 40%, transparent)"
+				style:background="color-mix(in srgb, {rarityMeta?.color} 15%, transparent)"
 			>
 				{$t(rarityMeta?.i18nKey)}
 			</span>
 			{#if !masked && categoryMeta}
 				<span
 					class="pill category-pill"
-					style:color={categoryMeta.colorHex}
-					style:border-color={categoryMeta.borderRgba}
-					style:background={categoryMeta.bgRgba}
 				>
 					{$t(categoryMeta.i18nKey)}
 				</span>

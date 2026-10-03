@@ -21,7 +21,7 @@ const gamesConfig = $derived.by(() => {
 			datasets: [
 				{
 					data: data.map((d) => d.games),
-					backgroundColor: `${theme.accentRed}cc`,
+					backgroundColor: `${theme.brand}cc`,
 					borderRadius: 4,
 					barThickness: 18,
 				},
@@ -33,7 +33,7 @@ const gamesConfig = $derived.by(() => {
 			scales: {
 				x: {
 					...base.scales.x,
-					grid: { color: `${theme.border}30` },
+					grid: { color: `${theme.line}30` },
 					ticks: { ...base.scales.x.ticks, stepSize: 1 },
 				},
 				y: { ...base.scales.y, grid: { display: false } },
@@ -60,7 +60,7 @@ const winRateConfig = $derived.by(() => {
 
 	const sorted = [...data].sort((a, b) => b.win_rate - a.win_rate);
 	const colors = sorted.map((d) =>
-		d.win_rate >= 50 ? theme.success : `${theme.textSecondary}60`,
+		d.win_rate >= 50 ? theme.win : `${theme.muted}60`,
 	);
 
 	return {
@@ -82,7 +82,7 @@ const winRateConfig = $derived.by(() => {
 			scales: {
 				x: {
 					...base.scales.x,
-					grid: { color: `${theme.border}30` },
+					grid: { color: `${theme.line}30` },
 					min: 0,
 					max: 100,
 					ticks: { ...base.scales.x.ticks, callback: (v) => `${v}%` },
@@ -110,14 +110,14 @@ const chartHeight = $derived(data.length > 8 ? "h-64" : "h-52");
 
 {#if data.length > 0}
 	{#if gamesConfig}
-		<div class="bg-bg-secondary border border-border rounded-lg p-4">
-			<h3 class="text-sm font-medium text-text-secondary mb-3">{$t("stats_dashboard.popular_teams")}</h3>
+		<div class="bg-surface border border-line rounded-lg p-4">
+			<h3 class="text-sm font-medium text-muted mb-3">{$t("stats_dashboard.popular_teams")}</h3>
 			<ChartCanvas config={gamesConfig} height={chartHeight} />
 		</div>
 	{/if}
 	{#if winRateConfig}
-		<div class="bg-bg-secondary border border-border rounded-lg p-4">
-			<h3 class="text-sm font-medium text-text-secondary mb-3">{$t("stats_dashboard.team_win_rate")}</h3>
+		<div class="bg-surface border border-line rounded-lg p-4">
+			<h3 class="text-sm font-medium text-muted mb-3">{$t("stats_dashboard.team_win_rate")}</h3>
 			<ChartCanvas config={winRateConfig} height={chartHeight} />
 		</div>
 	{/if}

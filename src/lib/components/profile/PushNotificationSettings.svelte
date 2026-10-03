@@ -76,36 +76,36 @@ async function deactivate() {
 }
 </script>
 
-<div class="rounded-xl bg-bg-input border border-border p-4">
+<div class="rounded-xl bg-sunken border border-line p-4">
 	<div class="flex items-center justify-between gap-3 mb-2">
 		<div class="leading-tight">
-			<div class="text-sm font-semibold text-text-primary">
+			<div class="text-sm font-semibold text-ink">
 				{$t("push.title")}
 			</div>
-			<div class="text-xs text-text-secondary mt-0.5">
+			<div class="text-xs text-muted mt-0.5">
 				{$t("push.subtitle")}
 			</div>
 		</div>
 		{#if activeSubscriptionId && permission === "granted"}
-			<span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-success bg-success/15 px-2 py-0.5 rounded-full">
-				<span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span>
+			<span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-win bg-win/15 px-2 py-0.5 rounded-full">
+				<span class="w-1.5 h-1.5 rounded-full bg-win animate-pulse"></span>
 				{$t("push.state_active")}
 			</span>
 		{/if}
 	</div>
 
 	{#if !supported}
-		<p class="text-xs text-text-muted">{$t("push.unsupported")}</p>
+		<p class="text-xs text-muted">{$t("push.unsupported")}</p>
 	{:else if !pwaInstalled}
-		<p class="text-xs text-text-muted">{$t("push.ios_install_hint")}</p>
+		<p class="text-xs text-muted">{$t("push.ios_install_hint")}</p>
 	{:else if permission === "denied"}
-		<p class="text-xs text-warning">{$t("push.denied_hint")}</p>
+		<p class="text-xs text-brand">{$t("push.denied_hint")}</p>
 	{:else if activeSubscriptionId && permission === "granted"}
 		<button
 			type="button"
 			onclick={deactivate}
 			disabled={working}
-			class="mt-1 inline-flex items-center gap-2 text-xs font-medium text-text-secondary hover:text-text-primary disabled:opacity-50"
+			class="mt-1 inline-flex items-center gap-2 text-xs font-medium text-muted hover:text-ink disabled:opacity-50"
 		>
 			{$t("push.deactivate")}
 		</button>
@@ -114,13 +114,13 @@ async function deactivate() {
 			type="button"
 			onclick={activate}
 			disabled={working}
-			class="mt-1 inline-flex items-center gap-2 rounded-lg bg-accent-red hover:bg-accent-red-hover text-white text-xs font-semibold px-3 py-2 shadow-md shadow-accent-red/20 disabled:opacity-50 transition-colors"
+			class="mt-1 inline-flex items-center gap-2 rounded-lg bg-brand hover:bg-brand-strong text-white text-xs font-semibold px-3 py-2 shadow-md shadow-brand/20 disabled:opacity-50 transition-colors"
 		>
 			🔔 {$t("push.activate")}
 		</button>
 	{/if}
 
 	{#if error}
-		<p class="mt-2 text-[11px] text-error">{error}</p>
+		<p class="mt-2 text-[11px] text-loss">{error}</p>
 	{/if}
 </div>

@@ -130,7 +130,7 @@ function trackHorizontalOverflow(node, onChange) {
 	{@const currentSide = getPlayerSide(id)}
 	{@const onThisSide = currentSide === side}
 	{@const onOtherSide = currentSide !== null && currentSide !== side}
-	{@const accent = side === "home" ? "ring-accent-red" : "ring-success"}
+	{@const accent = side === "home" ? "ring-brand" : "ring-win"}
 	<button
 		type="button"
 		disabled={onOtherSide}
@@ -145,7 +145,7 @@ function trackHorizontalOverflow(node, onChange) {
 		<span
 			class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-base sm:text-lg font-bold text-white overflow-hidden {onThisSide
 				? `ring-4 ${accent} shadow-lg`
-				: `ring-2 ring-border`} transition-all"
+				: `ring-2 ring-line`} transition-all"
 			style={avatarUrl ? "" : `background: ${gradient};`}
 		>
 			{#if avatarUrl}
@@ -154,7 +154,7 @@ function trackHorizontalOverflow(node, onChange) {
 				{name.charAt(0).toUpperCase()}
 			{/if}
 		</span>
-		<span class="text-[10px] sm:text-[11px] font-semibold text-text-primary max-w-[80px] truncate">
+		<span class="text-[10px] sm:text-[11px] font-semibold text-ink max-w-[80px] truncate">
 			{name}
 		</span>
 	</button>
@@ -214,7 +214,7 @@ function trackHorizontalOverflow(node, onChange) {
 
 <div class="flex flex-col gap-4">
 	<div
-		class="relative rounded-2xl border-2 border-border overflow-hidden"
+		class="relative rounded-2xl border-2 border-line overflow-hidden"
 		style="background: linear-gradient(135deg, #0d3320 0%, #0a2516 100%);"
 	>
 		<!-- Pitch markings -->
@@ -273,7 +273,7 @@ function trackHorizontalOverflow(node, onChange) {
 				avatar rows in each half away from the middle.
 			-->
 			<div class="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none z-20">
-				<span class="bg-black/60 border border-border/40 text-[10px] text-text-secondary font-medium px-2.5 py-1 rounded-full">
+				<span class="bg-black/60 border border-line/40 text-[10px] text-muted font-medium px-2.5 py-1 rounded-full">
 					{$t("new_game.lobby.center_hint")}
 				</span>
 			</div>
@@ -284,7 +284,7 @@ function trackHorizontalOverflow(node, onChange) {
 		<button
 			type="button"
 			onclick={onCancel}
-			class="flex-shrink-0 px-5 py-3 rounded-xl bg-bg-input border border-border text-sm font-semibold text-text-secondary hover:bg-bg-secondary"
+			class="flex-shrink-0 px-5 py-3 rounded-xl bg-sunken border border-line text-sm font-semibold text-muted hover:bg-surface"
 		>
 			{$t("new_game.cancel")}
 		</button>
@@ -293,7 +293,7 @@ function trackHorizontalOverflow(node, onChange) {
 			onclick={onNext}
 			disabled={!isValid}
 			data-onboarding="lobby-next"
-			class="flex-1 px-5 py-3 rounded-xl bg-accent-red text-white text-sm font-semibold shadow-lg shadow-accent-red/25 disabled:opacity-40 disabled:shadow-none hover:bg-accent-red-hover transition-all"
+			class="flex-1 px-5 py-3 rounded-xl bg-brand text-white text-sm font-semibold shadow-lg shadow-brand/25 disabled:opacity-40 disabled:shadow-none hover:bg-brand-strong transition-all"
 		>
 			{$t("new_game.next")} →
 		</button>

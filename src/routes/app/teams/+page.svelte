@@ -61,14 +61,14 @@ const filteredTeams = $derived.by(() => {
 			type="text"
 			bind:value={searchQuery}
 			placeholder={$t("teams.search_placeholder")}
-			class="w-full bg-bg-input border border-border rounded-lg px-3 py-2.5 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-red"
+			class="w-full bg-sunken border border-line rounded-lg px-3 py-2.5 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand"
 		/>
 
 		<!-- League + Sort -->
 		<div class="flex gap-2">
 			<select
 				bind:value={selectedLeague}
-				class="flex-1 bg-bg-input border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-red"
+				class="flex-1 bg-sunken border border-line rounded-lg px-3 py-2 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand"
 			>
 				<option value="">{$t("teams.all_leagues")}</option>
 				{#each leagues as league (league)}
@@ -76,18 +76,18 @@ const filteredTeams = $derived.by(() => {
 				{/each}
 			</select>
 
-			<div class="flex rounded-lg border border-border overflow-hidden shrink-0">
+			<div class="flex rounded-lg border border-line overflow-hidden shrink-0">
 				<button
 					type="button"
 					onclick={() => { sortBy = "name"; }}
-					class="px-3 py-2 text-xs font-medium transition-colors {sortBy === 'name' ? 'bg-accent-red text-white' : 'bg-bg-input text-text-secondary hover:text-text-primary'}"
+					class="px-3 py-2 text-xs font-medium transition-colors {sortBy === 'name' ? 'bg-brand text-white' : 'bg-sunken text-muted hover:text-ink'}"
 				>
 					{$t("teams.sort_name")}
 				</button>
 				<button
 					type="button"
 					onclick={() => { sortBy = "overall_rating"; }}
-					class="px-3 py-2 text-xs font-medium transition-colors {sortBy === 'overall_rating' ? 'bg-accent-red text-white' : 'bg-bg-input text-text-secondary hover:text-text-primary'}"
+					class="px-3 py-2 text-xs font-medium transition-colors {sortBy === 'overall_rating' ? 'bg-brand text-white' : 'bg-sunken text-muted hover:text-ink'}"
 				>
 					{$t("teams.sort_rating")}
 				</button>
@@ -96,31 +96,31 @@ const filteredTeams = $derived.by(() => {
 	</div>
 
 	<!-- Team count -->
-	<p class="text-xs text-text-secondary">
+	<p class="text-xs text-muted">
 		{$t("teams.team_count", { count: filteredTeams.length })}
 	</p>
 
 	<!-- Teams list -->
 	{#if loading}
 		<div class="flex justify-center py-8">
-			<div class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"></div>
+			<div class="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full"></div>
 		</div>
 	{:else if filteredTeams.length === 0}
 		<div class="text-center py-8">
-			<p class="text-text-secondary">{$t("teams.no_results")}</p>
+			<p class="text-muted">{$t("teams.no_results")}</p>
 		</div>
 	{:else}
 		<div class="flex flex-col gap-1 lg:grid lg:grid-cols-3 xl:grid-cols-4 lg:gap-3">
 			{#each filteredTeams as team (team.id)}
-				<div class="flex items-center gap-3 bg-bg-secondary border border-border rounded-lg px-3 py-2.5 hover:bg-bg-input transition-colors">
+				<div class="flex items-center gap-3 bg-surface border border-line rounded-lg px-3 py-2.5 hover:bg-sunken transition-colors">
 					<!-- Logo -->
 					<TeamLogo logoUrl={team.logo_url} teamName={team.name} size="md" />
 
 					<!-- Name + League -->
 					<div class="flex-1 min-w-0">
-						<p class="text-sm font-medium text-text-primary truncate">{team.name}</p>
+						<p class="text-sm font-medium text-ink truncate">{team.name}</p>
 						{#if team.league_name}
-							<p class="text-[10px] text-text-secondary truncate">
+							<p class="text-[10px] text-muted truncate">
 								{getCountryFlag(team.country_code)} {team.league_name}
 							</p>
 						{/if}

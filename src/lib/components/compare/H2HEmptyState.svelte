@@ -43,7 +43,7 @@ const { t } = getTranslate();
 	gap: 12px;
 }
 .ball-icon {
-	color: var(--color-text-muted);
+	color: var(--color-muted);
 	display: flex;
 	align-items: center;
 	justify-content: center;

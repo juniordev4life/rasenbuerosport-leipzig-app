@@ -50,9 +50,6 @@ const sorted = $derived.by(() => {
 		<div class="regal-title-block">
 			<div
 				class="regal-icon-wrap"
-				style:--cat-color={meta?.colorHex}
-				style:background={meta?.bgRgba}
-				style:border-color={meta?.borderRgba}
 			>
 				<TrophyCategoryIcon {category} size={16} />
 			</div>
@@ -111,16 +108,16 @@ const sorted = $derived.by(() => {
 	.regal-name {
 		font-size: 14px;
 		font-weight: 800;
-		color: var(--color-text-primary);
+		color: var(--color-ink);
 		line-height: 1.1;
 	}
 	.regal-progress {
 		font-size: 10px;
-		color: var(--color-text-secondary);
+		color: var(--color-muted);
 		margin-top: 2px;
 	}
 	.regal-progress strong {
-		color: var(--color-warning);
+		color: var(--color-gold);
 	}
 	.regal-shelf {
 		position: relative;

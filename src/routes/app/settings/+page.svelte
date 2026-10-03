@@ -4,7 +4,7 @@ import { goto } from "$app/navigation";
 import MessageIcon from "$lib/components/icons/MessageIcon.svelte";
 import ProfileEditor from "$lib/components/profile/ProfileEditor.svelte";
 import PushNotificationSettings from "$lib/components/profile/PushNotificationSettings.svelte";
-import ThemeSelector from "$lib/components/profile/ThemeSelector.svelte";
+import DesignVariantSelector from "$lib/components/profile/DesignVariantSelector.svelte";
 import Button from "$lib/components/ui/Button.svelte";
 import FeedbackSheet from "$lib/components/ui/FeedbackSheet.svelte";
 import { ROUTES } from "$lib/constants/routes.constants.js";
@@ -37,13 +37,13 @@ async function handleLogout() {
 		{$t("nav.settings")}
 	</h1>
 
-	<section class="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 space-y-4">
+	<section class="bg-surface border border-line rounded-2xl p-4 sm:p-5 space-y-4">
 		<ProfileEditor
 			currentUsername={username}
 			currentAvatarUrl={avatarUrl}
 		/>
 
-		<ThemeSelector />
+		<DesignVariantSelector />
 
 		<PushNotificationSettings />
 
@@ -52,16 +52,16 @@ async function handleLogout() {
 		</Button>
 	</section>
 
-	<section class="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5">
+	<section class="bg-surface border border-line rounded-2xl p-4 sm:p-5">
 		<div class="flex items-start gap-3">
-			<span class="text-text-secondary mt-0.5">
+			<span class="text-muted mt-0.5">
 				<MessageIcon size={20} />
 			</span>
 			<div class="flex-1 min-w-0">
-				<h2 class="text-sm font-bold text-text-primary">
+				<h2 class="text-sm font-bold text-ink">
 					{$t("feedback.settings_section_title")}
 				</h2>
-				<p class="text-xs text-text-secondary mt-1 leading-relaxed">
+				<p class="text-xs text-muted mt-1 leading-relaxed">
 					{$t("feedback.settings_section_body")}
 				</p>
 			</div>

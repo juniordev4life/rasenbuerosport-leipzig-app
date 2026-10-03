@@ -35,7 +35,7 @@ const fallbackGradient = $derived(
 );
 </script>
 
-<div class="relative rounded-2xl border border-warning/30 bg-bg-card p-4 overflow-hidden">
+<div class="relative rounded-2xl border border-gold/30 bg-surface p-4 overflow-hidden">
 	<div class="flex items-center gap-3.5">
 		<div class="relative shrink-0">
 			<span
@@ -46,11 +46,11 @@ const fallbackGradient = $derived(
 				<img referrerpolicy="no-referrer"
 					src={player.avatar_url}
 					alt={player.username}
-					class="w-[70px] h-[70px] rounded-full object-cover border-[3px] border-warning/50 shadow-lg"
+					class="w-[70px] h-[70px] rounded-full object-cover border-[3px] border-gold/50 shadow-lg"
 				/>
 			{:else}
 				<div
-					class="w-[70px] h-[70px] rounded-full flex items-center justify-center text-2xl font-extrabold text-white border-[3px] border-warning/50 shadow-lg"
+					class="w-[70px] h-[70px] rounded-full flex items-center justify-center text-2xl font-extrabold text-white border-[3px] border-gold/50 shadow-lg"
 					style:background={fallbackGradient}
 				>
 					{initial}
@@ -58,13 +58,13 @@ const fallbackGradient = $derived(
 			{/if}
 		</div>
 		<div class="flex-1 min-w-0">
-			<div class="text-[9px] font-extrabold uppercase tracking-widest text-warning mb-0.5">
+			<div class="text-[9px] font-extrabold uppercase tracking-widest text-brand mb-0.5">
 				{"★"}
 				{season.isCurrent
 					? $t("leaderboard.hero_label")
 					: $t("leaderboard.hero_label_closed", { version: season.gameVersion })}
 			</div>
-			<h2 class="text-[19px] font-extrabold tracking-tight text-text-primary truncate">
+			<h2 class="text-[19px] font-extrabold tracking-tight text-ink truncate">
 				{player.username}
 			</h2>
 		</div>
@@ -72,7 +72,7 @@ const fallbackGradient = $derived(
 
 	<div class="flex items-center justify-between gap-3.5 mt-3.5">
 		<div class="flex flex-col items-start gap-2">
-			<div class="text-[42px] font-extrabold leading-none tabular-nums tracking-tight text-text-primary">
+			<div class="text-[42px] font-extrabold leading-none tabular-nums tracking-tight text-ink">
 				{player.rating ?? "—"}
 			</div>
 			<div class="flex flex-wrap items-center gap-1.5">
@@ -95,7 +95,7 @@ const fallbackGradient = $derived(
 				points={player.history}
 				width={200}
 				height={56}
-				stroke="var(--color-success)"
+				stroke="var(--color-win)"
 				strokeWidth={2}
 				opacity={1}
 				fluid
@@ -103,25 +103,25 @@ const fallbackGradient = $derived(
 		</div>
 	</div>
 
-	<div class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border">
-		<span class="text-[11px] text-text-secondary tabular-nums">
-			<strong class="text-text-primary font-bold">{player.wins}</strong>{$t("leaderboard.w_short")}
+	<div class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-line">
+		<span class="text-[11px] text-muted tabular-nums">
+			<strong class="text-ink font-bold">{player.wins}</strong>{$t("leaderboard.w_short")}
 		</span>
-		<span class="text-border">·</span>
-		<span class="text-[11px] text-text-secondary tabular-nums">
-			<strong class="text-text-primary font-bold">{player.draws}</strong>{$t("leaderboard.d_short")}
+		<span class="text-line">·</span>
+		<span class="text-[11px] text-muted tabular-nums">
+			<strong class="text-ink font-bold">{player.draws}</strong>{$t("leaderboard.d_short")}
 		</span>
-		<span class="text-border">·</span>
-		<span class="text-[11px] text-text-secondary tabular-nums">
-			<strong class="text-text-primary font-bold">{player.losses}</strong>{$t("leaderboard.l_short")}
+		<span class="text-line">·</span>
+		<span class="text-[11px] text-muted tabular-nums">
+			<strong class="text-ink font-bold">{player.losses}</strong>{$t("leaderboard.l_short")}
 		</span>
-		<span class="text-border">·</span>
-		<span class="text-[11px] text-text-secondary tabular-nums">
-			<strong class="text-text-primary font-bold">{player.games}</strong> {$t("leaderboard.games_short")}
+		<span class="text-line">·</span>
+		<span class="text-[11px] text-muted tabular-nums">
+			<strong class="text-ink font-bold">{player.games}</strong> {$t("leaderboard.games_short")}
 		</span>
 		{#if winStreak}
 			<span
-				class="ml-auto inline-flex items-center gap-1 rounded-full border border-warning/30 bg-warning/10 px-2 py-1 text-[10px] font-bold text-warning"
+				class="ml-auto inline-flex items-center gap-1 rounded-full border border-gold/30 bg-gold/10 px-2 py-1 text-[10px] font-bold text-brand"
 			>
 				{"\u{1F525}"} {winStreak}{$t("leaderboard.streak_suffix")}
 			</span>

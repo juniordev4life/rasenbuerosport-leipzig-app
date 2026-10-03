@@ -110,19 +110,19 @@ $effect(() => {
 		onkeydown={handleKeydown}
 		placeholder={$t("new_game.select_team")}
 		autocomplete="off"
-		class="w-full bg-bg-input border border-border rounded-lg px-3 py-2.5 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-red"
+		class="w-full bg-sunken border border-line rounded-lg px-3 py-2.5 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand"
 	/>
 
 	{#if showSuggestions && suggestions.length > 0}
 		<ul
-			class="absolute z-10 w-full bg-bg-secondary border border-border rounded-lg overflow-y-auto shadow-lg {direction === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}"
+			class="absolute z-10 w-full bg-surface border border-line rounded-lg overflow-y-auto shadow-lg {direction === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}"
 			style="max-height: {maxVisible * ROW_PX}px;"
 		>
 			{#each suggestions as team, i (team.name)}
 				<li>
 					<button
 						type="button"
-						class="w-full text-left px-3 py-2 text-sm transition-colors flex items-center justify-between gap-2 {i === highlightIndex ? 'bg-accent-red text-white' : 'text-text-primary hover:bg-bg-input'}"
+						class="w-full text-left px-3 py-2 text-sm transition-colors flex items-center justify-between gap-2 {i === highlightIndex ? 'bg-brand text-white' : 'text-ink hover:bg-sunken'}"
 						onmousedown={() => selectTeam(team)}
 					>
 						<div class="flex items-center gap-2 min-w-0">

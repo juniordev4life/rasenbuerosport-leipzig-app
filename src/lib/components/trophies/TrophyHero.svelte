@@ -57,7 +57,7 @@ const rarityOrder = ["bronze", "silver", "gold", "diamond"];
 				<div class="rarity-stat">
 					<div
 						class="rarity-stat-num"
-						style:color={RARITY_META[rarity].colorHex}
+						style:color={RARITY_META[rarity].color}
 					>
 						{summary?.byRarity?.[rarity] ?? 0}
 					</div>

@@ -92,8 +92,8 @@ function passCount(network) {
 {#snippet pitch(network, side, teamName)}
 	{@const style = network?.passStyle ?? null}
 	{@const svgMarkup = style ? prepareSvg(style, side) : null}
-	<div class="rounded-xl bg-bg-input p-3.5 flex flex-col items-center">
-		<div class="text-[10px] tracking-[0.06em] uppercase font-semibold text-center w-full mb-2.5 {side === 'home' ? 'text-accent-red' : 'text-success'}">
+	<div class="rounded-xl bg-sunken p-3.5 flex flex-col items-center">
+		<div class="text-[10px] tracking-[0.06em] uppercase font-semibold text-center w-full mb-2.5 {side === 'home' ? 'text-brand' : 'text-win'}">
 			{teamName ?? (side === "home" ? $t("game_detail.home_team") : $t("game_detail.away_team"))}
 			{#if passCount(network) !== null}
 				· {passCount(network)} {$t("match_stats.passes")}
@@ -104,14 +104,14 @@ function passCount(network) {
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				{@html svgMarkup}
 			{:else}
-				<div class="w-full h-full rounded-lg border border-dashed border-border flex items-center justify-center text-[10px] text-text-muted text-center px-2">
+				<div class="w-full h-full rounded-lg border border-dashed border-line flex items-center justify-center text-[10px] text-muted text-center px-2">
 					{$t("game_detail.pass_character.unknown")}
 				</div>
 			{/if}
 		</div>
 		<div class="flex flex-col items-center gap-1.5 mt-3 text-center">
 			{#if styleLabel(style)}
-				<span class="text-[11px] font-semibold px-2.5 py-1 rounded-full {side === 'home' ? 'bg-accent-red/15 text-accent-red' : 'bg-success/15 text-success'}">
+				<span class="text-[11px] font-semibold px-2.5 py-1 rounded-full {side === 'home' ? 'bg-brand/15 text-brand' : 'bg-win/15 text-win'}">
 					{styleLabel(style)}
 				</span>
 			{/if}
@@ -120,8 +120,8 @@ function passCount(network) {
 {/snippet}
 
 {#if hasAnything}
-	<section class="rounded-2xl border border-border bg-bg-secondary p-4 sm:p-5">
-		<h3 class="text-[11px] tracking-[0.08em] uppercase text-text-muted font-semibold mb-3 flex items-center gap-1.5">
+	<section class="rounded-2xl border border-line bg-surface p-4 sm:p-5">
+		<h3 class="text-[11px] tracking-[0.08em] uppercase text-muted font-semibold mb-3 flex items-center gap-1.5">
 			<span>{$t("game_detail.section.pass_character")}</span>
 			<InfoTip
 				titleKey="info_tips.pass_network.title"

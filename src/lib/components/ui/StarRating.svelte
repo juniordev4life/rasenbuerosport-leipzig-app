@@ -6,6 +6,9 @@
  */
 let { rating = 0, size = "sm" } = $props();
 
+// Unique per instance: several ratings share a page.
+const uid = $props.id();
+
 const sizes = { xs: "w-3 h-3", sm: "w-4 h-4", md: "w-5 h-5" };
 const sizeClass = $derived(sizes[size] || sizes.sm);
 
@@ -24,7 +27,7 @@ const stars = $derived(
 	{#each stars as type, i (i)}
 		{#if type === "full"}
 			<svg
-				class="{sizeClass} text-warning"
+				class="{sizeClass} text-brand"
 				viewBox="0 0 24 24"
 				fill="currentColor"
 				aria-hidden="true"
@@ -35,24 +38,24 @@ const stars = $derived(
 			</svg>
 		{:else if type === "half"}
 			<svg
-				class="{sizeClass} text-warning"
+				class="{sizeClass} text-brand"
 				viewBox="0 0 24 24"
 				aria-hidden="true"
 			>
 				<defs>
-					<linearGradient id="half-star-{i}">
+					<linearGradient id="half-star-{uid}-{i}">
 						<stop offset="50%" stop-color="currentColor" />
-						<stop offset="50%" stop-color="var(--color-text-muted)" />
+						<stop offset="50%" stop-color="var(--color-muted)" />
 					</linearGradient>
 				</defs>
 				<path
 					d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-					fill="url(#half-star-{i})"
+					fill="url(#half-star-{uid}-{i})"
 				/>
 			</svg>
 		{:else}
 			<svg
-				class="{sizeClass} text-text-muted"
+				class="{sizeClass} text-muted"
 				viewBox="0 0 24 24"
 				fill="currentColor"
 				aria-hidden="true"

@@ -8,8 +8,8 @@ import PlayerRow from "$lib/components/leaderboard/PlayerRow.svelte";
 import RanglisteHero from "$lib/components/leaderboard/RanglisteHero.svelte";
 import SeasonSwitch from "$lib/components/leaderboard/SeasonSwitch.svelte";
 import SeasonTalkrundeCard from "$lib/components/leaderboard/SeasonTalkrundeCard.svelte";
-import SegmentedToggle from "$lib/components/leaderboard/SegmentedToggle.svelte";
 import InfoTip from "$lib/components/ui/InfoTip.svelte";
+import SegmentedControl from "$lib/components/ui/SegmentedControl.svelte";
 import {
 	getLeagueSeasons,
 	getSeasonAwards,
@@ -180,7 +180,7 @@ function handleDuoClick(duo) {
 <div class="mx-auto max-w-lg lg:max-w-xl flex flex-col gap-3 pb-4">
 	<header class="flex items-end justify-between pt-1">
 		<div class="flex items-center gap-1.5">
-			<h1 class="text-2xl font-extrabold tracking-tight text-text-primary">
+			<h1 class="text-2xl font-extrabold tracking-tight text-ink">
 				{$t("leaderboard.title")}
 			</h1>
 			<InfoTip titleKey="info_tips.elo.title" bodyKey="info_tips.elo.body" size={16} />
@@ -188,7 +188,7 @@ function handleDuoClick(duo) {
 		<button
 			type="button"
 			onclick={() => goto("/app/compare")}
-			class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full border border-warning/40 text-warning bg-warning/5 hover:bg-warning/10 transition-colors"
+			class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full border border-gold/40 text-brand bg-gold/5 hover:bg-gold/10 transition-colors"
 		>
 			<span>⇄</span>
 			{$t("leaderboard.compare")}
@@ -200,22 +200,22 @@ function handleDuoClick(duo) {
 	{#if loading}
 		<div class="flex justify-center py-12">
 			<div
-				class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"
+				class="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full"
 			></div>
 		</div>
 	{:else if error}
 		<div class="flex flex-col items-center gap-3 py-12 text-center">
-			<p class="text-text-secondary">{$t("leaderboard.error_generic")}</p>
+			<p class="text-muted">{$t("leaderboard.error_generic")}</p>
 			<button
 				type="button"
 				onclick={retry}
-				class="px-4 py-2 rounded-full text-xs font-bold bg-accent-red text-white hover:bg-accent-red-hover transition-colors"
+				class="px-4 py-2 rounded-full text-xs font-bold bg-brand text-white hover:bg-brand-strong transition-colors"
 			>
 				{$t("leaderboard.retry")}
 			</button>
 		</div>
 	{:else}
-		<SegmentedToggle
+		<SegmentedControl
 			options={[
 				{ value: "players", label: $t("leaderboard.tab_players") },
 				{ value: "duos", label: $t("leaderboard.mode_duos") },
@@ -226,7 +226,7 @@ function handleDuoClick(duo) {
 		/>
 
 		{#if skillTab === "players"}
-			<SegmentedToggle
+			<SegmentedControl
 				options={[
 					{ value: "current", label: $t("leaderboard.sort_current") },
 					{ value: "form", label: $t("leaderboard.sort_form") },
@@ -244,19 +244,19 @@ function handleDuoClick(duo) {
 			{/if}
 
 			{#if sortedPlayers.length === 0}
-				<p class="text-text-secondary text-center py-8">{$t("leaderboard.no_data", { minGames })}</p>
+				<p class="text-muted text-center py-8">{$t("leaderboard.no_data", { minGames })}</p>
 			{:else}
 				<div class="flex flex-col">
 					{#each sortedPlayers as p, i (p.player_id)}
 						{#if i === dividerIndex}
 							<div class="flex items-center gap-2 my-2 px-1">
-								<span class="h-px flex-1 bg-border"></span>
-								<span class="text-[10px] font-bold uppercase tracking-wide text-text-muted whitespace-nowrap">
+								<span class="h-px flex-1 bg-line"></span>
+								<span class="text-[10px] font-bold uppercase tracking-wide text-muted whitespace-nowrap">
 									{$t("leaderboard.not_qualified_divider", {
 										minGames: rating?.season?.min_games ?? 0,
 									})}
 								</span>
-								<span class="h-px flex-1 bg-border"></span>
+								<span class="h-px flex-1 bg-line"></span>
 							</div>
 						{/if}
 						<PlayerRow
@@ -271,7 +271,7 @@ function handleDuoClick(duo) {
 				</div>
 			{/if}
 		{:else if (rating?.duos ?? []).length === 0}
-			<p class="text-text-secondary text-center py-8">{$t("leaderboard.no_duos", { minGames })}</p>
+			<p class="text-muted text-center py-8">{$t("leaderboard.no_duos", { minGames })}</p>
 		{:else}
 			<div class="flex flex-col">
 				{#each rating.duos as duo (duo.duo_id)}
@@ -292,7 +292,7 @@ function handleDuoClick(duo) {
 		{#if hasRecap && recapHref}
 			<a
 				href={recapHref}
-				class="flex items-center justify-center gap-2 rounded-full bg-accent-red text-white text-sm font-bold px-4 py-2.5 hover:bg-accent-red-hover transition-colors"
+				class="flex items-center justify-center gap-2 rounded-full bg-brand text-white text-sm font-bold px-4 py-2.5 hover:bg-brand-strong transition-colors"
 			>
 				{$t("leaderboard.recap_cta", { version: seasonMeta?.game_version ?? "" })}
 			</a>

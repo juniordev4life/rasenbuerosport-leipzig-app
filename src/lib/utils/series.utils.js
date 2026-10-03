@@ -61,7 +61,7 @@ function teamConceded(game, userId) {
  * @param {object[]} games
  * @param {string} userId
  * @param {string} userName
- * @returns {Array<{ id: string, type: string, headline: string, detail: string }>}
+ * @returns {Array<{ id: string, type: string, headline: string, detail: string, count: number, label: string }>}
  * @example
  *   const series = detectUserSeries(recentGames, "marco", "Marco");
  *   series // → [{ type: "win_streak", headline: "Marco hat eine Siegesserie!", ... }]
@@ -77,6 +77,8 @@ export function detectUserSeries(games, userId, userName) {
 			type: "win_streak",
 			headline: `${userName} hat eine Siegesserie!`,
 			detail: `${winStreak} Siege in Folge`,
+			count: winStreak,
+			label: "Siege in Folge",
 		});
 	}
 
@@ -87,6 +89,8 @@ export function detectUserSeries(games, userId, userName) {
 			type: "loss_streak",
 			headline: `${userName} steckt in einer Durststrecke...`,
 			detail: `${lossStreak} Niederlagen in Folge`,
+			count: lossStreak,
+			label: "Niederlagen in Folge",
 		});
 	}
 
@@ -98,6 +102,8 @@ export function detectUserSeries(games, userId, userName) {
 			type: "scoring",
 			headline: `${userName} ist ein Torjäger!`,
 			detail: `${bigScoring.length} Spiele mit 3+ Toren`,
+			count: bigScoring.length,
+			label: "Spiele mit 3+ Toren",
 		});
 	}
 
@@ -108,6 +114,8 @@ export function detectUserSeries(games, userId, userName) {
 			type: "defensive",
 			headline: `${userName} ist eine Mauer!`,
 			detail: `${cleanSheets.length} Spiele zu Null`,
+			count: cleanSheets.length,
+			label: "Spiele zu Null",
 		});
 	}
 

@@ -63,7 +63,7 @@ const trendDirection = $derived(
 );
 
 const sparkStroke = $derived(
-	trendDirection === "down" ? "var(--color-error)" : "var(--color-success)",
+	trendDirection === "down" ? "var(--color-loss)" : "var(--color-win)",
 );
 
 const fallbackGradient = $derived(
@@ -79,8 +79,8 @@ function handleClick() {
 	type="button"
 	onclick={handleClick}
 	class="w-full flex items-center gap-2.5 rounded-xl border px-3 py-2.5 mb-2 text-left transition-colors {isCurrentUser
-		? 'border-accent-red/30 bg-accent-red/5'
-		: 'border-border bg-bg-card hover:bg-bg-input'} {dimmed || player.qualified === false
+		? 'border-brand/30 bg-brand/5'
+		: 'border-line bg-surface hover:bg-sunken'} {dimmed || player.qualified === false
 		? 'opacity-70'
 		: ''}"
 >
@@ -103,19 +103,19 @@ function handleClick() {
 
 	<div class="flex-1 min-w-0">
 		<div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
-			<span class="text-sm font-bold text-text-primary truncate">{player.username}</span>
+			<span class="text-sm font-bold text-ink truncate">{player.username}</span>
 			{#if streakLabel}
-				<span class="shrink-0 text-[10px] font-bold text-warning">{streakLabel}</span>
+				<span class="shrink-0 text-[10px] font-bold text-brand">{streakLabel}</span>
 			{/if}
 			{#if isCurrentUser}
 				<span
-					class="shrink-0 rounded-full border border-accent-red/30 bg-accent-red/10 px-1.5 py-px text-[8px] font-bold uppercase tracking-wide text-accent-red"
+					class="shrink-0 rounded-full border border-brand/30 bg-brand/10 px-1.5 py-px text-[8px] font-bold uppercase tracking-wide text-brand"
 				>
 					{$t("leaderboard.you")}
 				</span>
 			{/if}
 		</div>
-		<div class="text-[10px] text-text-muted tabular-nums">
+		<div class="text-[10px] text-muted tabular-nums">
 			{#if hasSeasonGames}
 				{player.wins}{$t("leaderboard.w_short")} ·
 				{player.draws}{$t("leaderboard.d_short")} ·
@@ -140,7 +140,7 @@ function handleClick() {
 	</div>
 
 	<div class="shrink-0 text-right flex flex-col items-end gap-0.5">
-		<div class="text-[17px] font-extrabold leading-none tabular-nums text-text-primary">
+		<div class="text-[17px] font-extrabold leading-none tabular-nums text-ink">
 			{player.rating ?? "—"}
 		</div>
 		<TrendPill delta={displayedDelta} />

@@ -306,10 +306,10 @@ const totalsLosses = $derived(profile?.player?.losses ?? eloEntry?.losses ?? 0);
 
 {#if loading}
 	<div class="flex justify-center py-12">
-		<div class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"></div>
+		<div class="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full"></div>
 	</div>
 {:else if errorMsg}
-	<div class="bg-bg-secondary border border-error/60 rounded-2xl p-6 text-center text-error">
+	<div class="bg-surface border border-loss/60 rounded-2xl p-6 text-center text-loss">
 		{errorMsg}
 	</div>
 {:else if profile}

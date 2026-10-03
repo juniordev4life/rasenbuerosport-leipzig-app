@@ -24,7 +24,7 @@ const { t } = getTranslate();
 	aria-modal="true"
 >
 	<div
-		class="bg-bg-secondary border border-border rounded-2xl w-full max-w-sm p-5"
+		class="bg-surface border border-line rounded-2xl w-full max-w-sm p-5"
 		onclick={(e) => e.stopPropagation()}
 	>
 		<h3 class="text-base font-bold text-center mb-4">{$t("new_game.goal_type_title")}</h3>
@@ -68,7 +68,7 @@ const { t } = getTranslate();
 		<button
 			type="button"
 			onclick={onClose}
-			class="mt-4 w-full py-2.5 rounded-xl bg-bg-input text-sm text-text-secondary hover:bg-bg-card"
+			class="mt-4 w-full py-2.5 rounded-xl bg-sunken text-sm text-muted hover:bg-surface"
 		>
 			{$t("new_game.back")}
 		</button>

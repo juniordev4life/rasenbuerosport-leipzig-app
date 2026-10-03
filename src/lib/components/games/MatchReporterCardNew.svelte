@@ -195,7 +195,7 @@ async function generateAudio() {
 
 	{#if AUDIO_ENABLED}
 		{#if audioUrl}
-			<MatchAudioPlayer audioUrl={audioUrl} {reporterId} />
+			<MatchAudioPlayer audioUrl={audioUrl} />
 		{:else if audioLoading}
 			<div class="audio-hint">{$t("match_report.generating_audio")}</div>
 		{:else if audioError}

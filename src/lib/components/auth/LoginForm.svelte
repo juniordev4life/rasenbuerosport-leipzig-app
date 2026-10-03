@@ -64,6 +64,6 @@ async function handleGoogleLogin() {
 	</button>
 
 	{#if error}
-		<p class="text-error text-sm text-center">{error}</p>
+		<p class="text-loss text-sm text-center">{error}</p>
 	{/if}
 </div>

@@ -41,10 +41,10 @@ const chartConfig = $derived.by(() => {
 			datasets: [
 				{
 					data: values,
-					backgroundColor: `${theme.accentRed}30`,
-					borderColor: theme.accentRed,
+					backgroundColor: `${theme.brand}30`,
+					borderColor: theme.brand,
 					borderWidth: 2,
-					pointBackgroundColor: theme.accentRed,
+					pointBackgroundColor: theme.brand,
 					pointRadius: 4,
 				},
 			],
@@ -68,14 +68,14 @@ const chartConfig = $derived.by(() => {
 					max: 100,
 					ticks: {
 						stepSize: 25,
-						color: theme.textSecondary,
+						color: theme.muted,
 						font: { size: 9 },
 						backdropColor: "transparent",
 					},
-					grid: { color: `${theme.border}40` },
-					angleLines: { color: `${theme.border}40` },
+					grid: { color: `${theme.line}40` },
+					angleLines: { color: `${theme.line}40` },
 					pointLabels: {
-						color: theme.textSecondary,
+						color: theme.muted,
 						font: { size: 10 },
 					},
 				},
@@ -86,8 +86,8 @@ const chartConfig = $derived.by(() => {
 </script>
 
 {#if stats && chartConfig}
-	<div class="bg-bg-secondary border border-border rounded-lg p-4">
-		<h3 class="text-sm font-medium text-text-secondary mb-3">{$t("stats_dashboard.player_radar")}</h3>
+	<div class="bg-surface border border-line rounded-lg p-4">
+		<h3 class="text-sm font-medium text-muted mb-3">{$t("stats_dashboard.player_radar")}</h3>
 		<ChartCanvas config={chartConfig} height="h-56" />
 	</div>
 {/if}

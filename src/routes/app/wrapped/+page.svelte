@@ -133,12 +133,12 @@ function formatDate(value) {
 	{#if loading}
 		<div class="flex justify-center py-16">
 			<div
-				class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"
+				class="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full"
 			></div>
 		</div>
 	{:else if error}
 		<div
-			class="bg-bg-secondary border border-error/60 rounded-2xl p-6 text-center text-error"
+			class="bg-surface border border-loss/60 rounded-2xl p-6 text-center text-loss"
 		>
 			{$t("wrapped.error.load_failed")}
 		</div>

@@ -61,10 +61,10 @@ async function handleSubmit(e) {
 
 <img src="/logo.png" alt="RasenBürosport Logo" class="w-40 h-auto mb-6" />
 
-<h1 class="text-2xl font-bold text-center mb-2 text-text-primary">
+<h1 class="text-2xl font-bold text-center mb-2 text-ink">
 	{$t("auth.invite.setup_title")}
 </h1>
-<p class="text-text-secondary text-sm text-center mb-8">
+<p class="text-muted text-sm text-center mb-8">
 	{$t("auth.invite.setup_subtitle")}
 </p>
 
@@ -79,7 +79,7 @@ async function handleSubmit(e) {
 	/>
 
 	{#if error}
-		<p class="text-error text-sm text-center">{error}</p>
+		<p class="text-loss text-sm text-center">{error}</p>
 	{/if}
 
 	<Button type="submit" {loading}>

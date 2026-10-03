@@ -15,7 +15,7 @@ const chartConfig = $derived.by(() => {
 
 	const maxVal = Math.max(...data.map((d) => d.count));
 	const colors = data.map((d) =>
-		d.count === maxVal ? theme.accentRed : `${theme.textSecondary}60`,
+		d.count === maxVal ? theme.brand : `${theme.muted}60`,
 	);
 
 	return {
@@ -37,7 +37,7 @@ const chartConfig = $derived.by(() => {
 			scales: {
 				x: {
 					...base.scales.x,
-					grid: { color: `${theme.border}30` },
+					grid: { color: `${theme.line}30` },
 					ticks: { ...base.scales.x.ticks, stepSize: 1 },
 				},
 				y: { ...base.scales.y, grid: { display: false } },
@@ -60,8 +60,8 @@ const chartHeight = $derived(data.length > 6 ? "h-64" : "h-52");
 </script>
 
 {#if data.length > 0 && chartConfig}
-	<div class="bg-bg-secondary border border-border rounded-lg p-4">
-		<h3 class="text-sm font-medium text-text-secondary mb-3">{$t("stats_dashboard.common_scores")}</h3>
+	<div class="bg-surface border border-line rounded-lg p-4">
+		<h3 class="text-sm font-medium text-muted mb-3">{$t("stats_dashboard.common_scores")}</h3>
 		<ChartCanvas config={chartConfig} height={chartHeight} />
 	</div>
 {/if}

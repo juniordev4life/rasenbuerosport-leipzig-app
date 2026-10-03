@@ -85,25 +85,30 @@
 		"profile": "Profile",
 		"settings": "Settings",
 		"wrapped": "Wrapped",
-		"seasons": "Seasons"
+		"seasons": "Seasons",
+		"main": "Main navigation"
 	},
 	"common": {
 		"loading": "Loading...",
 		"error": "Error",
 		"vs": "vs.",
 		"back": "Back",
-		"close": "Close",
-		"toggle_theme": "Toggle theme"
+		"close": "Close"
 	},
 	"home": {
 		"frank": {
 			"role": "Your week so far",
 			"record": "Record",
 			"matches": "Matches",
-			"positive": "{name}, what a week! +{delta} ELO — keep this up and we'll need to make room at the top!",
-			"negative": "{name}, that was tough — but everyone has off-weeks. Next one is better, I can feel it!",
-			"neutral": "{name}, solid week — there's still some hype to be had though, right?",
-			"empty": "{name}, fresh week, fresh chances! Time for your first match!"
+			"empty_headline": "Fresh week, fresh chances!",
+			"empty_text": "{name}, time for the first match!",
+			"positive_headline": "What a week!",
+			"positive_text": "{name}, {delta} ELO — keep this up and we'll start sweating!",
+			"negative_headline": "That was tough.",
+			"negative_text": "{name}, everyone has a mixed week now and then. The next one will be better, I can feel it!",
+			"neutral_headline": "Solid record.",
+			"neutral_text": "{name}, there's room for a bit more hype, right?",
+			"elo_delta": "ELO change"
 		},
 		"recap_card": {
 			"title": "Your {version} recap is here",
@@ -114,15 +119,15 @@
 		"sections": {
 			"challenges": "Weekly challenges",
 			"talkrunde": "Friday talk show",
-			"talkrunde_action": "Open recap →",
+			"talkrunde_action": "Open recap",
 			"series": "Current streaks",
 			"quick_stats": "Your standing",
 			"recent_matches": "Your last matches",
 			"top3": "Top 3 of the league",
 			"highlights": "Recent highlights",
-			"action_profile": "Profile →",
-			"action_all": "All →",
-			"action_ranking": "Ranking →"
+			"action_profile": "Your profile",
+			"action_all": "All matches",
+			"action_ranking": "Full ranking"
 		},
 		"talkrunde": {
 			"new": "New",
@@ -683,12 +688,6 @@
 			"detail_locked": "Not yet unlocked",
 			"detail_next_tier": "Next tier",
 			"detail_close": "Close"
-		},
-		"theme": {
-			"title": "Appearance",
-			"light": "Light",
-			"dark": "Dark",
-			"system": "System"
 		},
 		"edit": {
 			"title": "Edit profile",
@@ -1650,5 +1649,20 @@
 			"next_season": "FC27 is live — your starting ELO: {rating}",
 			"cta": "Go to the leaderboard"
 		}
+	},
+	"settings": {
+		"design": {
+			"title": "Design",
+			"body": "How the app looks. Applies to this device only.",
+			"a_name": "Red & White",
+			"a_hint": "Red header bands, white cards, sharp edges.",
+			"b_name": "Football pitch",
+			"b_hint": "White cards on the grass, rounded shapes."
+		}
+	},
+	"audio_player": {
+		"play": "Play",
+		"pause": "Pause",
+		"speed": "Playback speed"
 	}
 }

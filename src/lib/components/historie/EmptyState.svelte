@@ -58,7 +58,7 @@ const canReset = $derived(
 	margin-top: 8px;
 }
 .ball-icon {
-	color: var(--color-text-muted);
+	color: var(--color-muted);
 	display: flex;
 	align-items: center;
 	justify-content: center;

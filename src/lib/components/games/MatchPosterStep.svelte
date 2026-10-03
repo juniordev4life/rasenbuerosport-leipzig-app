@@ -166,7 +166,7 @@ function avatarGradient(id) {
 
 {#snippet playerChip(id)}
 	{@const p = getPlayer(id)}
-	<div class="inline-flex items-center gap-1.5 rounded-full bg-bg-input border border-border pl-0.5 pr-2.5 py-0.5 max-w-full">
+	<div class="inline-flex items-center gap-1.5 rounded-full bg-sunken border border-line pl-0.5 pr-2.5 py-0.5 max-w-full">
 		{#if p.avatar_url}
 			<img referrerpolicy="no-referrer" src={p.avatar_url} alt={p.username} class="w-5 h-5 rounded-full object-cover" />
 		{:else}
@@ -175,7 +175,7 @@ function avatarGradient(id) {
 				style="background: {avatarGradient(id)};"
 			>{p.username.charAt(0).toUpperCase()}</span>
 		{/if}
-		<span class="text-[11px] font-medium text-text-secondary truncate max-w-[120px]">
+		<span class="text-[11px] font-medium text-muted truncate max-w-[120px]">
 			{p.username}
 		</span>
 	</div>
@@ -186,7 +186,7 @@ function avatarGradient(id) {
 		{#if team}
 			<TeamLogo logoUrl={team.logo_url} teamName={team.name} size="lg" />
 		{:else}
-			<div class="w-14 h-14 rounded-full bg-bg-input animate-pulse"></div>
+			<div class="w-14 h-14 rounded-full bg-sunken animate-pulse"></div>
 		{/if}
 		<h2 class="text-sm sm:text-base font-bold leading-tight truncate max-w-[200px]">
 			{team?.name ?? "—"}
@@ -211,14 +211,14 @@ function avatarGradient(id) {
 
 <div class="flex flex-col gap-3">
 	{#if rollError}
-		<div class="text-center text-xs text-warning">{rollError}</div>
+		<div class="text-center text-xs text-brand">{rollError}</div>
 	{/if}
 
 	<!-- Pitch with the two teams in their respective halves — same
 	     visual as the player lobby and live-match screens. -->
 	<div
 		data-onboarding="poster-teams"
-		class="relative rounded-2xl border-2 border-border overflow-hidden"
+		class="relative rounded-2xl border-2 border-line overflow-hidden"
 		style="background: linear-gradient(135deg, #0d3320 0%, #0a2516 100%);"
 	>
 		<svg
@@ -383,21 +383,21 @@ function avatarGradient(id) {
 		onkeydown={(e) => e.key === "Escape" && (showManuell = false)}
 	>
 		<div
-			class="bg-bg-secondary border-t border-border rounded-t-2xl sm:rounded-2xl sm:border w-full max-w-lg overflow-y-auto p-5 sm:mx-4"
+			class="bg-surface border-t border-line rounded-t-2xl sm:rounded-2xl sm:border w-full max-w-lg overflow-y-auto p-5 sm:mx-4"
 		>
-			<h2 class="text-lg font-bold text-text-primary text-center mb-5">
+			<h2 class="text-lg font-bold text-ink text-center mb-5">
 				{$t("new_game.poster.action_manual")}
 			</h2>
 
 			<div class="flex flex-col gap-4 mb-5">
 				<div>
-					<label for="{uid}-home" class="text-xs font-medium text-accent-red mb-1.5 block tracking-[0.06em] uppercase">
+					<label for="{uid}-home" class="text-xs font-medium text-brand mb-1.5 block tracking-[0.06em] uppercase">
 						{$t("new_game.home")}
 					</label>
 					<TeamAutocomplete id="{uid}-home" bind:value={manualHomeDraft} />
 				</div>
 				<div>
-					<label for="{uid}-away" class="text-xs font-medium text-success mb-1.5 block tracking-[0.06em] uppercase">
+					<label for="{uid}-away" class="text-xs font-medium text-win mb-1.5 block tracking-[0.06em] uppercase">
 						{$t("new_game.away")}
 					</label>
 					<TeamAutocomplete id="{uid}-away" bind:value={manualAwayDraft} direction="up" />
@@ -408,7 +408,7 @@ function avatarGradient(id) {
 				<button
 					type="button"
 					onclick={() => (showManuell = false)}
-					class="flex-1 rounded-xl border border-border bg-bg-input hover:bg-bg-card text-text-secondary text-sm font-semibold px-4 py-2.5 transition-colors"
+					class="flex-1 rounded-xl border border-line bg-sunken hover:bg-surface text-muted text-sm font-semibold px-4 py-2.5 transition-colors"
 				>
 					{$t("new_game.cancel")}
 				</button>
@@ -416,7 +416,7 @@ function avatarGradient(id) {
 					type="button"
 					onclick={saveManuell}
 					disabled={!manualHomeDraft.trim() || !manualAwayDraft.trim()}
-					class="flex-1 rounded-xl bg-accent-red hover:bg-accent-red-hover text-white text-sm font-semibold px-4 py-2.5 shadow-md shadow-accent-red/20 disabled:opacity-40 disabled:shadow-none transition-colors"
+					class="flex-1 rounded-xl bg-brand hover:bg-brand-strong text-white text-sm font-semibold px-4 py-2.5 shadow-md shadow-brand/20 disabled:opacity-40 disabled:shadow-none transition-colors"
 				>
 					{$t("live_match.editor.confirm")}
 				</button>

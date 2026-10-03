@@ -40,8 +40,8 @@ function isActive(season) {
 				class="shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors {isActive(
 					season,
 				)
-					? 'bg-accent-red border-accent-red text-white'
-					: 'bg-bg-card border-border text-text-secondary hover:text-text-primary'}"
+					? 'bg-brand border-brand text-white'
+					: 'bg-surface border-line text-muted hover:text-ink'}"
 			>
 				{season.game_version}
 				<span class="opacity-75 font-semibold">

@@ -16,6 +16,6 @@ const medal = $derived(rank >= 1 && rank <= 3 ? MEDALS[rank - 1] : null);
 	{#if medal}
 		<span class="text-[22px] leading-none" aria-hidden="true">{medal}</span>
 	{:else}
-		<span class="text-[15px] font-bold text-text-muted tabular-nums">{rank}</span>
+		<span class="text-[15px] font-bold text-muted tabular-nums">{rank}</span>
 	{/if}
 </div>

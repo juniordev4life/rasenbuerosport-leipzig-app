@@ -5,17 +5,14 @@ import MicIcon from "$lib/components/icons/MicIcon.svelte";
 import { REPORTERS } from "$lib/constants/reporters.constants.js";
 
 /**
- * Friday-talkshow card. When a persisted episode is available
- * (`talkrunde.audioUrl` set) the card renders the shared
- * `<MatchAudioPlayer>` with the klassiker palette so Marcel's
- * accent-red carries the talkshow brand. Otherwise the empty-state
- * copy is shown — the placeholder the dashboard had since the very
- * first version.
+ * Friday talk-show card: episode title and week, the three reporters and
+ * the audio player once an episode exists (otherwise the "first episode
+ * on Friday" note). Design A: a navy block with a white mic tile.
+ * Design B: plain content on the section card, round reporter photos and
+ * the player in its pale green panel.
  *
- * Reporter avatars use the persona photos shared with the Frank card
- * and the match-report header. They are intentionally NOT clickable
- * here — the bio dialog is reserved for the contexts where the
- * reporter is the lead voice on the card.
+ * Reporter photos are not clickable here — the bio dialog belongs to the
+ * places where a reporter is the lead voice.
  *
  * @type {{
  *   talkrunde?: {
@@ -37,95 +34,149 @@ const lineup = [
 ];
 </script>
 
-<div class="talkrunde-card">
-	{#if talkrunde?.isFresh}
-		<div class="talkrunde-new-ribbon">{$t("home.talkrunde.new")}</div>
-	{/if}
-
-	<div class="flex items-center gap-2.5 mb-3">
-		<div class="talkrunde-icon">
-			<MicIcon size={18} />
-		</div>
-		<div class="flex-1 leading-tight">
-			<div class="text-[13px] font-extrabold text-white">
-				{talkrunde?.title ?? $t("home.talkrunde.placeholder_title")}
-			</div>
-			<div class="text-[10px] text-text-secondary mt-0.5">
-				{talkrunde?.subtitle ?? $t("home.talkrunde.placeholder_subtitle")}
-			</div>
+<div class="talk">
+	<div class="head">
+		<span class="mic" aria-hidden="true"><MicIcon size={24} strokeWidth={2} /></span>
+		<div class="flex flex-col gap-1.5 flex-1 min-w-0">
+			<span class="flex items-center gap-2.5 flex-wrap">
+				<span class="title">{talkrunde?.title ?? $t("home.talkrunde.placeholder_title")}</span>
+				{#if talkrunde?.isFresh}
+					<span class="chip fresh">{$t("home.talkrunde.new")}</span>
+				{/if}
+			</span>
+			<span class="sub">{talkrunde?.subtitle ?? $t("home.talkrunde.placeholder_subtitle")}</span>
 		</div>
 	</div>
 
-	<div class="flex items-center gap-2 mb-3 p-2.5 bg-black/25 rounded-lg">
-		<div class="reporter-avatars">
-			{#each lineup as r, i (r.key)}
-				<img
-					src={r.reporter.imageUrl}
-					alt={r.reporter.name}
-					class="reporter-avatar-photo {r.key}"
-					style={i === 0 ? "" : "margin-left: -8px;"}
-					loading="lazy"
-				/>
+	<div class="flex items-center gap-2.5">
+		<div class="reporters">
+			{#each lineup as r (r.key)}
+				<img src={r.reporter.imageUrl} alt={r.reporter.name} loading="lazy" />
 			{/each}
 		</div>
-		<div class="text-[11px] text-text-secondary flex-1">
-			<strong class="text-text-primary font-semibold">Marcel, Sophie &amp; Frank</strong>
+		<span class="text-[13px] leading-snug">
+			<strong>Marcel, Sophie &amp; Frank</strong>
 			{$t("home.talkrunde.lineup_suffix")}
-		</div>
+		</span>
 	</div>
 
 	{#if talkrunde?.audioUrl}
-		<MatchAudioPlayer audioUrl={talkrunde.audioUrl} reporterId="klassiker" />
+		<MatchAudioPlayer audioUrl={talkrunde.audioUrl} />
 	{:else}
-		<p class="text-[11px] text-text-muted italic">
-			{$t("home.talkrunde.empty_state")}
-		</p>
+		<p class="empty">{$t("home.talkrunde.empty_state")}</p>
 	{/if}
 </div>
 
 <style>
-.talkrunde-card {
-	background: linear-gradient(135deg, #1A1F2A 0%, #232938 100%);
-	border: 1px solid #2A3142;
-	border-radius: 18px;
-	padding: 14px;
-	position: relative;
-	overflow: hidden;
+/* ── Design A: navy block ───────────────────────────────────────────── */
+.talk {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 16px;
+	background: var(--color-navy);
+	color: var(--color-on-navy);
+	border-radius: var(--radius-tile);
 }
-.talkrunde-new-ribbon {
-	position: absolute;
-	top: 10px; right: -22px;
-	background: linear-gradient(135deg, #E24B4A, #C73E3D);
-	color: white;
-	font-size: 8px;
-	font-weight: 800;
-	padding: 2px 24px;
-	text-transform: uppercase;
-	letter-spacing: 0.1em;
-	transform: rotate(35deg);
-	box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+
+.head {
+	display: flex;
+	align-items: center;
+	gap: 12px;
 }
-.talkrunde-icon {
-	width: 36px;
-	height: 36px;
-	border-radius: 10px;
-	background: linear-gradient(135deg, #E24B4A, #C73E3D);
+
+.mic {
+	width: 48px;
+	height: 48px;
+	flex-shrink: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	background: var(--color-surface);
+	color: var(--color-navy);
+	border-radius: var(--radius-tile);
+}
+
+.title {
+	font-family: var(--font-display);
+	font-size: 22px;
+	line-height: 0.93;
+	text-transform: uppercase;
+}
+
+.fresh {
+	padding: 4px 8px;
+	font-size: 12px;
+	background: var(--color-brand);
+	color: var(--color-on-brand);
+}
+
+.sub {
+	font-size: 13px;
+}
+
+.reporters {
+	display: flex;
+	gap: 4px;
 	flex-shrink: 0;
-	color: white;
 }
-.reporter-avatars { display: flex; }
-.reporter-avatar-photo {
-	width: 30px;
-	height: 30px;
-	border-radius: 50%;
+
+.reporters img {
+	width: 28px;
+	height: 28px;
 	object-fit: cover;
-	border: 2px solid #131822;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+	background: var(--color-surface);
+	border-radius: var(--radius-avatar);
 }
-.reporter-avatar-photo.marcel { box-shadow: 0 0 0 1px rgba(226, 75, 74, 0.4); }
-.reporter-avatar-photo.sophie { box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.4); }
-.reporter-avatar-photo.frank { box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.4); }
+
+.empty {
+	margin: 0;
+	font-size: 13px;
+	font-style: italic;
+}
+
+/* ── Design B: content on the section card ──────────────────────────── */
+:global([data-variant="b"]) .talk {
+	gap: 14px;
+	padding: 0;
+	background: transparent;
+	color: var(--color-ink);
+}
+
+:global([data-variant="b"]) .mic {
+	display: none;
+}
+
+:global([data-variant="b"]) .title {
+	font-family: var(--font-cond);
+	font-weight: 800;
+	font-size: 26px;
+	line-height: 1;
+	text-transform: none;
+}
+
+:global([data-variant="b"]) .fresh {
+	padding: 3px 10px;
+	background: var(--color-gold);
+	color: var(--color-on-gold);
+}
+
+:global([data-variant="b"]) .sub,
+:global([data-variant="b"]) .empty {
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .reporters {
+	gap: 0;
+}
+
+:global([data-variant="b"]) .reporters img {
+	width: 34px;
+	height: 34px;
+	box-shadow: 0 0 0 2px var(--color-surface);
+}
+
+:global([data-variant="b"]) .reporters img + img {
+	margin-left: -8px;
+}
 </style>

@@ -61,7 +61,7 @@ function handleKey(event) {
 	class:locked={!unlocked}
 	class:masked
 	data-rarity={rarity}
-	style:--rarity-color={rarityMeta?.colorHex}
+	style:--rarity-color={rarityMeta?.color}
 	onclick={handleClick}
 	onkeydown={handleKey}
 	aria-label={titleText}
@@ -126,8 +126,8 @@ function handleKey(event) {
 		 * to its own content. */
 		height: 100%;
 		min-height: 220px;
-		background: var(--color-bg-card);
-		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		border: 1px solid var(--color-line);
 		border-radius: 14px;
 		padding: 12px 10px;
 		display: flex;
@@ -155,13 +155,13 @@ function handleKey(event) {
 				color-mix(in srgb, var(--rarity-color) 18%, transparent) 0%,
 				transparent 70%
 			),
-			var(--color-bg-card);
+			var(--color-surface);
 		border-color: color-mix(in srgb, var(--rarity-color) 40%, transparent);
 	}
 	.trophy.locked {
 		opacity: 0.6;
 		border-style: dashed;
-		border-color: color-mix(in srgb, var(--color-border) 60%, transparent);
+		border-color: color-mix(in srgb, var(--color-line) 60%, transparent);
 	}
 	.trophy.masked {
 		opacity: 0.5;
@@ -191,8 +191,8 @@ function handleKey(event) {
 	.trophy.locked .trophy-icon-circle {
 		background: rgba(0, 0, 0, 0.18);
 		border: 2px dashed
-			color-mix(in srgb, var(--color-border) 70%, transparent);
-		color: var(--color-text-muted);
+			color-mix(in srgb, var(--color-line) 70%, transparent);
+		color: var(--color-muted);
 	}
 
 	.trophy.earned[data-rarity="diamond"] .trophy-icon-circle::after {
@@ -219,23 +219,23 @@ function handleKey(event) {
 	.trophy-name {
 		font-size: 11px;
 		font-weight: 800;
-		color: var(--color-text-primary);
+		color: var(--color-ink);
 		line-height: 1.15;
 		min-height: 26px;
 		display: flex;
 		align-items: center;
 	}
 	.trophy.locked .trophy-name {
-		color: var(--color-text-muted);
+		color: var(--color-muted);
 	}
 	.trophy-desc {
 		font-size: 9px;
-		color: var(--color-text-secondary);
+		color: var(--color-muted);
 		line-height: 1.3;
 		min-height: 24px;
 	}
 	.trophy.locked .trophy-desc {
-		color: var(--color-text-muted);
+		color: var(--color-muted);
 	}
 	.trophy-rarity-pill {
 		font-size: 7px;
@@ -252,8 +252,8 @@ function handleKey(event) {
 	}
 	.trophy.locked .trophy-rarity-pill {
 		background: rgba(75, 85, 99, 0.15);
-		color: var(--color-text-muted);
-		border-color: color-mix(in srgb, var(--color-border) 50%, transparent);
+		color: var(--color-muted);
+		border-color: color-mix(in srgb, var(--color-line) 50%, transparent);
 	}
 	/* Footer slot always claims the same vertical space — date OR
 	 * progress OR nothing, every card ends at the same bottom line.
@@ -270,7 +270,7 @@ function handleKey(event) {
 	}
 	.trophy-date {
 		font-size: 8px;
-		color: var(--color-text-muted);
+		color: var(--color-muted);
 		letter-spacing: 0.04em;
 	}
 	.trophy-progress {
@@ -289,7 +289,7 @@ function handleKey(event) {
 	}
 	.trophy-progress-text {
 		font-size: 8px;
-		color: var(--color-text-secondary);
+		color: var(--color-muted);
 		font-weight: 700;
 		margin-top: 3px;
 		font-variant-numeric: tabular-nums;

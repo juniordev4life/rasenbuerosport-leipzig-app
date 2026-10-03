@@ -29,12 +29,12 @@ function initial(name) {
 {#if ordered.length > 0}
 	<div class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
 		{#each ordered as award (award.key)}
-			<div class="shrink-0 w-[168px] rounded-xl border border-border bg-bg-card p-3 flex flex-col gap-1.5">
+			<div class="shrink-0 w-[168px] rounded-xl border border-line bg-surface p-3 flex flex-col gap-1.5">
 				<div class="flex items-center gap-1.5">
 					<span aria-hidden="true" class="text-base leading-none">
 						{AWARD_EMOJI[award.key] ?? "\u{1F3C6}"}
 					</span>
-					<span class="text-[10px] font-bold uppercase tracking-wide text-text-muted truncate">
+					<span class="text-[10px] font-bold uppercase tracking-wide text-muted truncate">
 						{$t(`season_awards.${award.key}.label`)}
 					</span>
 				</div>
@@ -56,12 +56,12 @@ function initial(name) {
 								{initial(award.players[0].username)}
 							</span>
 						{/if}
-						<span class="text-[12px] font-bold text-text-primary truncate">
+						<span class="text-[12px] font-bold text-ink truncate">
 							{award.players.map((p) => p.username).join(" & ")}
 						</span>
 					</div>
 				{/if}
-				<div class="text-[15px] font-extrabold text-text-primary tabular-nums">
+				<div class="text-[15px] font-extrabold text-ink tabular-nums">
 					{formatAwardValue(award.value, award.unit)}
 				</div>
 			</div>

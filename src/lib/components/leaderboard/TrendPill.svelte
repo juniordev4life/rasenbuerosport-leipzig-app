@@ -31,18 +31,18 @@ const label = $derived.by(() => {
 
 const inlineToneClass = $derived(
 	direction === "up"
-		? "text-success"
+		? "text-win"
 		: direction === "down"
-			? "text-error"
-			: "text-text-muted",
+			? "text-loss"
+			: "text-muted",
 );
 
 const pillToneClass = $derived(
 	direction === "up"
-		? "bg-success/10 border-success/30 text-success"
+		? "bg-win/10 border-win/30 text-win"
 		: direction === "down"
-			? "bg-error/10 border-error/30 text-error"
-			: "bg-bg-input border-border text-text-muted",
+			? "bg-loss/10 border-loss/30 text-loss"
+			: "bg-sunken border-line text-muted",
 );
 </script>
 

@@ -87,25 +87,30 @@
 		"profile": "Profil",
 		"settings": "Einstellungen",
 		"wrapped": "Wrapped",
-		"seasons": "Saisons"
+		"seasons": "Saisons",
+		"main": "Hauptnavigation"
 	},
 	"common": {
 		"loading": "Laden...",
 		"error": "Fehler",
 		"vs": "vs.",
 		"back": "Zurück",
-		"close": "Schließen",
-		"toggle_theme": "Design wechseln"
+		"close": "Schließen"
 	},
 	"home": {
 		"frank": {
 			"role": "Deine Woche bisher",
 			"record": "Bilanz",
 			"matches": "Matches",
-			"positive": "{name}, was war das für eine Woche?! +{delta} ELO — wenn das so weitergeht, kommen wir noch ins Schwitzen!",
-			"negative": "{name}, das war zäh — aber so ist das, jeder hat mal ne durchwachsene Woche. Die nächste wird besser, ich seh's kommen!",
-			"neutral": "{name}, solide Bilanz — ein bisschen Hype geht aber noch, oder?",
-			"empty": "{name}, frische Woche, frische Chancen! Zeit für das erste Match!"
+			"empty_headline": "Frische Woche, frische Chancen!",
+			"empty_text": "{name}, Zeit für das erste Match!",
+			"positive_headline": "Was für eine Woche!",
+			"positive_text": "{name}, {delta} ELO — wenn das so weitergeht, kommen wir noch ins Schwitzen!",
+			"negative_headline": "Das war zäh.",
+			"negative_text": "{name}, jeder hat mal ne durchwachsene Woche. Die nächste wird besser, ich seh's kommen!",
+			"neutral_headline": "Solide Bilanz.",
+			"neutral_text": "{name}, ein bisschen Hype geht aber noch, oder?",
+			"elo_delta": "ELO-Differenz"
 		},
 		"recap_card": {
 			"title": "Dein {version}-Rückblick ist da",
@@ -116,15 +121,15 @@
 		"sections": {
 			"challenges": "Wochen-Challenges",
 			"talkrunde": "Freitags-Talkrunde",
-			"talkrunde_action": "Zum Rückblick →",
+			"talkrunde_action": "Zum Rückblick",
 			"series": "Aktuelle Serien",
 			"quick_stats": "Dein Stand",
 			"recent_matches": "Deine letzten Spiele",
 			"top3": "Top 3 der Liga",
 			"highlights": "Neueste Highlights",
-			"action_profile": "Profil →",
-			"action_all": "Alle →",
-			"action_ranking": "Rangliste →"
+			"action_profile": "Zum Profil",
+			"action_all": "Alle Spiele",
+			"action_ranking": "Zur Rangliste"
 		},
 		"talkrunde": {
 			"new": "Neu",
@@ -685,12 +690,6 @@
 			"detail_locked": "Noch nicht freigeschaltet",
 			"detail_next_tier": "Nächste Stufe",
 			"detail_close": "Schließen"
-		},
-		"theme": {
-			"title": "Erscheinungsbild",
-			"light": "Hell",
-			"dark": "Dunkel",
-			"system": "System"
 		},
 		"edit": {
 			"title": "Profil bearbeiten",
@@ -1652,5 +1651,20 @@
 			"next_season": "FC27 läuft — dein Start-ELO: {rating}",
 			"cta": "Zur Rangliste"
 		}
+	},
+	"settings": {
+		"design": {
+			"title": "Design",
+			"body": "Wie die App aussieht. Gilt nur für dieses Gerät.",
+			"a_name": "Rot & Weiß",
+			"a_hint": "Rote Kopfbereiche, weiße Karten, klare Kanten.",
+			"b_name": "Fußballplatz",
+			"b_hint": "Weiße Karten auf dem Rasen, runde Formen."
+		}
+	},
+	"audio_player": {
+		"play": "Abspielen",
+		"pause": "Pause",
+		"speed": "Wiedergabegeschwindigkeit"
 	}
 }

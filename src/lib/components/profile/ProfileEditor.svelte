@@ -126,8 +126,8 @@ async function handleSave() {
 const initial = $derived(username?.charAt(0)?.toUpperCase() || "?");
 </script>
 
-<div class="bg-bg-secondary border border-border rounded-lg p-5 flex flex-col gap-4">
-	<h3 class="text-sm font-bold text-text-primary text-center">
+<div class="bg-surface border border-line rounded-lg p-5 flex flex-col gap-4">
+	<h3 class="text-sm font-bold text-ink text-center">
 		{$t("profile.edit.title")}
 	</h3>
 
@@ -138,11 +138,11 @@ const initial = $derived(username?.charAt(0)?.toUpperCase() || "?");
 				<img referrerpolicy="no-referrer"
 					src={avatarPreview}
 					alt="Avatar"
-					class="w-20 h-20 rounded-full object-cover ring-2 ring-border group-hover:ring-accent-red transition-colors"
+					class="w-20 h-20 rounded-full object-cover ring-2 ring-line group-hover:ring-brand transition-colors"
 				/>
 			{:else}
 				<div
-					class="w-20 h-20 rounded-full bg-accent-red flex items-center justify-center text-3xl font-bold text-white ring-2 ring-border group-hover:ring-accent-red-light transition-colors"
+					class="w-20 h-20 rounded-full bg-brand flex items-center justify-center text-3xl font-bold text-white ring-2 ring-line group-hover:ring-brand transition-colors"
 				>
 					{initial}
 				</div>
@@ -162,12 +162,12 @@ const initial = $derived(username?.charAt(0)?.toUpperCase() || "?");
 			onchange={handleFileChange}
 			class="hidden"
 		/>
-		<p class="text-[10px] text-text-secondary">{$t("profile.edit.avatar_hint")}</p>
+		<p class="text-[10px] text-muted">{$t("profile.edit.avatar_hint")}</p>
 	</div>
 
 	<!-- Username Input -->
 	<div class="flex flex-col gap-1">
-		<label for="username-input" class="text-xs text-text-secondary font-medium">
+		<label for="username-input" class="text-xs text-muted font-medium">
 			{$t("profile.edit.username_label")}
 		</label>
 		<input
@@ -175,13 +175,13 @@ const initial = $derived(username?.charAt(0)?.toUpperCase() || "?");
 			type="text"
 			bind:value={username}
 			maxlength="30"
-			class="w-full bg-bg-input border border-border rounded-lg px-3 py-2.5 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-red"
+			class="w-full bg-sunken border border-line rounded-lg px-3 py-2.5 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand"
 		/>
 	</div>
 
 	<!-- Error -->
 	{#if error}
-		<p class="text-xs text-error text-center">{error}</p>
+		<p class="text-xs text-loss text-center">{error}</p>
 	{/if}
 
 	<!-- Buttons -->
@@ -195,7 +195,7 @@ const initial = $derived(username?.charAt(0)?.toUpperCase() || "?");
 			{saving ? $t("profile.edit.saving") : $t("profile.edit.save")}
 		</Button>
 		{#if savedHint}
-			<span class="text-xs text-success font-semibold">{$t("profile.edit.saved")}</span>
+			<span class="text-xs text-win font-semibold">{$t("profile.edit.saved")}</span>
 		{/if}
 	</div>
 </div>

@@ -130,9 +130,9 @@ function handleConfirm() {
 	onmousedown={(e) => { if (e.target === e.currentTarget) onClose(); }}
 	onkeydown={(e) => e.key === "Escape" && onClose()}
 >
-	<div class="bg-bg-secondary border-t border-border rounded-t-2xl sm:rounded-2xl sm:border w-full max-w-lg max-h-[85vh] overflow-y-auto p-5 sm:mx-4">
+	<div class="bg-surface border-t border-line rounded-t-2xl sm:rounded-2xl sm:border w-full max-w-lg max-h-[85vh] overflow-y-auto p-5 sm:mx-4">
 		<!-- Title -->
-		<h2 class="text-lg font-bold text-text-primary text-center mb-5">
+		<h2 class="text-lg font-bold text-ink text-center mb-5">
 			{$t("new_game.random_teams_title")}
 		</h2>
 
@@ -141,7 +141,7 @@ function handleConfirm() {
 		     a read-only visualisation; the scroller is the input. -->
 		<div class="flex flex-col gap-4 mb-5">
 			<div>
-				<span id="{uid}-min-stars" class="text-xs font-medium text-text-secondary mb-1.5 block">
+				<span id="{uid}-min-stars" class="text-xs font-medium text-muted mb-1.5 block">
 					{$t("new_game.random_min_stars")}
 				</span>
 				<div class="flex items-center gap-3">
@@ -164,7 +164,7 @@ function handleConfirm() {
 			</div>
 
 			<div>
-				<span id="{uid}-max-stars" class="text-xs font-medium text-text-secondary mb-1.5 block">
+				<span id="{uid}-max-stars" class="text-xs font-medium text-muted mb-1.5 block">
 					{$t("new_game.random_max_stars")}
 				</span>
 				<div class="flex items-center gap-3">
@@ -191,23 +191,23 @@ function handleConfirm() {
 		<button
 			type="button"
 			onclick={searchRandomTeams}
-			class="w-full mb-5 rounded-xl bg-accent-red hover:bg-accent-red-hover text-white text-sm font-semibold px-5 py-2.5 shadow-md shadow-accent-red/20 transition-colors"
+			class="w-full mb-5 rounded-xl bg-brand hover:bg-brand-strong text-white text-sm font-semibold px-5 py-2.5 shadow-md shadow-brand/20 transition-colors"
 		>
 			{$t("new_game.random_search")}
 		</button>
 
 		<!-- Results -->
 		{#if error}
-			<p class="text-sm text-error text-center mb-4">{error}</p>
+			<p class="text-sm text-loss text-center mb-4">{error}</p>
 		{/if}
 
 		{#if homeResult && awayResult}
 			<div class="flex flex-col gap-3 mb-5">
 				<!-- Home Team -->
-				<div class="flex items-center gap-3 bg-bg-secondary border border-border rounded-xl p-3">
+				<div class="flex items-center gap-3 bg-surface border border-line rounded-xl p-3">
 					<TeamLogo logoUrl={homeResult.logo_url} teamName={homeResult.name} size="md" />
 					<div class="flex-1 min-w-0">
-						<p class="text-sm font-bold text-text-primary truncate">{homeResult.name}</p>
+						<p class="text-sm font-bold text-ink truncate">{homeResult.name}</p>
 						<div class="flex items-center gap-2 mt-0.5">
 							<OvrBadge rating={homeResult.overall_rating} size="xs" />
 							<StarRating rating={homeResult.star_rating} size="xs" />
@@ -216,7 +216,7 @@ function handleConfirm() {
 					<button
 						type="button"
 						onclick={() => rerollSingle("home")}
-						class="shrink-0 text-text-secondary hover:text-accent-red transition-colors p-1.5"
+						class="shrink-0 text-muted hover:text-brand transition-colors p-1.5"
 						aria-label="Reroll home team"
 					>
 						<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -227,13 +227,13 @@ function handleConfirm() {
 				</div>
 
 				<!-- VS -->
-				<p class="text-xs font-bold text-text-secondary text-center">{$t("new_game.random_vs")}</p>
+				<p class="text-xs font-bold text-muted text-center">{$t("new_game.random_vs")}</p>
 
 				<!-- Away Team -->
-				<div class="flex items-center gap-3 bg-bg-secondary border border-border rounded-xl p-3">
+				<div class="flex items-center gap-3 bg-surface border border-line rounded-xl p-3">
 					<TeamLogo logoUrl={awayResult.logo_url} teamName={awayResult.name} size="md" />
 					<div class="flex-1 min-w-0">
-						<p class="text-sm font-bold text-text-primary truncate">{awayResult.name}</p>
+						<p class="text-sm font-bold text-ink truncate">{awayResult.name}</p>
 						<div class="flex items-center gap-2 mt-0.5">
 							<OvrBadge rating={awayResult.overall_rating} size="xs" />
 							<StarRating rating={awayResult.star_rating} size="xs" />
@@ -242,7 +242,7 @@ function handleConfirm() {
 					<button
 						type="button"
 						onclick={() => rerollSingle("away")}
-						class="shrink-0 text-text-secondary hover:text-accent-red transition-colors p-1.5"
+						class="shrink-0 text-muted hover:text-brand transition-colors p-1.5"
 						aria-label="Reroll away team"
 					>
 						<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -258,14 +258,14 @@ function handleConfirm() {
 				<button
 					type="button"
 					onclick={searchRandomTeams}
-					class="flex-1 rounded-xl border border-border bg-bg-input hover:bg-bg-card text-text-secondary text-sm font-semibold px-4 py-2.5 transition-colors"
+					class="flex-1 rounded-xl border border-line bg-sunken hover:bg-surface text-muted text-sm font-semibold px-4 py-2.5 transition-colors"
 				>
 					{$t("new_game.random_reroll")}
 				</button>
 				<button
 					type="button"
 					onclick={handleConfirm}
-					class="flex-1 rounded-xl bg-accent-red hover:bg-accent-red-hover text-white text-sm font-semibold px-4 py-2.5 shadow-md shadow-accent-red/20 transition-colors"
+					class="flex-1 rounded-xl bg-brand hover:bg-brand-strong text-white text-sm font-semibold px-4 py-2.5 shadow-md shadow-brand/20 transition-colors"
 				>
 					{$t("new_game.random_confirm")}
 				</button>
@@ -276,7 +276,7 @@ function handleConfirm() {
 		<button
 			type="button"
 			onclick={onClose}
-			class="w-full mt-4 py-2 text-xs font-medium text-text-muted hover:text-text-primary rounded-lg transition-colors"
+			class="w-full mt-4 py-2 text-xs font-medium text-muted hover:text-ink rounded-lg transition-colors"
 		>
 			{$t("new_game.random_cancel")}
 		</button>

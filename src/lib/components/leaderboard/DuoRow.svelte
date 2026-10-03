@@ -30,7 +30,7 @@ function initial(name) {
 
 <button
 	type="button"
-	class="w-full flex items-center gap-2.5 rounded-xl border border-border bg-bg-card px-3 py-2.5 mb-2 text-left hover:bg-bg-input transition-colors"
+	class="w-full flex items-center gap-2.5 rounded-xl border border-line bg-surface px-3 py-2.5 mb-2 text-left hover:bg-sunken transition-colors"
 	onclick={() => onClick?.(duo)}
 >
 	<RankIndicator {rank} />
@@ -38,7 +38,7 @@ function initial(name) {
 	<div class="relative w-14 h-[38px] shrink-0">
 		{#each duo.players.slice(0, 2) as p, i (p.player_id)}
 			<div
-				class="absolute top-0 w-9 h-9 rounded-full border-2 border-bg-card shadow-sm overflow-hidden {i === 0
+				class="absolute top-0 w-9 h-9 rounded-full border-2 border-surface shadow-sm overflow-hidden {i === 0
 					? 'left-0 z-[2]'
 					: 'right-0 z-[1]'}"
 				style:background={p.avatar_url
@@ -57,10 +57,10 @@ function initial(name) {
 	</div>
 
 	<div class="flex-1 min-w-0">
-		<div class="text-[13px] font-bold text-text-primary truncate mb-0.5">
+		<div class="text-[13px] font-bold text-ink truncate mb-0.5">
 			{duo.players.map((p) => p.username).join(" & ")}
 		</div>
-		<div class="text-[10px] text-text-muted tabular-nums">
+		<div class="text-[10px] text-muted tabular-nums">
 			{duo.wins}{$t("leaderboard.w_short")} ·
 			{duo.draws}{$t("leaderboard.d_short")} ·
 			{duo.losses}{$t("leaderboard.l_short")} ·
@@ -70,7 +70,7 @@ function initial(name) {
 	</div>
 
 	<div class="shrink-0 text-right flex flex-col items-end gap-0.5">
-		<div class="text-[17px] font-extrabold leading-none tabular-nums text-text-primary">
+		<div class="text-[17px] font-extrabold leading-none tabular-nums text-ink">
 			{duo.rating ?? "—"}
 		</div>
 		<TrendPill delta={duo.delta_season} />

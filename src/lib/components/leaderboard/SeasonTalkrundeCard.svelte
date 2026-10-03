@@ -15,17 +15,17 @@ const { t } = getTranslate();
 </script>
 
 <section
-	class="rounded-2xl border border-border bg-bg-card p-4 flex flex-col gap-3"
+	class="rounded-2xl border border-line bg-surface p-4 flex flex-col gap-3"
 	aria-label={$t("leaderboard.season_talkrunde.title", { version: gameVersion })}
 >
 	<div class="flex items-center gap-3">
 		<span class="text-2xl" aria-hidden="true">{"\u{1F399}\u{FE0F}"}</span>
 		<div class="flex-1 min-w-0">
-			<h2 class="text-sm font-extrabold text-text-primary">
+			<h2 class="text-sm font-extrabold text-ink">
 				{$t("leaderboard.season_talkrunde.title", { version: gameVersion })}
 			</h2>
-			<p class="text-xs text-text-secondary">{$t("leaderboard.season_talkrunde.subtitle")}</p>
+			<p class="text-xs text-muted">{$t("leaderboard.season_talkrunde.subtitle")}</p>
 		</div>
 	</div>
-	<MatchAudioPlayer {audioUrl} reporterId="klassiker" />
+	<MatchAudioPlayer {audioUrl} />
 </section>
