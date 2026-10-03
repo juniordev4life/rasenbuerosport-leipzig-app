@@ -8,6 +8,7 @@ import FilterChip from "$lib/components/historie/FilterChip.svelte";
 import FilterSheet from "$lib/components/historie/FilterSheet.svelte";
 import LoadMoreCard from "$lib/components/historie/LoadMoreCard.svelte";
 import MatchCard from "$lib/components/historie/MatchCard.svelte";
+import { tolgee } from "$lib/config/i18n.config.js";
 import { get } from "$lib/services/api.services.js";
 import { user } from "$lib/stores/auth.stores.js";
 import {
@@ -16,6 +17,15 @@ import {
 } from "$lib/utils/dateGrouping.utils.js";
 
 const { t } = getTranslate();
+
+let currentLanguage = $state(tolgee.getLanguage());
+
+$effect(() => {
+	const update = () => {
+		currentLanguage = tolgee.getLanguage();
+	};
+	tolgee.on("language", update);
+});
 
 const PAGE_SIZE = 20;
 
@@ -171,7 +181,7 @@ const filtered = $derived.by(() => {
 	});
 });
 
-const groups = $derived(groupMatchesByDate(filtered));
+const groups = $derived(groupMatchesByDate(filtered, currentLanguage));
 
 const totalCount = $derived(filtered.length);
 
@@ -299,7 +309,7 @@ const filterGroups = $derived([
 					/>
 					<div class="list">
 						{#each group.matches as game (game.id)}
-							<MatchCard {game} currentUserId={userId} />
+							<MatchCard {game} currentUserId={userId} locale={currentLanguage} />
 						{/each}
 					</div>
 				</section>

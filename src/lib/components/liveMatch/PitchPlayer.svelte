@@ -1,4 +1,5 @@
 <script>
+import { getTranslate } from "@tolgee/svelte";
 import { MediaQuery } from "svelte/reactivity";
 import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
 import { LIVE_MATCH } from "$lib/constants/liveMatch.constants.js";
@@ -51,6 +52,8 @@ let {
 	onLongPress,
 } = $props();
 
+const { t } = getTranslate();
+
 let pressTimer = $state(null);
 let longPressFired = $state(false);
 
@@ -99,11 +102,16 @@ function handleKeyboardClick(event) {
 /** The role shown under the name, or null. */
 const role = $derived(
 	isScorer
-		? { label: isOwnGoal ? "Eigentor" : "Schütze", tone: "scorer" }
+		? {
+				labelKey: isOwnGoal
+					? "live_match.role.own_goal"
+					: "live_match.role.scorer",
+				tone: "scorer",
+			}
 		: isAssister
-			? { label: "Vorlage", tone: "assister" }
+			? { labelKey: "live_match.role.assister", tone: "assister" }
 			: isKeeper
-				? { label: "Keeper", tone: "keeper" }
+				? { labelKey: "live_match.role.keeper", tone: "keeper" }
 				: null,
 );
 
@@ -149,7 +157,7 @@ const ring = $derived(
 	<!-- Fixed-height slot so the avatar doesn't shift when a role is assigned. -->
 	<span class="pp-role">
 		{#if role}
-			<span class="chip {ROLE_CHIP[role.tone]}">{role.label}</span>
+			<span class="chip {ROLE_CHIP[role.tone]}">{$t(role.labelKey)}</span>
 		{/if}
 	</span>
 </button>

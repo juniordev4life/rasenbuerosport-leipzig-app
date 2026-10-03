@@ -4,11 +4,15 @@
  * the intro, every slide with data renders in order, the arrow keys and
  * the tap thirds of the story frame step back and on (on desktop the
  * thirds are measured on the phone-shaped frame, not the window), the
- * desktop step buttons do the same, and Escape or ✕ close it.
+ * desktop step buttons do the same, Escape or ✕ close it, and the
+ * slides format values in the UI language.
  */
 
 import { fireEvent, render, screen } from "@testing-library/svelte";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+
+/** UI language the Tolgee singleton reports; a test may switch it. */
+const i18n = vi.hoisted(() => ({ language: "de" }));
 
 vi.mock("@tolgee/svelte", async () => {
 	const { readable } = await import("svelte/store");
@@ -18,6 +22,9 @@ vi.mock("@tolgee/svelte", async () => {
 		}),
 	};
 });
+vi.mock("$lib/config/i18n.config.js", () => ({
+	tolgee: { getLanguage: () => i18n.language, on: vi.fn() },
+}));
 vi.mock("$app/navigation", () => ({ goto: vi.fn() }));
 
 import SeasonRecapStory from "$lib/components/recap/SeasonRecapStory.svelte";
@@ -187,5 +194,34 @@ describe("SeasonRecapStory", () => {
 			screen.getByRole("button", { name: "season_recap.close" }),
 		);
 		expect(onClose).toHaveBeenCalledTimes(2);
+	});
+
+	describe("in English", () => {
+		afterEach(() => {
+			i18n.language = "de";
+		});
+
+		it("writes award values with the English decimal point", async () => {
+			// Arrange
+			i18n.language = "en";
+			const recap = buildSeasonRecapFixture();
+			recap.league.awards.push({
+				key: "fair_play",
+				players: [{ player_id: "p3", username: "Kalle", avatar_url: null }],
+				value: 0.12,
+				unit: "cards_per_game",
+			});
+			render(SeasonRecapStory, { props: { recap, onClose: vi.fn() } });
+
+			// Act
+			const awardsIndex = SLIDE_TITLES.indexOf("season_recap.awards.title");
+			for (let i = 0; i < awardsIndex; i++) {
+				await fireEvent.keyDown(window, { key: "ArrowRight" });
+			}
+
+			// Assert
+			expect(showsSlide("season_recap.awards.title")).toBe(true);
+			expect(screen.getByText("0.12")).toBeInTheDocument();
+		});
 	});
 });

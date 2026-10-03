@@ -15,10 +15,22 @@ import TeamStatsChart from "$lib/components/stats/TeamStatsChart.svelte";
 import WeekdayDistributionChart from "$lib/components/stats/WeekdayDistributionChart.svelte";
 import XgVsGoalsChart from "$lib/components/stats/XgVsGoalsChart.svelte";
 import Section from "$lib/components/ui/Section.svelte";
+import { tolgee } from "$lib/config/i18n.config.js";
 import { get } from "$lib/services/api.services.js";
 import { selectedSeason } from "$lib/stores/season.stores.js";
 
 const { t } = getTranslate();
+
+let currentLanguage = $state(tolgee.getLanguage());
+
+$effect(() => {
+	const update = () => {
+		currentLanguage = tolgee.getLanguage();
+	};
+	tolgee.on("language", update);
+});
+
+const currentLocale = $derived(currentLanguage === "de" ? "de-DE" : "en-US");
 
 let dashboard = $state(null);
 let community = $state(null);
@@ -119,8 +131,14 @@ const isEmpty = $derived(
 			<Section title={$t("stats_dashboard.section_activity")}>
 				{#snippet icon()}<ClockIcon size={22} strokeWidth={2} />{/snippet}
 				<div class="chart-grid">
-					<GamesPerMonthChart data={dashboard?.games_per_month} />
-					<WeekdayDistributionChart data={dashboard?.games_per_weekday} />
+					<GamesPerMonthChart
+						data={dashboard?.games_per_month}
+						locale={currentLocale}
+					/>
+					<WeekdayDistributionChart
+						data={dashboard?.games_per_weekday}
+						locale={currentLocale}
+					/>
 				</div>
 			</Section>
 		{/if}

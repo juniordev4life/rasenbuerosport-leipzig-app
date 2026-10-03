@@ -24,11 +24,14 @@ import {
  * label, the winner's avatar(s) and name(s) and the winning value.
  * A horizontal scroll strip on phones, a grid from `lg`. Design A:
  * white cards; design B: grey tiles inside the section card. The
- * champion's icon is gold.
+ * champion's icon is gold. Decimal values follow `locale`.
  *
- * @type {{ awards: Array<{ key: string, players: Array<object>, value: number, unit: string }> }}
+ * @type {{
+ *   awards: Array<{ key: string, players: Array<object>, value: number, unit: string }>,
+ *   locale?: string,
+ * }}
  */
-let { awards = [] } = $props();
+let { awards = [], locale = "de-DE" } = $props();
 
 const { t } = getTranslate();
 
@@ -74,7 +77,7 @@ const AWARD_ICONS = {
 							<span class="award-name">{award.players.map((p) => p.username).join(" & ")}</span>
 						</span>
 					{/if}
-					<span class="num award-value">{formatAwardValue(award.value, award.unit)}</span>
+					<span class="num award-value">{formatAwardValue(award.value, award.unit, locale)}</span>
 				</li>
 			{/each}
 		</ul>

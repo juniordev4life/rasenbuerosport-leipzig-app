@@ -808,6 +808,12 @@
 			"delete_aria": "Remove event",
 			"delete_title": "Remove event?",
 			"delete_body": "This event will be removed and the score recalculated."
+		},
+		"role": {
+			"scorer": "Scorer",
+			"own_goal": "Own goal",
+			"assister": "Assist",
+			"keeper": "Keeper"
 		}
 	},
 	"new_game": {
@@ -909,6 +915,8 @@
 		"random_stars_value": "{stars, plural, one {# star} other {# stars}}",
 		"random_search": "Save",
 		"random_reroll": "Reroll",
+		"random_reroll_home": "Reroll home team",
+		"random_reroll_away": "Reroll away team",
 		"random_confirm": "Confirm",
 		"random_cancel": "Cancel",
 		"random_no_teams": "Not enough equally rated teams in star range",

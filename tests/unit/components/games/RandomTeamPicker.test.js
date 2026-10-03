@@ -18,12 +18,35 @@ vi.mock("@tolgee/svelte", async () => {
 vi.mock("$lib/services/teams.services.js", () => ({ getAllTeams: vi.fn() }));
 
 import RandomTeamPicker from "../../../../src/lib/components/games/RandomTeamPicker.svelte";
+import { getAllTeams } from "../../../../src/lib/services/teams.services.js";
 
 beforeAll(() => {
 	// The star sliders re-centre themselves via `scrollTo`, which jsdom lacks.
 	if (typeof Element.prototype.scrollTo !== "function") {
 		Element.prototype.scrollTo = vi.fn();
 	}
+});
+
+describe("RandomTeamPicker — reroll buttons", () => {
+	it("names each team's reroll button by its side", async () => {
+		// Arrange
+		vi.mocked(getAllTeams).mockResolvedValue([
+			{ name: "Home FC", star_rating: 4.5, overall_rating: 80, logo_url: null },
+			{ name: "Away FC", star_rating: 4.5, overall_rating: 79, logo_url: null },
+		]);
+		render(RandomTeamPicker, { onClose: vi.fn(), onConfirm: vi.fn() });
+
+		// Act
+		screen.getByRole("button", { name: "new_game.random_search" }).click();
+
+		// Assert
+		expect(
+			await screen.findByRole("button", { name: "new_game.random_reroll_home" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "new_game.random_reroll_away" }),
+		).toBeInTheDocument();
+	});
 });
 
 describe("RandomTeamPicker — star-range sliders", () => {

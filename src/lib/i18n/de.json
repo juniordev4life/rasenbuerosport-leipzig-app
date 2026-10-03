@@ -810,6 +810,12 @@
 			"delete_aria": "Ereignis entfernen",
 			"delete_title": "Ereignis löschen?",
 			"delete_body": "Das Ereignis wird entfernt und der Spielstand neu berechnet."
+		},
+		"role": {
+			"scorer": "Schütze",
+			"own_goal": "Eigentor",
+			"assister": "Vorlage",
+			"keeper": "Keeper"
 		}
 	},
 	"new_game": {
@@ -911,6 +917,8 @@
 		"random_stars_value": "{stars, plural, one {# Stern} other {# Sterne}}",
 		"random_search": "Speichern",
 		"random_reroll": "Nochmal",
+		"random_reroll_home": "Heimteam neu würfeln",
+		"random_reroll_away": "Auswärtsteam neu würfeln",
 		"random_confirm": "Bestätigen",
 		"random_cancel": "Abbrechen",
 		"random_no_teams": "Nicht genug gleich starke Teams im Sterne-Bereich",

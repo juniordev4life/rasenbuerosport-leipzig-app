@@ -231,6 +231,8 @@ tests/
   unit/                       # Vitest unit + component tests (jsdom)
     service-worker.test.js    # src/service-worker.js push artwork paths
     components/               # Component tests, mirroring src/lib/components/
+    constants/                # Tests for helpers in src/lib/constants/
+    routes/                   # Route tests, mirroring src/routes/
     utils/                    # Tests for src/lib/utils/
   rules/                      # storage.rules against the Storage emulator (own Vitest config)
   e2e/                        # Playwright end-to-end specs (*.spec.js)
@@ -246,7 +248,7 @@ Vitest runs the unit and component tests, Playwright the end-to-end tests. Vites
 - **Components**: `@testing-library/svelte`. Keep the `svelteTesting()` plugin in `vite.config.js` — it makes tests resolve Svelte's client build; without it, rendering throws `lifecycle_function_unavailable`
 - **E2E**: Playwright specs in `tests/e2e/`, Chromium only. `npm run test:e2e` starts `npm run dev` on port 5173 for the run, or reuses a dev server already running there; set `E2E_BASE_URL` to test a running deployment instead. Install the browser once with `npx playwright install chromium`
 - **Pattern**: AAA (Arrange-Act-Assert)
-- **Mocking**: mock `apiRequest`, Firebase auth and Tolgee — never hit the real API or Firebase in tests. A Tolgee mock must return `t` as a readable store (see `tests/unit/components/trophies/TrophyCard.test.js`)
+- **Mocking**: mock `apiRequest`, Firebase auth and Tolgee — never hit the real API or Firebase in tests. A Tolgee mock must return `t` as a readable store (see `tests/unit/components/trophies/TrophyCard.test.js`). A component that reads the language through the `tolgee` singleton also needs `vi.mock("$lib/config/i18n.config.js", () => ({ tolgee: { getLanguage: () => "en", on: vi.fn() } }))`, because the real config cannot load against a `@tolgee/svelte` mock that only provides `getTranslate` (see `tests/unit/routes/app/history.page.test.js`)
 - **Test files**: `{Name}.test.js` for components, `{name}.utils.test.js` for utils, `{name}.services.test.js` for services
 
 ### Tests in CI
@@ -278,6 +280,8 @@ const STATIC_DIR = join(import.meta.dirname, "../../static");
 - DO NOT write `t('key')` — it throws `TypeError: t is not a function` at the first render. This regression has shipped twice in the trophy room; both times by reaching for the destructured `t` directly inside `$derived(...)` blocks. Patterns to compare against when unsure: `ProfileSpiderSection.svelte` (`$derived(...map(k => $t(...)))`) and `ProfilePage.svelte` (template `{$t(...)}`).
 - Keep keys flat or shallowly nested by domain (`game.create.title`, `stats.label.winRate`)
 - Add both `de` and `en` for every new key
+- Dates, month and weekday names and decimals follow the UI language too. The page or container reads it with the reactive pattern (see Svelte 5 Patterns) and passes `locale` down as a prop; children never fall back to German silently. Format with `Intl` (`dateLabels.utils.js`, `formatAwardValue`) rather than German word lists or `.replace(".", ",")`. Helpers that only tell German from English (`relativeTime`, `groupMatchesByDate`, `generatePlayerTags`) take the language (`"de"`/`"en"`); `Intl` calls take `currentLocale`.
+- The language is fixed to `de` for now: Tolgee starts in `de` and nothing calls `tolgee.changeLanguage`, so English cannot be checked in the browser yet. Cover the English path in tests by mocking the singleton's `getLanguage()`.
 
 ## Code Style
 

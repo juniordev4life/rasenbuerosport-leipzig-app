@@ -13,6 +13,7 @@ import SeasonTalkrundeCard from "$lib/components/leaderboard/SeasonTalkrundeCard
 import InfoTip from "$lib/components/ui/InfoTip.svelte";
 import Section from "$lib/components/ui/Section.svelte";
 import SegmentedControl from "$lib/components/ui/SegmentedControl.svelte";
+import { tolgee } from "$lib/config/i18n.config.js";
 import { ROUTES } from "$lib/constants/routes.constants.js";
 import {
 	getLeagueSeasons,
@@ -30,6 +31,17 @@ import {
 } from "$lib/utils/leaderboard.utils.js";
 
 const { t } = getTranslate();
+
+let currentLanguage = $state(tolgee.getLanguage());
+
+$effect(() => {
+	const update = () => {
+		currentLanguage = tolgee.getLanguage();
+	};
+	tolgee.on("language", update);
+});
+
+const currentLocale = $derived(currentLanguage === "de" ? "de-DE" : "en-US");
 
 let seasons = $state([]);
 let selectedSeasonId = $state(initialParam("season", "current"));
@@ -331,7 +343,7 @@ function handleDuoClick(duo) {
 
 	{#if !loading && !error && !isCurrentSeason}
 		<div class="rl-extras">
-			<AwardsStrip {awards} />
+			<AwardsStrip {awards} locale={currentLocale} />
 			{#if seasonMeta?.talkrunde?.audio_url}
 				<SeasonTalkrundeCard
 					audioUrl={seasonMeta.talkrunde.audio_url}
