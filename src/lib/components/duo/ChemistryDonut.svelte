@@ -35,13 +35,13 @@ const trendText = $derived.by(() => {
 
 <div class="chem">
 	{#if isPending}
-		<div class="ring pending">
+		<div class="dial pending">
 			<span class="num chem-value">—</span>
 			<span class="chem-label">{$t("duo.chemistry_label")}</span>
 		</div>
 		<p class="chem-note">{$t("duo.chemistry_pending_sub")}</p>
 	{:else}
-		<div class="ring">
+		<div class="dial">
 			<svg class="donut" viewBox="0 0 100 100" aria-hidden="true">
 				<circle cx="50" cy="50" r={RADIUS} class="track" />
 				<circle
@@ -79,7 +79,7 @@ const trendText = $derived.by(() => {
 	text-align: center;
 }
 
-.ring {
+.dial {
 	position: relative;
 	display: flex;
 	flex-direction: column;

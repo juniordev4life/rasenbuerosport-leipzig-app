@@ -165,6 +165,9 @@ Use this to translate a hex value from the design canvas.
    unlayered, Tailwind's are layered. Never set the same property through a
    utility and a scoped rule (e.g. `display` with `lg:hidden`); put the
    breakpoint in the component CSS instead.
+   And never name a scoped class like a Tailwind utility (`ring`, `border`,
+   `shadow`, `rounded`, `outline`, `transition`, …): Tailwind generates the
+   utility for every class name it finds, so `class="ring"` gets a 1px ring.
 5. **The page colour lives on `<html>` only.** Do not paint `bg-page` on a
    page wrapper, and do not give `body` a background: it would cover B's
    pitch. Text placed straight on the page gets `.on-page`.
