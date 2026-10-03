@@ -87,4 +87,35 @@ describe("RandomTeamPicker — search", () => {
 		// Assert
 		expect(await screen.findByText("teams.error_loading")).toBeInTheDocument();
 	});
+
+	it("confirms with the range the pair was rolled in, not the sliders' latest", async () => {
+		// Arrange: a 4–5★ search, then the min slider moved down to 3★
+		vi.mocked(getAllTeams).mockResolvedValue([
+			{ name: "Arsenal", star_rating: 4.5, overall_rating: 80 },
+			{ name: "Chelsea", star_rating: 4.5, overall_rating: 79 },
+		]);
+		const onConfirm = vi.fn();
+		render(RandomTeamPicker, { onClose: vi.fn(), onConfirm });
+		await fireEvent.click(
+			screen.getByRole("button", { name: "new_game.random_search" }),
+		);
+		const minSlider = screen.getByRole("slider", {
+			name: "new_game.random_min_stars",
+		});
+		await fireEvent.keyDown(minSlider, { key: "ArrowLeft" });
+		await fireEvent.keyDown(minSlider, { key: "ArrowLeft" });
+		expect(minSlider).toHaveAttribute("aria-valuenow", "3");
+
+		// Act
+		await fireEvent.click(
+			await screen.findByRole("button", { name: "new_game.random_confirm" }),
+		);
+
+		// Assert
+		expect(onConfirm).toHaveBeenCalledWith(
+			expect.any(String),
+			expect.any(String),
+			{ minStars: 4, maxStars: 5 },
+		);
+	});
 });

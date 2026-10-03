@@ -11,7 +11,7 @@ import { getAllTeams } from "$lib/services/teams.services.js";
  * RandomTeamPicker - Sheet for picking two random teams of equal star rating
  * within a configurable min/max range. Both teams always share the same exact star rating.
  * @param {Function} onClose - Close handler
- * @param {(homeTeam: string, awayTeam: string) => void} onConfirm - Confirm handler with team names
+ * @param {(homeTeam: string, awayTeam: string, range: { minStars: number, maxStars: number }) => void} onConfirm - Confirm handler with team names and the star range they were rolled in
  */
 let { onClose, onConfirm } = $props();
 
@@ -22,6 +22,9 @@ let minStars = $state(4);
 let maxStars = $state(5);
 let homeResult = $state(null);
 let awayResult = $state(null);
+/** Range the shown pair was rolled in; the sliders may move again before
+ *  confirming. Plain let: only read on confirm, never rendered. */
+let resultRange = { minStars: 4, maxStars: 5 };
 let error = $state("");
 
 /**
@@ -97,6 +100,7 @@ async function searchRandomTeams() {
 
 	homeResult = pool[idx1];
 	awayResult = pool[idx2];
+	resultRange = { minStars, maxStars };
 }
 
 /**
@@ -127,7 +131,7 @@ async function rerollSingle(side) {
 
 function handleConfirm() {
 	if (homeResult && awayResult) {
-		onConfirm(homeResult.name, awayResult.name);
+		onConfirm(homeResult.name, awayResult.name, resultRange);
 	}
 }
 </script>
