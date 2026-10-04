@@ -136,7 +136,7 @@ Public routes: `/`, `/auth/*`. Authenticated routes: everything under `/app/*`.
 
 ## Styling
 
-The app has two fixed designs instead of a light/dark theme: **A "Rot & Weiß"** (default; RB Leipzig red, white and navy) and **B "Fußballplatz"** (white cards on a mown pitch), picked per device in Settings. Neither follows the OS light/dark setting. **`docs/DESIGN.md` is the guide** — read it before touching UI: tokens, building-block classes, shared components, rules and a mockup-colour table.
+The app has two fixed designs instead of a light/dark theme: **A "RB Leipzig"** (default; red, white and navy) and **B "Fußballplatz"** (white cards on a mown pitch), picked per device in Settings. Neither follows the OS light/dark setting. **`docs/DESIGN.md` is the guide** — read it before touching UI: tokens, building-block classes, shared components, rules and a mockup-colour table.
 
 - `src/app.css` is the only file with colour values. `@theme` defines the colour roles with their A values (`--color-surface`, `--color-ink`, `--color-muted`, `--color-line`, `--color-brand`, `--color-win`, `--color-loss`, …) and switches the default Tailwind palette off (`--color-*: initial`), so `bg-blue-500` renders nothing. `:root[data-variant="b"]` overrides what differs in B; shape and type roles (`--radius-*`, `--shadow-*`, `--font-title`, …) sit in `:root`.
 - Use the utilities the roles generate (`bg-surface`, `text-muted`, `border-line`, `bg-brand`) or `var(--color-…)` in `<style>` blocks. No hex/rgb literals, no default-palette classes, no `dark:` variants.

@@ -3,7 +3,7 @@
 The app has two looks. Users pick one in **Settings → Design**; the choice is
 stored per device.
 
-| | A "Rot & Weiß" (default) | B "Fußballplatz" |
+| | A "RB Leipzig" (default) | B "Fußballplatz" |
 |---|---|---|
 | Page | Light grey `#f6f6f6` | A mown pitch: green stripes plus chalk lines |
 | Cards | White, 8 px radius, soft shadow | White "stickers", 20 px radius, hard drop shadow |

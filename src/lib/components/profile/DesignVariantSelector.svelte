@@ -3,7 +3,7 @@ import { getTranslate } from "@tolgee/svelte";
 import { designVariant } from "$lib/stores/designVariant.stores.js";
 
 /**
- * Settings → Design: pick look A ("Rot & Weiß", the default) or B
+ * Settings → Design: pick look A ("RB Leipzig", the default) or B
  * ("Fußballplatz"). Native radio buttons, so arrow keys work without
  * extra code. The choice is stored on this device only. It sits in the
  * Settings section titled "Design", so the legend is for screen readers.
