@@ -175,21 +175,18 @@ const streakLeader = $derived.by(() => {
 });
 const streakCount = $derived(h2h?.streak?.count ?? null);
 
-const marcelQuote = $derived.by(() => {
-	if (matchCount === 0) return $t("compare.marcel_empty");
-	if (matchCount === draws + Math.abs(winsA - winsB)) {
-		// noop guard
-	}
+/** Sophie's verdict in the hero, which only shows once they have met. */
+const sophieQuote = $derived.by(() => {
 	if (Math.abs(winsA - winsB) >= 3 && matchCount >= 5) {
 		if (winsA > winsB) {
-			return $t("compare.marcel_dominance_a", {
+			return $t("compare.sophie_dominance_a", {
 				a: playerANames,
 				b: playerBNames,
 				winsA,
 				winsB,
 			});
 		}
-		return $t("compare.marcel_dominance_b", {
+		return $t("compare.sophie_dominance_b", {
 			a: playerANames,
 			b: playerBNames,
 			winsA,
@@ -197,13 +194,13 @@ const marcelQuote = $derived.by(() => {
 		});
 	}
 	if (winsA === winsB) {
-		return $t("compare.marcel_tied", { winsA, winsB });
+		return $t("compare.sophie_tied", { winsA, winsB });
 	}
 	if (Math.abs(winsA - winsB) === 1) {
-		return $t("compare.marcel_close", { winsA, winsB });
+		return $t("compare.sophie_close", { winsA, winsB });
 	}
 	const leader = winsA > winsB ? playerANames : playerBNames;
-	return $t("compare.marcel_lead", { leader, winsA, winsB });
+	return $t("compare.sophie_lead", { leader, winsA, winsB });
 });
 
 const statRows = $derived.by(() => {
@@ -281,7 +278,7 @@ function goBack() {
 				{draws}
 				{streakLeader}
 				{streakCount}
-				{marcelQuote}
+				{sophieQuote}
 			/>
 
 			<div class="h2h-col">

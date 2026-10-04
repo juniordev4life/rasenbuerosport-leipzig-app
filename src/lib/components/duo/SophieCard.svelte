@@ -2,20 +2,18 @@
 import { REPORTERS } from "$lib/constants/reporters.constants.js";
 
 /**
- * A reporter verdict: Sophie's photo, the quote and her name. Used in
- * the duo hero, the H2H hero and (compact) under the contribution bars.
- * Design A: a white box — it sits on the red hero band — or a grey one
- * in its compact form on white cards. Design B: a pale gold speech
- * bubble.
+ * Sophie's verdict: her photo, the quote and her name. Used in the duo
+ * hero and the H2H hero. Design A: a white box on the red hero band.
+ * Design B: a pale gold speech bubble.
  *
- * @type {{ quote: string, variant?: "normal"|"compact" }}
+ * @type {{ quote: string }}
  */
-let { quote, variant = "normal" } = $props();
+let { quote } = $props();
 
 const sophie = REPORTERS.analyst;
 </script>
 
-<figure class="sophie" class:compact={variant === "compact"}>
+<figure class="sophie">
 	<img class="sophie-pic" src={sophie.imageUrl} alt="" loading="lazy" />
 	<blockquote class="sophie-quote">{quote}</blockquote>
 	<figcaption class="sophie-name">{sophie.name}</figcaption>
@@ -66,22 +64,6 @@ const sophie = REPORTERS.analyst;
 	color: var(--color-brand);
 }
 
-/* Compact: on white cards, so a grey box instead of a white one. */
-.compact {
-	gap: 4px 10px;
-	padding: 10px 12px;
-	background: var(--color-sunken);
-}
-
-.compact .sophie-pic {
-	width: 28px;
-	height: 28px;
-}
-
-.compact .sophie-quote {
-	font-size: 13px;
-}
-
 /* Design B: a pale gold speech bubble. */
 :global([data-variant="b"]) .sophie {
 	gap: 4px 10px;
@@ -105,10 +87,5 @@ const sophie = REPORTERS.analyst;
 	letter-spacing: 0;
 	text-transform: none;
 	color: var(--color-muted);
-}
-
-:global([data-variant="b"]) .compact .sophie-pic {
-	width: 26px;
-	height: 26px;
 }
 </style>

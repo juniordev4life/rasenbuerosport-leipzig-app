@@ -9,7 +9,7 @@ import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
  * Top of the H2H detail: both players face to face (avatar, name,
  * player type, ELO), the head-to-head wins in the middle with the
  * draws below, a trophy badge on whoever leads by 2+ wins, a gold
- * chip for a run of 2+ duel wins and the reporter verdict.
+ * chip for a run of 2+ duel wins and Sophie's verdict.
  *
  * Design A: the red hero band (a red card from `lg`). Design B: a white
  * card on the pitch.
@@ -22,7 +22,7 @@ import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
  *   draws: number,
  *   streakLeader?: string|null,
  *   streakCount?: number|null,
- *   marcelQuote: string,
+ *   sophieQuote: string,
  * }}
  */
 let {
@@ -33,7 +33,7 @@ let {
 	draws,
 	streakLeader = null,
 	streakCount = null,
-	marcelQuote,
+	sophieQuote,
 } = $props();
 
 const { t } = getTranslate();
@@ -96,7 +96,7 @@ const streakLabel = $derived(
 		{@render side(playerB, crownOn === "b")}
 	</div>
 
-	<SophieCard quote={marcelQuote} />
+	<SophieCard quote={sophieQuote} />
 </section>
 
 <style>

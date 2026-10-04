@@ -143,6 +143,7 @@ Use this to translate a hex value from the design canvas.
 | `ui/Button.svelte`, `ui/Input.svelte` | Full-width form button / labelled input |
 | `ui/ConfirmDialog.svelte`, `ui/InfoTip.svelte` | Confirm/alert dialog; "?" explainer |
 | `ui/OvrBadge.svelte`, `ui/StarRating.svelte`, `ui/TeamLogo.svelte` | Team strength, stars, crest |
+| `historie/RecentMatchesList.svelte` | Short lists of recent matches (dashboard, duo page): result marker, score, ELO change, each row linking to the match |
 | `icons/*` | Line icons (`currentColor`); `FootballIcon` is the two-tone ball |
 | `layout/PitchBackground.svelte` | B's pitch (fixed layer behind everything) |
 

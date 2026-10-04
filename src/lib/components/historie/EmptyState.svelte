@@ -24,8 +24,6 @@ const { t } = getTranslate();
 
 const headline = $derived.by(() => {
 	if (checked != null) return $t("historie.empty.partial", { count: checked });
-	if (erg === "comebacks") return $t("historie.empty.comebacks");
-	if (erg === "hattricks") return $t("historie.empty.hattricks");
 	if (who === "me" && zeit === "thisweek")
 		return $t("historie.empty.me_thisweek");
 	if (who === "me") return $t("historie.empty.me_default");

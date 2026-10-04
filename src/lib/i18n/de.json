@@ -734,7 +734,6 @@
 		"load_more": "Weitere Matches laden",
 		"load_more_remaining": "{count} weitere laden",
 		"load_more_loading": "Lädt …",
-		"load_more_hint": "Tippen um zu laden",
 		"load_error": "Matches konnten nicht geladen werden.",
 		"filter_who_title": "Wer hat gespielt?",
 		"filter_zeit_title": "Welcher Zeitraum?",
@@ -769,8 +768,6 @@
 			"today": "Heute noch nichts gespielt — die Liga ruht.",
 			"me_thisweek": "Diese Woche noch keine eigenen Matches — Zeit für ein Spiel!",
 			"me_default": "Noch keine eigenen Matches im Filter.",
-			"comebacks": "Noch keine Comebacks dokumentiert.",
-			"hattricks": "Noch kein Hattrick — wer schafft den ersten?",
 			"reset": "Filter zurücksetzen"
 		}
 	},
@@ -1154,7 +1151,6 @@
 		"team_identity": "Team-Identität",
 		"archetype_placeholder": "Aufstrebendes Duo",
 		"w_short": "S",
-		"d_short": "U",
 		"l_short": "N",
 		"invalid_id": "Ungültige Duo-ID",
 		"load_error": "Duo konnte nicht geladen werden.",
@@ -1163,11 +1159,10 @@
 		"chemistry_pending_sub": "Chemistry ab 10 gemeinsamen Spielen",
 		"league_average": "Liga-Durchschnitt",
 		"spider_section": "Spielstil als Duo",
-		"contribution_section": "Beitragsverteilung",
 		"recent_section": "Letzte gemeinsame Spiele",
 		"tentative_banner": "Werte stabilisieren sich mit mehr Spielen",
 		"onboarding_headline": "Noch {remaining} Spiele bis zum vollen Profil",
-		"onboarding_body": "Spielt mehr gemeinsame Matches, um Spielstil, Chemistry und Beitragsverteilung freizuschalten.",
+		"onboarding_body": "Spielt mehr gemeinsame Matches, um Spielstil und Chemistry freizuschalten.",
 		"axes": {
 			"offensive": "Offensive",
 			"possession": "Ballbesitz",
@@ -1184,12 +1179,6 @@
 			"matches_meta_fresh": "Frische Konstellation",
 			"matches_meta_some": "{count} gemeinsame Matches",
 			"based_on_recent": "aus den letzten 5 Spielen"
-		},
-		"contrib": {
-			"wins": "Siege",
-			"matches": "Spiele",
-			"goals": "Tore",
-			"assists": "Vorlagen"
 		},
 		"archetypes": {
 			"fresh": "Frisches Duo",
@@ -1265,12 +1254,11 @@
 		"character_section": "Spielercharakter im Vergleich",
 		"stat_section": "Stat-Vergleich",
 		"matches_section": "Letzte direkte Duelle",
-		"marcel_empty": "Noch keine Datenbasis — die Bilanz wartet auf das erste Duell.",
-		"marcel_dominance_a": "Klare Datenlage: {a} dominiert das Duell mit {winsA} zu {winsB}.",
-		"marcel_dominance_b": "Die Bilanz spricht für {b} — {winsB} zu {winsA}.",
-		"marcel_tied": "Ausgeglichene Bilanz — {winsA} zu {winsB}, kein Spieler setzt sich durch.",
-		"marcel_close": "Enges Profil — {winsA} zu {winsB}, jedes Detail kann den Ausschlag geben.",
-		"marcel_lead": "{leader} führt das Duell mit {winsA} zu {winsB}, der Rückstand ist aber aufholbar.",
+		"sophie_dominance_a": "Klare Datenlage: {a} dominiert das Duell mit {winsA} zu {winsB}.",
+		"sophie_dominance_b": "Die Bilanz spricht für {b} — {winsB} zu {winsA}.",
+		"sophie_tied": "Ausgeglichene Bilanz — {winsA} zu {winsB}, kein Spieler setzt sich durch.",
+		"sophie_close": "Enges Profil — {winsA} zu {winsB}, jedes Detail kann den Ausschlag geben.",
+		"sophie_lead": "{leader} führt das Duell mit {winsA} zu {winsB}, der Rückstand ist aber aufholbar.",
 		"stats": {
 			"goals_per_game": "Tore / Spiel",
 			"assists_per_game": "Vorlagen / Spiel",
