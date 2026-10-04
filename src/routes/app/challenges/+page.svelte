@@ -2,9 +2,9 @@
 import { getTranslate } from "@tolgee/svelte";
 import ActiveChallengeCard from "$lib/components/challenges/ActiveChallengeCard.svelte";
 import ChallengesHero from "$lib/components/challenges/ChallengesHero.svelte";
-import ChallengesTabs from "$lib/components/challenges/ChallengesTabs.svelte";
 import StreakBanner from "$lib/components/challenges/StreakBanner.svelte";
 import WeekCard from "$lib/components/challenges/WeekCard.svelte";
+import SegmentedControl from "$lib/components/ui/SegmentedControl.svelte";
 import { tolgee } from "$lib/config/i18n.config.js";
 import {
 	fetchActiveChallenges,
@@ -60,6 +60,11 @@ $effect(() => {
 	};
 });
 
+const tabOptions = $derived([
+	{ value: "active", label: $t("challenges.tab_active") },
+	{ value: "history", label: $t("challenges.tab_history") },
+]);
+
 const challenges = $derived(active?.challenges ?? []);
 const completedCount = $derived(
 	challenges.filter((c) => c.progress?.completed).length,
@@ -91,13 +96,13 @@ const streakDetail = $derived(
 	<title>RasenBürosport - {$t("challenges.title")}</title>
 </svelte:head>
 
-<div class="page lg:max-w-5xl lg:mx-auto">
+<div class="stack page pb-4 lg:pb-8">
 	{#if loading}
-		<div class="loading">
-			<div class="spinner"></div>
+		<div class="flex justify-center py-12">
+			<span class="spinner" role="status" aria-label={$t("common.loading")}></span>
 		</div>
 	{:else if errorState}
-		<div class="error">{$t("challenges.error")}</div>
+		<p class="card notice text-loss" role="alert">{$t("challenges.error")}</p>
 	{:else}
 		<ChallengesHero
 			completed={completedCount}
@@ -105,20 +110,19 @@ const streakDetail = $derived(
 			{countdownText}
 			{statusHeadline}
 			{statusDetail}
-		/>
-
-		<div class="tabs-wrap">
-			<ChallengesTabs
+		>
+			<SegmentedControl
+				options={tabOptions}
 				value={tab}
-				onChange={(v) => (tab = v)}
-				activeLabel={$t("challenges.tab_active")}
-				historyLabel={$t("challenges.tab_history")}
+				onChange={(next) => (tab = next)}
+				ariaLabel={$t("challenges.title")}
+				tone="brand"
 			/>
-		</div>
+		</ChallengesHero>
 
 		{#if tab === "active"}
 			{#if challenges.length === 0}
-				<div class="empty">{$t("challenges.empty_active")}</div>
+				<p class="card notice">{$t("challenges.empty_active")}</p>
 			{:else}
 				<div class="list">
 					{#each challenges as c, i (i)}
@@ -134,7 +138,7 @@ const streakDetail = $derived(
 			<StreakBanner headline={streakHeadline} detail={streakDetail} />
 
 			{#if historyWeeks.length === 0}
-				<div class="empty">{$t("challenges.empty_history")}</div>
+				<p class="card notice">{$t("challenges.empty_history")}</p>
 			{:else}
 				<div class="list">
 					{#each historyWeeks as week, i (week.week_start ?? i)}
@@ -147,51 +151,30 @@ const streakDetail = $derived(
 </div>
 
 <style>
-.page {
-	padding: 0 4px 32px;
-	display: flex; flex-direction: column;
+.list {
+	display: flex;
+	flex-direction: column;
 	gap: 12px;
 }
-.tabs-wrap { margin-top: 2px; }
-.list {
-	display: flex; flex-direction: column;
-	gap: 8px;
-}
-/* Tile challenge / week cards on desktop instead of one tall column. */
+
+/* Desktop: a centred column; challenge and week cards tile. */
 @media (min-width: 1024px) {
-	.list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+	.page {
+		max-width: 64rem;
+		margin-inline: auto;
+	}
+
+	.list {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		align-items: start;
+		gap: var(--stack-gap);
+	}
 }
+
 @media (min-width: 1280px) {
-	.list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-.loading {
-	display: flex; justify-content: center;
-	padding: 48px 0;
-}
-.spinner {
-	width: 28px; height: 28px;
-	border: 2px solid #F59E0B;
-	border-top-color: transparent;
-	border-radius: 50%;
-	animation: spin 1s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.error {
-	background: rgba(226, 75, 74, 0.1);
-	border: 1px solid rgba(226, 75, 74, 0.3);
-	color: #E24B4A;
-	border-radius: 12px;
-	padding: 16px;
-	text-align: center;
-	font-size: 13px;
-}
-.empty {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 28px 18px;
-	text-align: center;
-	color: #9CA3AF;
-	font-size: 13px;
+	.list {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
 }
 </style>

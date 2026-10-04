@@ -255,15 +255,16 @@ function goBack() {
 	<title>RasenBürosport - {$t("compare.h2h_title")}</title>
 </svelte:head>
 
-<div class="mx-auto max-w-3xl px-3 pb-4 pt-0">
+<!-- Phone: one column. Desktop: the duel card across the top, then two
+     columns — the ELO curve and the radars left, the stats and the
+     latest duels right. -->
+<div class="h2h pb-4 lg:pb-8">
 	{#if loading}
 		<div class="flex justify-center py-12">
-			<div class="animate-spin h-8 w-8 border-2 border-warning border-t-transparent rounded-full"></div>
+			<span class="spinner" role="status" aria-label={$t("common.loading")}></span>
 		</div>
 	{:else if errorMsg}
-		<div class="bg-bg-secondary border border-error/60 rounded-2xl p-6 text-center text-error">
-			{errorMsg}
-		</div>
+		<div class="card notice text-loss" role="alert">{errorMsg}</div>
 	{:else if matchCount === 0}
 		<H2HEmptyState
 			playerAName={playerANames}
@@ -271,7 +272,7 @@ function goBack() {
 			onBack={goBack}
 		/>
 	{:else}
-		<div class="flex flex-col gap-3 pb-4">
+		<div class="h2h-body stack">
 			<H2HHero
 				playerA={heroPlayerA}
 				playerB={heroPlayerB}
@@ -283,30 +284,61 @@ function goBack() {
 				{marcelQuote}
 			/>
 
-			<EloDeltaChart
-				points={eloDeltaPoints}
-				playerAName={playerANames}
-				playerBName={playerBNames}
-			/>
+			<div class="h2h-col">
+				<EloDeltaChart
+					points={eloDeltaPoints}
+					playerAName={playerANames}
+					playerBName={playerBNames}
+				/>
 
-			<OverlaidSpiderSection
-				axesA={profileA?.axes ?? null}
-				axesB={profileB?.axes ?? null}
-				playerAName={playerANames}
-				playerBName={playerBNames}
-			/>
+				<OverlaidSpiderSection
+					axesA={profileA?.axes ?? null}
+					axesB={profileB?.axes ?? null}
+					playerAName={playerANames}
+					playerBName={playerBNames}
+				/>
+			</div>
 
-			<StatComparisonSection
-				rows={statRows}
-				playerAName={playerANames}
-				playerBName={playerBNames}
-			/>
+			<div class="h2h-col">
+				<StatComparisonSection
+					rows={statRows}
+					playerAName={playerANames}
+					playerBName={playerBNames}
+				/>
 
-			<H2HMatchList
-				matches={matchListRows}
-				playerAName={playerANames}
-				playerBName={playerBNames}
-			/>
+				<H2HMatchList
+					matches={matchListRows}
+					playerAName={playerANames}
+					playerBName={playerBNames}
+				/>
+			</div>
 		</div>
 	{/if}
 </div>
+
+<style>
+/* Phone: the columns dissolve into the page stack. */
+.h2h-col {
+	display: contents;
+}
+
+@media (min-width: 1024px) {
+	.h2h-body {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--stack-gap) 32px;
+		align-items: start;
+	}
+
+	.h2h-body > :global(:first-child) {
+		grid-column: 1 / -1;
+	}
+
+	.h2h-col {
+		display: flex;
+		flex-direction: column;
+		gap: var(--stack-gap);
+		min-width: 0;
+	}
+}
+</style>

@@ -5,20 +5,24 @@ import fluegelspiel from "$lib/assets/passCharacter/pass-character-fluegelspiel.
 import linkslastig from "$lib/assets/passCharacter/pass-character-linkslastig.svg?raw";
 import rechtslastig from "$lib/assets/passCharacter/pass-character-rechtslastig.svg?raw";
 import zentral from "$lib/assets/passCharacter/pass-character-zentral.svg?raw";
+import FootballIcon from "$lib/components/icons/FootballIcon.svelte";
 import InfoTip from "$lib/components/ui/InfoTip.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 
 /**
- * Pass-character panel — one mini-pitch per team using the prebuilt
- * SVG illustrations from `src/lib/assets/passCharacter/`. The assets
- * ship in green; we recolour the strokes/markers to the team's accent
- * (red for home, green for away) and rewrite the gradient/marker ids
- * so two SVGs can coexist on the same page without id clashes.
+ * "Pass-Charakter": one mini pitch per team from the prebuilt SVG
+ * illustrations in `src/lib/assets/passCharacter/`, with the team name,
+ * its pass count and the style as a chip. The assets carry their own
+ * colours; the CSS below repaints pitch, chalk and arrows with the
+ * design tokens (home red, away navy), and `prepareSvg` rewrites the
+ * gradient/marker ids so both SVGs can coexist on one page.
  *
  * @type {{
  *   homePassNetwork: object|null,
  *   awayPassNetwork: object|null,
  *   homeTeamName?: string|null,
  *   awayTeamName?: string|null,
+ *   class?: string,
  * }}
  */
 let {
@@ -26,6 +30,7 @@ let {
 	awayPassNetwork = null,
 	homeTeamName = null,
 	awayTeamName = null,
+	class: className = "",
 } = $props();
 
 const { t } = getTranslate();
@@ -46,10 +51,6 @@ const STYLE_TO_KEY = {
 	Flügelspiel: "fluegelspiel",
 };
 
-const HOME_COLOR = "#e63950";
-const AWAY_COLOR = "#22c55e";
-const ASSET_COLOR = "#84CC16";
-
 const hasAnything = $derived(
 	(homePassNetwork?.passStyle && STYLE_SVGS[homePassNetwork.passStyle]) ||
 		(awayPassNetwork?.passStyle && STYLE_SVGS[awayPassNetwork.passStyle]),
@@ -64,17 +65,11 @@ function prepareSvg(style, side) {
 	const raw = STYLE_SVGS[style];
 	if (!raw) return null;
 	const idPrefix = `${side}-`;
-	let out = raw
+	return raw
 		.replace(/\swidth="\d+"/i, "")
 		.replace(/\sheight="\d+"/i, "")
 		.replace(/id="([^"]+)"/g, (_, id) => `id="${idPrefix}${id}"`)
 		.replace(/url\(#([^)]+)\)/g, (_, id) => `url(#${idPrefix}${id})`);
-	if (side === "home") {
-		out = out.replaceAll(ASSET_COLOR, HOME_COLOR);
-	} else {
-		out = out.replaceAll(ASSET_COLOR, AWAY_COLOR);
-	}
-	return out;
 }
 
 function styleLabel(style) {
@@ -87,59 +82,163 @@ function passCount(network) {
 	const total = network.totalPasses ?? network.passes ?? null;
 	return typeof total === "number" ? total : null;
 }
+
+/** "Liverpool · 312 Pässe", falling back to Heim / Auswärts. */
+function teamTitle(network, side, teamName) {
+	const name =
+		teamName ??
+		(side === "home"
+			? $t("game_detail.home_team")
+			: $t("game_detail.away_team"));
+	const count = passCount(network);
+	return count !== null
+		? `${name} · ${count} ${$t("match_stats.passes")}`
+		: name;
+}
 </script>
 
 {#snippet pitch(network, side, teamName)}
 	{@const style = network?.passStyle ?? null}
 	{@const svgMarkup = style ? prepareSvg(style, side) : null}
-	<div class="rounded-xl bg-bg-input p-3.5 flex flex-col items-center">
-		<div class="text-[10px] tracking-[0.06em] uppercase font-semibold text-center w-full mb-2.5 {side === 'home' ? 'text-accent-red' : 'text-success'}">
-			{teamName ?? (side === "home" ? $t("game_detail.home_team") : $t("game_detail.away_team"))}
-			{#if passCount(network) !== null}
-				· {passCount(network)} {$t("match_stats.passes")}
-			{/if}
-		</div>
-		<div class="w-full max-w-[160px]" style="aspect-ratio: 100 / 120;">
+	{@const label = styleLabel(style)}
+	<div class="tile pitch-tile {side}">
+		<span class="label team">{teamTitle(network, side, teamName)}</span>
+		<div class="mini-pitch">
 			{#if svgMarkup}
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				{@html svgMarkup}
 			{:else}
-				<div class="w-full h-full rounded-lg border border-dashed border-border flex items-center justify-center text-[10px] text-text-muted text-center px-2">
-					{$t("game_detail.pass_character.unknown")}
-				</div>
+				<span class="unknown">{$t("game_detail.pass_character.unknown")}</span>
 			{/if}
 		</div>
-		<div class="flex flex-col items-center gap-1.5 mt-3 text-center">
-			{#if styleLabel(style)}
-				<span class="text-[11px] font-semibold px-2.5 py-1 rounded-full {side === 'home' ? 'bg-accent-red/15 text-accent-red' : 'bg-success/15 text-success'}">
-					{styleLabel(style)}
-				</span>
-			{/if}
-		</div>
+		{#if label}
+			<span class="chip style-chip {side === 'home' ? 'chip-brand' : 'chip-navy'}">
+				{label}
+			</span>
+		{/if}
 	</div>
 {/snippet}
 
 {#if hasAnything}
-	<section class="rounded-2xl border border-border bg-bg-secondary p-4 sm:p-5">
-		<h3 class="text-[11px] tracking-[0.08em] uppercase text-text-muted font-semibold mb-3 flex items-center gap-1.5">
-			<span>{$t("game_detail.section.pass_character")}</span>
+	<Section title={$t("game_detail.section.pass_character")} class={className}>
+		{#snippet icon()}<FootballIcon size={22} />{/snippet}
+		{#snippet aside()}
 			<InfoTip
 				titleKey="info_tips.pass_network.title"
 				bodyKey="info_tips.pass_network.body"
-				size={13}
+				size={16}
 			/>
-		</h3>
-		<div class="grid grid-cols-2 gap-3">
+		{/snippet}
+		<div class="card pass-card">
 			{@render pitch(homePassNetwork, "home", homeTeamName)}
 			{@render pitch(awayPassNetwork, "away", awayTeamName)}
 		</div>
-	</section>
+	</Section>
 {/if}
 
 <style>
-section :global(svg) {
+.pass-card {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+	padding: 14px;
+}
+
+.pitch-tile {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+	padding: 12px;
+}
+
+.team {
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	text-align: center;
+}
+
+.home .team {
+	color: var(--color-home);
+}
+
+.away .team {
+	color: var(--color-away);
+}
+
+/* Token colours for pitch, chalk and arrows. B's mini pitch is pale green
+ * rather than the dark grass of its drawn pitches. */
+.mini-pitch {
+	--pitch-fill: var(--color-pitch);
+	--pitch-chalk: var(--color-chalk);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	max-width: 150px;
+	aspect-ratio: 100 / 120;
+}
+
+.home .mini-pitch {
+	--team: var(--color-home);
+}
+
+.away .mini-pitch {
+	--team: var(--color-away);
+}
+
+:global([data-variant="b"]) .mini-pitch {
+	--pitch-fill: var(--color-win-soft);
+	--pitch-chalk: var(--color-chart-2);
+}
+
+/* CSS beats the SVG's presentation attributes: repaint the pitch (first
+ * rect), the chalk lines and spot, and the arrows' gradients and heads. */
+.mini-pitch :global(svg) {
 	display: block;
 	width: 100%;
 	height: 100%;
+}
+
+.mini-pitch :global(svg > rect:first-of-type) {
+	fill: var(--pitch-fill);
+}
+
+.mini-pitch :global(svg > :is(rect, line, circle):not([marker-end])) {
+	stroke: var(--pitch-chalk);
+}
+
+.mini-pitch :global(svg > circle:not([fill="none"])) {
+	fill: var(--pitch-chalk);
+}
+
+.mini-pitch :global(svg stop) {
+	stop-color: var(--team);
+	stop-opacity: 1;
+}
+
+.mini-pitch :global(svg marker path) {
+	fill: var(--team);
+}
+
+.unknown {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	padding: 0 8px;
+	border: 1px dashed var(--color-line);
+	border-radius: var(--radius-tile);
+	color: var(--color-ink);
+	font-size: 12px;
+	text-align: center;
+}
+
+.style-chip {
+	font-size: 12px;
 }
 </style>

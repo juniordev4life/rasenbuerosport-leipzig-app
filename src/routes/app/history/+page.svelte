@@ -246,91 +246,95 @@ const filterGroups = $derived([
 	<title>RasenBürosport - {$t("historie.title")}</title>
 </svelte:head>
 
-<div class="page lg:grid lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-6 lg:items-start">
-	<!-- Primary column. `contents` keeps the mobile single-column layout. -->
-	<div class="contents lg:block lg:min-w-0">
-	<header class="head">
-		<h1 class="title lg:hidden">{$t("historie.title")}</h1>
-		<div class="subtitle">
-			<strong>{totalCount} {$t("historie.matches")}</strong>
-			<span class="divider">·</span>
-			<span>{filterDescription}</span>
-		</div>
-	</header>
-
-	<div class="chip-row lg:hidden">
-		<FilterChip
-			label={$t(`historie.who.${who}`)}
-			active={who !== "all"}
-			onClick={() => openSheet("who")}
-		/>
-		<FilterChip
-			label={$t(`historie.zeit.${zeit}`)}
-			active={zeit !== "thisweek"}
-			onClick={() => openSheet("zeit")}
-		/>
-		<FilterChip
-			label={$t(`historie.erg.${erg}`)}
-			active={erg !== "all"}
-			onClick={() => openSheet("erg")}
-		/>
-	</div>
-
-	{#if loading}
-		<div class="loading">
-			<div class="spinner"></div>
-		</div>
-	{:else if totalCount === 0}
-		<EmptyState {who} {zeit} {erg} onReset={resetFilters} />
-	{:else}
-		{#each groups as group (group.key)}
-			{@const eloDelta = who === "me" ? computeGroupEloDelta(group.matches, userId) : null}
-			<DateGroupHeader
-				label={group.label}
-				matchCount={group.matches.length}
-				{eloDelta}
-				matchesLabel={$t("historie.matches")}
-			/>
-			<div class="list">
-				{#each group.matches as game (game.id)}
-					<MatchCard {game} currentUserId={userId} />
-				{/each}
+<div class="historie">
+	<div class="stack min-w-0">
+		<!-- Hero: red band in A, plain text on the pitch in B. On desktop the
+		     filter rail on the right takes over its count and filters. -->
+		<header class="hero bleed head">
+			<div class="title-row">
+				<h1 class="page-title title">{$t("historie.title")}</h1>
+				<p class="summary">
+					<strong class="count">{totalCount} {$t("historie.matches")}</strong>
+					<span class="desc">
+						<span aria-hidden="true">·</span>
+						{filterDescription}
+					</span>
+				</p>
 			</div>
-		{/each}
 
-		{#if hasMore}
-			<LoadMoreCard
-				remaining={null}
-				loading={loadingMore}
-				onClick={loadMore}
-			/>
+			<div class="chip-row">
+				<FilterChip
+					label={$t(`historie.who.${who}`)}
+					active={who !== "all"}
+					onClick={() => openSheet("who")}
+				/>
+				<FilterChip
+					label={$t(`historie.zeit.${zeit}`)}
+					active={zeit !== "thisweek"}
+					onClick={() => openSheet("zeit")}
+				/>
+				<FilterChip
+					label={$t(`historie.erg.${erg}`)}
+					active={erg !== "all"}
+					onClick={() => openSheet("erg")}
+				/>
+			</div>
+		</header>
+
+		{#if loading}
+			<div class="loading">
+				<span class="spinner" role="status" aria-label={$t("common.loading")}></span>
+			</div>
+		{:else if totalCount === 0}
+			<EmptyState {who} {zeit} {erg} onReset={resetFilters} />
+		{:else}
+			{#each groups as group (group.key)}
+				{@const eloDelta = who === "me" ? computeGroupEloDelta(group.matches, userId) : null}
+				<section class="group">
+					<DateGroupHeader
+						label={group.label}
+						matchCount={group.matches.length}
+						{eloDelta}
+						matchesLabel={$t("historie.matches")}
+					/>
+					<div class="list">
+						{#each group.matches as game (game.id)}
+							<MatchCard {game} currentUserId={userId} />
+						{/each}
+					</div>
+				</section>
+			{/each}
+
+			{#if hasMore}
+				<LoadMoreCard
+					remaining={null}
+					loading={loadingMore}
+					onClick={loadMore}
+				/>
+			{/if}
 		{/if}
-	{/if}
 	</div>
 
 	<!-- Persistent filter rail (desktop only); reuses the same setters as
 	     the mobile filter sheet, so there is no duplicated filter logic. -->
-	<aside class="hidden lg:flex lg:flex-col lg:gap-4 lg:sticky lg:top-20">
-		<div class="rounded-xl border border-border bg-bg-card p-4 flex flex-col gap-4">
-			<div>
-				<div class="text-[22px] font-extrabold tabular-nums text-text-primary leading-none">
-					{totalCount}
-				</div>
-				<div class="text-[11px] text-text-secondary mt-1">{$t("historie.matches")}</div>
+	<aside class="rail">
+		<div class="card rail-card">
+			<div class="rail-count">
+				<span class="num count-num">{totalCount}</span>
+				<span class="label count-label">{$t("historie.matches")}</span>
 			</div>
 			{#each filterGroups as group (group.key)}
-				<div>
-					<div class="text-[10px] font-bold uppercase tracking-[0.1em] text-text-muted mb-1.5">
+				<div class="rail-group" role="group" aria-labelledby="rail-{group.key}">
+					<span id="rail-{group.key}" class="label rail-label">
 						{$t(group.titleKey)}
-					</div>
-					<div class="flex flex-wrap gap-1.5">
+					</span>
+					<div class="rail-options">
 						{#each group.options as opt (opt.value)}
 							<button
 								type="button"
+								class="rail-opt"
+								aria-pressed={group.current === opt.value}
 								onclick={() => setFilter(group.key, opt.value)}
-								class="px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors {group.current === opt.value
-									? 'bg-accent-red/10 text-accent-red border-accent-red/30'
-									: 'bg-bg-input text-text-secondary border-border hover:text-text-primary'}"
 							>
 								{opt.label}
 							</button>
@@ -369,46 +373,221 @@ const filterGroups = $derived([
 {/if}
 
 <style>
-.page { padding: 0 4px 32px; }
-.head { margin: 0 2px 10px; }
+.historie {
+	padding-bottom: 8px;
+}
+
+/* ── Hero (A: red band flush under the header) ─────────────────────── */
+.head {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	padding-top: 20px;
+	padding-bottom: 24px;
+}
+
+.title-row {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
 .title {
-	font-size: 24px;
-	font-weight: 800;
-	letter-spacing: -0.02em;
-	margin: 0 0 4px;
-	color: #FFFFFF;
+	margin: 0;
+	font-size: 44px;
+	text-shadow: var(--on-page-shadow);
 }
-.subtitle {
-	font-size: 12px;
-	color: #6B7280;
-	display: flex; align-items: center; gap: 6px;
+
+.summary {
+	display: flex;
 	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 6px;
+	margin: 0;
+	font-size: 15px;
+	line-height: 1.3;
 }
-.subtitle strong { color: #E5E7EB; font-weight: 700; }
-.divider { color: #4B5563; }
+
+.count {
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.desc {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+/* The pills scroll sideways edge to edge when they do not fit. */
 .chip-row {
-	display: flex; gap: 7px;
-	margin-bottom: 14px;
+	display: flex;
+	gap: 8px;
+	margin-inline: calc(var(--page-gutter, 1rem) * -1);
+	padding: 2px var(--page-gutter, 1rem);
 	overflow-x: auto;
 	scrollbar-width: none;
-	padding: 2px 0;
 }
-.chip-row::-webkit-scrollbar { display: none; }
-.list { display: flex; flex-direction: column; gap: 7px; }
-/* Two-up match cards once there is room on desktop. */
-@media (min-width: 1280px) {
-	.list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+
+.chip-row::-webkit-scrollbar {
+	display: none;
 }
+
+/* ── List ──────────────────────────────────────────────────────────── */
 .loading {
-	display: flex; justify-content: center;
+	display: flex;
+	justify-content: center;
 	padding: 48px 0;
 }
-.spinner {
-	width: 28px; height: 28px;
-	border: 2px solid #E24B4A;
-	border-top-color: transparent;
-	border-radius: 50%;
-	animation: spin 1s linear infinite;
+
+.group {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+
+/* One column on phones, two or three side by side on desktop; cards in a
+ * row share their height. */
+.list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+	gap: 10px;
+}
+
+/* ── Desktop filter rail ───────────────────────────────────────────── */
+.rail {
+	display: none;
+}
+
+.rail-card {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 20px;
+}
+
+.rail-count {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+}
+
+.count-num {
+	font-size: 48px;
+	color: var(--color-brand);
+}
+
+.count-label,
+.rail-label {
+	color: var(--color-muted);
+}
+
+.rail-group {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.rail-options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.rail-opt {
+	min-height: 34px;
+	padding: 0 12px;
+	border: 0;
+	border-radius: var(--radius-control);
+	background: var(--color-sunken);
+	color: var(--color-ink);
+	font-family: var(--font-sans);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition:
+		background-color 120ms,
+		color 120ms;
+}
+
+.rail-opt:hover {
+	background: var(--color-line);
+}
+
+.rail-opt[aria-pressed="true"] {
+	background: var(--color-brand);
+	color: var(--color-on-brand);
+}
+
+.rail-opt[aria-pressed="true"]:hover {
+	background: var(--color-brand-strong);
+}
+
+@media (min-width: 1024px) {
+	.historie {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 300px;
+		align-items: start;
+		gap: 32px;
+		padding-bottom: 32px;
+	}
+
+	.head {
+		display: none;
+	}
+
+	.rail {
+		display: block;
+		position: sticky;
+		top: 92px;
+	}
+}
+
+/* ── Design B: white title on the pitch, count as a pill ───────────── */
+:global([data-variant="b"]) .head {
+	gap: 12px;
+	padding-top: 4px;
+	padding-bottom: 0;
+}
+
+:global([data-variant="b"]) .title-row {
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+}
+
+:global([data-variant="b"]) .title {
+	font-size: 40px;
+}
+
+:global([data-variant="b"]) .count {
+	padding: 4px 12px;
+	border-radius: 999px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	box-shadow: var(--shadow-control);
+	font-size: 13px;
+}
+
+/* The pills below already name the active filters. */
+:global([data-variant="b"]) .desc {
+	display: none;
+}
+
+:global([data-variant="b"]) .count-num {
+	color: var(--color-ink);
+}
+
+:global([data-variant="b"]) .rail-opt[aria-pressed="true"] {
+	background: var(--color-navy);
+	color: var(--color-on-navy);
+}
+
+@media (min-width: 1024px) {
+	/* B's top bar scrolls away with the page. */
+	:global([data-variant="b"]) .rail {
+		top: 24px;
+	}
+}
 </style>

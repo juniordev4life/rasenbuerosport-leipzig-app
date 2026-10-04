@@ -30,7 +30,6 @@ import SequenceCell from "./SequenceCell.svelte";
  *   awayPlayers: Array<{ id: string, username: string, avatar_url?: string | null }>,
  *   pendingShooter?: { id: string, username: string, avatar_url?: string | null } | null,
  *   decided?: boolean,
- *   gradientFor?: (id: string) => string,
  * }}
  */
 let {
@@ -41,7 +40,6 @@ let {
 	awayPlayers,
 	pendingShooter = null,
 	decided = false,
-	gradientFor,
 } = $props();
 
 const { t } = getTranslate();
@@ -113,10 +111,10 @@ const awayCells = $derived(
 const showScrollHint = $derived(cellCount > PENALTY_REGULAR_ROUNDS);
 </script>
 
-<div class="board">
+<div class="card board">
 	<div class="header">
-		<span class="board-title">{$t("penalty_shootout.board.title")}</span>
-		<span class="round-pill">
+		<span class="label text-muted">{$t("penalty_shootout.board.title")}</span>
+		<span class="chip chip-gold">
 			{$t("penalty_shootout.board.round_progress", {
 				current: currentRound,
 				total: Math.max(PENALTY_REGULAR_ROUNDS, currentRound),
@@ -133,22 +131,12 @@ const showScrollHint = $derived(cellCount > PENALTY_REGULAR_ROUNDS);
 		<div class="cells-scroll">
 			<div class="cells-row">
 				{#each homeCells as cell (cell.round)}
-					<SequenceCell
-						state={cell.state}
-						round={cell.round}
-						shooter={cell.shooter}
-						gradient={cell.shooter && gradientFor ? gradientFor(cell.shooter.id) : null}
-					/>
+					<SequenceCell state={cell.state} round={cell.round} shooter={cell.shooter} />
 				{/each}
 			</div>
 			<div class="cells-row">
 				{#each awayCells as cell (cell.round)}
-					<SequenceCell
-						state={cell.state}
-						round={cell.round}
-						shooter={cell.shooter}
-						gradient={cell.shooter && gradientFor ? gradientFor(cell.shooter.id) : null}
-					/>
+					<SequenceCell state={cell.state} round={cell.round} shooter={cell.shooter} />
 				{/each}
 			</div>
 		</div>
@@ -162,75 +150,73 @@ const showScrollHint = $derived(cellCount > PENALTY_REGULAR_ROUNDS);
 </div>
 
 <style>
+/* Cell width (read by SequenceCell): five regular rounds fit a phone
+ * without scrolling; sudden death scrolls sideways. */
 .board {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 12px;
+	--sb-cell-width: 54px;
+	padding: 14px;
+}
+
+@media (min-width: 640px) {
+	.board {
+		--sb-cell-width: 60px;
+	}
 }
 
 .header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: 12px;
 	margin-bottom: 10px;
-}
-.board-title {
-	font-size: 10px;
-	font-weight: 800;
-	letter-spacing: 0.12em;
-	text-transform: uppercase;
-	color: #9CA3AF;
-}
-.round-pill {
-	font-size: 10px;
-	font-weight: 700;
-	color: #FBBF24;
-	background: rgba(245, 158, 11, 0.1);
-	border: 1px solid rgba(245, 158, 11, 0.3);
-	border-radius: 999px;
-	padding: 3px 10px;
-	letter-spacing: 0.05em;
 }
 
 .rows {
 	display: grid;
-	grid-template-columns: 36px 1fr;
+	grid-template-columns: 40px minmax(0, 1fr);
 	gap: 6px;
 	min-width: 0;
 }
+
+/* Same track sizes as the two cell rows (58px cells, 6px + 1px + 6px
+ * divider), so each label sits level with its row. */
 .team-labels {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-around;
-	gap: 4px;
+	display: grid;
+	grid-template-rows: 58px 58px;
+	row-gap: 13px;
+	align-items: center;
 }
+
 .team-label {
-	font-size: 10px;
-	font-weight: 800;
-	color: #9CA3AF;
-	letter-spacing: 0.06em;
-	text-transform: uppercase;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 13px;
+	letter-spacing: 0.03em;
 	text-align: center;
+	text-transform: uppercase;
 }
 
 .cells-scroll {
+	min-width: 0;
 	overflow-x: auto;
 	scrollbar-width: thin;
-	min-width: 0;
 }
+
 .cells-row {
 	display: flex;
 	gap: 2px;
 }
+
 .cells-row + .cells-row {
-	margin-top: 4px;
+	margin-top: 6px;
+	padding-top: 6px;
+	border-top: 1px solid var(--color-line);
 }
 
 .scroll-hint {
-	font-size: 10px;
-	color: #6B7280;
-	margin: 6px 0 0;
+	margin: 8px 0 0;
+	color: var(--color-muted);
+	font-size: 12px;
 	text-align: center;
 }
 </style>

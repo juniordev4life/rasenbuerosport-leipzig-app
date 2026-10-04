@@ -55,27 +55,63 @@ function handleClose() {
 	<title>RasenBürosport - {$t("season_recap.title")}</title>
 </svelte:head>
 
+<!-- Loading and error states fill the screen like the story they stand in
+     for: the page colour (grey in A, the pitch in B) with a white card. -->
 {#if loading}
-	<div class="fixed inset-0 z-50 bg-[#0B0F17] flex items-center justify-center">
-		<div class="animate-spin h-8 w-8 border-2 border-white/40 border-t-transparent rounded-full"></div>
+	<div class="recap-state">
+		<span class="spinner" role="status" aria-label={$t("common.loading")}></span>
 	</div>
 {:else if error}
-	<div class="fixed inset-0 z-50 bg-[#0B0F17] text-white flex flex-col items-center justify-center gap-4 px-6 text-center">
-		<p>{$t("season_recap.error")}</p>
-		<button type="button" onclick={load} class="px-4 py-2 rounded-full bg-white/10 text-sm font-bold">
-			{$t("season_recap.retry")}
-		</button>
-		<button type="button" onclick={handleClose} class="text-sm text-white/60 underline">
-			{$t("season_recap.back")}
-		</button>
+	<div class="recap-state">
+		<div class="card state-card">
+			<p class="state-text">{$t("season_recap.error")}</p>
+			<button type="button" onclick={load} class="btn btn-primary">
+				{$t("season_recap.retry")}
+			</button>
+			<button type="button" onclick={handleClose} class="btn btn-ghost">
+				{$t("season_recap.back")}
+			</button>
+		</div>
 	</div>
 {:else if !recap}
-	<div class="fixed inset-0 z-50 bg-[#0B0F17] text-white flex flex-col items-center justify-center gap-4 px-6 text-center">
-		<p>{$t("season_recap.empty")}</p>
-		<button type="button" onclick={handleClose} class="px-4 py-2 rounded-full bg-white/10 text-sm font-bold">
-			{$t("season_recap.back")}
-		</button>
+	<div class="recap-state">
+		<div class="card state-card">
+			<p class="state-text">{$t("season_recap.empty")}</p>
+			<button type="button" onclick={handleClose} class="btn btn-primary">
+				{$t("season_recap.back")}
+			</button>
+		</div>
 	</div>
 {:else}
 	<SeasonRecapStory {recap} onClose={handleClose} />
 {/if}
+
+<style>
+.recap-state {
+	position: fixed;
+	inset: 0;
+	z-index: 50;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	background: var(--page-bg);
+}
+
+.state-card {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 12px;
+	width: 100%;
+	max-width: 22rem;
+	padding: 24px;
+	text-align: center;
+}
+
+.state-text {
+	margin: 0 0 4px;
+	font-size: 16px;
+	line-height: 1.4;
+}
+</style>

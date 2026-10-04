@@ -1,11 +1,18 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import SophieCard from "$lib/components/duo/SophieCard.svelte";
+import LightningIcon from "$lib/components/icons/LightningIcon.svelte";
+import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
 
 /**
- * Hero card for the H2H detail. Faceoff with both players, the
- * head-to-head score in the middle, optional crown over the leader
- * and the Marcel verdict at the bottom.
+ * Top of the H2H detail: both players face to face (avatar, name,
+ * player type, ELO), the head-to-head wins in the middle with the
+ * draws below, a trophy badge on whoever leads by 2+ wins, a gold
+ * chip for a run of 2+ duel wins and the reporter verdict.
+ *
+ * Design A: the red hero band (a red card from `lg`). Design B: a white
+ * card on the pitch.
  *
  * @type {{
  *   playerA: { id: string, username: string, avatarUrl: string|null, initials: string, archetype: string|null, elo: number|null, rank: number|null },
@@ -31,9 +38,6 @@ let {
 
 const { t } = getTranslate();
 
-const COLOR_A = "#F59E0B";
-const COLOR_B = "#06B6D4";
-
 const crownOn = $derived.by(() => {
 	if (Math.abs(winsA - winsB) < 2) return null;
 	return winsA > winsB ? "a" : "b";
@@ -41,190 +45,245 @@ const crownOn = $derived.by(() => {
 
 const streakLabel = $derived(
 	streakLeader && streakCount && streakCount >= 2
-		? `${"\u{1F525}"} ${streakCount} ${$t("compare.in_a_row")}`
+		? `${streakCount} ${$t("compare.in_a_row")}`
 		: null,
 );
 </script>
 
-<div class="hero">
-	<div class="title-bar">
-		<div class="title-tag">⚔ {$t("compare.h2h_tag")}</div>
+{#snippet side(player, leads)}
+	<div class="side">
+		<span class="side-pic">
+			<PlayerAvatar
+				player={{ id: player.id, username: player.username, avatarUrl: player.avatarUrl }}
+				size={64}
+				class="side-avatar"
+			/>
+			{#if leads}
+				<span class="lead-badge" aria-hidden="true"><TrophyIcon size={14} strokeWidth={2.2} /></span>
+			{/if}
+		</span>
+		<span class="side-name">{player.username}</span>
+		{#if player.archetype}
+			<span class="side-type">{player.archetype}</span>
+		{/if}
+		<span class="side-elo">
+			ELO {player.elo ?? "—"}{#if player.rank}<span class="side-rank"> · #{player.rank}</span>{/if}
+		</span>
+	</div>
+{/snippet}
+
+<section class="hero bleed duel" aria-label={$t("compare.h2h_tag")}>
+	<div class="duel-head">
+		<p class="duel-tag">{$t("compare.h2h_tag")}</p>
 		{#if streakLabel}
-			<div class="streak">{streakLabel}</div>
+			<span class="chip chip-gold">
+				<LightningIcon size={12} strokeWidth={2.4} />
+				{streakLabel}
+			</span>
 		{/if}
 	</div>
 
 	<div class="faceoff">
-		<div class="side side-a">
-			{#if crownOn === "a"}<div class="crown" aria-hidden="true">{"\u{1F451}"}</div>{/if}
-			<div class="avatar" style="background: linear-gradient(135deg, {COLOR_A}, #D97706); border-color: {COLOR_A}66;">
-				{#if playerA.avatarUrl}
-					<img referrerpolicy="no-referrer" src={playerA.avatarUrl} alt={playerA.username} />
-				{:else}
-					<span>{playerA.initials}</span>
-				{/if}
-			</div>
-			<div class="name">{playerA.username}</div>
-			{#if playerA.archetype}
-				<div class="archetype">{playerA.archetype}</div>
+		{@render side(playerA, crownOn === "a")}
+		<div class="tally">
+			<span class="num tally-score">
+				<span>{winsA}</span><span class="tally-sep">:</span><span>{winsB}</span>
+			</span>
+			{#if draws > 0}
+				<span class="tally-draws">{draws} {$t("compare.draws_short")}</span>
 			{/if}
-			<div class="elo-row" style="color: {COLOR_A};">
-				{playerA.elo ?? "—"}
-				{#if playerA.rank}<span class="rank">· #{playerA.rank}</span>{/if}
-			</div>
 		</div>
-
-		<div class="score-block">
-			<div class="score-num" style="color: {winsA > winsB ? COLOR_A : '#6B7280'}">{winsA}</div>
-			<div class="score-sep">:</div>
-			<div class="score-num" style="color: {winsB > winsA ? COLOR_B : '#6B7280'}">{winsB}</div>
-		</div>
-
-		<div class="side side-b">
-			{#if crownOn === "b"}<div class="crown" aria-hidden="true">{"\u{1F451}"}</div>{/if}
-			<div class="avatar" style="background: linear-gradient(135deg, {COLOR_B}, #0891B2); border-color: {COLOR_B}66;">
-				{#if playerB.avatarUrl}
-					<img referrerpolicy="no-referrer" src={playerB.avatarUrl} alt={playerB.username} />
-				{:else}
-					<span>{playerB.initials}</span>
-				{/if}
-			</div>
-			<div class="name">{playerB.username}</div>
-			{#if playerB.archetype}
-				<div class="archetype">{playerB.archetype}</div>
-			{/if}
-			<div class="elo-row" style="color: {COLOR_B};">
-				{playerB.elo ?? "—"}
-				{#if playerB.rank}<span class="rank">· #{playerB.rank}</span>{/if}
-			</div>
-		</div>
+		{@render side(playerB, crownOn === "b")}
 	</div>
 
-	<div class="marcel-wrap">
-		<SophieCard quote={marcelQuote} />
-	</div>
-</div>
+	<SophieCard quote={marcelQuote} />
+</section>
 
 <style>
-.hero {
-	background: radial-gradient(ellipse at top left, rgba(245, 158, 11, 0.10) 0%, transparent 50%),
-		radial-gradient(ellipse at top right, rgba(6, 182, 212, 0.10) 0%, transparent 50%),
-		linear-gradient(180deg, #1A1F2A 0%, #131822 100%);
-	border: 1px solid rgba(255,255,255,0.06);
-	border-radius: 18px;
-	padding: 16px;
-	position: relative;
-	overflow: hidden;
+/* ── Design A: the red hero band ────────────────────────────────────── */
+.duel {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	padding-top: 20px;
+	padding-bottom: 24px;
 }
-.hero::before {
-	content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-	background: linear-gradient(90deg, #F59E0B 0%, transparent 50%, #06B6D4 100%);
-	opacity: 0.5;
+
+.duel-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
 }
-.title-bar {
-	display: flex; justify-content: space-between; align-items: center;
-	margin-bottom: 14px;
-}
-.title-tag {
-	font-size: 10px; font-weight: 800;
-	color: #E5E7EB;
-	text-transform: uppercase; letter-spacing: 0.12em;
-}
-.streak {
-	background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.1));
-	border: 1px solid rgba(245, 158, 11, 0.3);
-	color: #F59E0B;
-	font-size: 10px;
+
+.duel-tag {
+	margin: 0;
+	font-family: var(--font-cond);
 	font-weight: 700;
-	padding: 3px 8px;
-	border-radius: 999px;
+	font-size: 14px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
 }
+
 .faceoff {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr);
-	gap: 8px;
-	align-items: center;
-	width: 100%;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	align-items: start;
+	gap: 10px;
 }
+
 .side {
-	position: relative;
-	display: flex; flex-direction: column;
+	display: flex;
+	flex-direction: column;
 	align-items: center;
-	gap: 4px;
-	text-align: center;
+	gap: 5px;
 	min-width: 0;
-	max-width: 100%;
+	text-align: center;
 }
-.crown {
+
+.side-pic {
+	position: relative;
+	display: flex;
+	margin-bottom: 4px;
+}
+
+:global([data-variant="a"]) .side-pic :global(.side-avatar) {
+	--avatar-bg: var(--color-surface);
+	--avatar-fg: var(--color-ink);
+}
+
+.lead-badge {
 	position: absolute;
-	top: -14px; left: 50%; transform: translateX(-50%);
-	font-size: 18px;
-	filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
-	z-index: 2;
-}
-.avatar {
-	width: 60px; height: 60px;
-	border-radius: 50%;
-	border: 3px solid;
-	display: flex; align-items: center; justify-content: center;
-	color: white;
-	font-size: 22px;
-	font-weight: 800;
-	overflow: hidden;
-	box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-}
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
-.name {
-	font-size: 14px;
-	font-weight: 800;
-	color: #FFFFFF;
-	width: 100%;
-	max-width: 100%;
-	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.archetype {
-	font-size: 10px;
-	color: #9CA3AF;
-	font-style: italic;
-	width: 100%;
-	max-width: 100%;
-	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.elo-row {
-	font-size: 13px;
-	font-weight: 800;
-	font-variant-numeric: tabular-nums;
-}
-.elo-row .rank {
-	color: #6B7280;
-	font-weight: 600;
-	margin-left: 2px;
-}
-.score-block {
-	display: flex; flex-direction: column;
+	top: -8px;
+	right: -10px;
+	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 2px;
-	width: 100%;
+	width: 26px;
+	height: 26px;
+	border: 2px solid var(--color-surface);
+	border-radius: 999px;
+	background: var(--color-gold);
+	color: var(--color-on-gold);
 }
-.score-num {
-	font-size: 36px;
-	font-weight: 800;
+
+.side-name {
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: var(--font-display);
+	font-size: 22px;
 	line-height: 1;
+	text-transform: uppercase;
+}
+
+.side-type {
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 13px;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.side-elo {
+	font-size: 13px;
 	font-variant-numeric: tabular-nums;
 }
-.score-sep {
-	font-size: 14px;
-	color: #4B5563;
-	margin-top: -4px;
+
+.tally {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	padding-top: 8px;
 }
-.score-meta {
-	font-size: 9px;
-	color: #6B7280;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	font-weight: 700;
-	margin-top: 4px;
+
+.tally-score {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	font-size: 56px;
+	line-height: 0.85;
 }
-.marcel-wrap { margin-top: 14px; }
+
+.tally-sep {
+	font-size: 0.6em;
+}
+
+.tally-draws {
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+@media (min-width: 1024px) {
+	.duel {
+		margin: 0;
+		padding: 24px;
+		border-radius: var(--radius-card);
+	}
+
+	.faceoff {
+		gap: 24px;
+	}
+
+	.tally-score {
+		font-size: 72px;
+	}
+}
+
+/* ── Design B: a white card on the pitch ────────────────────────────── */
+:global([data-variant="b"]) .duel {
+	gap: 14px;
+	padding: 18px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+}
+
+:global([data-variant="b"]) .duel-tag {
+	font-family: var(--font-sans);
+	font-size: 12px;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .side-pic :global(.side-avatar) {
+	box-shadow: 0 0 0 3px var(--color-surface), 0 0 0 5px var(--color-line);
+}
+
+:global([data-variant="b"]) .side-name {
+	font-family: var(--font-cond);
+	font-weight: 800;
+	font-size: 20px;
+	text-transform: none;
+}
+
+:global([data-variant="b"]) .side-type {
+	font-family: var(--font-sans);
+	font-weight: 500;
+	font-size: 12px;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--color-brand-strong);
+}
+
+:global([data-variant="b"]) .side-elo {
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .tally-score {
+	font-size: 52px;
+	line-height: 1;
+}
+
+:global([data-variant="b"]) .tally-draws {
+	color: var(--color-muted);
+}
 </style>

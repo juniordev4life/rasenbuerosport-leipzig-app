@@ -62,6 +62,8 @@ function handleClick(event) {
 {/if}
 
 <style>
+/* Takes the colour of the text it sits in (navy on cards, white on the
+ * red hero or the B pitch), dimmed until hovered. */
 .info-tip {
 	display: inline-flex;
 	align-items: center;
@@ -71,17 +73,25 @@ function handleClick(event) {
 	margin: -4px;
 	padding: 4px;
 	border: 0;
+	border-radius: 999px;
 	background: none;
-	color: rgba(255, 255, 255, 0.4);
+	color: inherit;
+	opacity: 0.6;
 	cursor: pointer;
-	border-radius: 50%;
 	vertical-align: middle;
-	transition: color 0.15s, background-color 0.15s;
+	transition:
+		opacity 0.15s,
+		background-color 0.15s;
 }
 .info-tip:hover,
 .info-tip:focus-visible {
-	color: rgba(255, 255, 255, 0.92);
-	background: rgba(255, 255, 255, 0.06);
-	outline: none;
+	opacity: 1;
+	background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+/* Dimmed white drops below 3:1 on the red band and the pitch. */
+:global(.hero) .info-tip,
+:global(.on-page) .info-tip {
+	opacity: 1;
 }
 </style>

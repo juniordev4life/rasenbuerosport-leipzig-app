@@ -6,6 +6,7 @@
  */
 
 import { render } from "@testing-library/svelte";
+import { readable } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { deleteAccount, get, goto, logout } = vi.hoisted(() => ({
@@ -15,6 +16,9 @@ const { deleteAccount, get, goto, logout } = vi.hoisted(() => ({
 	logout: vi.fn(),
 }));
 
+vi.mock("@tolgee/svelte", () => ({
+	getTranslate: () => ({ t: readable((key) => key) }),
+}));
 vi.mock("$app/environment", () => ({ browser: true }));
 vi.mock("$app/navigation", () => ({ goto }));
 vi.mock("$app/state", () => ({

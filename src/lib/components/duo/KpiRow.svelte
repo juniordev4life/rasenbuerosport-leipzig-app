@@ -1,64 +1,78 @@
 <script>
-import { getTranslate } from "@tolgee/svelte";
-
 /**
- * 2×2 KPI grid for the duo page. Each card has an optional meta line
- * that can be styled positive (green arrow) or neutral (grey text).
+ * The duo's key figures as a 2 × 2 grid of stat cards: label, big
+ * number and an optional note. A "positive" note is printed in the win
+ * colour and bold; the text itself says what it means.
  *
  * @type {{
  *   cards: Array<{ label: string, value: string, meta?: string|null, tone?: "positive"|"neutral" }>,
  * }}
  */
 let { cards } = $props();
-
-const { t } = getTranslate();
 </script>
 
-<div class="kpi-row">
+<dl class="kpis">
 	{#each cards as card, i (i)}
-		<div class="kpi-card">
-			<div class="kpi-label">{card.label}</div>
-			<div class="kpi-value">{card.value}</div>
+		<div class="kpi">
+			<dt class="label kpi-label">{card.label}</dt>
+			<dd class="num kpi-value">{card.value}</dd>
 			{#if card.meta}
-				<div class="kpi-meta" class:positive={card.tone === "positive"}>{card.meta}</div>
+				<dd class="kpi-meta" class:positive={card.tone === "positive"}>{card.meta}</dd>
 			{/if}
 		</div>
 	{/each}
-</div>
+</dl>
 
 <style>
-.kpi-row {
+.kpis {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+	margin: 0;
+}
+
+.kpi {
+	display: flex;
+	flex-direction: column;
 	gap: 8px;
+	min-width: 0;
+	padding: 14px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
 }
-.kpi-card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 12px;
-	padding: 12px;
-}
+
 .kpi-label {
-	font-size: 9px;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	color: #6B7280;
-	font-weight: 700;
-	margin-bottom: 6px;
+	color: var(--color-muted);
 }
+
 .kpi-value {
-	font-size: 22px; font-weight: 800;
-	line-height: 1;
-	color: #FFFFFF;
-	font-variant-numeric: tabular-nums;
+	margin: 0;
+	font-size: 36px;
+	line-height: 0.85;
+	overflow-wrap: anywhere;
 }
+
 .kpi-meta {
-	font-size: 10px;
-	color: #6B7280;
-	margin-top: 4px;
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.3;
+	color: var(--color-muted);
 }
+
 .kpi-meta.positive {
-	color: #84CC16;
 	font-weight: 700;
+	color: var(--color-win);
+}
+
+:global([data-variant="b"]) .kpi {
+	gap: 4px;
+	padding: 14px 16px;
+}
+
+:global([data-variant="b"]) .kpi-value {
+	font-size: 32px;
+	line-height: 1.05;
 }
 </style>

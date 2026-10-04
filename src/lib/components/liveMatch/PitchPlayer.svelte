@@ -1,37 +1,43 @@
 <script>
+import { MediaQuery } from "svelte/reactivity";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
 import { LIVE_MATCH } from "$lib/constants/liveMatch.constants.js";
 
 /**
  * Live-match player avatar. Single tap dispatches `onSelect`; a press
  * held longer than `LIVE_MATCH.longPressMs` dispatches `onLongPress`
  * (own goal). When `onLongPress` fires the next pointerup is squelched
- * so the tap doesn't double-fire.
+ * so the tap doesn't double-fire. Keyboard activation (Enter / Space,
+ * a click without a pointer) selects as well.
  *
- * Visual state combines the active highlight (scorer / assister-hint /
- * card-target / penalty-miss-target) and a subtle "pulse" glow during
- * the awaiting-player modes — the colour is supplied by the parent
- * via `glowColor`.
+ * Design A: a square avatar in the team colour (home red, away navy).
+ * Design B: the player's own avatar colour inside a white ring and a
+ * team-coloured ring, the name on a white pill. A role (scorer /
+ * assister / keeper) swaps the ring colour and adds a labelled chip,
+ * so the role never rests on colour alone; the awaiting-player modes
+ * pulse the ring in the colour supplied via `glowColor`.
  *
  * @type {{
  *   playerId: string,
  *   name: string,
  *   avatarUrl?: string|null,
- *   gradient: string,
  *   side: "home"|"away",
  *   isScorer?: boolean,
  *   isAssister?: boolean,
+ *   isKeeper?: boolean,
  *   isOwnGoal?: boolean,
  *   assistHint?: boolean,
  *   awaitingTarget?: boolean,
+ *   disabled?: boolean,
  *   glowColor?: "yellow"|"red"|"orange"|null,
  *   onSelect: () => void,
  *   onLongPress: () => void,
  * }}
  */
 let {
+	playerId,
 	name,
 	avatarUrl = null,
-	gradient,
 	side,
 	isScorer = false,
 	isAssister = false,
@@ -47,6 +53,9 @@ let {
 
 let pressTimer = $state(null);
 let longPressFired = $state(false);
+
+/** Bigger avatars from `sm` up, where the pitch halves have room. */
+const roomy = new MediaQuery("min-width: 640px");
 
 function handlePointerDown() {
 	if (disabled) return;
@@ -75,64 +84,203 @@ function handlePointerCancel() {
 	pressTimer = null;
 }
 
-const sideRing = side === "home" ? "ring-accent-red" : "ring-success";
-const glowClass = $derived(
-	glowColor === "yellow"
-		? "shadow-[0_0_0_4px_rgba(251,191,36,0.25)]"
-		: glowColor === "red"
-			? "shadow-[0_0_0_4px_rgba(226,75,74,0.25)]"
-			: glowColor === "orange"
-				? "shadow-[0_0_0_4px_rgba(245,158,11,0.25)]"
-				: "",
-);
-const stateRing = $derived(
+/**
+ * Enter / Space on the focused button fire a click with `detail === 0`
+ * and no pointer events. Pointer taps already selected in pointerup,
+ * so only the keyboard click is handled here.
+ *
+ * @param {MouseEvent} event
+ */
+function handleKeyboardClick(event) {
+	if (disabled || event.detail !== 0) return;
+	onSelect?.();
+}
+
+/** The role shown under the name, or null. */
+const role = $derived(
 	isScorer
-		? "ring-4 ring-warning"
+		? { label: isOwnGoal ? "Eigentor" : "Schütze", tone: "scorer" }
 		: isAssister
-			? "ring-4 ring-success"
+			? { label: "Vorlage", tone: "assister" }
 			: isKeeper
-				? "ring-4 ring-blue-400"
-				: awaitingTarget && glowColor
-					? "ring-2 ring-current animate-pulse"
-					: assistHint
-						? "ring-2 ring-success/40 animate-pulse"
-						: `ring-2 ${sideRing}`,
+				? { label: "Keeper", tone: "keeper" }
+				: null,
+);
+
+/** Chip colour per role: shared chips for scorer and keeper. */
+const ROLE_CHIP = {
+	scorer: "chip-gold",
+	assister: "role-assister",
+	keeper: "chip-aqua",
+};
+
+/** Ring state, read by the CSS through `data-ring`. */
+const ring = $derived(
+	role
+		? role.tone
+		: awaitingTarget && glowColor
+			? "awaiting"
+			: assistHint
+				? "assist-hint"
+				: "team",
 );
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<!-- svelte-ignore a11y_click_events_have_key_events -->
 <button
 	type="button"
 	onpointerdown={handlePointerDown}
 	onpointerup={handlePointerUp}
 	onpointerleave={handlePointerCancel}
 	onpointercancel={handlePointerCancel}
-	class="flex flex-col items-center gap-1.5 select-none transition-all focus:outline-none {disabled ? 'opacity-30 cursor-not-allowed' : 'active:scale-95'}"
+	onclick={handleKeyboardClick}
+	class="pitch-player"
+	data-side={side}
+	data-ring={ring}
+	data-glow={glowColor}
 	aria-label={name}
 	aria-disabled={disabled}
 >
-	<span
-		class="w-14 h-14 sm:w-16 sm:h-16 text-lg sm:text-xl rounded-full flex items-center justify-center font-bold text-white {stateRing} {glowClass} transition-all"
-		style={avatarUrl ? "" : `background: ${gradient};`}
-	>
-		{#if avatarUrl}
-			<img referrerpolicy="no-referrer" src={avatarUrl} alt={name} class="w-full h-full rounded-full object-cover" />
-		{:else}
-			{name.charAt(0).toUpperCase()}
-		{/if}
-	</span>
-	<span class="text-[11px] font-semibold text-text-primary max-w-[88px] truncate">
-		{name}
-	</span>
+	<PlayerAvatar
+		player={{ id: playerId, name, avatarUrl }}
+		size={roomy.current ? 64 : 56}
+		class="pp-avatar"
+	/>
+	<span class="pp-name">{name}</span>
 	<!-- Fixed-height slot so the avatar doesn't shift when a role is assigned. -->
-	<span class="h-[14px] text-[10px] font-bold uppercase tracking-[0.06em] leading-none">
-		{#if isScorer}
-			<span class="text-warning">{isOwnGoal ? "Eigentor" : "Schütze"}</span>
-		{:else if isAssister}
-			<span class="text-success">Vorlage</span>
-		{:else if isKeeper}
-			<span class="text-blue-400">Keeper</span>
+	<span class="pp-role">
+		{#if role}
+			<span class="chip {ROLE_CHIP[role.tone]}">{role.label}</span>
 		{/if}
 	</span>
 </button>
+
+<style>
+.pitch-player {
+	--team: var(--color-home);
+	--on-team: var(--color-on-home);
+	--ring-color: transparent;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 2px 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	user-select: none;
+	-webkit-user-select: none;
+	-webkit-touch-callout: none;
+	touch-action: manipulation;
+	cursor: pointer;
+	transition: transform 120ms;
+}
+
+.pitch-player[data-side="away"] {
+	--team: var(--color-away);
+	--on-team: var(--color-on-away);
+}
+
+.pitch-player:active:not([aria-disabled="true"]) {
+	transform: scale(0.95);
+}
+
+.pitch-player[aria-disabled="true"] {
+	opacity: 0.3;
+	cursor: not-allowed;
+}
+
+/* ── Avatar + state ring ────────────────────────────────────────────── */
+.pitch-player :global(.pp-avatar) {
+	outline: 3px solid var(--ring-color);
+	outline-offset: 3px;
+	transition: outline-color 150ms;
+}
+
+/* A: the avatar itself carries the team colour (home red, away navy). */
+:global(:root:not([data-variant="b"])) .pitch-player :global(.pp-avatar) {
+	--avatar-bg: var(--team);
+	--avatar-fg: var(--on-team);
+}
+
+.pitch-player[data-ring="scorer"] {
+	--ring-color: var(--color-gold);
+}
+
+.pitch-player[data-ring="assister"] {
+	--ring-color: var(--color-win);
+}
+
+.pitch-player[data-ring="keeper"] {
+	--ring-color: var(--color-aqua);
+}
+
+.pitch-player[data-ring="assist-hint"] {
+	--ring-color: color-mix(in srgb, var(--color-win) 50%, transparent);
+}
+
+.pitch-player[data-ring="awaiting"] {
+	--ring-color: var(--color-brand);
+}
+
+.pitch-player[data-ring="awaiting"][data-glow="yellow"],
+.pitch-player[data-ring="awaiting"][data-glow="orange"] {
+	--ring-color: var(--color-gold);
+}
+
+.pitch-player[data-ring="awaiting"] :global(.pp-avatar),
+.pitch-player[data-ring="assist-hint"] :global(.pp-avatar) {
+	animation: ring-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ring-pulse {
+	50% {
+		outline-color: transparent;
+	}
+}
+
+/* ── Name + role ────────────────────────────────────────────────────── */
+.pp-name {
+	max-width: 88px;
+	overflow: hidden;
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.25;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.pp-role {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 18px;
+}
+
+.role-assister {
+	background: var(--color-win);
+	color: var(--color-on-win);
+}
+
+/* ── Design B: own avatar colour in a white ring, team ring around it,
+ *    the name on a white pill. ─────────────────────────────────────── */
+:global([data-variant="b"]) .pitch-player :global(.pp-avatar) {
+	box-shadow:
+		0 0 0 3px var(--color-surface),
+		var(--shadow-raised);
+	outline-offset: 3px;
+}
+
+:global([data-variant="b"]) .pitch-player[data-ring="team"] {
+	--ring-color: var(--team);
+}
+
+:global([data-variant="b"]) .pp-name {
+	max-width: 96px;
+	padding: 2px 9px;
+	border-radius: 999px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	font-size: 12px;
+	box-shadow: var(--shadow-control);
+}
+</style>

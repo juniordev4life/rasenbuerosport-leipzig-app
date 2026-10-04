@@ -28,7 +28,7 @@ From 5 matches on: a radar chart with six axes — **Finisher**, **Playmaker**, 
 
 ### Current form
 
-Your last 5 results, the ELO change across them and an ELO curve with a dot per result (green win, red loss, grey draw), plus a short comment from Marcel.
+Your last 5 results, the ELO change across them and an ELO curve with a dot per result in the result colours, plus a short comment from Marcel.
 
 ### Favourite & nemesis
 

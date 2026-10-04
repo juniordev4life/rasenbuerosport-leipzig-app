@@ -154,6 +154,41 @@ npm run dev
 
 The app runs at **http://localhost:5173**.
 
+### Local login without Google (Auth emulator)
+
+Real Google sign-in works on `localhost` and is all you need for your own checks. Browsers that cannot complete a Google login (automated or embedded browsers used for visual reviews) can sign in against the Firebase Auth emulator instead. Nothing here touches the real Firebase project.
+
+1. Start the emulator (port 9099, configured in `firebase.json`):
+
+   ```bash
+   npx firebase-tools emulators:start --only auth --project rasenbuerosport-leipzig-9d54f
+   ```
+
+2. Start the API with `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099`. The Firebase Admin SDK then accepts emulator tokens. Never set this variable in production.
+
+3. Start the app with `VITE_AUTH_EMULATOR_URL=http://127.0.0.1:9099`. `src/lib/config/firebase.config.js` connects to the emulator only in dev builds when this variable is set.
+
+4. Create a user whose uid matches a profile in your local database, so the app shows that player's data. Use a verified `@redbulls.com` address, because the API admits nothing else:
+
+   ```bash
+   curl -s -X POST \
+     "http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/projects/rasenbuerosport-leipzig-9d54f/accounts" \
+     -H "Authorization: Bearer owner" -H "Content-Type: application/json" \
+     -d '{"localId":"<profile uid>","email":"<name>@redbulls.com","password":"<local password>","emailVerified":true}'
+   ```
+
+5. The login page offers Google only. Sign in from the browser console instead:
+
+   ```js
+   const { auth } = await import("/src/lib/config/firebase.config.js");
+   const { signInWithEmailAndPassword } = await import("firebase/auth");
+   await signInWithEmailAndPassword(auth, "<name>@redbulls.com", "<local password>");
+   ```
+
+   If the bare `firebase/auth` import does not resolve in the console, import the pre-bundled module Vite serves under `/node_modules/.vite/deps/firebase_auth.js` instead.
+
+The emulator keeps users in memory: after a restart, create the user again.
+
 ---
 
 ## Quick Start (Two Terminals)

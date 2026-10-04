@@ -4,6 +4,7 @@ import EventFooter from "$lib/components/liveMatch/EventFooter.svelte";
 import GoalTypeDialog from "$lib/components/liveMatch/GoalTypeDialog.svelte";
 import MatchHeader from "$lib/components/liveMatch/MatchHeader.svelte";
 import Pitch from "$lib/components/liveMatch/Pitch.svelte";
+import ConfirmDialog from "$lib/components/ui/ConfirmDialog.svelte";
 import { getTeamByName } from "$lib/services/teams.services.js";
 import {
 	cancelEntry,
@@ -24,6 +25,9 @@ import {
  * drives the three children (header / pitch / footer). On "Spiel
  * beenden" it forwards the accumulated score + score_timeline through
  * `onEndMatch` so the parent page can POST the game in one call.
+ *
+ * Phones stack scoreboard, pitch, event pills and controls; from `xl`
+ * the pitch sits next to a column with the pills and the controls.
  *
  * The 11m button bubbles via `onStartPenaltyShootout` so the parent
  * page can decide where the penalty-shootout flow lives — either as
@@ -106,23 +110,30 @@ const awayPitchPlayers = $derived(
 	})),
 );
 
-function gradientFor(id) {
-	const palette = [
-		["#84CC16", "#65A30D"],
-		["#E24B4A", "#C73E3D"],
-		["#6366F1", "#4338CA"],
-		["#F59E0B", "#D97706"],
-		["#06B6D4", "#0891B2"],
-		["#A78BFA", "#7C3AED"],
-		["#EC4899", "#BE185D"],
-		["#14B8A6", "#0F766E"],
-	];
-	let hash = 0;
-	for (let i = 0; i < id.length; i += 1) {
-		hash = (hash * 31 + id.charCodeAt(i)) | 0;
-	}
-	const [a, b] = palette[Math.abs(hash) % palette.length];
-	return `linear-gradient(135deg, ${a}, ${b})`;
+/**
+ * What the scoreboard and the pitch show for a side: the catalogue
+ * entry (with crest) once loaded, else the typed name.
+ *
+ * @param {object|null} data - team from `getTeamByName`
+ * @param {string} name - team name chosen on the poster step
+ * @returns {{ name: string, logo_url?: string|null }|null}
+ */
+function teamView(data, name) {
+	return data ?? (name ? { name, logo_url: null } : null);
+}
+
+const homeTeamView = $derived(teamView(homeTeamData, homeTeam));
+const awayTeamView = $derived(teamView(awayTeamData, awayTeam));
+
+/**
+ * Team name for an event pill's side marker.
+ *
+ * @param {"home"|"away"} side
+ * @returns {string}
+ */
+function sideName(side) {
+	if (side === "home") return homeTeam || $t("new_game.home");
+	return awayTeam || $t("new_game.away");
 }
 
 function handleEnd() {
@@ -213,111 +224,132 @@ $effect(() => {
 	<button
 		type="button"
 		onclick={() => (pendingDeleteIndex = index)}
-		class="w-4 h-4 rounded-full bg-black/30 hover:bg-black/60 flex items-center justify-center text-[10px] text-text-secondary hover:text-text-primary shrink-0"
+		class="event-delete"
 		aria-label={$t("live_match.events.delete_aria")}
-	>×</button>
+	>
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" width="11" height="11" aria-hidden="true">
+			<line x1="18" y1="6" x2="6" y2="18" />
+			<line x1="6" y1="6" x2="18" y2="18" />
+		</svg>
+	</button>
 {/snippet}
 
-<div class="flex flex-col gap-3">
-	<MatchHeader
-		homeTeam={homeTeamData}
-		awayTeam={awayTeamData}
-		scoreHome={state.scoreHome}
-		scoreAway={state.scoreAway}
-	/>
+{#snippet sideMarker(side)}
+	{@const name = sideName(side)}
+	<span class="event-side" title={name}>
+		<span aria-hidden="true">{name.charAt(0).toUpperCase()}</span>
+		<span class="sr-only">{name}</span>
+	</span>
+{/snippet}
 
-	<div class="my-3" data-onboarding="live-pitch">
-		<Pitch
-		homePlayers={homePitchPlayers}
-		awayPlayers={awayPitchPlayers}
-		homeTeam={homeTeamData}
-		awayTeam={awayTeamData}
-		{state}
-		{gradientFor}
-		onSelectPlayer={(id, side) => (state = selectPlayer(state, { playerId: id, side }))}
-		onLongPressPlayer={(id, side) => (state = longPressPlayer(state, { playerId: id, side }))}
-		onMinuteChange={(m) => {
-			if (state.minute !== m) state = setMinute(state, m);
-		}}
-		onStoppageChange={(s) => {
-			if (state.stoppageMinutes !== s) state = setStoppage(state, s);
-		}}
-		onGoalTypeClick={() => (showGoalDialog = true)}
-		onCancel={() => (state = cancelEntry(state))}
-		onConfirm={() => (state = confirmEntry(state))}
-	/>
-	</div>
-
-	<!-- Container is always rendered so the onboarding tour can attach
-	     its `live-event-pill` anchor at tour-start time, even before
-	     the demo `confirm` action inserts the first event. Padding +
-	     margin are toggled with the events count so an empty strip
-	     collapses to 0 px height and doesn't add visible whitespace. -->
-	<div
-		data-onboarding="live-event-pill"
-		class="flex items-center gap-2 overflow-x-auto whitespace-nowrap [&::-webkit-scrollbar]:hidden [scrollbar-width:none] {state.events.length > 0 ? 'px-2 py-1' : ''}"
-	>
-		{#if state.events.length > 0}
-			{@const reversed = state.events.toReversed()}
-			{#each reversed as e, i (i)}
-				{@const originalIndex = state.events.length - 1 - i}
-				{@const minLabel = (e.stoppage ?? 0) > 0
-					? `${e.minute}+${e.stoppage}'`
-					: `${e.minute}'`}
-				{#if e.event_type === "goal"}
-					{@const isHome = e.team === "home"}
-					{@const player = playerName(e.scored_by)}
-					<span class="inline-flex shrink-0 items-center gap-1.5 rounded-full pl-2.5 pr-1 py-1 text-[11px] font-semibold {isHome ? 'bg-accent-red/15 text-accent-red' : 'bg-success/15 text-success'}">
-						<span class="font-bold tabular-nums">{e.home}:{e.away}</span>
-						<span class="opacity-80">{player}</span>
-						<span class="text-text-muted tabular-nums">{minLabel}</span>
-						{@render deleteBtn(originalIndex)}
-					</span>
-				{:else if e.event_type === "red_card" || (e.event_type === "card" && e.card_type === "red")}
-					<span class="inline-flex shrink-0 items-center gap-1 rounded-full pl-2.5 pr-1 py-1 text-[11px] font-semibold bg-accent-red/20 text-accent-red">
-						<span aria-hidden="true">🟥</span>
-						<span class="opacity-80">{playerName(e.player_id)}</span>
-						<span class="text-text-muted tabular-nums">{minLabel}</span>
-						{@render deleteBtn(originalIndex)}
-					</span>
-				{:else if e.event_type === "card"}
-					<span class="inline-flex shrink-0 items-center gap-1 rounded-full pl-2.5 pr-1 py-1 text-[11px] font-semibold bg-warning/20 text-warning">
-						<span aria-hidden="true">🟨</span>
-						<span class="opacity-80">{playerName(e.player_id)}</span>
-						<span class="text-text-muted tabular-nums">{minLabel}</span>
-						{@render deleteBtn(originalIndex)}
-					</span>
-				{:else if e.event_type === "penalty_missed"}
-					<span class="inline-flex shrink-0 items-center gap-1 rounded-full pl-2.5 pr-1 py-1 text-[11px] font-semibold bg-warning/20 text-warning">
-						<span aria-hidden="true">❌</span>
-						<span class="opacity-80">{playerName(e.shooter_id)}</span>
-						<span class="text-text-muted tabular-nums">{minLabel}</span>
-						{@render deleteBtn(originalIndex)}
-					</span>
-				{/if}
-			{/each}
-		{/if}
-	</div>
-
-	<div data-onboarding="live-footer">
-		<EventFooter
-			mode={state.mode}
-			pendingCardColor={state.pendingCardColor}
-			{ending}
-			onToggleCard={(color) => (state = toggleCardMode(state, color))}
-			onTogglePenaltyMiss={() => (state = togglePenaltyMissMode(state))}
-			onStartPenaltyShootout={handleStartPenaltyShootout}
-			onEndMatch={handleEnd}
+<div class="live">
+	<div class="live-head">
+		<MatchHeader
+			homeTeam={homeTeamView}
+			awayTeam={awayTeamView}
+			scoreHome={state.scoreHome}
+			scoreAway={state.scoreAway}
 		/>
 	</div>
 
-	<button
-		type="button"
-		onclick={onBack}
-		class="self-center text-xs text-text-muted hover:text-text-primary px-3 py-2"
-	>
-		← {$t("new_game.back")}
-	</button>
+	<div class="live-pitch" data-onboarding="live-pitch">
+		<Pitch
+			homePlayers={homePitchPlayers}
+			awayPlayers={awayPitchPlayers}
+			homeTeam={homeTeamView}
+			awayTeam={awayTeamView}
+			{state}
+			onSelectPlayer={(id, side) => (state = selectPlayer(state, { playerId: id, side }))}
+			onLongPressPlayer={(id, side) => (state = longPressPlayer(state, { playerId: id, side }))}
+			onMinuteChange={(m) => {
+				if (state.minute !== m) state = setMinute(state, m);
+			}}
+			onStoppageChange={(s) => {
+				if (state.stoppageMinutes !== s) state = setStoppage(state, s);
+			}}
+			onGoalTypeClick={() => (showGoalDialog = true)}
+			onCancel={() => (state = cancelEntry(state))}
+			onConfirm={() => (state = confirmEntry(state))}
+		/>
+	</div>
+
+	<div class="live-side">
+		<!-- Container is always rendered so the onboarding tour can attach
+		     its `live-event-pill` anchor at tour-start time, even before
+		     the demo `confirm` action inserts the first event. Its margin
+		     is toggled with the events count so an empty strip collapses
+		     to 0 px height and doesn't add visible whitespace. -->
+		<div
+			data-onboarding="live-event-pill"
+			class="events"
+			class:has-events={state.events.length > 0}
+		>
+			{#if state.events.length > 0}
+				{@const reversed = state.events.toReversed()}
+				{#each reversed as e, i (i)}
+					{@const originalIndex = state.events.length - 1 - i}
+					{@const minLabel = (e.stoppage ?? 0) > 0
+						? `${e.minute}+${e.stoppage}'`
+						: `${e.minute}'`}
+					{#if e.event_type === "goal"}
+						<span class="event" data-side={e.team}>
+							{@render sideMarker(e.team)}
+							<span class="event-score">{e.home}:{e.away}</span>
+							<span class="event-player">{playerName(e.scored_by)}</span>
+							<span class="event-minute">{minLabel}</span>
+							{@render deleteBtn(originalIndex)}
+						</span>
+					{:else if e.event_type === "red_card" || (e.event_type === "card" && e.card_type === "red")}
+						<span class="event" data-side={e.team}>
+							{@render sideMarker(e.team)}
+							<span class="card-shape red" role="img" aria-label={$t("game_detail.event_red_card")}></span>
+							<span class="event-player">{playerName(e.player_id)}</span>
+							<span class="event-minute">{minLabel}</span>
+							{@render deleteBtn(originalIndex)}
+						</span>
+					{:else if e.event_type === "card"}
+						<span class="event" data-side={e.team}>
+							{@render sideMarker(e.team)}
+							<span class="card-shape yellow" role="img" aria-label={$t("game_detail.event_yellow_card")}></span>
+							<span class="event-player">{playerName(e.player_id)}</span>
+							<span class="event-minute">{minLabel}</span>
+							{@render deleteBtn(originalIndex)}
+						</span>
+					{:else if e.event_type === "penalty_missed"}
+						<span class="event" data-side={e.team}>
+							{@render sideMarker(e.team)}
+							<svg class="miss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" width="12" height="12" role="img" aria-label={$t("game_detail.event_penalty_missed")}>
+								<line x1="18" y1="6" x2="6" y2="18" />
+								<line x1="6" y1="6" x2="18" y2="18" />
+							</svg>
+							<span class="event-player">{playerName(e.shooter_id)}</span>
+							<span class="event-minute">{minLabel}</span>
+							{@render deleteBtn(originalIndex)}
+						</span>
+					{/if}
+				{/each}
+			{/if}
+		</div>
+
+		<div class="controls">
+			<div data-onboarding="live-footer">
+				<EventFooter
+					mode={state.mode}
+					pendingCardColor={state.pendingCardColor}
+					{ending}
+					onToggleCard={(color) => (state = toggleCardMode(state, color))}
+					onTogglePenaltyMiss={() => (state = togglePenaltyMissMode(state))}
+					onStartPenaltyShootout={handleStartPenaltyShootout}
+					onEndMatch={handleEnd}
+				/>
+			</div>
+
+			<button type="button" onclick={onBack} class="back-link">
+				<span aria-hidden="true">←</span>
+				{$t("new_game.back")}
+			</button>
+		</div>
+	</div>
 </div>
 
 {#if showGoalDialog}
@@ -330,42 +362,235 @@ $effect(() => {
 	/>
 {/if}
 
-{#if pendingDeleteIndex !== null}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-		onclick={() => (pendingDeleteIndex = null)}
-		role="dialog"
-		aria-modal="true"
-	>
-		<div
-			class="bg-bg-secondary border border-border rounded-2xl w-full max-w-sm p-5"
-			onclick={(e) => e.stopPropagation()}
-		>
-			<h3 class="text-base font-bold mb-2">{$t("live_match.events.delete_title")}</h3>
-			<p class="text-sm text-text-secondary mb-5">
-				{$t("live_match.events.delete_body")}
-			</p>
-			<div class="flex gap-3">
-				<button
-					type="button"
-					onclick={() => (pendingDeleteIndex = null)}
-					class="flex-1 py-2.5 rounded-lg bg-bg-input border border-border text-sm font-medium text-text-primary hover:bg-bg-card"
-				>
-					{$t("game_detail.delete_cancel")}
-				</button>
-				<button
-					type="button"
-					onclick={() => {
-						state = removeEventAt(state, pendingDeleteIndex);
-						pendingDeleteIndex = null;
-					}}
-					class="flex-1 py-2.5 rounded-lg bg-error text-white text-sm font-medium hover:bg-error/90"
-				>
-					{$t("game_detail.delete_confirm")}
-				</button>
-			</div>
-		</div>
-	</div>
-{/if}
+<ConfirmDialog
+	open={pendingDeleteIndex !== null}
+	title={$t("live_match.events.delete_title")}
+	message={$t("live_match.events.delete_body")}
+	actions={[
+		{
+			label: $t("game_detail.delete_confirm"),
+			variant: "primary",
+			onClick: () => {
+				state = removeEventAt(state, pendingDeleteIndex);
+				pendingDeleteIndex = null;
+			},
+		},
+		{
+			label: $t("game_detail.delete_cancel"),
+			variant: "ghost",
+			onClick: () => (pendingDeleteIndex = null),
+		},
+	]}
+	onDismiss={() => (pendingDeleteIndex = null)}
+/>
+
+<style>
+.live {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+/* ── Event pills ────────────────────────────────────────────────────── */
+.events {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+
+.events::-webkit-scrollbar {
+	display: none;
+}
+
+.events.has-events {
+	padding: 2px 2px 4px;
+	margin-bottom: 12px;
+}
+
+.event {
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	gap: 7px;
+	min-height: 34px;
+	padding: 0 4px 0 5px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	border: 1px solid var(--color-line);
+	border-radius: var(--radius-badge);
+	font-size: 13px;
+	white-space: nowrap;
+}
+
+/* Side marker: the team's initial on its colour (home red, away navy),
+ * full name for screen readers and as a tooltip. */
+.event-side {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	flex-shrink: 0;
+	border-radius: var(--radius-avatar);
+	background: var(--color-home);
+	color: var(--color-on-home);
+	font-family: var(--font-cond);
+	font-weight: 800;
+	font-size: 12px;
+}
+
+.event[data-side="away"] .event-side {
+	background: var(--color-away);
+	color: var(--color-on-away);
+}
+
+.event-score {
+	font-family: var(--font-num);
+	font-weight: var(--num-weight);
+	font-size: 16px;
+	font-variant-numeric: tabular-nums;
+}
+
+.event-player {
+	font-weight: 700;
+}
+
+.event-minute {
+	color: var(--color-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.card-shape {
+	display: inline-block;
+	flex-shrink: 0;
+	width: 10px;
+	height: 14px;
+	border-radius: 2px;
+}
+
+.card-shape.red {
+	background: var(--color-brand);
+}
+
+.card-shape.yellow {
+	background: var(--color-gold);
+}
+
+.miss-icon {
+	flex-shrink: 0;
+	color: var(--color-brand);
+}
+
+.event-delete {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	flex-shrink: 0;
+	border: 0;
+	border-radius: var(--radius-control);
+	background: var(--color-sunken);
+	color: var(--color-muted);
+	cursor: pointer;
+}
+
+.event-delete:hover {
+	color: var(--color-ink);
+	background: var(--color-line);
+}
+
+/* ── Controls ───────────────────────────────────────────────────────── */
+.controls {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.back-link {
+	align-self: center;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 40px;
+	padding: 0 12px;
+	border: 0;
+	background: none;
+	color: var(--color-on-page);
+	text-shadow: var(--on-page-shadow);
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.back-link:hover {
+	text-decoration: underline;
+}
+
+/* Design B: pills as white stickers, the controls in one white card. */
+:global([data-variant="b"]) .event {
+	border: 0;
+	padding-left: 4px;
+	box-shadow: var(--shadow-control);
+}
+
+:global([data-variant="b"]) .controls {
+	padding: 14px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+}
+
+:global([data-variant="b"]) .back-link {
+	color: var(--color-muted);
+	text-shadow: none;
+	font-weight: 700;
+}
+
+/* ── Desktop: the landscape pitch takes the full width, the controls a
+ *    comfortable centred column under it. ─────────────────────────── */
+@media (min-width: 1024px) {
+	.live-side {
+		align-self: center;
+		width: min(100%, 36rem);
+	}
+}
+
+/* ── Wide screens: pitch left, pills and controls in a side column.
+ *    Below xl the landscape pitch keeps the full width. ─────────────── */
+@media (min-width: 1280px) {
+	.live {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 22rem;
+		grid-template-areas:
+			"head head"
+			"pitch side";
+		align-items: start;
+		gap: 24px;
+	}
+
+	.live-head {
+		grid-area: head;
+	}
+
+	.live-pitch {
+		grid-area: pitch;
+	}
+
+	.live-side {
+		grid-area: side;
+		position: sticky;
+		top: 24px;
+		align-self: start;
+		width: auto;
+	}
+
+	/* The column has the height to list the events instead of scrolling. */
+	.events {
+		flex-wrap: wrap;
+		overflow: visible;
+	}
+}
+</style>

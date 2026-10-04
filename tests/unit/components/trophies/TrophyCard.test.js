@@ -66,6 +66,14 @@ describe("TrophyCard — earned", () => {
 		expect(screen.getByText("12.03.2025")).toBeInTheDocument();
 	});
 
+	it("names rarity and unlock date in the button's accessible name", () => {
+		render(TrophyCard, { props: { trophy: earnedTrophy } });
+
+		expect(screen.getByRole("button")).toHaveAccessibleName(
+			"Erster Sieg, trophies.rarity.bronze, trophies.featured.earned_on 12.03.2025",
+		);
+	});
+
 	it("calls onSelect with the trophy when clicked", async () => {
 		const onSelect = vi.fn();
 		render(TrophyCard, { props: { trophy: earnedTrophy, onSelect } });
@@ -83,6 +91,18 @@ describe("TrophyCard — locked with progress", () => {
 		expect(screen.getByText("110 / 250")).toBeInTheDocument();
 		// Locked → no unlock date string in the DOM.
 		expect(screen.queryByText(/\d{2}\.\d{2}\.\d{4}/)).toBeNull();
+	});
+});
+
+describe("TrophyCard — locked without progress", () => {
+	it("states in text that the trophy is not earned yet", () => {
+		const { progress: _progress, ...lockedTrophy } = lockedThresholdTrophy;
+		render(TrophyCard, { props: { trophy: lockedTrophy } });
+
+		expect(screen.getByText("trophies.card.locked")).toBeInTheDocument();
+		expect(screen.getByRole("button")).toHaveAccessibleName(
+			"Veteran, trophies.rarity.gold, trophies.card.locked",
+		);
 	});
 });
 

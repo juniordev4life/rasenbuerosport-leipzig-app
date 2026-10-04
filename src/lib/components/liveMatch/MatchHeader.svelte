@@ -3,138 +3,236 @@ import { getTranslate } from "@tolgee/svelte";
 import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
 
 /**
- * Live-match hero: atmospheric red glow card with a centered "LIVE"
- * pulsing pill on top, then the two teams flanking the running score.
- * Matches the live-hero treatment from the new-game mockup.
+ * Scoreboard at the top of the live match (and of the penalty
+ * shootout): a badge, the two crests with their names and the running
+ * score. Design A: the red hero band under the step bar, the score in
+ * display type. Design B: a dark green scoreboard card with the digits
+ * in gold tiles.
+ *
+ * `badge` replaces the default "LIVE" chip; `subtitle` adds a line
+ * under the score (the shootout shows the score after extra time).
  *
  * @type {{
- *   homeTeam: object|null,
- *   awayTeam: object|null,
+ *   homeTeam: { name: string, logo_url?: string|null }|null,
+ *   awayTeam: { name: string, logo_url?: string|null }|null,
  *   scoreHome: number,
  *   scoreAway: number,
+ *   badge?: import('svelte').Snippet,
+ *   subtitle?: string,
  * }}
  */
-let { homeTeam, awayTeam, scoreHome, scoreAway } = $props();
+let {
+	homeTeam,
+	awayTeam,
+	scoreHome,
+	scoreAway,
+	badge,
+	subtitle = "",
+} = $props();
 
 const { t } = getTranslate();
 </script>
 
-<header class="live-hero">
-	<div class="pill-row">
-		<span class="live-pill">
-			<span class="pill-dot"></span>
-			{$t("live_match.live_pill")}
+{#snippet teamSide(team, side)}
+	<div class="team-side {side}">
+		<span class="crest">
+			<TeamLogo logoUrl={team?.logo_url} teamName={team?.name ?? "?"} size="md" />
 		</span>
+		<span class="team-name">{team?.name ?? "—"}</span>
+	</div>
+{/snippet}
+
+<header class="live-hero hero bleed">
+	<div class="badge-row">
+		{#if badge}
+			{@render badge()}
+		{:else}
+			<span class="chip live-chip">
+				<span class="live-dot" aria-hidden="true"></span>
+				{$t("live_match.live_pill")}
+			</span>
+		{/if}
 	</div>
 
 	<div class="score-row">
-		<div class="team-side">
-			<div class="logo-wrap">
-				<TeamLogo logoUrl={homeTeam?.logo_url} teamName={homeTeam?.name ?? "?"} size="sm" />
-			</div>
-			<div class="team-name">{homeTeam?.name ?? "—"}</div>
-		</div>
+		{@render teamSide(homeTeam, "home")}
 
 		<div class="score">
-			<span>{scoreHome}</span>
+			<span class="digit">{scoreHome}</span>
 			<span class="sep">:</span>
-			<span>{scoreAway}</span>
+			<span class="digit">{scoreAway}</span>
 		</div>
 
-		<div class="team-side right">
-			<div class="logo-wrap">
-				<TeamLogo logoUrl={awayTeam?.logo_url} teamName={awayTeam?.name ?? "?"} size="sm" />
-			</div>
-			<div class="team-name">{awayTeam?.name ?? "—"}</div>
-		</div>
+		{@render teamSide(awayTeam, "away")}
 	</div>
+
+	{#if subtitle}
+		<p class="subtitle">{subtitle}</p>
+	{/if}
 </header>
 
 <style>
+/* ── Design A: red hero band ─────────────────────────────────────────── */
 .live-hero {
-	position: relative;
-	background: radial-gradient(ellipse at top, rgba(226, 75, 74, 0.14) 0%, transparent 60%),
-		linear-gradient(180deg, #1A1F2A 0%, #131822 100%);
-	border: 1px solid rgba(226, 75, 74, 0.22);
-	border-radius: 18px;
-	padding: 14px 16px;
-	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	/* Under the wizard's step bar, which already cancels the top padding. */
+	margin-top: 0;
+	padding-top: 16px;
+	padding-bottom: 20px;
 }
-.live-hero::before {
-	content: '';
-	position: absolute;
-	top: 0; left: 0; right: 0; height: 2px;
-	background: linear-gradient(90deg, transparent, #E24B4A 50%, transparent);
+
+.badge-row {
+	display: flex;
+	justify-content: center;
 }
-.pill-row {
-	text-align: center;
-	margin-bottom: 8px;
-}
-.live-pill {
-	display: inline-flex; align-items: center; gap: 5px;
-	background: rgba(226, 75, 74, 0.18);
-	border: 1px solid rgba(226, 75, 74, 0.4);
-	color: #E24B4A;
-	font-size: 9px;
-	font-weight: 800;
+
+.live-chip {
+	gap: 6px;
 	padding: 3px 10px;
-	border-radius: 999px;
-	letter-spacing: 0.12em;
-	text-transform: uppercase;
+	background: var(--color-surface);
+	color: var(--color-brand);
+	font-family: var(--font-cond);
+	font-size: 13px;
+	letter-spacing: 0.03em;
 }
-.pill-dot {
-	width: 6px; height: 6px;
-	border-radius: 50%;
-	background: #E24B4A;
-	animation: livePulse 1.4s ease-in-out infinite;
+
+.live-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: var(--radius-badge);
+	background: currentColor;
+	animation: live-pulse 1.4s ease-in-out infinite;
 }
-@keyframes livePulse {
-	0%, 100% { opacity: 1; transform: scale(1); }
-	50% { opacity: 0.4; transform: scale(0.9); }
+
+@keyframes live-pulse {
+	50% {
+		opacity: 0.35;
+	}
 }
+
 .score-row {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 	align-items: center;
 	gap: 10px;
 }
+
 .team-side {
-	display: flex; align-items: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 	gap: 8px;
 	min-width: 0;
+	text-align: center;
 }
-.team-side.right {
-	justify-content: flex-end;
-	flex-direction: row-reverse;
-}
-.logo-wrap {
-	width: 32px; height: 32px;
-	border-radius: 7px;
-	background: rgba(255,255,255,0.04);
-	border: 1px solid rgba(255,255,255,0.06);
-	display: flex; align-items: center; justify-content: center;
-	overflow: hidden;
+
+.crest {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
 	flex-shrink: 0;
-}
-.team-name {
-	font-size: 13px;
-	font-weight: 700;
-	color: #E5E7EB;
 	overflow: hidden;
+	background: var(--color-surface);
+	border-radius: var(--radius-avatar);
+}
+
+.team-name {
+	max-width: 100%;
+	overflow: hidden;
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.25;
 	text-overflow: ellipsis;
-	white-space: nowrap;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
 }
+
 .score {
-	display: flex; align-items: center; gap: 8px;
-	font-size: 32px;
-	font-weight: 800;
-	line-height: 1;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-family: var(--font-num);
+	font-weight: var(--num-weight);
+	font-size: 60px;
+	line-height: 0.85;
 	font-variant-numeric: tabular-nums;
-	letter-spacing: -0.02em;
-	color: #FFFFFF;
 }
-.score .sep {
-	color: #4B5563;
-	font-size: 26px;
+
+.subtitle {
+	margin: -4px 0 0;
+	font-size: 13px;
+	text-align: center;
+}
+
+/* Desktop: the band becomes a rounded block in the content column. */
+@media (min-width: 1024px) {
+	.live-hero {
+		margin: 0;
+		padding: 18px 24px 22px;
+		border-radius: var(--radius-card);
+	}
+}
+
+/* ── Design B: dark green scoreboard card ───────────────────────────── */
+:global([data-variant="b"]) .live-hero {
+	gap: 10px;
+	padding: 12px 16px 16px;
+	background: var(--color-score);
+	color: var(--color-on-score);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+}
+
+:global([data-variant="b"]) .live-chip {
+	padding: 2px 10px;
+	background: var(--color-brand);
+	color: var(--color-on-brand);
+	font-size: 12px;
+}
+
+:global([data-variant="b"]) .team-side {
+	flex-direction: row;
+	gap: 8px;
+	text-align: left;
+}
+
+:global([data-variant="b"]) .team-side.away {
+	flex-direction: row-reverse;
+	text-align: right;
+}
+
+:global([data-variant="b"]) .crest {
+	width: 44px;
+	height: 44px;
+}
+
+:global([data-variant="b"]) .team-name {
+	font-size: 13px;
+}
+
+:global([data-variant="b"]) .score {
+	gap: 6px;
+	font-size: 30px;
+}
+
+:global([data-variant="b"]) .digit {
+	min-width: 46px;
+	padding: 4px 8px;
+	border-radius: 10px;
+	background: color-mix(in srgb, var(--color-score) 70%, var(--color-ink));
+	color: var(--color-gold);
+	font-size: 42px;
+	line-height: 1.05;
+	text-align: center;
+}
+
+:global([data-variant="b"]) .subtitle {
+	margin: 0;
+	opacity: 0.85;
 }
 </style>

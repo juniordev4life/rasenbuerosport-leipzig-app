@@ -1,15 +1,23 @@
 <script>
 /**
- * Lightweight CSS-only confetti burst — a fixed number of coloured
- * pieces falling via a CSS keyframe animation with a randomised drift
- * and spin per piece. Renders nothing under `prefers-reduced-motion`
- * (pass `reduced`) or while `active` is false.
+ * Lightweight CSS-only confetti burst — a fixed number of pieces in the
+ * brand colours (red, gold, navy, aqua, white) falling via a CSS
+ * keyframe animation with a randomised drift and spin per piece. The
+ * layer is `position: fixed`, so inside the recap story frame it fills
+ * the frame. Renders nothing under `prefers-reduced-motion` (pass
+ * `reduced`) or while `active` is false.
  *
  * @type {{ active?: boolean, reduced?: boolean, pieceCount?: number }}
  */
 let { active = true, reduced = false, pieceCount = 24 } = $props();
 
-const COLORS = ["#E24B4A", "#84CC16", "#F59E0B", "#3B82F6", "#EC4899"];
+const COLORS = [
+	"var(--color-brand)",
+	"var(--color-gold)",
+	"var(--color-navy)",
+	"var(--color-aqua)",
+	"var(--color-surface)",
+];
 
 const pieces = $derived.by(() => {
 	if (!active || reduced) return [];
@@ -26,7 +34,7 @@ const pieces = $derived.by(() => {
 </script>
 
 {#if pieces.length > 0}
-	<div class="pointer-events-none fixed inset-0 overflow-hidden z-[60]" aria-hidden="true">
+	<div class="confetti" aria-hidden="true">
 		{#each pieces as piece (piece.id)}
 			<span
 				class="confetti-piece"
@@ -42,23 +50,33 @@ const pieces = $derived.by(() => {
 {/if}
 
 <style>
+.confetti {
+	position: fixed;
+	inset: 0;
+	z-index: 60;
+	overflow: hidden;
+	pointer-events: none;
+}
+
 .confetti-piece {
 	position: absolute;
 	top: -10px;
 	width: 8px;
 	height: 14px;
-	border-radius: 2px;
+	border-radius: var(--radius-result);
 	animation-name: confetti-fall;
 	animation-timing-function: ease-in;
 	animation-fill-mode: forwards;
 }
+
 @keyframes confetti-fall {
 	0% {
 		transform: translate(0, -10px) rotate(0deg);
 		opacity: 1;
 	}
 	100% {
-		transform: translate(var(--confetti-drift), 100vh) rotate(var(--confetti-spin));
+		transform: translate(var(--confetti-drift), 100vh)
+			rotate(var(--confetti-spin));
 		opacity: 0.2;
 	}
 }

@@ -4,11 +4,12 @@ import MatchAudioPlayer from "$lib/components/games/MatchAudioPlayer.svelte";
 import { REPORTERS } from "$lib/constants/reporters.constants.js";
 
 /**
- * Talkrunde block on the wrapped page — three-avatar lineup,
- * "Bürowoche besprochen"-style label and the shared
- * `<MatchAudioPlayer>` with the klassiker palette (accent red,
- * matches the dashboard card so the same content keeps the same
- * visual signature across surfaces).
+ * Talkrunde block on the wrapped page — the three reporters, the
+ * "Marcel, Sophie & Frank discuss the week" line and the shared
+ * `<MatchAudioPlayer>`. The page wraps it in a "Talkrunde" Section.
+ * Same look as the talk show on Home: design A a navy block, design B
+ * plain content on the section card with the player in its pale green
+ * panel.
  *
  * @type {{ audioUrl: string|null }}
  */
@@ -23,108 +24,86 @@ const lineup = [
 ];
 </script>
 
-<section class="talkrunde">
-	<header class="talkrunde-header">
-		<div class="avatars">
-			{#each lineup as r, i (r.key)}
-				<img
-					src={r.reporter.imageUrl}
-					alt={r.reporter.name}
-					class="avatar {r.key}"
-					style={i === 0 ? "" : "margin-left: -8px;"}
-					loading="lazy"
-				/>
+<div class="talk">
+	<div class="lineup">
+		<div class="reporters">
+			{#each lineup as r (r.key)}
+				<img src={r.reporter.imageUrl} alt={r.reporter.name} loading="lazy" />
 			{/each}
 		</div>
-		<div class="meta">
-			<div class="meta-tag">{$t("wrapped.talkrunde.tag")}</div>
-			<div class="meta-line">
-				<strong>Marcel, Sophie &amp; Frank</strong>
-				{$t("wrapped.talkrunde.lineup_suffix")}
-			</div>
-		</div>
-	</header>
+		<p class="lineup-text">
+			<strong>Marcel, Sophie &amp; Frank</strong>
+			{$t("wrapped.talkrunde.lineup_suffix")}
+		</p>
+	</div>
 
-	<MatchAudioPlayer {audioUrl} reporterId="klassiker" />
-</section>
+	<MatchAudioPlayer {audioUrl} />
+</div>
 
 <style>
-	.talkrunde {
-		background:
-			radial-gradient(
-				ellipse at top right,
-				rgba(245, 158, 11, 0.18) 0%,
-				transparent 60%
-			),
-			linear-gradient(180deg, #1a1f2a 0%, #131822 100%);
-		border: 1px solid rgba(245, 158, 11, 0.3);
-		border-radius: 18px;
-		padding: 16px;
-		margin-bottom: 20px;
-		color: #e5e7eb;
-		position: relative;
-		overflow: hidden;
-	}
-	.talkrunde::before {
-		content: "";
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 2px;
-		background: linear-gradient(
-			90deg,
-			transparent,
-			#fbbf24 50%,
-			transparent
-		);
-		opacity: 0.6;
-	}
-	.talkrunde-header {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		margin-bottom: 14px;
-	}
-	.avatars {
-		display: flex;
-		flex-shrink: 0;
-	}
-	.avatar {
-		width: 36px;
-		height: 36px;
-		border-radius: 50%;
-		object-fit: cover;
-		border: 2px solid #131822;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-	}
-	.avatar.marcel {
-		box-shadow: 0 0 0 1px rgba(226, 75, 74, 0.4);
-	}
-	.avatar.sophie {
-		box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.4);
-	}
-	.avatar.frank {
-		box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.4);
-	}
-	.meta {
-		flex: 1;
-		min-width: 0;
-	}
-	.meta-tag {
-		font-size: 10px;
-		font-weight: 800;
-		color: #fbbf24;
-		text-transform: uppercase;
-		letter-spacing: 0.12em;
-		margin-bottom: 2px;
-	}
-	.meta-line {
-		font-size: 12px;
-		color: #9ca3af;
-	}
-	.meta-line strong {
-		color: #e5e7eb;
-		font-weight: 600;
-	}
+/* ── Design A: navy block ───────────────────────────────────────────── */
+.talk {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 16px;
+	background: var(--color-navy);
+	color: var(--color-on-navy);
+	border-radius: var(--radius-tile);
+}
+
+.lineup {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.reporters {
+	display: flex;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.reporters img {
+	width: 36px;
+	height: 36px;
+	object-fit: cover;
+	background: var(--color-surface);
+	border-radius: var(--radius-avatar);
+}
+
+.lineup-text {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.35;
+}
+
+/* Keep the focus ring visible on navy (the default ring is navy too). */
+.talk :global(:focus-visible) {
+	outline-color: var(--color-on-navy);
+}
+
+/* ── Design B: content on the section card ──────────────────────────── */
+:global([data-variant="b"]) .talk {
+	gap: 14px;
+	padding: 0;
+	background: transparent;
+	color: var(--color-ink);
+}
+
+:global([data-variant="b"]) .talk :global(:focus-visible) {
+	outline-color: var(--color-gold);
+}
+
+:global([data-variant="b"]) .reporters {
+	gap: 0;
+}
+
+:global([data-variant="b"]) .reporters img {
+	box-shadow: 0 0 0 2px var(--color-surface);
+}
+
+:global([data-variant="b"]) .reporters img + img {
+	margin-left: -8px;
+}
 </style>

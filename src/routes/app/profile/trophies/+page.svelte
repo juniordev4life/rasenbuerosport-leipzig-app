@@ -12,8 +12,6 @@ const playerId = $derived($user?.uid ?? null);
 	<title>RasenBürosport - {$t("trophies.hero.title")}</title>
 </svelte:head>
 
-<div class="mx-auto max-w-3xl">
-	{#if playerId}
-		<TrophyRoom {playerId} />
-	{/if}
-</div>
+{#if playerId}
+	<TrophyRoom {playerId} />
+{/if}

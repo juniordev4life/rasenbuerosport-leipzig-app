@@ -1,19 +1,20 @@
 <script>
 /**
- * Compact wrapped tile — small icon, optional player avatar(s) and
- * a category line with primary + secondary detail on the right. Used
- * for everything that isn't the two large MVP/Match-of-the-Week
- * highlights (Torschützenkönig, Aktivster, Aufsteiger, Pechvogel,
- * Heißeste Serie, Top Duo, Trophäen).
+ * Compact wrapped card — the player's avatar (or, without one, the
+ * category icon in a tile), the category with its small icon, the name
+ * with a secondary detail line, and a value on the right. Used for
+ * everything that isn't the two large MVP/Match-of-the-Week highlights
+ * (Torschützenkönig, Aktivster, Aufsteiger, Pechvogel, Heißeste Serie,
+ * Top Duo, Trophäen).
  *
  * Slots:
- *   - `icon`  — small category SVG, ~14px
- *   - `avatar` — optional, player gradient circle(s)
+ *   - `icon`  — small category line icon, ~14px
+ *   - `avatar` — optional, player avatar(s)
  *
- * `valueTone` colours the right-most value text — "up" for ELO
- * gainers (green), "down" for Pechvogel (muted grey, NOT red — the
- * spec is explicit about not bloßstellen), "neutral" / any colour
- * passed as a CSS string.
+ * `valueTone` colours the right-most value text — "up" for ELO gainers
+ * (green in design B; navy like all text in A, where the "+" carries
+ * it), "down" for Pechvogel (muted grey, NOT red — the spec is
+ * explicit about not bloßstellen), "neutral" for everything else.
  *
  * @type {{
  *   categoryLabel: string,
@@ -40,92 +41,128 @@ let {
 const Tag = $derived(href ? "a" : "div");
 </script>
 
-<svelte:element this={Tag} class="card" href={href ?? undefined}>
-	{#if icon}
-		<div class="icon-wrap">{@render icon()}</div>
-	{/if}
+<svelte:element this={Tag} class="card compact" href={href ?? undefined}>
 	{#if avatar}
-		<div class="avatar-wrap">{@render avatar()}</div>
+		<span class="visual">{@render avatar()}</span>
+	{:else if icon}
+		<span class="visual icon-tile" aria-hidden="true">{@render icon()}</span>
 	{/if}
-	<div class="body">
-		<div class="cat">{categoryLabel}</div>
-		<div class="name">{name}</div>
+	<span class="body">
+		<span class="cat">
+			{#if avatar && icon}
+				<span class="cat-icon" aria-hidden="true">{@render icon()}</span>
+			{/if}
+			{categoryLabel}
+		</span>
+		<span class="name">{name}</span>
 		{#if detail}
-			<div class="detail">{detail}</div>
+			<span class="detail">{detail}</span>
 		{/if}
-	</div>
+	</span>
 	{#if value}
-		<div class="value" data-tone={valueTone}>{value}</div>
+		<span class="num value" data-tone={valueTone}>{value}</span>
 	{/if}
 </svelte:element>
 
 <style>
-	.card {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		background: #131822;
-		border: 1px solid #1f2937;
-		border-radius: 14px;
-		padding: 12px 14px;
-		margin-bottom: 8px;
-		color: #e5e7eb;
-		text-decoration: none;
-		transition: border-color 0.15s;
-	}
-	.card:hover {
-		border-color: #2a3142;
-	}
-	.icon-wrap {
-		width: 30px;
-		height: 30px;
-		border-radius: 8px;
-		background: rgba(255, 255, 255, 0.04);
-		border: 1px solid rgba(255, 255, 255, 0.06);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: #9ca3af;
-		flex-shrink: 0;
-	}
-	.avatar-wrap {
-		flex-shrink: 0;
-	}
-	.body {
-		flex: 1;
-		min-width: 0;
-	}
-	.cat {
-		font-size: 9px;
-		font-weight: 800;
-		color: #6b7280;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		margin-bottom: 2px;
-	}
-	.name {
-		font-size: 14px;
-		font-weight: 700;
-		color: white;
-		line-height: 1.2;
-	}
-	.detail {
-		font-size: 11px;
-		color: #9ca3af;
-		margin-top: 2px;
-	}
-	.value {
-		font-size: 22px;
-		font-weight: 800;
-		letter-spacing: -0.02em;
-		font-variant-numeric: tabular-nums;
-		color: #e5e7eb;
-		flex-shrink: 0;
-	}
-	.value[data-tone="up"] {
-		color: #84cc16;
-	}
-	.value[data-tone="down"] {
-		color: #94a3b8;
-	}
+.compact {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	height: 100%;
+	padding: 14px 16px;
+	color: var(--color-ink);
+	text-decoration: none;
+	transition: box-shadow 150ms;
+}
+
+a.compact:hover {
+	box-shadow: var(--shadow-raised);
+}
+
+.visual {
+	display: flex;
+	flex-shrink: 0;
+}
+
+.icon-tile {
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: var(--radius-tile);
+	background: var(--color-navy);
+	color: var(--color-on-navy);
+}
+
+.body {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	flex: 1;
+	min-width: 0;
+}
+
+.cat {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-family: var(--font-label);
+	font-weight: var(--label-weight);
+	text-transform: var(--label-case);
+	letter-spacing: var(--label-tracking);
+	font-size: 12px;
+	line-height: 1.2;
+	color: var(--color-brand);
+}
+
+.cat-icon {
+	display: inline-flex;
+	flex-shrink: 0;
+}
+
+.name {
+	font-weight: 700;
+	font-size: 15px;
+	line-height: 1.25;
+	overflow-wrap: anywhere;
+}
+
+.detail {
+	font-size: 13px;
+	line-height: 1.3;
+	color: var(--color-muted);
+}
+
+.value {
+	flex-shrink: 0;
+	font-size: 30px;
+}
+
+.value[data-tone="up"] {
+	color: var(--color-win);
+}
+
+.value[data-tone="down"] {
+	color: var(--color-muted);
+}
+
+/* ── Design B: round icon tile, muted category, green gains ──────────── */
+:global([data-variant="b"]) .compact {
+	padding: 14px 18px;
+}
+
+:global([data-variant="b"]) .icon-tile {
+	border-radius: 999px;
+	background: var(--color-gold-soft);
+	color: var(--color-ink);
+}
+
+:global([data-variant="b"]) .cat {
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .cat-icon {
+	color: var(--color-brand);
+}
 </style>

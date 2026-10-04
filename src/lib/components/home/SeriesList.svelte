@@ -1,86 +1,130 @@
 <script>
-import BallIcon from "$lib/components/icons/BallIcon.svelte";
-import LightningIcon from "$lib/components/icons/LightningIcon.svelte";
-import ShieldIcon from "$lib/components/icons/ShieldIcon.svelte";
-import TrendDownIcon from "$lib/components/icons/TrendDownIcon.svelte";
+import { getTranslate } from "@tolgee/svelte";
+import { designVariant } from "$lib/stores/designVariant.stores.js";
 
 /**
- * Stack of narrative series rows. Each row has a colour-coded left
- * border, an icon matching the type and a headline + detail.
+ * The signed-in player's running series (win / loss streaks, scoring,
+ * clean sheets). Design A: the count in big red display type. Design B:
+ * the count fanned out as cards, like a referee's hand. Texts come from
+ * `home.series.<type>`.
  *
- * @type {{ series: Array<{ id: string, type: string, headline: string, detail: string }> }}
+ * @type {{
+ *   series: Array<{ id: string, type: string, count: number }>,
+ *   userName?: string,
+ * }}
  */
-let { series = [] } = $props();
+let { series = [], userName = "" } = $props();
+
+const { t } = getTranslate();
+
+/** Fan of up to five cards, rotated around the middle one. */
+const FAN = [-16, -8, 0, 8, 16];
+
+function fanFor(count) {
+	const n = Math.min(Math.max(count ?? 1, 1), FAN.length);
+	const start = Math.floor((FAN.length - n) / 2);
+	return FAN.slice(start, start + n);
+}
 </script>
 
-<div class="flex flex-col gap-1.5">
+<div class="flex flex-col gap-3">
 	{#each series as s (s.id)}
-		<div class="serie-row {s.type}">
-			<div class="serie-icon {s.type}">
-				{#if s.type === "win_streak"}
-					<LightningIcon size={14} />
-				{:else if s.type === "loss_streak"}
-					<TrendDownIcon size={14} />
-				{:else if s.type === "scoring"}
-					<BallIcon size={14} />
-				{:else if s.type === "defensive"}
-					<ShieldIcon size={14} />
-				{/if}
-			</div>
-			<div class="flex-1 min-w-0">
-				<div class="text-[12px] font-bold text-text-primary truncate">
-					{s.headline}
+		<div class="card serie {s.type}">
+			{#if $designVariant === "b"}
+				<div class="fan" aria-hidden="true">
+					{#each fanFor(s.count) as angle, i (i)}
+						<span class="fan-card" style="--angle: {angle}deg; --i: {i};"></span>
+					{/each}
 				</div>
-				<div class="text-[10px] text-text-muted">
-					{s.detail}
-				</div>
+			{:else}
+				<span class="count num" aria-hidden="true">{s.count}</span>
+			{/if}
+			<div class="flex flex-col gap-1 min-w-0">
+				<span class="kicker">{$t(`home.series.${s.type}.label`)}</span>
+				<span class="line">{s.count} {$t(`home.series.${s.type}.label`)}</span>
+				<span class="text-sm leading-snug">
+					{$t(`home.series.${s.type}.headline`, { name: userName })}
+				</span>
 			</div>
 		</div>
 	{/each}
 </div>
 
 <style>
-.serie-row {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 12px;
-	padding: 9px 12px;
+.serie {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 16px;
+	padding: 16px;
 }
-.serie-row.win_streak { border-left: 3px solid #84CC16; }
-.serie-row.loss_streak { border-left: 3px solid #E24B4A; }
-.serie-row.scoring { border-left: 3px solid #F59E0B; }
-.serie-row.defensive { border-left: 3px solid #818CF8; }
 
-.serie-icon {
-	width: 28px;
-	height: 28px;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+.count {
+	font-size: 64px;
+	line-height: 0.8;
+	color: var(--color-brand);
+}
+
+.win_streak .count,
+.defensive .count {
+	color: var(--color-win);
+}
+
+.kicker {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 16px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
+.line {
+	display: none;
+}
+
+/* Design B */
+.fan {
+	position: relative;
+	width: 96px;
+	height: 64px;
 	flex-shrink: 0;
 }
-.serie-icon.win_streak {
-	background: rgba(132, 204, 22, 0.15);
-	border: 1px solid rgba(132, 204, 22, 0.3);
-	color: #84CC16;
+
+.fan-card {
+	position: absolute;
+	left: calc(var(--i) * 17px);
+	top: 10px;
+	width: 26px;
+	height: 36px;
+	border: 2px solid var(--color-surface);
+	border-radius: 4px;
+	background: var(--color-brand);
+	box-shadow: var(--shadow-control);
+	transform: rotate(var(--angle));
 }
-.serie-icon.loss_streak {
-	background: rgba(226, 75, 74, 0.15);
-	border: 1px solid rgba(226, 75, 74, 0.3);
-	color: #E24B4A;
+
+.win_streak .fan-card,
+.defensive .fan-card {
+	background: var(--color-win);
 }
-.serie-icon.scoring {
-	background: rgba(245, 158, 11, 0.15);
-	border: 1px solid rgba(245, 158, 11, 0.3);
-	color: #F59E0B;
+
+.scoring .fan-card {
+	background: var(--color-gold);
 }
-.serie-icon.defensive {
-	background: rgba(129, 140, 248, 0.15);
-	border: 1px solid rgba(129, 140, 248, 0.3);
-	color: #818CF8;
+
+/* B names the series in one line under the fan instead. */
+:global([data-variant="b"]) .kicker {
+	display: none;
+}
+
+:global([data-variant="b"]) .line {
+	display: block;
+	font-family: var(--font-cond);
+	font-weight: 800;
+	font-size: 20px;
+	line-height: 1.1;
+}
+
+:global([data-variant="b"]) .serie {
+	padding: 18px;
 }
 </style>

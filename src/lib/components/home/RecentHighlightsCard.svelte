@@ -47,55 +47,85 @@ function dateLabel(iso) {
 }
 </script>
 
-<div class="flex flex-col gap-1.5">
-	{#each items as game (game.id)}
-		<a
-			href={`/app/games/${game.id}`}
-			class="bg-bg-card border border-border rounded-xl p-2 flex items-center gap-3 hover:bg-bg-input transition-colors"
-		>
-			<div class="relative w-28 shrink-0 aspect-video rounded-md overflow-hidden bg-black">
-				<!-- svelte-ignore a11y_media_has_caption -->
-				<video
-					src={`${game.highlight_url}#t=0.1`}
-					preload="metadata"
-					muted
-					playsinline
-					class="w-full h-full object-cover"
-				></video>
-				<span class="absolute inset-0 flex items-center justify-center" aria-hidden="true">
-					<span class="w-6 h-6 rounded-full bg-black/55 flex items-center justify-center">
-						<svg class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
-							<polygon points="6 4 20 12 6 20" />
+{#if items.length === 0}
+	<div class="card notice">
+		{$t("home.highlights.empty")}
+	</div>
+{:else}
+	<div class="card rows">
+		{#each items as game (game.id)}
+			<a href={`/app/games/${game.id}`} class="clip">
+				<span class="poster">
+					<!-- svelte-ignore a11y_media_has_caption -->
+					<video
+						src={`${game.highlight_url}#t=0.1`}
+						preload="metadata"
+						muted
+						playsinline
+						tabindex="-1"
+					></video>
+					<span class="play" aria-hidden="true">
+						<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+							<polygon points="7 4 20 12 7 20" />
 						</svg>
 					</span>
 				</span>
-			</div>
-			<div class="flex-1 min-w-0">
-				<div class="text-[12px] font-semibold text-text-primary truncate">
-					{matchupLabel(game)}
-				</div>
-				<div class="text-[10px] text-text-muted">{dateLabel(game.played_at)}</div>
-			</div>
-			<div class="text-[14px] font-extrabold tabular-nums shrink-0 text-text-primary">
-				{game.score_home ?? 0}:{game.score_away ?? 0}
-			</div>
-			<svg
-				class="w-4 h-4 shrink-0 text-text-muted"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				aria-hidden="true"
-			>
-				<path d="M9 5l7 7-7 7" />
-			</svg>
-		</a>
-	{/each}
-	{#if items.length === 0}
-		<div class="flex-1 flex items-center justify-center text-center text-[11px] text-text-muted italic py-6">
-			{$t("home.highlights.empty")}
-		</div>
-	{/if}
-</div>
+				<span class="flex flex-col gap-0.5 flex-1 min-w-0">
+					<span class="font-bold truncate">{matchupLabel(game)}</span>
+					<span class="text-[13px] text-muted">{dateLabel(game.played_at)}</span>
+				</span>
+				<span class="score">{game.score_home ?? 0}:{game.score_away ?? 0}</span>
+			</a>
+		{/each}
+	</div>
+{/if}
+
+<style>
+.clip {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 16px;
+	text-decoration: none;
+	color: inherit;
+}
+
+.clip:hover {
+	background: var(--color-sunken);
+}
+
+.poster {
+	position: relative;
+	width: 112px;
+	flex-shrink: 0;
+	aspect-ratio: 16 / 9;
+	overflow: hidden;
+	border-radius: var(--radius-tile);
+	background: var(--color-navy);
+}
+
+.poster video {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.play {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transform: translate(-50%, -50%);
+	border-radius: 999px;
+	background: var(--color-brand);
+	color: var(--color-on-brand);
+}
+
+:global([data-variant="b"]) .clip {
+	padding: 10px 0;
+}
+</style>

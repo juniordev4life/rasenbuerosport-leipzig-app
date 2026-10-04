@@ -1,6 +1,9 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import CountUpNumber from "../CountUpNumber.svelte";
+import RecapCard from "../RecapCard.svelte";
+import RecapHeroNumber from "../RecapHeroNumber.svelte";
+import RecapSlide from "../RecapSlide.svelte";
+import RecapStatGrid from "../RecapStatGrid.svelte";
 
 /**
  * Slide 3 — goals: total goals, assists, goals per game, hattricks
@@ -12,43 +15,42 @@ let { recap, reducedMotion } = $props();
 
 const { t } = getTranslate();
 const stats = $derived(recap.stats ?? {});
+
+const details = $derived(
+	[
+		{
+			key: "assists",
+			label: $t("season_recap.goals.assists"),
+			value: stats.assists ?? 0,
+		},
+		{
+			key: "per_game",
+			label: $t("season_recap.goals.per_game"),
+			value: stats.goals_per_game?.toFixed(2) ?? "—",
+			countUp: false,
+		},
+		stats.hattricks && {
+			key: "hattricks",
+			label: $t("season_recap.goals.hattricks"),
+			value: stats.hattricks,
+		},
+		stats.clean_sheets && {
+			key: "clean_sheets",
+			label: $t("season_recap.goals.clean_sheets"),
+			value: stats.clean_sheets,
+		},
+	].filter(Boolean),
+);
 </script>
 
-<div class="flex flex-col items-center text-center gap-5 w-full">
-	<h2 class="text-xs uppercase tracking-[0.2em] text-white/50 font-bold">
-		{$t("season_recap.goals.title")}
-	</h2>
-	<div class="text-6xl font-extrabold text-[#F59E0B]">
-		<CountUpNumber value={stats.goals ?? 0} reduced={reducedMotion} />
-	</div>
-	<p class="text-sm text-white/60 -mt-3">{$t("season_recap.goals.goals_label")}</p>
-
-	<div class="grid grid-cols-2 gap-3 w-full max-w-xs text-left">
-		<div class="rounded-xl bg-white/5 p-3">
-			<div class="text-xl font-extrabold">
-				<CountUpNumber value={stats.assists ?? 0} reduced={reducedMotion} />
-			</div>
-			<div class="text-[11px] text-white/50">{$t("season_recap.goals.assists")}</div>
-		</div>
-		<div class="rounded-xl bg-white/5 p-3">
-			<div class="text-xl font-extrabold">{stats.goals_per_game?.toFixed(2) ?? "—"}</div>
-			<div class="text-[11px] text-white/50">{$t("season_recap.goals.per_game")}</div>
-		</div>
-		{#if stats.hattricks}
-			<div class="rounded-xl bg-white/5 p-3">
-				<div class="text-xl font-extrabold">
-					<CountUpNumber value={stats.hattricks} reduced={reducedMotion} />
-				</div>
-				<div class="text-[11px] text-white/50">{$t("season_recap.goals.hattricks")}</div>
-			</div>
-		{/if}
-		{#if stats.clean_sheets}
-			<div class="rounded-xl bg-white/5 p-3">
-				<div class="text-xl font-extrabold">
-					<CountUpNumber value={stats.clean_sheets} reduced={reducedMotion} />
-				</div>
-				<div class="text-[11px] text-white/50">{$t("season_recap.goals.clean_sheets")}</div>
-			</div>
-		{/if}
-	</div>
-</div>
+<RecapSlide title={$t("season_recap.goals.title")}>
+	<RecapCard>
+		<RecapHeroNumber
+			value={stats.goals ?? 0}
+			label={$t("season_recap.goals.goals_label")}
+			accent
+			reduced={reducedMotion}
+		/>
+		<RecapStatGrid items={details} reduced={reducedMotion} />
+	</RecapCard>
+</RecapSlide>

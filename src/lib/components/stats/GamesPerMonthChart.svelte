@@ -2,8 +2,13 @@
 import { getTranslate } from "@tolgee/svelte";
 import { getBaseChartOptions, getChartTheme } from "$lib/utils/chart.utils.js";
 import ChartCanvas from "./ChartCanvas.svelte";
+import ChartCard from "./ChartCard.svelte";
 
-/** @type {{ data?: Array<{month: string, count: number}> }} */
+/**
+ * Games per calendar month as vertical bars in the main series colour.
+ *
+ * @type {{ data?: Array<{month: string, count: number}> }}
+ */
 let { data = [] } = $props();
 
 const { t } = getTranslate();
@@ -40,8 +45,8 @@ const chartConfig = $derived.by(() => {
 			datasets: [
 				{
 					data: data.map((d) => d.count),
-					backgroundColor: `${theme.accentRed}cc`,
-					borderRadius: 4,
+					backgroundColor: theme.chart1,
+					maxBarThickness: 32,
 				},
 			],
 		},
@@ -72,8 +77,11 @@ const chartConfig = $derived.by(() => {
 </script>
 
 {#if data.length > 0 && chartConfig}
-	<div class="bg-bg-secondary border border-border rounded-lg p-4">
-		<h3 class="text-sm font-medium text-text-secondary mb-3">{$t("stats_dashboard.games_per_month")}</h3>
-		<ChartCanvas config={chartConfig} height="h-48" />
-	</div>
+	<ChartCard title={$t("stats_dashboard.games_per_month")}>
+		<ChartCanvas
+			config={chartConfig}
+			height="h-48 lg:h-56"
+			label={$t("stats_dashboard.games_per_month")}
+		/>
+	</ChartCard>
 {/if}

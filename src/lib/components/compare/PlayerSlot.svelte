@@ -1,12 +1,18 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
+import PlusIcon from "$lib/components/icons/PlusIcon.svelte";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
 
 /**
- * Compare-screen slot card. Three states:
- *   - locked: own user (slot 1) — shows lock icon, gradient avatar
- *   - empty: dashed border with "+" placeholder (slot 2 before pick)
- *   - filled: chosen opponent with cyan accent (slot 2 after pick)
+ * One side of the compare pairing. Three states:
+ *   - locked: the signed-in player (slot 1) — a "Du" badge, own avatar
+ *   - empty: a dashed placeholder with "+" (slot 2 before the pick)
+ *   - filled: the chosen opponent, with a button to clear the pick
+ *
+ * Design A: white tiles on the red hero, the empty slot as a dashed
+ * white outline. Design B: white cards, the empty one with a dashed
+ * grey border. `accent` is kept for callers; the side is shown by the
+ * badge and the avatar colour.
  *
  * @type {{
  *   state: "locked"|"empty"|"filled",
@@ -14,7 +20,7 @@ import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
  *     id: string,
  *     username: string,
  *     avatarUrl: string|null,
- *     initials: string,
+ *     initials?: string,
  *     elo?: number|null,
  *   } | null,
  *   accent?: "self"|"opponent",
@@ -29,145 +35,161 @@ let {
 } = $props();
 
 const { t } = getTranslate();
-
-const gradient = $derived(
-	player?.id ? avatarGradient(player.id).gradient : null,
-);
-
-const accentColor = $derived(accent === "self" ? "#F59E0B" : "#06B6D4");
 </script>
 
-<div
-	class="slot {state}"
-	style={state === "filled" || state === "locked"
-		? `--accent: ${accentColor};`
-		: ""}
->
+<div class="slot {state} accent-{accent}">
 	{#if state === "empty"}
-		<div class="empty-mark">+</div>
-		<div class="empty-label">{$t("compare.slot_pick")}</div>
-	{:else if state === "locked" && player}
-		<div class="lock-badge" aria-hidden="true">{"\u{1F512}"}</div>
-		<div class="avatar" style="background: {gradient};">
-			{#if player.avatarUrl}
-				<img referrerpolicy="no-referrer" src={player.avatarUrl} alt={player.username} />
-			{:else}
-				<span>{player.initials}</span>
-			{/if}
-		</div>
-		<div class="name">{player.username}</div>
-		<div class="meta">
+		<span class="plus" aria-hidden="true"><PlusIcon size={28} /></span>
+		<span class="slot-label">{$t("compare.slot_pick")}</span>
+	{:else if player}
+		{#if state === "locked"}
+			<span class="chip chip-navy badge">{$t("compare.slot_you")}</span>
+		{:else}
+			<button
+				type="button"
+				class="clear"
+				aria-label={$t("compare.slot_clear")}
+				onclick={() => onClear?.()}
+			>
+				<svg
+					viewBox="0 0 24 24"
+					width="16"
+					height="16"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2.5"
+					stroke-linecap="round"
+					aria-hidden="true"
+				>
+					<line x1="18" y1="6" x2="6" y2="18" />
+					<line x1="6" y1="6" x2="18" y2="18" />
+				</svg>
+			</button>
+		{/if}
+		<PlayerAvatar
+			player={{ id: player.id, username: player.username, avatarUrl: player.avatarUrl }}
+			size={56}
+			self={state === "locked"}
+		/>
+		<span class="slot-name">{player.username}</span>
+		<span class="slot-meta">
 			{#if player.elo != null}
 				ELO {player.elo}
+			{:else if state === "filled"}
+				{$t("compare.slot_opponent")}
 			{:else}
 				—
 			{/if}
-		</div>
-	{:else if state === "filled" && player}
-		<button
-			type="button"
-			class="close"
-			aria-label={$t("compare.slot_clear")}
-			onclick={() => onClear?.()}
-		>×</button>
-		<div class="avatar" style="background: {gradient};">
-			{#if player.avatarUrl}
-				<img referrerpolicy="no-referrer" src={player.avatarUrl} alt={player.username} />
-			{:else}
-				<span>{player.initials}</span>
-			{/if}
-		</div>
-		<div class="name">{player.username}</div>
-		<div class="meta">
-			{#if player.elo != null}
-				ELO {player.elo}
-			{:else}
-				{$t("compare.slot_opponent")}
-			{/if}
-		</div>
+		</span>
 	{/if}
 </div>
 
 <style>
+/* ── Design A: white tiles on the red hero ──────────────────────────── */
 .slot {
 	position: relative;
 	flex: 1;
 	min-width: 0;
-	border-radius: 16px;
-	padding: 16px 12px;
-	display: flex; flex-direction: column;
+	min-height: 148px;
+	display: flex;
+	flex-direction: column;
 	align-items: center;
-	gap: 6px;
-	text-align: center;
-}
-.slot.empty {
-	border: 1.5px dashed rgba(6, 182, 212, 0.4);
-	background: rgba(6, 182, 212, 0.04);
-	color: #9CA3AF;
 	justify-content: center;
+	gap: 6px;
+	padding: 16px 10px 14px;
+	text-align: center;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	border-radius: var(--radius-card);
 }
-.slot.empty .empty-mark {
-	font-size: 36px;
-	color: #06B6D4;
-	line-height: 1;
+
+.slot.empty {
+	background: transparent;
+	color: inherit;
+	border: 1.5px dashed currentColor;
 }
-.slot.empty .empty-label {
-	font-size: 11px;
-	color: #6B7280;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
+
+.plus {
+	display: flex;
+}
+
+.slot-label {
+	font-family: var(--font-cond);
 	font-weight: 700;
+	font-size: 13px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
 }
-.slot.locked,
-.slot.filled {
-	background: #131822;
-	border: 1px solid var(--accent, #1F2937);
-	box-shadow: 0 0 0 1px var(--accent, transparent) inset;
-}
-.slot.locked { border-color: rgba(245, 158, 11, 0.4); }
-.slot.filled { border-color: rgba(6, 182, 212, 0.4); }
-.avatar {
-	width: 56px; height: 56px;
-	border-radius: 50%;
-	display: flex; align-items: center; justify-content: center;
-	color: #fff;
-	font-size: 22px;
-	font-weight: 800;
-	overflow: hidden;
-	box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-}
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
-.name {
-	font-size: 14px;
-	font-weight: 800;
-	color: #E5E7EB;
+
+.slot-name {
 	max-width: 100%;
-	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.meta {
-	font-size: 10px;
-	color: #9CA3AF;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 	font-weight: 700;
+	font-size: 15px;
+}
+
+.slot-meta {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 13px;
+	letter-spacing: 0.02em;
 	font-variant-numeric: tabular-nums;
+	color: var(--color-muted);
 }
-.lock-badge {
+
+.badge {
 	position: absolute;
-	top: 8px; right: 10px;
-	font-size: 12px;
+	top: 8px;
+	right: 8px;
 }
-.close {
+
+.clear {
 	position: absolute;
-	top: 4px; right: 6px;
-	width: 22px; height: 22px;
-	border-radius: 50%;
-	background: rgba(255,255,255,0.06);
-	color: #9CA3AF;
+	top: 6px;
+	right: 6px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
 	border: 0;
-	font-size: 16px;
-	line-height: 1;
+	border-radius: 999px;
+	background: var(--color-sunken);
+	color: var(--color-ink);
 	cursor: pointer;
 }
-.close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+.clear:hover {
+	background: var(--color-line);
+}
+
+/* ── Design B: white sticker cards ──────────────────────────────────── */
+:global([data-variant="b"]) .slot {
+	box-shadow: var(--shadow-card);
+	text-shadow: none;
+}
+
+:global([data-variant="b"]) .slot.empty {
+	background: var(--color-surface);
+	color: var(--color-muted);
+	border: 2px dashed var(--color-line);
+}
+
+:global([data-variant="b"]) .plus {
+	color: var(--color-brand);
+}
+
+:global([data-variant="b"]) .slot-label {
+	font-family: var(--font-sans);
+	font-size: 13px;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+:global([data-variant="b"]) .slot-meta {
+	font-weight: 800;
+	letter-spacing: 0;
+}
 </style>

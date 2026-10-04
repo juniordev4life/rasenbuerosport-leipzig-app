@@ -2,10 +2,10 @@
 import { getTranslate } from "@tolgee/svelte";
 
 /**
- * Wrapped's stats hero — the dezent red-glow card at the top of the
- * page showing total games and total goals for the week. The spec
- * explicitly drops the loud red branding of the old design in favour
- * of a subtle radial-gradient + 2px top accent line.
+ * Wrapped's week totals — games and goals played in the office this
+ * week. Design A: big white display numbers in the red hero band, split
+ * by hairlines like the home page's week stats. Design B: a white
+ * sticker card with two pale green tiles.
  *
  * @type {{ totals: { total_games?: number, total_goals?: number } | null }}
  */
@@ -15,82 +15,119 @@ const { t } = getTranslate();
 </script>
 
 <div class="stats-hero">
-	<div class="stats-hero-label">{$t("wrapped.hero.label")}</div>
-	<div class="stats-hero-row">
-		<div class="stats-hero-stat">
-			<div class="stats-hero-num">{totals?.total_games ?? 0}</div>
-			<div class="stats-hero-unit">{$t("wrapped.hero.games")}</div>
+	<p class="kicker">{$t("wrapped.hero.label")}</p>
+	<dl class="stats">
+		<div class="stat">
+			<dt class="unit">{$t("wrapped.hero.games")}</dt>
+			<dd class="num value">{totals?.total_games ?? 0}</dd>
 		</div>
-		<div class="stats-hero-stat">
-			<div class="stats-hero-num">{totals?.total_goals ?? 0}</div>
-			<div class="stats-hero-unit">{$t("wrapped.hero.goals")}</div>
+		<div class="stat">
+			<dt class="unit">{$t("wrapped.hero.goals")}</dt>
+			<dd class="num value">{totals?.total_goals ?? 0}</dd>
 		</div>
-	</div>
+	</dl>
 </div>
 
 <style>
-	.stats-hero {
-		background:
-			radial-gradient(
-				ellipse at top right,
-				rgba(226, 75, 74, 0.14) 0%,
-				transparent 60%
-			),
-			linear-gradient(180deg, #1a1f2a 0%, #131822 100%);
-		border: 1px solid rgba(226, 75, 74, 0.22);
-		border-radius: 18px;
-		padding: 18px;
-		position: relative;
-		overflow: hidden;
-		margin-bottom: 16px;
-		color: #e5e7eb;
-	}
-	.stats-hero::before {
-		content: "";
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 2px;
-		background: linear-gradient(
-			90deg,
-			transparent,
-			rgba(226, 75, 74, 0.55) 50%,
-			transparent
-		);
-		opacity: 0.7;
-	}
-	.stats-hero-label {
-		font-size: 10px;
-		font-weight: 800;
-		color: rgba(226, 75, 74, 0.85);
-		text-transform: uppercase;
-		letter-spacing: 0.14em;
-		margin-bottom: 12px;
-	}
-	.stats-hero-row {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 16px;
-	}
-	.stats-hero-stat {
-		display: flex;
-		flex-direction: column;
-	}
-	.stats-hero-num {
-		font-size: 32px;
-		font-weight: 800;
-		color: white;
-		letter-spacing: -0.02em;
-		line-height: 1;
-		font-variant-numeric: tabular-nums;
-	}
-	.stats-hero-unit {
-		font-size: 10px;
-		font-weight: 700;
-		color: #9ca3af;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		margin-top: 4px;
-	}
+/* ── Design A: in the red hero band ─────────────────────────────────── */
+.stats-hero {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.kicker {
+	margin: 0;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 14px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
+.stats {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	margin: 0;
+	padding-top: 16px;
+	border-top: 1px solid currentColor;
+}
+
+/* Value above its label, label first for screen readers. */
+.stat {
+	display: flex;
+	flex-direction: column-reverse;
+	justify-content: flex-end;
+	gap: 8px;
+	min-width: 0;
+}
+
+.stat + .stat {
+	padding-left: 16px;
+	border-left: 1px solid currentColor;
+}
+
+.value {
+	margin: 0;
+	font-size: 64px;
+	line-height: 0.85;
+}
+
+.unit {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 13px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
+/* ── Design B: a white sticker card with green tiles ─────────────────── */
+:global([data-variant="b"]) .stats-hero {
+	padding: 18px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+}
+
+:global([data-variant="b"]) .kicker {
+	font-family: var(--font-sans);
+	font-size: 13px;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .stats {
+	gap: 8px;
+	padding-top: 0;
+	border-top: 0;
+}
+
+:global([data-variant="b"]) .stat {
+	align-items: center;
+	gap: 4px;
+	padding: 12px 10px;
+	border-radius: var(--radius-tile);
+	background: var(--color-win-soft);
+}
+
+:global([data-variant="b"]) .stat + .stat {
+	padding-left: 10px;
+	border-left: 0;
+}
+
+:global([data-variant="b"]) .value {
+	font-size: 44px;
+	line-height: 1;
+	color: var(--color-win);
+}
+
+:global([data-variant="b"]) .unit {
+	font-family: var(--font-sans);
+	font-weight: 400;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--color-muted);
+}
 </style>

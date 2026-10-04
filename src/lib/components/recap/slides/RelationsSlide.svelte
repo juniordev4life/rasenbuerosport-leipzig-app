@@ -1,10 +1,12 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
+import RecapCard from "../RecapCard.svelte";
+import RecapSlide from "../RecapSlide.svelte";
 
 /**
  * Slide 5 — who you play with: best partner, nemesis and favorite
- * victim.
+ * victim, each tagged with a labelled chip (never colour alone).
  *
  * @type {{ recap: object }}
  */
@@ -16,6 +18,7 @@ const stats = $derived(recap.stats ?? {});
 const relationRows = $derived.by(() => [
 	{
 		key: "best_partner",
+		chip: "chip-navy",
 		data: stats.best_partner,
 		label: $t("season_recap.relations.best_partner"),
 		detail: stats.best_partner
@@ -27,6 +30,7 @@ const relationRows = $derived.by(() => [
 	},
 	{
 		key: "nemesis",
+		chip: "chip-brand",
 		data: stats.nemesis,
 		label: $t("season_recap.relations.nemesis"),
 		detail: stats.nemesis
@@ -38,6 +42,7 @@ const relationRows = $derived.by(() => [
 	},
 	{
 		key: "favorite_victim",
+		chip: "chip-gold",
 		data: stats.favorite_victim,
 		label: $t("season_recap.relations.favorite_victim"),
 		detail: stats.favorite_victim
@@ -48,36 +53,77 @@ const relationRows = $derived.by(() => [
 			: "",
 	},
 ]);
-
-function initial(name) {
-	return (name ?? "?").charAt(0).toUpperCase();
-}
 </script>
 
-<div class="flex flex-col items-center text-center gap-4 w-full">
-	<h2 class="text-xs uppercase tracking-[0.2em] text-white/50 font-bold">
-		{$t("season_recap.relations.title")}
-	</h2>
-
-	{#each relationRows as row (row.key)}
-		{#if row.data}
-			<div class="w-full flex items-center gap-3 rounded-xl bg-white/5 p-3 text-left">
-				{#if row.data.avatar_url}
-					<img referrerpolicy="no-referrer" src={row.data.avatar_url} alt="" class="w-10 h-10 rounded-full object-cover shrink-0" />
-				{:else}
-					<div
-						class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-						style:background={avatarGradient(row.data.player_id ?? row.data.username).gradient}
-					>
-						{initial(row.data.username)}
-					</div>
+<RecapSlide title={$t("season_recap.relations.title")}>
+	<RecapCard panel>
+		<ul class="people rows">
+			{#each relationRows as row (row.key)}
+				{#if row.data}
+					<li class="person">
+						<PlayerAvatar player={row.data} size={48} />
+						<div class="who">
+							<span class="chip {row.chip}">{row.label}</span>
+							<span class="name">{row.data.username}</span>
+							<span class="detail">{row.detail}</span>
+						</div>
+					</li>
 				{/if}
-				<div class="min-w-0">
-					<div class="text-[10px] uppercase tracking-wide text-white/50 font-bold">{row.label}</div>
-					<div class="text-base font-extrabold truncate">{row.data.username}</div>
-					<div class="text-[11px] text-white/50">{row.detail}</div>
-				</div>
-			</div>
-		{/if}
-	{/each}
-</div>
+			{/each}
+		</ul>
+	</RecapCard>
+</RecapSlide>
+
+<style>
+.people {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.person {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 0;
+}
+
+.person:first-child {
+	padding-top: 0;
+}
+
+.person:last-child {
+	padding-bottom: 0;
+}
+
+.who {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 3px;
+	min-width: 0;
+}
+
+.name {
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 20px;
+	line-height: 1.15;
+}
+
+.detail {
+	font-size: 13px;
+	line-height: 1.3;
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .name {
+	font-weight: 800;
+}
+</style>

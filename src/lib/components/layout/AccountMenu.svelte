@@ -8,9 +8,8 @@ import { ROUTES } from "$lib/constants/routes.constants.js";
 import { logout } from "$lib/services/auth.services.js";
 
 /**
- * Bottom-sheet (mobile) / popover (desktop) opened from the avatar
- * tap in the top bar. Carries the actions that used to live inside
- * the profile page: open Settings, send feedback, or log out.
+ * Bottom sheet (mobile) / popover (desktop) opened from the avatar in the
+ * top bar: open Settings, send feedback, or log out.
  *
  * @type {{ onClose: () => void, onOpenFeedback?: () => void }}
  */
@@ -48,38 +47,47 @@ function handleKeydown(event) {
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="fixed inset-0 z-[60] flex items-end sm:items-center sm:justify-end bg-black/60 sm:bg-black/40 sm:p-4 pb-[max(env(safe-area-inset-bottom),16px)] sm:pb-4"
+	class="scrim fixed inset-0 z-[60] flex items-end sm:items-start sm:justify-end sm:p-4 sm:pt-20 pb-[max(env(safe-area-inset-bottom),16px)] sm:pb-4"
 	onclick={onClose}
-	role="dialog"
-	aria-modal="true"
 >
 	<div
-		class="w-full sm:w-72 bg-bg-secondary border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl p-2"
+		class="sheet w-full sm:w-72 p-2"
+		role="dialog"
+		aria-modal="true"
+		aria-label={$t("nav.settings")}
+		tabindex="-1"
 		onclick={(e) => e.stopPropagation()}
 	>
-		<button
-			type="button"
-			onclick={openSettings}
-			class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left text-text-primary hover:bg-bg-input transition-colors"
-		>
-			<span class="text-text-secondary"><SettingsIcon size={18} /></span>
-			<span class="text-sm font-semibold">{$t("nav.settings")}</span>
+		<button type="button" onclick={openSettings} class="menu-item">
+			<span class="text-muted"><SettingsIcon size={18} /></span>
+			{$t("nav.settings")}
 		</button>
-		<button
-			type="button"
-			onclick={handleFeedback}
-			class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left text-text-primary hover:bg-bg-input transition-colors"
-		>
-			<span class="text-text-secondary"><MessageIcon size={18} /></span>
-			<span class="text-sm font-semibold">{$t("feedback.menu_item")}</span>
+		<button type="button" onclick={handleFeedback} class="menu-item">
+			<span class="text-muted"><MessageIcon size={18} /></span>
+			{$t("feedback.menu_item")}
 		</button>
-		<button
-			type="button"
-			onclick={handleLogout}
-			class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left text-accent-red hover:bg-accent-red/10 transition-colors"
-		>
-			<span><LogoutIcon size={18} /></span>
-			<span class="text-sm font-semibold">{$t("profile.logout")}</span>
+		<button type="button" onclick={handleLogout} class="menu-item text-brand">
+			<LogoutIcon size={18} />
+			{$t("profile.logout")}
 		</button>
 	</div>
 </div>
+
+<style>
+.menu-item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+	min-height: 48px;
+	padding: 0 12px;
+	border-radius: var(--radius-tile);
+	text-align: left;
+	font-weight: 700;
+	font-size: 15px;
+}
+
+.menu-item:hover {
+	background: var(--color-sunken);
+}
+</style>

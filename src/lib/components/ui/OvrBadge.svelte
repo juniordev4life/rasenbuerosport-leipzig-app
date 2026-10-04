@@ -6,28 +6,26 @@
  */
 let { rating = null, size = "sm" } = $props();
 
+// Strong / good / fair / weak, on the shared chip colours.
 const colorClass = $derived.by(() => {
-	if (!rating) return "bg-bg-input text-text-secondary";
-	if (rating >= 80) return "bg-success/20 text-success";
-	if (rating >= 70) return "bg-warning/20 text-warning";
-	if (rating >= 60) return "bg-accent-red/20 text-accent-red-light";
-	return "bg-bg-input text-text-secondary";
+	if (!rating) return "chip-muted";
+	if (rating >= 80) return "chip-win";
+	if (rating >= 70) return "chip-gold";
+	if (rating >= 60) return "chip-loss";
+	return "chip-muted";
 });
 
 const sizeClass = $derived(
 	size === "xs"
-		? "text-[10px] px-1.5 py-0.5"
+		? "text-[10px]"
 		: size === "md"
 			? "text-sm px-2.5 py-1"
-			: "text-xs px-2 py-0.5",
+			: "text-xs",
 );
 </script>
 
 {#if rating}
-	<span
-		class="inline-flex items-center font-bold rounded-md {colorClass} {sizeClass}"
-		aria-label="Overall rating: {rating}"
-	>
+	<span class="chip {colorClass} {sizeClass}" aria-label="Overall rating: {rating}">
 		{rating}
 	</span>
 {/if}

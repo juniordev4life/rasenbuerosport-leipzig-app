@@ -1,11 +1,11 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import BallIcon from "$lib/components/icons/BallIcon.svelte";
+import FootballIcon from "$lib/components/icons/FootballIcon.svelte";
 
 /**
- * Empty state for the Historie page. Shows a context-aware headline
- * based on the active filter combination and a reset button when at
- * least one filter is non-default.
+ * Empty state for the Historie page: a card (the shared `.notice`) with a
+ * headline that fits the active filter combination and a reset button
+ * once at least one filter differs from its default.
  *
  * @type {{
  *   who: string,
@@ -33,52 +33,24 @@ const canReset = $derived(
 );
 </script>
 
-<div class="empty">
-	<div class="ball-icon" aria-hidden="true">
-		<BallIcon size={44} strokeWidth={1.6} />
-	</div>
-	<div class="headline">{headline}</div>
+<div class="card notice">
+	<span class="icon" aria-hidden="true"><FootballIcon size={44} /></span>
+	<p class="notice-title headline">{headline}</p>
 	{#if canReset}
-		<button type="button" class="cta" onclick={onReset}>
+		<button type="button" class="btn btn-sm btn-secondary" onclick={onReset}>
 			{$t("historie.empty.reset")}
 		</button>
 	{/if}
 </div>
 
 <style>
-.empty {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 32px 20px;
-	text-align: center;
-	display: flex; flex-direction: column;
-	align-items: center;
-	gap: 12px;
-	margin-top: 8px;
-}
-.ball-icon {
-	color: var(--color-text-muted);
+.icon {
 	display: flex;
-	align-items: center;
-	justify-content: center;
 }
+
 .headline {
-	font-size: 13px;
-	color: #9CA3AF;
-	font-weight: 600;
-	max-width: 280px;
-	line-height: 1.5;
+	max-width: 300px;
+	font-weight: 500;
+	text-wrap: balance;
 }
-.cta {
-	background: rgba(226, 75, 74, 0.12);
-	border: 1px solid rgba(226, 75, 74, 0.35);
-	color: #E24B4A;
-	font-size: 12px;
-	font-weight: 700;
-	padding: 8px 16px;
-	border-radius: 999px;
-	cursor: pointer;
-}
-.cta:hover { background: rgba(226, 75, 74, 0.18); }
 </style>

@@ -1,9 +1,10 @@
 <script>
 /**
- * Section header rendered above each date bucket in the Historie list.
- * The ELO meta is only shown when the user has chosen the "Meine
- * Spiele" filter, so the visual chrome stays clean for general
- * browsing.
+ * Heading above one date bucket of the Historie list ("Gestern —
+ * 2 Matches"), placed straight on the page: red condensed caps in
+ * design A, white sentence case on the pitch in B. The bucket's ELO
+ * change only shows under the "Meine Spiele" filter and always carries
+ * its sign, so it never relies on colour.
  *
  * @type {{
  *   label: string,
@@ -14,45 +15,79 @@
  */
 let { label, matchCount, eloDelta = null, matchesLabel = "Matches" } = $props();
 
-const showElo = $derived(eloDelta != null);
+// Bucket labels arrive in caps ("DIESE WOCHE"). Lower-case them so each
+// design sets the case in CSS: caps in A, capitalised words in B.
+const when = $derived((label ?? "").toLowerCase());
+
 const eloText = $derived.by(() => {
 	if (eloDelta == null) return null;
-	if (eloDelta > 0) return `↑ +${eloDelta} ELO`;
-	if (eloDelta < 0) return `↓ ${eloDelta} ELO`;
-	return "± 0 ELO";
+	if (eloDelta > 0) return `+${eloDelta} ELO`;
+	if (eloDelta < 0) return `−${Math.abs(eloDelta)} ELO`;
+	return "±0 ELO";
 });
-const eloClass = $derived(
-	eloDelta == null ? "" : eloDelta > 0 ? "up" : eloDelta < 0 ? "down" : "flat",
+
+const tone = $derived(
+	eloDelta == null || eloDelta === 0 ? "draw" : eloDelta > 0 ? "win" : "loss",
 );
 </script>
 
-<div class="header">
-	<div class="title">{label} · <strong>{matchCount} {matchesLabel}</strong></div>
-	{#if showElo}
-		<div class="meta {eloClass}">{eloText}</div>
+<div class="group-head">
+	<h2 class="section-title on-page title">
+		<span class="when">{when}</span>
+		<span class="sep" aria-hidden="true"></span>
+		{matchCount}
+		{matchesLabel}
+	</h2>
+	{#if eloText}
+		<span class="delta delta-{tone}">{eloText}</span>
 	{/if}
 </div>
 
 <style>
-.header {
-	display: flex; justify-content: space-between;
+.group-head {
+	display: flex;
 	align-items: baseline;
-	margin: 16px 2px 8px;
+	justify-content: space-between;
+	gap: 12px;
 }
+
 .title {
-	font-size: 10px;
-	text-transform: uppercase;
-	letter-spacing: 0.12em;
-	font-weight: 800;
-	color: #6B7280;
+	margin: 0;
+	min-width: 0;
 }
-.title strong { color: #9CA3AF; }
-.meta {
-	font-size: 10px;
-	font-weight: 700;
-	font-variant-numeric: tabular-nums;
+
+.sep::before {
+	content: "—";
 }
-.meta.up { color: #84CC16; }
-.meta.down { color: #E24B4A; }
-.meta.flat { color: #6B7280; }
+
+/* The ELO change is the shared `.delta`: coloured text in A. */
+.delta {
+	flex-shrink: 0;
+	font-size: 15px;
+}
+
+/* Design B: white sentence case on the pitch (`.on-page`), the ELO change
+ * as a white sticker pill instead of the shared tint — small coloured
+ * text cannot sit on the grass. */
+:global([data-variant="b"]) .group-head {
+	align-items: center;
+}
+
+:global([data-variant="b"]) .title {
+	font-size: 20px;
+}
+
+:global([data-variant="b"]) .when {
+	text-transform: capitalize;
+}
+
+:global([data-variant="b"]) .sep::before {
+	content: "·";
+}
+
+:global([data-variant="b"]) .delta {
+	background: var(--color-surface);
+	box-shadow: var(--shadow-control);
+	font-size: 13px;
+}
 </style>

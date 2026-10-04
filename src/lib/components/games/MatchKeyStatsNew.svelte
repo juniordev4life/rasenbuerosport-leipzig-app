@@ -1,5 +1,7 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import BarChartIcon from "$lib/components/icons/BarChartIcon.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 import {
 	formatStatValue,
 	getHeadlineKpis,
@@ -8,13 +10,16 @@ import {
 } from "$lib/utils/matchKpis.utils.js";
 
 /**
- * 2×2 grid with the four headline match KPIs. Each card shows the
- * label, the two values (winner side in the team colour) and a small
- * split bar — winner side saturated, loser side faded.
+ * "Wichtigste Zahlen": the four headline KPIs as a 2×2 grid of tiles.
+ * Each tile shows the label, home value left and away value right (the
+ * leading side in its team colour — home red, away navy — the other one
+ * muted) and a split bar in the two team colours.
+ * Design A: small white cards on the page. Design B: grey tiles inside
+ * the section card.
  *
- * @type {{ matchStats: object|null }}
+ * @type {{ matchStats: object|null, class?: string }}
  */
-let { matchStats } = $props();
+let { matchStats, class: className = "" } = $props();
 
 const { t } = getTranslate();
 
@@ -22,82 +27,111 @@ const kpis = $derived(getHeadlineKpis(matchStats));
 </script>
 
 {#if kpis.length > 0}
-	<div class="grid">
-		{#each kpis as kpi (kpi.key)}
-			{@const winner = statWinner(kpi.home, kpi.away)}
-			{@const shares = statBarShares(kpi.home, kpi.away)}
-			<div class="card">
-				<div class="label">{$t(kpi.labelKey)}</div>
-				<div class="values">
-					<span class="val home" class:winner={winner === "home"}>
-						{formatStatValue(kpi.home, kpi.decimals)}{kpi.unit}
-					</span>
-					<span class="val away" class:winner={winner === "away"}>
-						{formatStatValue(kpi.away, kpi.decimals)}{kpi.unit}
-					</span>
+	<Section title={$t("game_detail.section.kpis")} class={className}>
+		{#snippet icon()}<BarChartIcon size={22} strokeWidth={2} />{/snippet}
+		<div class="kpis">
+			{#each kpis as kpi (kpi.key)}
+				{@const winner = statWinner(kpi.home, kpi.away)}
+				{@const shares = statBarShares(kpi.home, kpi.away)}
+				<div class="kpi">
+					<span class="label kpi-label">{$t(kpi.labelKey)}</span>
+					<div class="values">
+						<span
+							class="num val home"
+							class:winner={winner === "home"}
+							class:loser={winner === "away"}
+						>
+							{formatStatValue(kpi.home, kpi.decimals)}{kpi.unit}
+						</span>
+						<span
+							class="num val away"
+							class:winner={winner === "away"}
+							class:loser={winner === "home"}
+						>
+							{formatStatValue(kpi.away, kpi.decimals)}{kpi.unit}
+						</span>
+					</div>
+					<div class="split" aria-hidden="true">
+						<span class="part home" style:flex-grow={shares.home}></span>
+						<span class="part away" style:flex-grow={shares.away}></span>
+					</div>
 				</div>
-				<div class="bar">
-					<div
-						class="bar-left"
-						class:winner={winner === "home"}
-						style="width: {shares.home}%;"
-					></div>
-					<div
-						class="bar-right"
-						class:winner={winner === "away"}
-						style="width: {shares.away}%;"
-					></div>
-				</div>
-			</div>
-		{/each}
-	</div>
+			{/each}
+		</div>
+	</Section>
 {/if}
 
 <style>
-.grid {
+.kpis {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.kpi {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+	padding: 14px;
+	border-radius: var(--radius-card);
+	background: var(--color-surface);
+	box-shadow: var(--shadow-card);
+}
+
+.kpi-label {
+	color: var(--color-muted);
+}
+
+.values {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
 	gap: 8px;
 }
-.card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 12px;
-	padding: 11px;
+
+.val {
+	font-size: 26px;
+	white-space: nowrap;
 }
-.label {
-	font-size: 9px;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	color: #6B7280;
-	font-weight: 700;
-	margin-bottom: 8px;
+
+.val.loser {
+	color: var(--color-muted);
 }
-.values {
-	display: flex; justify-content: space-between;
-	font-size: 18px;
-	font-weight: 800;
-	font-variant-numeric: tabular-nums;
-	margin-bottom: 6px;
+
+.val.home.winner {
+	color: var(--color-home);
 }
-.val { color: #9CA3AF; }
-.val.home.winner { color: #E24B4A; }
-.val.away.winner { color: #84CC16; }
-.bar {
+
+.val.away.winner {
+	color: var(--color-away);
+}
+
+.split {
 	display: flex;
-	height: 4px;
-	border-radius: 2px;
-	overflow: hidden;
-	background: rgba(255,255,255,0.04);
+	gap: 2px;
+	height: var(--bar-height);
 }
-.bar-left {
-	height: 100%;
-	background: rgba(226, 75, 74, 0.35);
+
+.part {
+	flex-basis: 0;
+	min-width: 0;
+	border-radius: var(--radius-bar);
 }
-.bar-left.winner { background: #E24B4A; }
-.bar-right {
-	height: 100%;
-	background: rgba(132, 204, 22, 0.35);
+
+.part.home {
+	background: var(--color-home);
 }
-.bar-right.winner { background: #84CC16; }
+
+.part.away {
+	background: var(--color-away);
+}
+
+/* Design B: grey tiles inside the section card. */
+:global([data-variant="b"]) .kpi {
+	padding: 12px;
+	border-radius: var(--radius-tile);
+	background: var(--color-sunken);
+	box-shadow: none;
+}
 </style>

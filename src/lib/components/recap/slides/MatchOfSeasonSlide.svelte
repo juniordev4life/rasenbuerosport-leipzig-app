@@ -1,5 +1,9 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import PlayIcon from "$lib/components/icons/PlayIcon.svelte";
+import RecapCard from "../RecapCard.svelte";
+import RecapSlide from "../RecapSlide.svelte";
+import RecapStatGrid from "../RecapStatGrid.svelte";
 
 /**
  * Slide 6 — the match of the season, plus a few small season facts
@@ -14,6 +18,40 @@ const { t } = getTranslate();
 const stats = $derived(recap.stats ?? {});
 const mos = $derived(stats.match_of_season);
 
+const facts = $derived(
+	[
+		stats.biggest_win && {
+			key: "biggest_win",
+			label: $t("season_recap.match_of_season.biggest_win"),
+			value: stats.biggest_win.score,
+		},
+		stats.highest_scoring_game && {
+			key: "highest_scoring",
+			label: $t("season_recap.match_of_season.highest_scoring"),
+			value: stats.highest_scoring_game.score,
+		},
+		stats.most_common_score && {
+			key: "most_common_score",
+			label: $t("season_recap.match_of_season.most_common_score"),
+			value: stats.most_common_score.score,
+			extra: `×${stats.most_common_score.count}`,
+		},
+		stats.favorite_club && {
+			key: "favorite_club",
+			label: $t("season_recap.match_of_season.favorite_club"),
+			value: stats.favorite_club.name,
+			text: true,
+		},
+		stats.best_club && {
+			key: "best_club",
+			label: $t("season_recap.match_of_season.best_club"),
+			value: stats.best_club.name,
+			extra: `${Math.round(stats.best_club.win_rate * 100)}%`,
+			text: true,
+		},
+	].filter(Boolean),
+);
+
 function formatDate(iso) {
 	if (!iso) return "";
 	const d = new Date(iso);
@@ -22,80 +60,90 @@ function formatDate(iso) {
 }
 </script>
 
-<div class="flex flex-col items-center text-center gap-4 w-full">
-	<h2 class="text-xs uppercase tracking-[0.2em] text-white/50 font-bold">
-		{$t("season_recap.match_of_season.title")}
-	</h2>
-
+<RecapSlide title={$t("season_recap.match_of_season.title")}>
 	{#if mos}
-		<div class="w-full rounded-2xl bg-white/5 p-5">
+		<RecapCard>
 			{#if mos.result_type === "penalty"}
-				<span class="inline-block rounded-full bg-[#F59E0B]/20 text-[#F59E0B] text-[10px] font-bold px-2 py-0.5 mb-2">
+				<span class="chip chip-gold badge">
 					{$t("season_recap.match_of_season.penalty_badge")}
 				</span>
 			{/if}
-			<div class="text-4xl font-extrabold tabular-nums">{mos.score}</div>
-			<div class="text-[12px] text-white/50 mt-2">
-				{(mos.home_players ?? []).join(" & ")} vs {(mos.away_players ?? []).join(" & ")}
+			<p class="mos-score">{mos.score}</p>
+			<div class="mos-meta">
+				<p class="mos-teams">
+					{(mos.home_players ?? []).join(" & ")} vs {(mos.away_players ?? []).join(" & ")}
+				</p>
+				<p class="recap-note">{formatDate(mos.played_at)}</p>
 			</div>
-			<div class="text-[11px] text-white/40 mt-1">{formatDate(mos.played_at)}</div>
 			{#if mos.highlight_url}
 				<a
 					href={mos.highlight_url}
 					target="_blank"
 					rel="noopener noreferrer"
-					class="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-[#E24B4A]"
+					class="btn btn-sm btn-accent watch"
 				>
-					{"▶"} {$t("season_recap.match_of_season.watch_highlight")}
+					<PlayIcon size={14} />
+					{$t("season_recap.match_of_season.watch_highlight")}
 				</a>
 			{/if}
-		</div>
+		</RecapCard>
 	{/if}
 
-	<div class="grid grid-cols-2 gap-2 w-full text-left">
-		{#if stats.biggest_win}
-			<div class="rounded-xl bg-white/5 p-3">
-				<div class="text-[10px] uppercase tracking-wide text-white/40 font-bold">
-					{$t("season_recap.match_of_season.biggest_win")}
-				</div>
-				<div class="text-lg font-extrabold mt-1">{stats.biggest_win.score}</div>
-			</div>
-		{/if}
-		{#if stats.highest_scoring_game}
-			<div class="rounded-xl bg-white/5 p-3">
-				<div class="text-[10px] uppercase tracking-wide text-white/40 font-bold">
-					{$t("season_recap.match_of_season.highest_scoring")}
-				</div>
-				<div class="text-lg font-extrabold mt-1">{stats.highest_scoring_game.score}</div>
-			</div>
-		{/if}
-		{#if stats.most_common_score}
-			<div class="rounded-xl bg-white/5 p-3">
-				<div class="text-[10px] uppercase tracking-wide text-white/40 font-bold">
-					{$t("season_recap.match_of_season.most_common_score")}
-				</div>
-				<div class="text-lg font-extrabold mt-1">
-					{stats.most_common_score.score}
-					<span class="text-white/40 text-xs">&times;{stats.most_common_score.count}</span>
-				</div>
-			</div>
-		{/if}
-		{#if stats.favorite_club}
-			<div class="rounded-xl bg-white/5 p-3">
-				<div class="text-[10px] uppercase tracking-wide text-white/40 font-bold">
-					{$t("season_recap.match_of_season.favorite_club")}
-				</div>
-				<div class="text-lg font-extrabold mt-1 truncate">{stats.favorite_club.name}</div>
-			</div>
-		{/if}
-		{#if stats.best_club}
-			<div class="rounded-xl bg-white/5 p-3">
-				<div class="text-[10px] uppercase tracking-wide text-white/40 font-bold">
-					{$t("season_recap.match_of_season.best_club")}
-				</div>
-				<div class="text-lg font-extrabold mt-1 truncate">{stats.best_club.name}</div>
-				<div class="text-[10px] text-white/40">{Math.round(stats.best_club.win_rate * 100)}%</div>
-			</div>
-		{/if}
-	</div>
-</div>
+	{#if facts.length > 0}
+		<RecapCard>
+			<RecapStatGrid items={facts} />
+		</RecapCard>
+	{/if}
+</RecapSlide>
+
+<style>
+.badge {
+	align-self: flex-start;
+}
+
+.mos-score {
+	align-self: flex-start;
+	margin: 0;
+	font-family: var(--font-num);
+	font-weight: var(--num-weight);
+	font-variant-numeric: tabular-nums;
+	font-size: min(104px, 28cqw);
+	line-height: 0.85;
+}
+
+.mos-meta {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.mos-teams {
+	margin: 0;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 18px;
+	line-height: 1.2;
+	letter-spacing: 0.02em;
+	text-transform: var(--title-case);
+	overflow-wrap: anywhere;
+}
+
+.watch {
+	align-self: flex-start;
+}
+
+/* B: the score in its dark green chip, as everywhere else in B. */
+:global([data-variant="b"]) .mos-score {
+	padding: 10px 18px;
+	border-radius: 16px;
+	background: var(--color-score);
+	color: var(--color-on-score);
+	font-size: min(64px, 18cqw);
+	line-height: 1;
+}
+
+:global([data-variant="b"]) .mos-teams {
+	font-weight: 800;
+	letter-spacing: 0;
+}
+</style>

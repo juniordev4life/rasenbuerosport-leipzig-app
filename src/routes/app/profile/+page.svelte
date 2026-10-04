@@ -10,11 +10,7 @@ const playerId = $derived($user?.uid ?? null);
 
 function handleRelationSelect(rel) {
 	if (!rel?.playerId) return;
-	if (rel.type === "partner") {
-		goto(`/app/profile/${rel.playerId}`);
-	} else {
-		goto(`/app/profile/${rel.playerId}`);
-	}
+	goto(`/app/profile/${rel.playerId}`);
 }
 </script>
 
@@ -22,6 +18,4 @@ function handleRelationSelect(rel) {
 	<title>RasenBürosport - {$t("profile.title")}</title>
 </svelte:head>
 
-<div class="mx-auto max-w-3xl p-3">
-	<ProfilePage {playerId} isOwnProfile onSelectRelation={handleRelationSelect} />
-</div>
+<ProfilePage {playerId} isOwnProfile onSelectRelation={handleRelationSelect} />

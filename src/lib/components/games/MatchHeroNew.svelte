@@ -1,18 +1,16 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import TeamLogo from "$lib/components/ui/TeamLogo.svelte";
-import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
 import { getMatchCharacterTags } from "$lib/utils/matchCharacterTags.utils.js";
 
 /**
- * Atmospheric match hero card — applies the new-design language: radial
- * glow in the winner's colour, top accent line, big score with the
- * loser side muted, team labels with Sieg/Niederlage tags and the
- * player names in their identity colour, marker tags below and the
- * rematch CTA directly inside the hero.
- *
- * Logos stay small in the outer columns; the focus is the score and
- * the identity-coloured player names.
+ * Top block of the match detail page: mode and date, both clubs with the
+ * score between them (plus extra time / the shootout result), each
+ * side's players with a Sieg / Niederlage tag, the match's character
+ * tags and the rematch button.
+ * Design A: the red hero band under the header with the score in big
+ * display type (a red card on desktop). Design B: a white score card on
+ * the pitch with the dark green score chip.
  *
  * @type {{
  *   game: object,
@@ -25,6 +23,7 @@ import { getMatchCharacterTags } from "$lib/utils/matchCharacterTags.utils.js";
  *   currentUserId: string|null,
  *   resultSuffix?: string,
  *   rematchUrl?: string,
+ *   class?: string,
  * }}
  */
 let {
@@ -38,6 +37,7 @@ let {
 	currentUserId = null,
 	resultSuffix = "",
 	rematchUrl = "",
+	class: className = "",
 } = $props();
 
 const { t } = getTranslate();
@@ -48,9 +48,9 @@ const awayScore = $derived(game?.score_away ?? 0);
 /**
  * Penalty shootout reshapes "who won": regular score is a draw but
  * the shootout settles it. Treat `penalty_shootout.winner_side` as
- * the authoritative winner whenever the JSONB blob is present, so
- * winner glow + side tags read penalties correctly without touching
- * the score numbers themselves.
+ * the authoritative winner whenever the JSONB blob is present, so the
+ * side tags read penalties correctly without touching the score numbers
+ * themselves.
  */
 const penaltyShootout = $derived(game?.penalty_shootout ?? null);
 const penaltyWinner = $derived(penaltyShootout?.winner_side ?? null);
@@ -62,51 +62,8 @@ const awayWins = $derived(
 	penaltyWinner ? penaltyWinner === "away" : awayScore > homeScore,
 );
 const isDraw = $derived(!homeWins && !awayWins);
-const winnerSide = $derived(homeWins ? "home" : awayWins ? "away" : "draw");
-
-const palette = {
-	home: {
-		glow: "rgba(226, 75, 74, 0.16)",
-		border: "rgba(226, 75, 74, 0.22)",
-		line: "#E24B4A",
-	},
-	away: {
-		glow: "rgba(132, 204, 22, 0.16)",
-		border: "rgba(132, 204, 22, 0.22)",
-		line: "#84CC16",
-	},
-	draw: {
-		glow: "rgba(245, 158, 11, 0.16)",
-		border: "rgba(245, 158, 11, 0.22)",
-		line: "#F59E0B",
-	},
-};
-const skin = $derived(palette[winnerSide]);
 
 const tags = $derived(getMatchCharacterTags(game));
-
-const TAG_VARIANT = {
-	warning: {
-		bg: "rgba(245, 158, 11, 0.12)",
-		border: "rgba(245, 158, 11, 0.3)",
-		color: "#F59E0B",
-	},
-	red: {
-		bg: "rgba(226, 75, 74, 0.12)",
-		border: "rgba(226, 75, 74, 0.3)",
-		color: "#E24B4A",
-	},
-	success: {
-		bg: "rgba(132, 204, 22, 0.12)",
-		border: "rgba(132, 204, 22, 0.3)",
-		color: "#84CC16",
-	},
-	info: {
-		bg: "rgba(129, 140, 248, 0.12)",
-		border: "rgba(129, 140, 248, 0.3)",
-		color: "#818CF8",
-	},
-};
 
 const TAG_LABEL_KEY = {
 	late_drama: "match_hero.tags.late_drama",
@@ -117,6 +74,7 @@ const TAG_LABEL_KEY = {
 	clear_win: "match_hero.tags.clear_win",
 	draw: "match_hero.tags.draw",
 	comeback: "match_hero.tags.comeback",
+	elferkrimi: "match_hero.tags.elferkrimi",
 };
 
 const formattedDate = $derived(
@@ -146,6 +104,13 @@ function resultLabel(side) {
 	return awayWins ? $t("match_hero.wins") : $t("match_hero.loses");
 }
 
+/** "win" | "loss" | "draw" from one side's point of view. */
+function resultTone(side) {
+	if (isDraw) return "draw";
+	const wins = side === "home" ? homeWins : awayWins;
+	return wins ? "win" : "loss";
+}
+
 function playerNames(players) {
 	return (players ?? []).map((p) => p.profiles?.username ?? "?");
 }
@@ -160,82 +125,72 @@ function isUserInTeam(players) {
 
 const userInHome = $derived(isUserInTeam(homePlayers));
 const userInAway = $derived(isUserInTeam(awayPlayers));
-const userAccent = $derived(
-	currentUserId ? avatarGradient(currentUserId).from : "#F59E0B",
-);
 </script>
 
-<div
-	class="hero"
-	style="--glow: {skin.glow}; --border: {skin.border}; --line: {skin.line};"
->
+{#snippet club(team, fallbackName)}
+	<div class="club">
+		<span class="crest">
+			<TeamLogo
+				logoUrl={team?.logo_url}
+				teamName={team?.name || fallbackName || "?"}
+				size="md"
+			/>
+		</span>
+		<span class="club-name">{team?.name || fallbackName || "—"}</span>
+	</div>
+{/snippet}
+
+{#snippet side(key, names, isMe)}
+	<div class="team {key}">
+		<div class="team-meta">
+			<span class="side-label">{teamLabel(key)}</span>
+			<span class="chip rtag rtag-{resultTone(key)}">{resultLabel(key)}</span>
+			{#if isMe}
+				<span class="chip chip-gold">{$t("leaderboard.you")}</span>
+			{/if}
+		</div>
+		<div class="players">{names.join(" & ")}</div>
+	</div>
+{/snippet}
+
+<section class="hero bleed match-hero {className}">
 	<div class="top-row">
-		<span class="mode-pill">{game.mode}</span>
+		{#if game.mode}
+			<span class="chip mode">{game.mode}</span>
+		{/if}
 		<span class="date">{formattedDate} · {formattedTime}</span>
 	</div>
 
 	<div class="score-row">
-		<div class="logo-col">
-			<TeamLogo logoUrl={homeTeam?.logo_url} teamName={homeTeam?.name || homeTeamName || "?"} size="md" />
-			<div class="club-name">{homeTeam?.name || homeTeamName || "—"}</div>
-		</div>
+		{@render club(homeTeam, homeTeamName)}
 		<div class="score-block">
-			<div class="score">
-				<span class="num" class:winner={homeWins}>{homeScore}</span>
-				<span class="sep">:</span>
-				<span class="num" class:winner={awayWins}>{awayScore}</span>
-			</div>
+			<span class="num scoreline">
+				<span>{homeScore}</span><span class="colon">:</span><span>{awayScore}</span>
+			</span>
 			{#if resultSuffix}
-				<div class="result-suffix">{resultSuffix}</div>
+				<span class="suffix">{resultSuffix}</span>
 			{/if}
 			{#if penaltyShootout}
-				<div class="penalty-score" aria-label={$t("game_detail.penalty_score_aria")}>
+				<span class="penalty" aria-label={$t("game_detail.penalty_score_aria")}>
 					{$t("game_detail.penalty_score_label", {
 						home: penaltyShootout.final_score?.home ?? 0,
 						away: penaltyShootout.final_score?.away ?? 0,
 					})}
-				</div>
+				</span>
 			{/if}
 		</div>
-		<div class="logo-col">
-			<TeamLogo logoUrl={awayTeam?.logo_url} teamName={awayTeam?.name || awayTeamName || "?"} size="md" />
-			<div class="club-name">{awayTeam?.name || awayTeamName || "—"}</div>
-		</div>
+		{@render club(awayTeam, awayTeamName)}
 	</div>
 
-	<div class="teams-row">
-		<div class="team-block">
-			<div class="team-meta">
-				<span class="team-side">{teamLabel("home")}</span>
-				<span class="team-tag" class:win={homeWins} class:loss={awayWins} class:draw={isDraw}>
-					{resultLabel("home")}
-				</span>
-			</div>
-			<div class="players" class:me={userInHome} style:--accent={userAccent}>
-				{homeNames.join(" & ")}
-			</div>
-		</div>
-		<div class="team-block away">
-			<div class="team-meta">
-				<span class="team-side">{teamLabel("away")}</span>
-				<span class="team-tag" class:win={awayWins} class:loss={homeWins} class:draw={isDraw}>
-					{resultLabel("away")}
-				</span>
-			</div>
-			<div class="players" class:me={userInAway} style:--accent={userAccent}>
-				{awayNames.join(" & ")}
-			</div>
-		</div>
+	<div class="teams">
+		{@render side("home", homeNames, userInHome)}
+		{@render side("away", awayNames, userInAway)}
 	</div>
 
 	{#if tags.length > 0}
-		<div class="markers-row">
+		<div class="tags">
 			{#each tags as tag (tag.id)}
-				{@const v = TAG_VARIANT[tag.variant] ?? TAG_VARIANT.info}
-				<span
-					class="marker"
-					style="background: {v.bg}; border: 1px solid {v.border}; color: {v.color};"
-				>
+				<span class="chip tag tag-{tag.variant}">
 					{$t(TAG_LABEL_KEY[tag.id] ?? tag.id)}
 				</span>
 			{/each}
@@ -243,196 +198,339 @@ const userAccent = $derived(
 	{/if}
 
 	{#if rematchUrl}
-		<a href={rematchUrl} class="rematch">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<polyline points="23 4 23 10 17 10" />
-				<polyline points="1 20 1 14 7 14" />
-				<path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-			</svg>
-			<span>{$t("match_hero.rematch")}</span>
-		</a>
-		<div class="rematch-hint">{$t("match_hero.rematch_hint")}</div>
+		<div class="rematch-block">
+			<a href={rematchUrl} class="btn btn-accent rematch">
+				<svg
+					viewBox="0 0 24 24"
+					width="18"
+					height="18"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					aria-hidden="true"
+				>
+					<polyline points="23 4 23 10 17 10" />
+					<polyline points="1 20 1 14 7 14" />
+					<path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+				</svg>
+				<span>{$t("match_hero.rematch")}</span>
+			</a>
+			<p class="rematch-hint">{$t("match_hero.rematch_hint")}</p>
+		</div>
 	{/if}
-</div>
+</section>
 
 <style>
-.hero {
-	background: radial-gradient(ellipse at top, var(--glow) 0%, transparent 60%),
-		linear-gradient(180deg, #1A1F2A 0%, #131822 100%);
-	border: 1px solid var(--border);
-	border-radius: 18px;
-	padding: 16px;
-	position: relative;
-	overflow: hidden;
+/* ── Design A: red band under the header ───────────────────────────── */
+.match-hero {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	padding-top: 18px;
+	padding-bottom: 24px;
 }
-.hero::before {
-	content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-	background: linear-gradient(90deg, transparent, var(--line) 50%, transparent);
-	opacity: 0.5;
-}
+
 .top-row {
-	display: flex; justify-content: space-between; align-items: center;
-	margin-bottom: 16px;
-	gap: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
 }
-.mode-pill {
-	background: rgba(226, 75, 74, 0.15);
-	color: #E24B4A;
-	font-size: 10px;
-	font-weight: 800;
+
+.mode {
 	padding: 3px 8px;
-	border-radius: 6px;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
+	background: var(--color-surface);
+	color: var(--color-brand);
+	font-size: 12px;
 }
+
 .date {
-	font-size: 11px;
-	color: #9CA3AF;
+	margin-left: auto;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 13px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	text-align: right;
 }
+
 .score-row {
 	display: grid;
-	grid-template-columns: 1fr auto 1fr;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 	align-items: center;
 	gap: 12px;
-	margin-bottom: 14px;
 }
-.logo-col {
-	display: flex; flex-direction: column;
+
+.club {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	text-align: center;
+}
+
+/* Crests sit on a white tile: a red crest would vanish on the red band. */
+.crest {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	flex-shrink: 0;
+	border-radius: var(--radius-tile);
+	background: var(--color-surface);
+}
+
+.club-name {
+	display: -webkit-box;
+	max-width: 100%;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	overflow-wrap: anywhere;
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.2;
+}
+
+.score-block {
+	display: flex;
+	flex-direction: column;
 	align-items: center;
 	gap: 6px;
-	min-width: 0;
-}
-.club-name {
-	font-size: 9px;
-	font-weight: 700;
-	color: #9CA3AF;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	max-width: 100%;
-	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.score-block {
 	text-align: center;
+}
+
+.scoreline {
+	display: inline-flex;
+	align-items: baseline;
+	font-size: 64px;
+	line-height: 0.85;
+	white-space: nowrap;
+}
+
+.colon {
+	margin: 0 0.06em;
+}
+
+.suffix,
+.penalty {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.suffix {
+	font-size: 13px;
+}
+
+.penalty {
+	font-size: 15px;
+}
+
+.teams {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+	padding-top: 14px;
+	border-top: 1px solid currentColor;
+}
+
+.team {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
 	min-width: 0;
 }
-.score {
-	display: flex; align-items: baseline;
-	justify-content: center;
-	gap: 6px;
-	font-variant-numeric: tabular-nums;
+
+.team.away {
+	align-items: flex-end;
+	text-align: right;
 }
-.score .num {
-	font-size: 36px;
-	font-weight: 800;
-	color: #6B7280;
+
+.team-meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+}
+
+.team.away .team-meta {
+	justify-content: flex-end;
+}
+
+.side-label {
+	font-family: var(--font-label);
+	font-weight: var(--label-weight);
+	font-size: 12px;
+	letter-spacing: var(--label-tracking);
+	text-transform: var(--label-case);
+}
+
+/* A: the winner's tag solid white, the others outlined. */
+.rtag {
+	background: transparent;
+	color: inherit;
+	box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.rtag-win {
+	background: var(--color-surface);
+	color: var(--color-brand);
+	box-shadow: none;
+}
+
+.players {
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	font-weight: 700;
+	font-size: 15px;
+	line-height: 1.25;
+}
+
+.tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.tag {
+	padding: 3px 9px;
+	font-size: 12px;
+	background: transparent;
+	color: inherit;
+	box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.rematch-block {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.rematch {
+	width: 100%;
+}
+
+.rematch-hint {
+	margin: 0;
+	font-size: 12px;
+	text-align: center;
+}
+
+@media (min-width: 1024px) {
+	.match-hero {
+		margin: 0;
+		padding: 24px;
+		border-radius: var(--radius-card);
+	}
+}
+
+/* ── Design B: white score card on the pitch ──────────────────────── */
+/* `.hero` sets a white focus ring (right for the pitch); this hero is a
+ * white card, so it goes back to navy. */
+:global([data-variant="b"]) .match-hero {
+	--focus-ring: var(--color-navy);
+	gap: 16px;
+	padding: 18px;
+	background: var(--color-surface);
+	color: var(--color-ink);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+}
+
+:global([data-variant="b"]) .mode {
+	background: var(--color-win-soft);
+	color: var(--color-win);
+}
+
+:global([data-variant="b"]) .date {
+	color: var(--color-muted);
+	font-family: var(--font-sans);
+	font-weight: 500;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+:global([data-variant="b"]) .crest {
+	background: var(--color-sunken);
+}
+
+:global([data-variant="b"]) .scoreline {
+	padding: 8px 14px;
+	border-radius: 14px;
+	background: var(--color-score);
+	color: var(--color-on-score);
+	font-size: 42px;
 	line-height: 1;
 }
-.score .num.winner { color: #FFFFFF; }
-.score .sep {
-	font-size: 22px;
-	color: #4B5563;
+
+:global([data-variant="b"]) .colon {
+	margin: 0 0.2em;
 }
-.result-suffix {
-	margin-top: 6px;
-	font-size: 10px;
-	font-weight: 800;
-	color: var(--line);
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
+
+:global([data-variant="b"]) .suffix {
+	color: var(--color-muted);
+	font-family: var(--font-sans);
+	font-size: 12px;
+	letter-spacing: 0;
+	text-transform: none;
 }
-.penalty-score {
-	margin-top: 4px;
-	font-size: 11px;
-	font-weight: 700;
-	color: #FBBF24;
-	letter-spacing: 0.04em;
-	font-variant-numeric: tabular-nums;
-}
-.teams-row {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 12px;
-	padding-top: 12px;
-	border-top: 1px solid rgba(255,255,255,0.06);
-	margin-bottom: 12px;
-}
-.team-block { min-width: 0; }
-.team-block.away { text-align: right; }
-.team-meta {
-	display: flex; align-items: center; gap: 6px;
-	font-size: 9px;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	font-weight: 700;
-	color: #6B7280;
-	margin-bottom: 3px;
-}
-.team-block.away .team-meta { justify-content: flex-end; }
-.team-tag {
-	font-size: 9px;
-	font-weight: 800;
-	padding: 2px 6px;
-	border-radius: 4px;
-	letter-spacing: 0.06em;
-	border: 1px solid transparent;
-}
-.team-tag.win {
-	background: rgba(132, 204, 22, 0.12);
-	color: #84CC16;
-	border-color: rgba(132, 204, 22, 0.3);
-}
-.team-tag.loss {
-	background: rgba(226, 75, 74, 0.12);
-	color: #E24B4A;
-	border-color: rgba(226, 75, 74, 0.3);
-}
-.team-tag.draw {
-	background: rgba(245, 158, 11, 0.12);
-	color: #F59E0B;
-	border-color: rgba(245, 158, 11, 0.3);
-}
-.players {
-	font-size: 13px;
-	font-weight: 700;
-	color: #D1D5DB;
-	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.players.me { color: var(--accent, #F59E0B); }
-.markers-row {
-	display: flex; flex-wrap: wrap;
-	gap: 6px;
-	margin-bottom: 14px;
-}
-.marker {
-	font-size: 10px;
-	font-weight: 700;
-	padding: 3px 8px;
+
+:global([data-variant="b"]) .penalty {
+	padding: 3px 10px;
 	border-radius: 999px;
+	background: var(--color-gold);
+	color: var(--color-on-gold);
+	font-size: 14px;
+	letter-spacing: 0;
+	text-transform: none;
 }
-.rematch {
-	display: flex; align-items: center; justify-content: center;
-	gap: 8px;
-	width: 100%;
-	padding: 12px 16px;
-	border-radius: 12px;
-	background: linear-gradient(135deg, #E24B4A, #C73E3D);
-	color: #FFFFFF;
-	font-size: 13px;
-	font-weight: 800;
-	letter-spacing: 0.04em;
-	text-decoration: none;
-	box-shadow: 0 6px 18px rgba(226, 75, 74, 0.35);
-	transition: transform 0.15s, box-shadow 0.15s;
+
+:global([data-variant="b"]) .teams {
+	border-top-color: var(--color-line);
 }
-.rematch:hover { transform: translateY(-1px); }
-.rematch:active { transform: scale(0.99); }
-.rematch svg {
-	width: 16px; height: 16px;
+
+:global([data-variant="b"]) .side-label {
+	color: var(--color-muted);
 }
-.rematch-hint {
-	text-align: center;
-	font-size: 10px;
-	color: #6B7280;
-	margin-top: 6px;
+
+:global([data-variant="b"]) .rtag,
+:global([data-variant="b"]) .tag {
+	box-shadow: none;
+}
+
+:global([data-variant="b"]) .rtag-win,
+:global([data-variant="b"]) .tag-success {
+	background: var(--color-win-soft);
+	color: var(--color-win);
+}
+
+:global([data-variant="b"]) .rtag-loss,
+:global([data-variant="b"]) .tag-red {
+	background: var(--color-loss-soft);
+	color: var(--color-loss);
+}
+
+:global([data-variant="b"]) .rtag-draw,
+:global([data-variant="b"]) .tag-info {
+	background: var(--color-sunken);
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .tag-warning {
+	background: var(--color-gold);
+	color: var(--color-on-gold);
+}
+
+:global([data-variant="b"]) .rematch-hint {
+	color: var(--color-muted);
 }
 </style>

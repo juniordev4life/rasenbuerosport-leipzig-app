@@ -1,10 +1,9 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { cubicOut } from "svelte/easing";
-import { fade, fly } from "svelte/transition";
 import { page } from "$app/state";
 import { post } from "$lib/services/api.services.js";
-import { portal } from "$lib/utils/portal.utils.js";
+import SegmentedControl from "./SegmentedControl.svelte";
+import Sheet from "./Sheet.svelte";
 
 /**
  * Bottom-sheet feedback form with three kinds:
@@ -17,8 +16,7 @@ import { portal } from "$lib/utils/portal.utils.js";
  * client only sends `{ kind, title?, description, route? }` and shows
  * the resulting success/error state inline. No mailto, no GitHub login.
  *
- * Same portal + slide-up pattern as InfoSheet so the overlay escapes
- * section stacking contexts and the BottomNav.
+ * Rendered in the shared {@link Sheet}.
  *
  * @type {{ onClose: () => void }}
  */
@@ -44,7 +42,7 @@ const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
 let screenshotDataUrl = $state(null);
 let screenshotName = $state("");
 let screenshotError = $state("");
-let fileInputEl;
+let fileInputEl = $state(null);
 
 /**
  * Submission lifecycle:
@@ -55,10 +53,6 @@ let fileInputEl;
  */
 let submitState = $state("idle");
 let errorMessage = $state("");
-
-function handleKeydown(event) {
-	if (event.key === "Escape") onClose();
-}
 
 /**
  * Read the picked file as a base64 data URL into local state.
@@ -140,6 +134,12 @@ const submitLabelKey = $derived.by(() => {
 	return "feedback.submit_feature";
 });
 
+const kindOptions = $derived([
+	{ value: "general", label: $t("feedback.kind_general") },
+	{ value: "bug", label: $t("feedback.kind_bug") },
+	{ value: "feature", label: $t("feedback.kind_feature") },
+]);
+
 const successMessageKey = $derived(
 	kind === "general"
 		? "feedback.success_general"
@@ -149,121 +149,46 @@ const successMessageKey = $derived(
 );
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
-
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
-	use:portal
-	in:fade={{ duration: 150 }}
-	out:fade={{ duration: 150 }}
-	class="feedback-overlay fixed inset-0 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4"
-	role="dialog"
-	aria-modal="true"
-	aria-labelledby="feedback-title"
-	onclick={onClose}
->
-	<div
-		in:fly={{ y: 280, duration: 260, easing: cubicOut }}
-		out:fly={{ y: 280, duration: 200, easing: cubicOut }}
-		class="feedback-sheet w-full sm:max-w-md max-h-[90vh] overflow-y-auto"
-		onclick={(e) => e.stopPropagation()}
-	>
-		<div class="feedback-handle" aria-hidden="true"></div>
-
-		<div class="feedback-header">
-			<h3 id="feedback-title" class="feedback-title">
-				{$t("feedback.title")}
-			</h3>
-			<button
-				type="button"
-				onclick={onClose}
-				class="feedback-close"
-				aria-label={$t("feedback.close")}
+<Sheet title={$t("feedback.title")} {onClose}>
+	{#if submitState === "success"}
+		<div class="success" role="status" aria-live="polite">
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				width="42"
+				height="42"
+				aria-hidden="true"
 			>
-				<svg
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2.5"
-					stroke-linecap="round"
-					width="20"
-					height="20"
-					aria-hidden="true"
-				>
-					<line x1="18" y1="6" x2="6" y2="18" />
-					<line x1="6" y1="6" x2="18" y2="18" />
-				</svg>
-			</button>
+				<path d="M5 13l4 4L19 7" />
+			</svg>
+			<p class="m-0 text-[15px] font-bold text-ink">{$t(successMessageKey)}</p>
 		</div>
+	{:else}
+		<div class="flex flex-col gap-4">
+			<p class="m-0 text-sm leading-relaxed text-muted">{$t("feedback.intro")}</p>
 
-		{#if submitState === "success"}
-			<div class="feedback-success" role="status" aria-live="polite">
-				<svg
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2.5"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					width="42"
-					height="42"
-					aria-hidden="true"
-				>
-					<path d="M5 13l4 4L19 7" />
-				</svg>
-				<p class="feedback-success-text">
-					{$t(successMessageKey)}
-				</p>
-			</div>
-		{:else}
-			<p class="feedback-intro">
-				{$t("feedback.intro")}
-			</p>
+			<SegmentedControl
+				options={kindOptions}
+				value={kind}
+				onChange={(next) => (kind = next)}
+				ariaLabel={$t("feedback.title")}
+				tone="brand"
+			/>
 
-			<div class="feedback-tabs" role="tablist">
-				<button
-					type="button"
-					role="tab"
-					aria-selected={kind === "general"}
-					class="feedback-tab"
-					class:active={kind === "general"}
-					onclick={() => (kind = "general")}
-				>
-					{$t("feedback.kind_general")}
-				</button>
-				<button
-					type="button"
-					role="tab"
-					aria-selected={kind === "bug"}
-					class="feedback-tab"
-					class:active={kind === "bug"}
-					onclick={() => (kind = "bug")}
-				>
-					{$t("feedback.kind_bug")}
-				</button>
-				<button
-					type="button"
-					role="tab"
-					aria-selected={kind === "feature"}
-					class="feedback-tab"
-					class:active={kind === "feature"}
-					onclick={() => (kind = "feature")}
-				>
-					{$t("feedback.kind_feature")}
-				</button>
-			</div>
-
-			<label class="feedback-field">
-				<span class="feedback-label">
+			<label class="flex flex-col gap-1.5">
+				<span class="text-sm font-bold">
 					{$t("feedback.label_title")}
-					{#if titleRequired}<span class="required">*</span>{/if}
+					{#if titleRequired}<span class="text-brand">*</span>{/if}
 				</span>
 				<input
 					type="text"
 					bind:value={title}
 					maxlength="120"
-					class="feedback-input"
+					class="field"
 					placeholder={$t(
 						kind === "bug"
 							? "feedback.placeholder_title_bug"
@@ -274,15 +199,15 @@ const successMessageKey = $derived(
 				/>
 			</label>
 
-			<label class="feedback-field">
-				<span class="feedback-label">
-					{$t("feedback.label_description")}<span class="required">*</span>
+			<label class="flex flex-col gap-1.5">
+				<span class="text-sm font-bold">
+					{$t("feedback.label_description")}<span class="text-brand">*</span>
 				</span>
 				<textarea
 					bind:value={description}
 					rows="6"
 					maxlength="4000"
-					class="feedback-textarea"
+					class="field textarea"
 					placeholder={$t(
 						kind === "bug"
 							? "feedback.placeholder_body_bug"
@@ -294,38 +219,25 @@ const successMessageKey = $derived(
 			</label>
 
 			{#if kind === "bug"}
-				<div class="feedback-field">
-					<span class="feedback-label">
-						{$t("feedback.label_screenshot")}
-					</span>
+				<div class="flex flex-col gap-1.5">
+					<span class="text-sm font-bold">{$t("feedback.label_screenshot")}</span>
 
 					{#if screenshotDataUrl}
-						<div class="screenshot-preview">
-							<img
-								src={screenshotDataUrl}
-								alt={screenshotName}
-								class="screenshot-thumb"
-							/>
-							<div class="screenshot-meta">
-								<span class="screenshot-name">{screenshotName}</span>
-								<button
-									type="button"
-									class="screenshot-remove"
-									onclick={removeScreenshot}
-									aria-label={$t("feedback.screenshot_remove")}
-								>
-									{$t("feedback.screenshot_remove")}
-								</button>
-							</div>
+						<div class="tile flex items-center gap-3 p-2">
+							<img src={screenshotDataUrl} alt={screenshotName} class="thumb" />
+							<span class="flex-1 min-w-0 text-sm truncate">{screenshotName}</span>
+							<button type="button" class="btn btn-ghost btn-sm" onclick={removeScreenshot}>
+								{$t("feedback.screenshot_remove")}
+							</button>
 						</div>
 					{:else}
-						<label class="screenshot-picker">
+						<label class="picker">
 							<input
 								type="file"
 								accept="image/png,image/jpeg,image/webp,image/heic"
 								bind:this={fileInputEl}
 								onchange={handleFileChange}
-								class="screenshot-input"
+								class="sr-only"
 							/>
 							<svg
 								viewBox="0 0 24 24"
@@ -334,8 +246,8 @@ const successMessageKey = $derived(
 								stroke-width="2"
 								stroke-linecap="round"
 								stroke-linejoin="round"
-								width="14"
-								height="14"
+								width="16"
+								height="16"
 								aria-hidden="true"
 							>
 								<rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
@@ -347,347 +259,102 @@ const successMessageKey = $derived(
 					{/if}
 
 					{#if screenshotError}
-						<p class="screenshot-error" role="alert">{screenshotError}</p>
+						<p class="m-0 text-[13px] text-loss" role="alert">{screenshotError}</p>
 					{:else}
-						<p class="screenshot-hint">{$t("feedback.screenshot_hint")}</p>
+						<p class="m-0 text-[13px] text-muted">{$t("feedback.screenshot_hint")}</p>
 					{/if}
 				</div>
 			{/if}
 
-			<p class="feedback-route-hint">
-				{$t("feedback.route_hint", {
-					route: page.url?.pathname ?? "",
-				})}
+			<p class="m-0 text-[13px] text-muted">
+				{$t("feedback.route_hint", { route: page.url?.pathname ?? "" })}
 			</p>
 
 			{#if submitState === "error" && errorMessage}
-				<div class="feedback-error" role="alert">
-					<span class="feedback-error-title">
-						{$t("feedback.error_title")}
-					</span>
-					<span class="feedback-error-body">{errorMessage}</span>
+				<div class="error" role="alert">
+					<span class="font-bold">{$t("feedback.error_title")}</span>
+					<span>{errorMessage}</span>
 				</div>
 			{/if}
 
 			<button
 				type="button"
-				class="feedback-submit"
+				class="btn btn-primary btn-lg w-full"
 				disabled={!canSubmit || submitState === "submitting"}
 				onclick={handleSubmit}
 			>
 				{#if submitState === "submitting"}
-					<span class="feedback-spinner" aria-hidden="true"></span>
+					<span class="spinner spinner-sm submitting" aria-hidden="true"></span>
 				{/if}
 				{$t(submitLabelKey)}
 			</button>
-		{/if}
-	</div>
-</div>
+		</div>
+	{/if}
+</Sheet>
 
 <style>
-.feedback-overlay {
-	z-index: 100;
-}
-
-.feedback-sheet {
-	background: #131822;
-	border: 1px solid #1f2937;
-	border-radius: 22px 22px 0 0;
-	padding: 8px 22px 22px;
-	box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.55);
-	text-transform: none;
-	letter-spacing: normal;
-	font-weight: 400;
-	font-style: normal;
-	padding-bottom: max(env(safe-area-inset-bottom, 0px), 22px);
-}
-@media (min-width: 640px) {
-	.feedback-sheet {
-		border-radius: 18px;
-		padding: 22px 22px 22px;
-		box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
-	}
-}
-
-.feedback-handle {
-	display: block;
-	width: 36px;
-	height: 4px;
-	border-radius: 2px;
-	background: rgba(255, 255, 255, 0.18);
-	margin: 6px auto 14px;
-}
-@media (min-width: 640px) {
-	.feedback-handle {
-		display: none;
-	}
-}
-
-.feedback-header {
-	display: flex;
-	align-items: flex-start;
-	justify-content: space-between;
-	gap: 12px;
-	margin-bottom: 6px;
-}
-.feedback-title {
-	font-size: 20px;
-	font-weight: 800;
-	letter-spacing: -0.01em;
-	color: #f0f2f5;
-	margin: 0;
-}
-.feedback-close {
-	flex-shrink: 0;
-	background: none;
-	border: none;
-	color: #6b7280;
-	padding: 4px;
-	margin: -4px;
-	cursor: pointer;
-	border-radius: 8px;
-	transition: color 0.15s, background-color 0.15s;
-}
-.feedback-close:hover {
-	color: #f0f2f5;
-	background: rgba(255, 255, 255, 0.05);
-}
-.feedback-intro {
-	font-size: 12.5px;
-	line-height: 1.5;
-	color: #9ca3af;
-	margin: 0 0 14px;
-}
-
-.feedback-tabs {
-	display: flex;
-	gap: 6px;
-	background: rgba(0, 0, 0, 0.3);
-	border: 1px solid #1f2937;
-	border-radius: 10px;
-	padding: 4px;
-	margin-bottom: 16px;
-}
-.feedback-tab {
-	flex: 1;
-	background: none;
-	border: 0;
-	padding: 8px 10px;
-	border-radius: 7px;
-	font-size: 12px;
-	font-weight: 700;
-	color: #9ca3af;
-	cursor: pointer;
-	transition: background-color 0.15s, color 0.15s;
-}
-.feedback-tab:hover { color: #e5e7eb; }
-.feedback-tab.active {
-	background: linear-gradient(135deg, #e24b4a, #c73e3d);
-	color: white;
-	box-shadow: 0 2px 8px rgba(226, 75, 74, 0.3);
-}
-
-.feedback-field {
-	display: block;
-	margin-bottom: 12px;
-}
-.feedback-label {
-	display: block;
-	font-size: 11px;
-	font-weight: 700;
-	color: #9ca3af;
-	margin-bottom: 6px;
-}
-.required {
-	color: #e24b4a;
-	margin-left: 2px;
-}
-.feedback-input,
-.feedback-textarea {
-	width: 100%;
-	background: #1a1f2a;
-	border: 1px solid #2a3142;
-	border-radius: 10px;
-	padding: 10px 12px;
-	font-size: 13px;
-	color: #f0f2f5;
-	font-family: inherit;
-}
-.feedback-input:focus,
-.feedback-textarea:focus {
-	outline: none;
-	border-color: rgba(226, 75, 74, 0.6);
-	box-shadow: 0 0 0 3px rgba(226, 75, 74, 0.12);
-}
-.feedback-textarea {
+.textarea {
+	min-height: 140px;
+	padding-block: 10px;
 	resize: vertical;
-	line-height: 1.5;
+	line-height: 1.45;
 }
 
-.feedback-route-hint {
-	font-size: 10px;
-	color: #6b7280;
-	margin: 0 0 14px;
+.thumb {
+	width: 56px;
+	height: 56px;
+	flex-shrink: 0;
+	object-fit: cover;
+	border-radius: var(--radius-tile);
 }
 
-.feedback-error {
-	background: rgba(226, 75, 74, 0.08);
-	border: 1px solid rgba(226, 75, 74, 0.4);
-	border-radius: 10px;
-	padding: 10px 12px;
-	margin-bottom: 12px;
+/* The hidden file input stays focusable; show its focus on the label. */
+.picker {
+	display: inline-flex;
+	align-items: center;
+	align-self: flex-start;
+	gap: 8px;
+	min-height: 44px;
+	padding: 0 16px;
+	border: 1px dashed var(--color-muted);
+	border-radius: var(--radius-tile);
+	color: var(--color-ink);
+	font-size: 14px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.picker:hover {
+	background: var(--color-sunken);
+}
+
+.picker:focus-within {
+	outline: 2px solid var(--color-navy);
+	outline-offset: 2px;
+}
+
+.error {
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
-}
-.feedback-error-title {
-	font-size: 11px;
-	font-weight: 800;
-	color: #fca5a5;
-}
-.feedback-error-body {
-	font-size: 12px;
-	color: #fda4af;
-	line-height: 1.4;
-	overflow-wrap: anywhere;
-}
-
-.feedback-submit {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 8px;
-	width: 100%;
-	background: linear-gradient(135deg, #e24b4a, #c73e3d);
-	color: white;
-	border: 0;
-	border-radius: 12px;
-	padding: 13px;
+	padding: 10px 12px;
+	border-radius: var(--radius-tile);
+	background: var(--color-loss-soft);
+	color: var(--color-loss);
 	font-size: 14px;
-	font-weight: 800;
-	cursor: pointer;
-	box-shadow: 0 6px 18px rgba(226, 75, 74, 0.4);
-	transition: transform 0.15s, opacity 0.15s;
-}
-.feedback-submit:not(:disabled):hover {
-	transform: translateY(-1px);
-}
-.feedback-submit:disabled {
-	opacity: 0.4;
-	cursor: not-allowed;
-	box-shadow: none;
 }
 
-.feedback-spinner {
-	width: 14px;
-	height: 14px;
-	border: 2px solid rgba(255, 255, 255, 0.5);
-	border-top-color: white;
-	border-radius: 50%;
-	animation: feedback-spin 0.8s linear infinite;
+.submitting {
+	--spinner-color: currentColor;
 }
 
-@keyframes feedback-spin {
-	to {
-		transform: rotate(360deg);
-	}
-}
-
-.screenshot-picker {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	background: rgba(255, 255, 255, 0.04);
-	border: 1px dashed rgba(255, 255, 255, 0.18);
-	border-radius: 10px;
-	padding: 10px 14px;
-	font-size: 12px;
-	font-weight: 700;
-	color: #d1d5db;
-	cursor: pointer;
-	transition: background-color 0.15s, border-color 0.15s, color 0.15s;
-}
-.screenshot-picker:hover {
-	background: rgba(255, 255, 255, 0.06);
-	border-color: rgba(255, 255, 255, 0.3);
-	color: #f0f2f5;
-}
-.screenshot-input {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	overflow: hidden;
-	clip: rect(0 0 0 0);
-}
-.screenshot-preview {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	background: #1a1f2a;
-	border: 1px solid #2a3142;
-	border-radius: 10px;
-	padding: 8px;
-}
-.screenshot-thumb {
-	width: 56px;
-	height: 56px;
-	border-radius: 8px;
-	object-fit: cover;
-	flex-shrink: 0;
-}
-.screenshot-meta {
-	flex: 1;
-	min-width: 0;
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-}
-.screenshot-name {
-	font-size: 12px;
-	color: #f0f2f5;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-.screenshot-remove {
-	background: none;
-	border: 0;
-	font-size: 11px;
-	font-weight: 700;
-	color: #e24b4a;
-	padding: 0;
-	cursor: pointer;
-	text-align: left;
-	align-self: flex-start;
-}
-.screenshot-remove:hover {
-	color: #fca5a5;
-}
-.screenshot-hint {
-	font-size: 10px;
-	color: #6b7280;
-	margin: 6px 0 0;
-}
-.screenshot-error {
-	font-size: 11px;
-	color: #fca5a5;
-	margin: 6px 0 0;
-}
-
-.feedback-success {
+.success {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	gap: 12px;
-	padding: 24px 8px 12px;
-	color: #34d399;
-}
-.feedback-success-text {
-	font-size: 14px;
-	font-weight: 700;
-	color: #f0f2f5;
+	padding: 24px 0 8px;
 	text-align: center;
-	margin: 0;
-	line-height: 1.4;
+	color: var(--color-win);
 }
 </style>

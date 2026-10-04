@@ -1,11 +1,14 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import SpiderChart from "$lib/components/charts/SpiderChart.svelte";
+import TargetIcon from "$lib/components/icons/TargetIcon.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 
 /**
- * Overlay spider chart for the H2H view. Renders both players in the
- * same hexagon — Player A in orange, Player B in cyan, each with a
- * transparent fill so the overlap is readable.
+ * Both players' character radars overlaid in one chart: player A in
+ * `--color-chart-4` (red), player B in `--color-chart-1` (navy in A,
+ * green in B), each with a light fill so the overlap stays readable.
+ * A legend names both colours.
  *
  * @type {{
  *   axesA: { finisher:number, playmaker:number, clutch:number, consistency:number, discipline:number, winner:number }|null,
@@ -37,15 +40,15 @@ const datasets = $derived([
 		id: "playerA",
 		label: playerAName,
 		values: valuesA,
-		strokeColor: "#F59E0B",
-		fillColor: "rgba(245, 158, 11, 0.22)",
+		strokeColor: "var(--color-chart-4)",
+		fillColor: "color-mix(in srgb, var(--color-chart-4) 18%, transparent)",
 	},
 	{
 		id: "playerB",
 		label: playerBName,
 		values: valuesB,
-		strokeColor: "#06B6D4",
-		fillColor: "rgba(6, 182, 212, 0.22)",
+		strokeColor: "var(--color-chart-1)",
+		fillColor: "color-mix(in srgb, var(--color-chart-1) 18%, transparent)",
 	},
 ]);
 
@@ -53,64 +56,69 @@ const hasData = $derived(axesA || axesB);
 </script>
 
 {#if hasData}
-	<div class="section-card">
-		<div class="section-header">
-			<div class="section-label">{"\u{1F3AF}"} {$t("compare.character_section")}</div>
-		</div>
-
-		<div class="spider-wrap">
-			<SpiderChart axes={labels} {datasets} />
-		</div>
-
-		<div class="legend">
-			<div class="legend-item">
-				<div class="swatch a"></div>
-				<span>{playerAName}</span>
+	<Section title={$t("compare.character_section")}>
+		{#snippet icon()}<TargetIcon size={22} strokeWidth={2} />{/snippet}
+		<div class="card spider-card">
+			<div class="spider-wrap">
+				<SpiderChart axes={labels} {datasets} />
 			</div>
-			<div class="legend-item">
-				<div class="swatch b"></div>
-				<span>{playerBName}</span>
+			<div class="legend">
+				<span class="legend-item">
+					<span class="swatch swatch-a" aria-hidden="true"></span>
+					{playerAName}
+				</span>
+				<span class="legend-item">
+					<span class="swatch swatch-b" aria-hidden="true"></span>
+					{playerBName}
+				</span>
 			</div>
 		</div>
-	</div>
+	</Section>
 {/if}
 
 <style>
-.section-card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 14px;
+.spider-card {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding: 16px;
 }
-.section-header { margin-bottom: 10px; }
-.section-label {
-	font-size: 10px;
-	text-transform: uppercase; letter-spacing: 0.1em;
-	color: #6B7280;
-	font-weight: 700;
-}
+
+/* Matches SpiderChart's text-label viewBox (516 × 340). */
 .spider-wrap {
-	position: relative;
 	width: 100%;
-	aspect-ratio: 1;
-	max-width: 320px;
+	max-width: 460px;
+	aspect-ratio: 129 / 85;
 	margin: 0 auto;
 }
+
 .legend {
-	display: flex; justify-content: center; gap: 18px;
-	margin-top: 10px;
-	padding-top: 10px;
-	border-top: 1px solid #1F2937;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 8px 20px;
+	font-size: 13px;
 }
+
 .legend-item {
-	display: flex; align-items: center; gap: 6px;
-	font-size: 11px;
-	color: #9CA3AF;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
 }
+
 .swatch {
-	width: 16px; height: 4px;
-	border-radius: 2px;
+	width: 18px;
+	height: 4px;
+	flex-shrink: 0;
+	border-radius: var(--radius-bar);
 }
-.swatch.a { background: #F59E0B; }
-.swatch.b { background: #06B6D4; }
+
+.swatch-a {
+	background: var(--color-chart-4);
+}
+
+.swatch-b {
+	background: var(--color-chart-1);
+}
 </style>

@@ -5,7 +5,7 @@ import { vi } from "vitest";
  * Vitest global setup — runs once before every test file.
  *
  * Stubs browser APIs that jsdom does not implement and that some components
- * touch (haptics, ResizeObserver, matchMedia). Keep this file tight: prefer
+ * touch (haptics, ResizeObserver, matchMedia, Web Animations). Keep this file tight: prefer
  * per-test mocking via `vi.mock(...)` for everything domain-specific
  * (`apiRequest`, Firebase, Tolgee).
  */
@@ -40,5 +40,15 @@ if (!window.ResizeObserver) {
 		observe() {}
 		unobserve() {}
 		disconnect() {}
+	};
+}
+
+// Svelte transitions run on the Web Animations API (every ui/Sheet uses
+// fade + fly). Finish each animation at once.
+if (typeof Element.prototype.animate !== "function") {
+	Element.prototype.animate = () => {
+		const animation = { onfinish: null, cancel: vi.fn(), currentTime: 0 };
+		queueMicrotask(() => animation.onfinish?.());
+		return animation;
 	};
 }

@@ -18,6 +18,4 @@ function handleRelationSelect(rel) {
 	<title>RasenBürosport - {$t("profile.title")}</title>
 </svelte:head>
 
-<div class="mx-auto max-w-3xl p-3">
-	<ProfilePage {playerId} onSelectRelation={handleRelationSelect} />
-</div>
+<ProfilePage {playerId} onSelectRelation={handleRelationSelect} />

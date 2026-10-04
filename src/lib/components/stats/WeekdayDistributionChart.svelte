@@ -2,8 +2,14 @@
 import { getTranslate } from "@tolgee/svelte";
 import { getBaseChartOptions, getChartTheme } from "$lib/utils/chart.utils.js";
 import ChartCanvas from "./ChartCanvas.svelte";
+import ChartCard from "./ChartCard.svelte";
 
-/** @type {{ data?: Array<{weekday: number, count: number}> }} */
+/**
+ * Games per weekday (Sunday first, as the API counts them); the busiest
+ * day is drawn in the emphasis colour.
+ *
+ * @type {{ data?: Array<{weekday: number, count: number}> }}
+ */
 let { data = [] } = $props();
 
 const { t } = getTranslate();
@@ -22,7 +28,7 @@ const chartConfig = $derived.by(() => {
 
 	const maxVal = Math.max(...values);
 	const colors = values.map((v) =>
-		v === maxVal && maxVal > 0 ? theme.accentRed : `${theme.textSecondary}50`,
+		v === maxVal && maxVal > 0 ? theme.chart4 : theme.chart1,
 	);
 
 	return {
@@ -33,7 +39,7 @@ const chartConfig = $derived.by(() => {
 				{
 					data: values,
 					backgroundColor: colors,
-					borderRadius: 4,
+					maxBarThickness: 32,
 				},
 			],
 		},
@@ -63,8 +69,11 @@ const chartConfig = $derived.by(() => {
 </script>
 
 {#if data.length > 0 && chartConfig}
-	<div class="bg-bg-secondary border border-border rounded-lg p-4">
-		<h3 class="text-sm font-medium text-text-secondary mb-3">{$t("stats_dashboard.weekday_distribution")}</h3>
-		<ChartCanvas config={chartConfig} height="h-40" />
-	</div>
+	<ChartCard title={$t("stats_dashboard.weekday_distribution")}>
+		<ChartCanvas
+			config={chartConfig}
+			height="h-48 lg:h-56"
+			label={$t("stats_dashboard.weekday_distribution")}
+		/>
+	</ChartCard>
 {/if}

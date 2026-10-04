@@ -34,7 +34,8 @@ $effect(() => {
 	/>
 {:else}
 	<div
-		class="{sizeClass} rounded-full bg-bg-input flex items-center justify-center {fontClass} font-bold text-text-primary shrink-0"
+		class="{sizeClass} bg-sunken flex items-center justify-center {fontClass} font-bold text-ink shrink-0"
+		style="border-radius: var(--radius-avatar)"
 	>
 		{initial}
 	</div>

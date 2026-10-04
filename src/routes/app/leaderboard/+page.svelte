@@ -2,14 +2,18 @@
 import { getTranslate } from "@tolgee/svelte";
 import { untrack } from "svelte";
 import { goto, replaceState } from "$app/navigation";
+import UserIcon from "$lib/components/icons/UserIcon.svelte";
+import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
 import AwardsStrip from "$lib/components/leaderboard/AwardsStrip.svelte";
 import DuoRow from "$lib/components/leaderboard/DuoRow.svelte";
 import PlayerRow from "$lib/components/leaderboard/PlayerRow.svelte";
 import RanglisteHero from "$lib/components/leaderboard/RanglisteHero.svelte";
 import SeasonSwitch from "$lib/components/leaderboard/SeasonSwitch.svelte";
 import SeasonTalkrundeCard from "$lib/components/leaderboard/SeasonTalkrundeCard.svelte";
-import SegmentedToggle from "$lib/components/leaderboard/SegmentedToggle.svelte";
 import InfoTip from "$lib/components/ui/InfoTip.svelte";
+import Section from "$lib/components/ui/Section.svelte";
+import SegmentedControl from "$lib/components/ui/SegmentedControl.svelte";
+import { ROUTES } from "$lib/constants/routes.constants.js";
 import {
 	getLeagueSeasons,
 	getSeasonAwards,
@@ -162,6 +166,28 @@ const dividerIndex = $derived(
 
 const recapHref = $derived(seasonMeta ? `/app/recap/${seasonMeta.id}` : null);
 
+const showLeader = $derived(
+	!loading && !error && skillTab === "players" && Boolean(heroPlayer),
+);
+
+/** "Spieler · FC27" / "Duos · FC26" above the list. */
+const listTitle = $derived(
+	[
+		$t(
+			skillTab === "players"
+				? "leaderboard.tab_players"
+				: "leaderboard.mode_duos",
+		),
+		seasonMeta?.game_version,
+	]
+		.filter(Boolean)
+		.join(" · "),
+);
+
+const recordHeader = $derived(
+	`${$t("leaderboard.w_short")}/${$t("leaderboard.d_short")}/${$t("leaderboard.l_short")}`,
+);
+
 function handlePlayerClick(id) {
 	if (id) goto(`/app/profile/${id}`);
 }
@@ -177,125 +203,380 @@ function handleDuoClick(duo) {
 	<title>RasenBürosport - {$t("leaderboard.title")}</title>
 </svelte:head>
 
-<div class="mx-auto max-w-lg lg:max-w-xl flex flex-col gap-3 pb-4">
-	<header class="flex items-end justify-between pt-1">
-		<div class="flex items-center gap-1.5">
-			<h1 class="text-2xl font-extrabold tracking-tight text-text-primary">
-				{$t("leaderboard.title")}
-			</h1>
-			<InfoTip titleKey="info_tips.elo.title" bodyKey="info_tips.elo.body" size={16} />
+<!-- Phone: one column — the hero band (title, switches, leader), the list,
+     then the season-end extras. Desktop: the hero becomes a wide card
+     (switches left, leader right) above a full-width table. -->
+<div class="rl stack pb-4 lg:pb-8">
+	<header class="hero bleed rl-hero" class:with-leader={showLeader}>
+		<div class="rl-controls">
+			<div class="rl-titlebar">
+				<div class="rl-heading">
+					<h1 class="page-title rl-title">{$t("leaderboard.title")}</h1>
+					<InfoTip titleKey="info_tips.elo.title" bodyKey="info_tips.elo.body" size={18} />
+				</div>
+				<a href={ROUTES.COMPARE} class="btn btn-sm btn-accent rl-compare">
+					{$t("leaderboard.compare")}
+				</a>
+			</div>
+
+			<SeasonSwitch {seasons} value={selectedSeasonId} onChange={(v) => (selectedSeasonId = v)} />
+
+			<div class="rl-toggles">
+				<SegmentedControl
+					options={[
+						{ value: "players", label: $t("leaderboard.tab_players") },
+						{ value: "duos", label: $t("leaderboard.mode_duos") },
+					]}
+					value={skillTab}
+					onChange={(v) => (skillTab = v)}
+					ariaLabel={$t("leaderboard.view_switch")}
+					tone="brand"
+				/>
+				{#if skillTab === "players"}
+					<SegmentedControl
+						options={[
+							{ value: "current", label: $t("leaderboard.sort_current") },
+							{ value: "form", label: $t("leaderboard.sort_form") },
+						]}
+						value={sort}
+						onChange={(v) => (sort = v)}
+						ariaLabel={$t("leaderboard.sort")}
+						tone="brand"
+					/>
+				{/if}
+			</div>
 		</div>
-		<button
-			type="button"
-			onclick={() => goto("/app/compare")}
-			class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full border border-warning/40 text-warning bg-warning/5 hover:bg-warning/10 transition-colors"
-		>
-			<span>⇄</span>
-			{$t("leaderboard.compare")}
-		</button>
+
+		{#if showLeader}
+			<RanglisteHero
+				player={heroPlayer}
+				season={{ isCurrent: isCurrentSeason, gameVersion: seasonMeta?.game_version ?? "" }}
+			/>
+		{/if}
 	</header>
 
-	<SeasonSwitch {seasons} value={selectedSeasonId} onChange={(v) => (selectedSeasonId = v)} />
-
-	{#if loading}
-		<div class="flex justify-center py-12">
-			<div
-				class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"
-			></div>
-		</div>
-	{:else if error}
-		<div class="flex flex-col items-center gap-3 py-12 text-center">
-			<p class="text-text-secondary">{$t("leaderboard.error_generic")}</p>
-			<button
-				type="button"
-				onclick={retry}
-				class="px-4 py-2 rounded-full text-xs font-bold bg-accent-red text-white hover:bg-accent-red-hover transition-colors"
-			>
-				{$t("leaderboard.retry")}
-			</button>
-		</div>
-	{:else}
-		<SegmentedToggle
-			options={[
-				{ value: "players", label: $t("leaderboard.tab_players") },
-				{ value: "duos", label: $t("leaderboard.mode_duos") },
-			]}
-			value={skillTab}
-			onChange={(v) => (skillTab = v)}
-			ariaLabel={$t("leaderboard.view_switch")}
-		/>
-
-		{#if skillTab === "players"}
-			<SegmentedToggle
-				options={[
-					{ value: "current", label: $t("leaderboard.sort_current") },
-					{ value: "form", label: $t("leaderboard.sort_form") },
-				]}
-				value={sort}
-				onChange={(v) => (sort = v)}
-				ariaLabel={$t("leaderboard.sort")}
-			/>
-
-			{#if heroPlayer}
-				<RanglisteHero
-					player={heroPlayer}
-					season={{ isCurrent: isCurrentSeason, gameVersion: seasonMeta?.game_version ?? "" }}
-				/>
-			{/if}
-
-			{#if sortedPlayers.length === 0}
-				<p class="text-text-secondary text-center py-8">{$t("leaderboard.no_data", { minGames })}</p>
-			{:else}
-				<div class="flex flex-col">
-					{#each sortedPlayers as p, i (p.player_id)}
-						{#if i === dividerIndex}
-							<div class="flex items-center gap-2 my-2 px-1">
-								<span class="h-px flex-1 bg-border"></span>
-								<span class="text-[10px] font-bold uppercase tracking-wide text-text-muted whitespace-nowrap">
+	<div class="rl-main">
+		{#if loading}
+			<div class="flex justify-center py-12">
+				<span class="spinner" role="status" aria-label={$t("common.loading")}></span>
+			</div>
+		{:else if error}
+			<div class="card notice" role="alert">
+				<p>{$t("leaderboard.error_generic")}</p>
+				<button type="button" class="btn btn-primary btn-sm" onclick={retry}>
+					{$t("leaderboard.retry")}
+				</button>
+			</div>
+		{:else if skillTab === "players"}
+			<Section title={listTitle}>
+				{#snippet icon()}<UserIcon size={22} strokeWidth={2} />{/snippet}
+				{#if sortedPlayers.length === 0}
+					<p class="card notice">{$t("leaderboard.no_data", { minGames })}</p>
+				{:else}
+					<div class="card rows rl-table rl-players">
+						<div class="label rl-head rl-head-players" aria-hidden="true">
+							<span>#</span>
+							<span></span>
+							<span>{$t("leaderboard.tab_players")}</span>
+							<span class="rl-wide">{$t("leaderboard.games_short")}</span>
+							<span class="rl-wide">{recordHeader}</span>
+							<span class="rl-wide">{$t("leaderboard.goals_short")}</span>
+							<span>{$t("leaderboard.sort_form")}</span>
+							<span class="rl-end">{$t("player_profile.rating")}</span>
+						</div>
+						{#each sortedPlayers as p, i (p.player_id)}
+							{#if i === dividerIndex}
+								<p class="label rl-divider">
 									{$t("leaderboard.not_qualified_divider", {
 										minGames: rating?.season?.min_games ?? 0,
 									})}
-								</span>
-								<span class="h-px flex-1 bg-border"></span>
-							</div>
-						{/if}
-						<PlayerRow
-							rank={p.rank}
-							player={p}
-							{sort}
-							isCurrentUser={p.player_id === userId}
-							dimmed={p.player_id === heroPlayer?.player_id}
-							onClick={handlePlayerClick}
-						/>
-					{/each}
-				</div>
-			{/if}
-		{:else if (rating?.duos ?? []).length === 0}
-			<p class="text-text-secondary text-center py-8">{$t("leaderboard.no_duos", { minGames })}</p>
+								</p>
+							{/if}
+							<PlayerRow
+								rank={p.rank}
+								player={p}
+								{sort}
+								isCurrentUser={p.player_id === userId}
+								dimmed={p.player_id === heroPlayer?.player_id}
+								onClick={handlePlayerClick}
+							/>
+						{/each}
+					</div>
+				{/if}
+			</Section>
 		{:else}
-			<div class="flex flex-col">
-				{#each rating.duos as duo (duo.duo_id)}
-					<DuoRow rank={duo.rank} {duo} onClick={handleDuoClick} />
-				{/each}
-			</div>
+			<Section title={listTitle}>
+				{#snippet icon()}<UsersIcon size={22} strokeWidth={2} />{/snippet}
+				{#if (rating?.duos ?? []).length === 0}
+					<p class="card notice">{$t("leaderboard.no_duos", { minGames })}</p>
+				{:else}
+					<div class="card rows rl-table rl-duos">
+						<div class="label rl-head rl-head-duos" aria-hidden="true">
+							<span>#</span>
+							<span></span>
+							<span>{$t("leaderboard.mode_duos")}</span>
+							<span class="rl-wide">{$t("leaderboard.games_short")}</span>
+							<span class="rl-wide">{recordHeader}</span>
+							<span class="rl-wide">{$t("leaderboard.duo_total_games_short")}</span>
+							<span class="rl-end">{$t("player_profile.rating")}</span>
+						</div>
+						{#each rating.duos as duo (duo.duo_id)}
+							<DuoRow rank={duo.rank} {duo} onClick={handleDuoClick} />
+						{/each}
+					</div>
+				{/if}
+			</Section>
 		{/if}
-	{/if}
+	</div>
 
 	{#if !loading && !error && !isCurrentSeason}
-		<AwardsStrip {awards} />
-		{#if seasonMeta?.talkrunde?.audio_url}
-			<SeasonTalkrundeCard
-				audioUrl={seasonMeta.talkrunde.audio_url}
-				gameVersion={seasonMeta.game_version ?? ""}
-			/>
-		{/if}
-		{#if hasRecap && recapHref}
-			<a
-				href={recapHref}
-				class="flex items-center justify-center gap-2 rounded-full bg-accent-red text-white text-sm font-bold px-4 py-2.5 hover:bg-accent-red-hover transition-colors"
-			>
-				{$t("leaderboard.recap_cta", { version: seasonMeta?.game_version ?? "" })}
-			</a>
-		{/if}
+		<div class="rl-extras">
+			<AwardsStrip {awards} />
+			{#if seasonMeta?.talkrunde?.audio_url}
+				<SeasonTalkrundeCard
+					audioUrl={seasonMeta.talkrunde.audio_url}
+					gameVersion={seasonMeta.game_version ?? ""}
+				/>
+			{/if}
+			{#if hasRecap && recapHref}
+				<a href={recapHref} class="btn btn-primary btn-lg rl-recap">
+					{$t("leaderboard.recap_cta", { version: seasonMeta?.game_version ?? "" })}
+				</a>
+			{/if}
+		</div>
 	{/if}
 </div>
+
+<style>
+/* ── Hero: red band in A (sits flush under the header), text on the
+ *    pitch in B ─────────────────────────────────────────────────────── */
+.rl-hero {
+	display: flex;
+	flex-direction: column;
+	gap: 22px;
+	padding-top: 20px;
+	padding-bottom: 26px;
+}
+
+.rl-controls {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	min-width: 0;
+}
+
+.rl-titlebar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.rl-heading {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
+.rl-title {
+	margin: 0;
+	font-size: 44px;
+	text-shadow: var(--on-page-shadow);
+}
+
+.rl-compare {
+	flex-shrink: 0;
+}
+
+.rl-toggles {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 12px 24px;
+}
+
+/* A: the second row of tabs has no baseline (only the season tabs do). */
+.rl-toggles :global(.seg) {
+	border-bottom-color: transparent;
+}
+
+:global([data-variant="b"]) .rl-hero {
+	gap: 14px;
+	padding: 0;
+}
+
+:global([data-variant="b"]) .rl-controls {
+	gap: 10px;
+}
+
+:global([data-variant="b"]) .rl-title {
+	font-size: 40px;
+	line-height: 1.1;
+}
+
+:global([data-variant="b"]) .rl-toggles {
+	display: grid;
+	grid-auto-flow: column;
+	grid-auto-columns: minmax(0, 1fr);
+	gap: 10px;
+}
+
+/* ── List ───────────────────────────────────────────────────────────── */
+/* Columns and gap shared by the header row and the rows (PlayerRow,
+ * DuoRow), so they line up. */
+.rl-table {
+	--col-gap: 8px;
+}
+
+.rl-players {
+	--cols: 26px 40px minmax(0, 1fr) 44px 52px;
+}
+
+.rl-duos {
+	--cols: 26px 60px minmax(0, 1fr) 52px;
+}
+
+.rl-head {
+	display: none;
+	grid-template-columns: var(--cols);
+	align-items: center;
+	column-gap: var(--col-gap);
+	padding: 10px 12px;
+	color: var(--color-muted);
+}
+
+.rl-head > span::first-letter {
+	text-transform: uppercase;
+}
+
+.rl-head > span:first-child {
+	text-align: center;
+}
+
+.rl-wide {
+	display: none;
+	text-align: right;
+}
+
+.rl-end {
+	text-align: right;
+}
+
+/* B shows the header row on phones too (#, Spieler, Form, Elo). */
+:global([data-variant="b"]) .rl-head-players {
+	display: grid;
+}
+
+:global([data-variant="b"]) .rl-head {
+	padding: 0 0 8px;
+	font-size: 11px;
+}
+
+/* "unter N Spielen · nicht gewertet", between hairlines. */
+.rl-divider {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+	padding: 10px 12px;
+	color: var(--color-muted);
+	white-space: nowrap;
+}
+
+.rl-divider::before,
+.rl-divider::after {
+	content: "";
+	flex: 1;
+	height: 1px;
+	background: var(--color-line);
+}
+
+:global([data-variant="b"]) .rl-divider {
+	padding-inline: 0;
+}
+
+/* ── Season-end extras ──────────────────────────────────────────────── */
+.rl-extras {
+	display: contents;
+}
+
+.rl-recap {
+	width: 100%;
+}
+
+/* ── Desktop: a wide hero card above a full-width table ─────────────── */
+@media (min-width: 1024px) {
+	.rl-hero {
+		margin: 0;
+		padding: 24px 28px;
+		border-radius: var(--radius-card);
+	}
+
+	.rl-hero.with-leader {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		align-items: center;
+		column-gap: 48px;
+	}
+
+	/* Season tabs and the actions share the first row; the page title is
+	 * in the top bar on desktop. */
+	.rl-controls {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		grid-template-areas:
+			"seasons actions"
+			"toggles toggles";
+		align-items: start;
+		gap: 18px 16px;
+	}
+
+	.rl-controls > :global(.seasons) {
+		grid-area: seasons;
+	}
+
+	.rl-titlebar {
+		grid-area: actions;
+	}
+
+	.rl-toggles {
+		grid-area: toggles;
+	}
+
+	.rl-title {
+		display: none;
+	}
+
+	.rl-table {
+		--col-gap: 12px;
+	}
+
+	.rl-players {
+		--cols: 36px 40px minmax(0, 1fr) 56px 96px 56px 96px 80px;
+	}
+
+	.rl-duos {
+		--cols: 36px 60px minmax(0, 1fr) 56px 96px 64px 80px;
+	}
+
+	.rl-head {
+		display: grid;
+	}
+
+	.rl-wide {
+		display: block;
+	}
+
+	.rl-extras {
+		display: flex;
+		flex-direction: column;
+		gap: var(--stack-gap);
+	}
+
+	.rl-recap {
+		align-self: flex-start;
+		width: auto;
+	}
+}
+</style>

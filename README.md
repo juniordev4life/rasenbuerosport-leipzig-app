@@ -41,6 +41,7 @@ RasenBürosport Leipzig transforms the office foosball table into a professional
 | 📈 | **Career Stats** | xG efficiency, possession, pass accuracy |
 | ⚽ | **League Stats** | Performance per league (Bundesliga, La Liga...) |
 | 🎬 | **Season Recap** | Story-style recap of your season once it closes |
+| 🎨 | **Two Designs** | "RB Leipzig" (default) or "Fußballplatz", picked per device in Settings |
 
 ---
 
@@ -223,7 +224,7 @@ Is **automatically generated** when statistics are available. The report is ente
 | **Hosting** | Firebase Hosting (Frontend), Cloud Run (Backend) |
 | **App Type** | Progressive Web App (PWA) |
 | **Languages** | German & English (Tolgee i18n) |
-| **Design** | Mobile-first, Dark Theme |
+| **Design** | Mobile-first with a desktop layout; two designs, A "RB Leipzig" and B "Fußballplatz" ([docs/DESIGN.md](docs/DESIGN.md)) |
 
 > For local development setup, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
@@ -239,7 +240,9 @@ RasenBürosport is a **Progressive Web App** — no app store required.
 
 Works on **iOS**, **Android** and **Desktop**.
 
-On **Desktop** the app has its own dedicated layout — a fixed left side navigation, a top bar (page title, theme toggle, quick "new match" action, account menu) and a wider content area. Instead of a scaled-up phone screen, cards are rearranged per page: multi-column "bento" grids on the Dashboard and Wrapped, and a primary column with a context side-rail on the Match details, Leaderboard, Profile and History screens. Match **highlight reels** get a cinema-style player next to the key stats on the match page, plus a "Recent highlights" list on the Dashboard — made for watching on a laptop.
+The app comes in two designs, chosen per device under **Settings → Design**: **A "RB Leipzig"** (default) with red hero bands, white cards and clear edges, and **B "Fußballplatz"** with white cards on a mown pitch and round shapes. Both look the same whether the phone is in light or dark mode.
+
+On **Desktop** the app has its own dedicated layout — a fixed left side navigation, a top bar (page title, calendar week, quick "new match" action, account menu) and a wider content area. Instead of a scaled-up phone screen, cards are rearranged per page: multi-column "bento" grids on the Dashboard and Wrapped, and a primary column with a context side-rail on the Match details, Leaderboard, Profile and History screens. Match **highlight reels** get a cinema-style player next to the key stats on the match page, plus a "Recent highlights" list on the Dashboard — made for watching on a laptop.
 
 ---
 

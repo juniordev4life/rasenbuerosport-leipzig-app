@@ -1,12 +1,15 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
-import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
+import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 
 /**
- * Two stacked lineup cards (Heim/Auswärts). Each lineup row pairs
- * an identity-coloured avatar with the player's name, a per-player
- * stats line ("⚽ 2 Tore · ↳ 1 Vorlage") and the ELO delta on the
- * right. The user's own name renders in their accent colour.
+ * "Aufstellungen & Performance": one lineup per side (Heim / Auswärts)
+ * with the side's Sieg / Niederlage tag, then a row per player: avatar,
+ * name ("Ich" for the signed-in player), goals and assists, and the ELO
+ * change with its sign. Stacked on phones, side by side when the column
+ * is wide enough.
  *
  * @type {{
  *   game: object,
@@ -15,6 +18,7 @@ import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
  *   homeTeamName?: string|null,
  *   awayTeamName?: string|null,
  *   currentUserId: string|null,
+ *   class?: string,
  * }}
  */
 let {
@@ -24,6 +28,7 @@ let {
 	homeTeamName = null,
 	awayTeamName = null,
 	currentUserId = null,
+	class: className = "",
 } = $props();
 
 const { t } = getTranslate();
@@ -79,25 +84,20 @@ const assistsMap = $derived.by(() => {
 	return map;
 });
 
+/** "2 Tore · 1 Vorlage", or "" when the player has neither. */
 function statsLine(playerId) {
 	const goals = goalsMap.get(playerId) ?? 0;
 	const assists = assistsMap.get(playerId) ?? 0;
 	const parts = [];
 	if (goals > 0)
-		parts.push({
-			text: `⚽ ${goals} ${goals === 1 ? $t("match_hero.goal") : $t("match_hero.goals")}`,
-			kind: "goals",
-		});
+		parts.push(
+			`${goals} ${goals === 1 ? $t("match_hero.goal") : $t("match_hero.goals")}`,
+		);
 	if (assists > 0)
-		parts.push({
-			text: `↳ ${assists} ${assists === 1 ? $t("match_hero.assist") : $t("match_hero.assists")}`,
-			kind: "assists",
-		});
-	return parts;
-}
-
-function initial(name) {
-	return (name ?? "?").charAt(0).toUpperCase();
+		parts.push(
+			`${assists} ${assists === 1 ? $t("match_hero.assist") : $t("match_hero.assists")}`,
+		);
+	return parts.join(" · ");
 }
 
 function eloFor(playerId) {
@@ -105,192 +105,210 @@ function eloFor(playerId) {
 	return d != null ? Math.round(d) : null;
 }
 
+/** Signed ELO change with a real minus sign: "+12", "−5", "±0". */
+function formatDelta(n) {
+	if (n > 0) return `+${n}`;
+	if (n < 0) return `−${Math.abs(n)}`;
+	return "±0";
+}
+
+function deltaTone(n) {
+	return n > 0 ? "win" : n < 0 ? "loss" : "draw";
+}
+
 function isMe(playerId) {
-	return currentUserId && playerId === currentUserId;
+	return Boolean(currentUserId) && playerId === currentUserId;
+}
+
+/**
+ * A side's result tag.
+ * @param {boolean} wins Whether this side won (shootout included).
+ */
+function sideResult(wins) {
+	if (isDraw) return { tone: "draw", label: $t("match_hero.draw_label") };
+	if (wins) return { tone: "win", label: $t("match_hero.wins") };
+	return { tone: "loss", label: $t("match_hero.loses") };
+}
+
+/** "Heim · Liverpool", or just "Heim" without a team name. */
+function sideTitle(side, teamName) {
+	const label =
+		side === "home" ? $t("match_hero.home_label") : $t("match_hero.away_label");
+	return teamName ? `${label} · ${teamName}` : label;
 }
 </script>
 
-<div class="lineups">
-	<div class="card">
-		<div class="header">
-			<div class="team-name home">
-				{$t("match_hero.home_label")}{#if homeTeamName} · {homeTeamName}{/if}
-			</div>
-			<div class="result-tag" class:win={homeWins} class:loss={awayWins} class:draw={isDraw}>
-				{isDraw ? $t("match_hero.draw_label") : homeWins ? $t("match_hero.wins") : $t("match_hero.loses")}
-			</div>
+{#snippet lineup(side, players, teamName, result)}
+	<div class="card lineup {side}">
+		<div class="head">
+			<span class="label team-name">{sideTitle(side, teamName)}</span>
+			<span class="chip result-tag tag-{result.tone}">{result.label}</span>
 		</div>
-		<div class="players">
-			{#each homePlayers as p (p.player_id)}
-				{@const g = avatarGradient(p.player_id)}
+		<ul class="rows players">
+			{#each players as p (p.player_id)}
 				{@const stats = statsLine(p.player_id)}
 				{@const elo = eloFor(p.player_id)}
-				<div class="player-row">
-					<div class="avatar" style="background: {g.gradient};">
-						{#if p.profiles?.avatar_url}
-							<img referrerpolicy="no-referrer" src={p.profiles.avatar_url} alt={p.profiles?.username ?? "?"} />
-						{:else}
-							<span>{initial(p.profiles?.username)}</span>
+				{@const me = isMe(p.player_id)}
+				<li class="player">
+					<PlayerAvatar
+						player={{
+							name: p.profiles?.username,
+							avatarUrl: p.profiles?.avatar_url,
+							id: p.player_id,
+						}}
+						size={36}
+						self={me}
+					/>
+					<span class="info">
+						<span class="name-line">
+							<span class="name">{p.profiles?.username ?? "?"}</span>
+							{#if me}
+								<span class="chip chip-gold">{$t("leaderboard.you")}</span>
+							{/if}
+						</span>
+						{#if stats}
+							<span class="stats">{stats}</span>
 						{/if}
-					</div>
-					<div class="info">
-						<div class="name" class:me={isMe(p.player_id)} style:--accent={g.from}>
-							{p.profiles?.username ?? "?"}
-						</div>
-						{#if stats.length > 0}
-							<div class="stats">
-								{#each stats as s, i (i)}
-									<span class="stat {s.kind}">{s.text}</span>
-									{#if i < stats.length - 1}<span class="dot">·</span>{/if}
-								{/each}
-							</div>
-						{/if}
-					</div>
+					</span>
 					{#if elo != null}
-						<div class="elo {elo > 0 ? 'up' : elo < 0 ? 'down' : 'flat'}">
-							{elo > 0 ? "↑ +" : elo < 0 ? "↓ " : "± "}{Math.abs(elo)}
-						</div>
+						<span class="delta delta-{deltaTone(elo)}">
+							{formatDelta(elo)} <span class="elo-unit">ELO</span>
+						</span>
 					{/if}
-				</div>
+				</li>
 			{/each}
-		</div>
+		</ul>
 	</div>
+{/snippet}
 
-	<div class="card">
-		<div class="header">
-			<div class="team-name away">
-				{$t("match_hero.away_label")}{#if awayTeamName} · {awayTeamName}{/if}
-			</div>
-			<div class="result-tag" class:win={awayWins} class:loss={homeWins} class:draw={isDraw}>
-				{isDraw ? $t("match_hero.draw_label") : awayWins ? $t("match_hero.wins") : $t("match_hero.loses")}
-			</div>
-		</div>
-		<div class="players">
-			{#each awayPlayers as p (p.player_id)}
-				{@const g = avatarGradient(p.player_id)}
-				{@const stats = statsLine(p.player_id)}
-				{@const elo = eloFor(p.player_id)}
-				<div class="player-row">
-					<div class="avatar" style="background: {g.gradient};">
-						{#if p.profiles?.avatar_url}
-							<img referrerpolicy="no-referrer" src={p.profiles.avatar_url} alt={p.profiles?.username ?? "?"} />
-						{:else}
-							<span>{initial(p.profiles?.username)}</span>
-						{/if}
-					</div>
-					<div class="info">
-						<div class="name" class:me={isMe(p.player_id)} style:--accent={g.from}>
-							{p.profiles?.username ?? "?"}
-						</div>
-						{#if stats.length > 0}
-							<div class="stats">
-								{#each stats as s, i (i)}
-									<span class="stat {s.kind}">{s.text}</span>
-									{#if i < stats.length - 1}<span class="dot">·</span>{/if}
-								{/each}
-							</div>
-						{/if}
-					</div>
-					{#if elo != null}
-						<div class="elo {elo > 0 ? 'up' : elo < 0 ? 'down' : 'flat'}">
-							{elo > 0 ? "↑ +" : elo < 0 ? "↓ " : "± "}{Math.abs(elo)}
-						</div>
-					{/if}
-				</div>
-			{/each}
-		</div>
+<Section title={$t("game_detail.section.lineups")} class={className}>
+	{#snippet icon()}<UsersIcon size={22} strokeWidth={2} />{/snippet}
+	<div class="lineups">
+		{@render lineup("home", homePlayers, homeTeamName, sideResult(homeWins))}
+		{@render lineup("away", awayPlayers, awayTeamName, sideResult(awayWins))}
 	</div>
-</div>
+</Section>
 
 <style>
+/* Side by side once the column has room for two lineups. */
 .lineups {
-	display: flex; flex-direction: column;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+	align-items: start;
 	gap: 10px;
 }
-.card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 12px 14px;
+
+.lineup {
+	padding: 0 16px 4px;
 }
-.header {
-	display: flex; justify-content: space-between;
+
+.head {
+	display: flex;
 	align-items: center;
-	margin-bottom: 10px;
-	padding-bottom: 10px;
-	border-bottom: 1px solid #1F2937;
+	justify-content: space-between;
+	gap: 10px;
+	min-height: 48px;
+	border-bottom: 1px solid var(--color-line);
 }
+
 .team-name {
-	font-size: 10px;
-	font-weight: 800;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.team-name.home { color: #E24B4A; }
-.team-name.away { color: #84CC16; }
-.result-tag {
-	font-size: 9px;
-	font-weight: 800;
-	padding: 2px 7px;
-	border-radius: 999px;
-	border: 1px solid transparent;
-	flex-shrink: 0;
-	margin-left: 6px;
-}
-.result-tag.win {
-	background: rgba(132, 204, 22, 0.15);
-	color: #84CC16;
-	border-color: rgba(132, 204, 22, 0.3);
-}
-.result-tag.loss {
-	background: rgba(226, 75, 74, 0.15);
-	color: #E24B4A;
-	border-color: rgba(226, 75, 74, 0.3);
-}
-.result-tag.draw {
-	background: rgba(245, 158, 11, 0.15);
-	color: #F59E0B;
-	border-color: rgba(245, 158, 11, 0.3);
-}
-.players { display: flex; flex-direction: column; gap: 9px; }
-.player-row { display: flex; align-items: center; gap: 10px; }
-.avatar {
-	width: 32px; height: 32px;
-	border-radius: 50%;
-	display: flex; align-items: center; justify-content: center;
-	font-size: 12px;
-	font-weight: 700;
-	color: white;
-	flex-shrink: 0;
+	min-width: 0;
 	overflow: hidden;
-}
-.avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.info { flex: 1; min-width: 0; }
-.name {
+	text-overflow: ellipsis;
+	white-space: nowrap;
 	font-size: 13px;
-	font-weight: 700;
-	color: #E5E7EB;
-	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.name.me { color: var(--accent, #F59E0B); }
-.stats {
-	display: flex; align-items: center;
-	gap: 6px;
-	font-size: 10px;
-	color: #9CA3AF;
-	margin-top: 2px;
-	flex-wrap: wrap;
+
+.home .team-name {
+	color: var(--color-home);
 }
-.stat.goals { color: #84CC16; font-weight: 700; }
-.dot { color: #4B5563; }
-.elo {
-	font-size: 11px;
-	font-weight: 800;
-	font-variant-numeric: tabular-nums;
+
+.away .team-name {
+	color: var(--color-away);
+}
+
+.result-tag {
 	flex-shrink: 0;
 }
-.elo.up { color: #84CC16; }
-.elo.down { color: #E24B4A; }
-.elo.flat { color: #6B7280; }
+
+.tag-win {
+	background: var(--color-win-soft);
+	color: var(--color-win);
+}
+
+.tag-loss {
+	background: var(--color-loss-soft);
+	color: var(--color-loss);
+}
+
+.tag-draw {
+	background: var(--color-draw);
+	color: var(--color-on-draw);
+}
+
+.players {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.player {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-height: 60px;
+	padding: 8px 0;
+}
+
+.info {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	flex: 1;
+	min-width: 0;
+}
+
+.name-line {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
+.name {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: 700;
+	font-size: 15px;
+}
+
+.stats {
+	color: var(--color-muted);
+	font-size: 13px;
+}
+
+/* The ELO change is the shared `.delta`: coloured text in A, a pill in B. */
+.delta {
+	flex-shrink: 0;
+	font-size: 16px;
+}
+
+.elo-unit {
+	font-size: 12px;
+}
+
+/* Design B: lineups flat on the section card, the ELO change as a pill. */
+:global([data-variant="b"]) .lineups {
+	gap: 18px;
+}
+
+:global([data-variant="b"]) .delta {
+	font-size: 14px;
+}
+
+:global([data-variant="b"]) .elo-unit {
+	display: none;
+}
 </style>

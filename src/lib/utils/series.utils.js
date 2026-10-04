@@ -55,18 +55,18 @@ function teamConceded(game, userId) {
 }
 
 /**
- * Build the home-screen series list for a single user. Games must be
- * sorted newest-first.
+ * Build the home-screen series list for a single user: which runs are
+ * active and how long they are. The texts live in the i18n files
+ * (`home.series.<type>`). Games must be sorted newest-first.
  *
  * @param {object[]} games
  * @param {string} userId
- * @param {string} userName
- * @returns {Array<{ id: string, type: string, headline: string, detail: string }>}
+ * @returns {Array<{ id: string, type: "win_streak"|"loss_streak"|"scoring"|"defensive", count: number }>}
  * @example
- *   const series = detectUserSeries(recentGames, "marco", "Marco");
- *   series // → [{ type: "win_streak", headline: "Marco hat eine Siegesserie!", ... }]
+ *   const series = detectUserSeries(recentGames, "marco");
+ *   series // → [{ id: "marco-win-streak", type: "win_streak", count: 4 }]
  */
-export function detectUserSeries(games, userId, userName) {
+export function detectUserSeries(games, userId) {
 	const series = [];
 	if (!games?.length || !userId) return series;
 
@@ -75,8 +75,7 @@ export function detectUserSeries(games, userId, userName) {
 		series.push({
 			id: `${userId}-win-streak`,
 			type: "win_streak",
-			headline: `${userName} hat eine Siegesserie!`,
-			detail: `${winStreak} Siege in Folge`,
+			count: winStreak,
 		});
 	}
 
@@ -85,8 +84,7 @@ export function detectUserSeries(games, userId, userName) {
 		series.push({
 			id: `${userId}-loss-streak`,
 			type: "loss_streak",
-			headline: `${userName} steckt in einer Durststrecke...`,
-			detail: `${lossStreak} Niederlagen in Folge`,
+			count: lossStreak,
 		});
 	}
 
@@ -96,8 +94,7 @@ export function detectUserSeries(games, userId, userName) {
 		series.push({
 			id: `${userId}-scoring`,
 			type: "scoring",
-			headline: `${userName} ist ein Torjäger!`,
-			detail: `${bigScoring.length} Spiele mit 3+ Toren`,
+			count: bigScoring.length,
 		});
 	}
 
@@ -106,8 +103,7 @@ export function detectUserSeries(games, userId, userName) {
 		series.push({
 			id: `${userId}-defensive`,
 			type: "defensive",
-			headline: `${userName} ist eine Mauer!`,
-			detail: `${cleanSheets.length} Spiele zu Null`,
+			count: cleanSheets.length,
 		});
 	}
 

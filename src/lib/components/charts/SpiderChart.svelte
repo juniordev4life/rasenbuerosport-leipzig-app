@@ -1,14 +1,15 @@
 <script>
 /**
- * Pure-SVG radar / spider chart. Replaces the Chart.js radar so the
- * profile page can render multiple overlapping datasets (player vs.
- * league baseline) with the visual treatment from the spec — dashed
- * baseline polygon, filled player polygon, point dots.
+ * Pure-SVG radar / spider chart: any number of axes and of overlaid
+ * datasets with the same length (e.g. a player against the league
+ * baseline, or two players head to head). The viewBox is centred on
+ * (0, 0) so the axis trigonometry stays readable.
  *
- * Inputs are kept declarative: pass any number of axes and any number
- * of datasets with the same length, and the component does the trig
- * to lay them out. The viewBox is centered around (0, 0) so axis
- * trigonometry stays readable.
+ * Colours: the grid, axes and labels use the design tokens (grey and
+ * condensed caps in design A, green and sentence case in B). Each
+ * dataset brings its own `strokeColor` / `fillColor`; pass tokens such
+ * as `var(--color-chart-4)` or a `color-mix(…)` of one. Points are solid
+ * in A and white with a coloured ring in B.
  *
  * @type {{
  *   axes: string[],
@@ -33,15 +34,18 @@
  * labels). The `onAxisClick` callback fires with the raw key in that
  * case so consumers can look up i18n strings or metadata without
  * round-tripping through the localised label. If `axisKeys` is null
- * the callback falls back to the label, preserving the original
- * single-arg behaviour for any caller that doesn't need raw keys.
+ * the callback falls back to the label.
  *
  * `axisIcons` is a `{ [rawKey]: <inline SVG children string> }` map.
  * Whenever a key has an entry, the component renders the icon instead
- * of the text label at that axis tip. The label string is still used
- * as the `aria-label`/screen-reader text so keyboard users hear what
- * the icon means. Icons are expected to be drawn against a `0 0 24 24`
- * box; they're scaled down to fit the chart's coordinate space.
+ * of the text label at that axis tip; the label stays the accessible
+ * name. Icons are drawn against a `0 0 24 24` box and scaled to fit.
+ *
+ * With text labels the viewBox is wider than tall (516 × 340), as in
+ * the design mockups: a slightly smaller chart, so labels such as
+ * "Sieger-Faktor" fit beside the side axes at a readable size. Give the
+ * container an aspect ratio of 129 / 85. With icons only (the profile)
+ * it stays square (360 × 360).
  */
 let {
 	axes,
@@ -54,16 +58,35 @@ let {
 } = $props();
 
 const RADIUS = 140;
-const LABEL_OFFSET = 18;
+const LABEL_OFFSET = 16;
 // Icons sit closer to the chart than text labels — they're smaller
 // and don't need the breathing room a multi-character word demands.
 const ICON_OFFSET = 14;
 const ICON_HIT_RADIUS = 16;
 const ICON_SCALE = 0.9;
 const VIEWBOX = 180;
+// Text-label mode: half width / height of the viewBox (room for the
+// longest label beside the side axes at the 18-unit label size).
+const TEXT_HALF_WIDTH = 258;
+const TEXT_HALF_HEIGHT = 170;
 
 const angles = $derived(
 	axes.map((_, i) => (i / axes.length) * Math.PI * 2 - Math.PI / 2),
+);
+
+function rawKeyAt(i) {
+	return axisKeys?.[i] ?? axes[i];
+}
+
+function hasIcon(i) {
+	return Boolean(axisIcons?.[rawKeyAt(i)]);
+}
+
+const iconMode = $derived(axes.every((_, i) => hasIcon(i)));
+const viewBox = $derived(
+	iconMode
+		? `-${VIEWBOX} -${VIEWBOX} ${VIEWBOX * 2} ${VIEWBOX * 2}`
+		: `-${TEXT_HALF_WIDTH} -${TEXT_HALF_HEIGHT} ${TEXT_HALF_WIDTH * 2} ${TEXT_HALF_HEIGHT * 2}`,
 );
 
 function pointFor(value, angle) {
@@ -71,21 +94,19 @@ function pointFor(value, angle) {
 	return [r * Math.cos(angle), r * Math.sin(angle)];
 }
 
-const gridPolygons = $derived.by(() => {
-	const polys = [];
-	for (let g = 1; g <= gridLevels; g += 1) {
-		const ratio = g / gridLevels;
-		const coords = angles
-			.map((a) => {
-				const x = RADIUS * ratio * Math.cos(a);
-				const y = RADIUS * ratio * Math.sin(a);
-				return `${x.toFixed(2)},${y.toFixed(2)}`;
-			})
-			.join(" ");
-		polys.push(coords);
-	}
-	return polys;
-});
+function ringAt(ratio) {
+	return angles
+		.map((a) => {
+			const x = RADIUS * ratio * Math.cos(a);
+			const y = RADIUS * ratio * Math.sin(a);
+			return `${x.toFixed(2)},${y.toFixed(2)}`;
+		})
+		.join(" ");
+}
+
+const gridPolygons = $derived(
+	Array.from({ length: gridLevels }, (_, g) => ringAt((g + 1) / gridLevels)),
+);
 
 const axisLines = $derived(
 	angles.map((a) => ({
@@ -96,10 +117,7 @@ const axisLines = $derived(
 
 const labels = $derived(
 	angles.map((a, i) => {
-		const offset =
-			axisIcons && (axisKeys?.[i] ?? axes[i]) in (axisIcons ?? {})
-				? RADIUS + ICON_OFFSET
-				: RADIUS + LABEL_OFFSET;
+		const offset = hasIcon(i) ? RADIUS + ICON_OFFSET : RADIUS + LABEL_OFFSET;
 		const x = offset * Math.cos(a);
 		const y = offset * Math.sin(a);
 		let anchor = "middle";
@@ -109,6 +127,8 @@ const labels = $derived(
 			x: x.toFixed(2),
 			y: y.toFixed(2),
 			text: axes[i],
+			key: rawKeyAt(i),
+			icon: axisIcons?.[rawKeyAt(i)] ?? null,
 			anchor,
 		};
 	}),
@@ -123,14 +143,27 @@ const renderedDatasets = $derived(
 		return { ...ds, points, polygon };
 	}),
 );
+
+function handleAxisKeydown(event, key) {
+	if (event.key === "Enter" || event.key === " ") {
+		event.preventDefault();
+		onAxisClick?.(key);
+	}
+}
 </script>
 
+<!-- A group when the axes are buttons: an img would hide them from
+     assistive technology. -->
 <svg
 	class="spider-svg"
-	viewBox="-{VIEWBOX} -{VIEWBOX} {VIEWBOX * 2} {VIEWBOX * 2}"
-	role="img"
+	{viewBox}
+	role={onAxisClick ? "group" : "img"}
 	aria-label="Radar chart"
 >
+	{#if gridPolygons.length > 0}
+		<polygon points={gridPolygons[gridPolygons.length - 1]} class="grid-bg" />
+	{/if}
+
 	{#each gridPolygons as poly, i (i)}
 		<polygon points={poly} class="grid" />
 	{/each}
@@ -140,53 +173,49 @@ const renderedDatasets = $derived(
 	{/each}
 
 	{#each renderedDatasets as ds (ds.id)}
-		<polygon
-			points={ds.polygon}
-			fill={ds.fillColor ?? "none"}
-			stroke={ds.strokeColor}
-			stroke-width={ds.fillColor ? 2 : 1.5}
-			stroke-linejoin="round"
-			stroke-dasharray={ds.dashed ? "4 4" : null}
-		/>
-		{#if ds.showPoints !== false && !ds.dashed}
-			{#each ds.points as [x, y], pi (pi)}
-				<circle cx={x} cy={y} r="3.5" fill={ds.strokeColor} />
-			{/each}
-		{/if}
+		<g style:--ds-stroke={ds.strokeColor} style:--ds-fill={ds.fillColor ?? "none"}>
+			<polygon
+				points={ds.polygon}
+				class="ds-shape"
+				stroke-width={ds.fillColor ? 2.5 : 1.5}
+				stroke-dasharray={ds.dashed ? "4 4" : null}
+			/>
+			{#if ds.showPoints !== false && !ds.dashed}
+				{#each ds.points as [x, y], pi (pi)}
+					<circle cx={x} cy={y} r="4" class="ds-point" />
+				{/each}
+			{/if}
+		</g>
 	{/each}
 
 	{#each labels as label, i (i)}
-		{@const rawKey = axisKeys?.[i] ?? axes[i]}
-		{@const iconMarkup = axisIcons?.[rawKey] ?? null}
-		{#if iconMarkup}
-			<!-- Icon mode: clickable group with an invisible hit-circle
-			     that's larger than the visual icon so the touch target
-			     is comfortable on mobile (~32 px diameter). -->
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
+		{#if label.icon && onAxisClick}
+			<!-- Icon mode: a focusable group with an invisible hit circle,
+			     larger than the icon so the touch target is comfortable. -->
 			<g
 				transform="translate({label.x}, {label.y})"
-				class="axis-marker"
-				class:clickable={!!onAxisClick}
-				role={onAxisClick ? "button" : null}
-				tabindex={onAxisClick ? 0 : null}
+				class="axis-marker clickable"
+				role="button"
+				tabindex="0"
 				aria-label={label.text}
-				onclick={onAxisClick ? () => onAxisClick(rawKey) : null}
-				onkeydown={onAxisClick
-					? (e) => {
-							if (e.key === "Enter" || e.key === " ") {
-								e.preventDefault();
-								onAxisClick(rawKey);
-							}
-						}
-					: null}
+				onclick={() => onAxisClick(label.key)}
+				onkeydown={(event) => handleAxisKeydown(event, label.key)}
 			>
 				<circle r={ICON_HIT_RADIUS} class="axis-hit" />
 				<g
 					transform="translate({-12 * ICON_SCALE}, {-12 * ICON_SCALE}) scale({ICON_SCALE})"
 					class="axis-icon"
 				>
-					<!-- eslint-disable-next-line -->
-					{@html iconMarkup}
+					{@html label.icon}
+				</g>
+			</g>
+		{:else if label.icon}
+			<g transform="translate({label.x}, {label.y})" class="axis-marker" role="img" aria-label={label.text}>
+				<g
+					transform="translate({-12 * ICON_SCALE}, {-12 * ICON_SCALE}) scale({ICON_SCALE})"
+					class="axis-icon"
+				>
+					{@html label.icon}
 				</g>
 			</g>
 		{:else if onAxisClick}
@@ -196,7 +225,10 @@ const renderedDatasets = $derived(
 				class="axis-label clickable"
 				text-anchor={label.anchor}
 				dominant-baseline="middle"
-				onclick={() => onAxisClick(rawKey)}
+				role="button"
+				tabindex="0"
+				onclick={() => onAxisClick(label.key)}
+				onkeydown={(event) => handleAxisKeydown(event, label.key)}
 			>{label.text}</text>
 		{:else}
 			<text
@@ -216,46 +248,97 @@ const renderedDatasets = $derived(
 	height: 100%;
 	display: block;
 }
-.grid {
-	fill: none;
-	stroke: rgba(255, 255, 255, 0.08);
-	stroke-width: 1;
-}
-.axis-line {
-	stroke: rgba(255, 255, 255, 0.06);
-	stroke-width: 1;
-}
-.axis-label {
-	fill: #9CA3AF;
-	font-size: 11px;
-	font-weight: 600;
-}
-.axis-label.clickable { cursor: pointer; }
-.axis-label.clickable:hover { fill: #E5E7EB; }
 
-.axis-marker { outline: none; }
-.axis-marker.clickable { cursor: pointer; }
-.axis-hit {
-	/* Visible at 0 alpha so it still catches pointer events but doesn't
-	 * paint anything. `fill: transparent` would block pointer events in
-	 * some browsers when SVG hit-testing is set to "visiblePainted". */
-	fill: rgba(0, 0, 0, 0);
+/* Grid: grey rings on a pale fill in A, green ones in B. */
+.grid-bg {
+	fill: var(--color-sunken);
+	stroke: none;
 }
+
+.grid,
+.axis-line {
+	fill: none;
+	stroke: var(--color-line);
+	stroke-width: 1;
+}
+
+:global([data-variant="b"]) .grid-bg {
+	fill: color-mix(in srgb, var(--color-win-soft) 60%, var(--color-surface));
+}
+
+:global([data-variant="b"]) .grid,
+:global([data-variant="b"]) .axis-line {
+	stroke: var(--color-chart-3);
+	stroke-width: 1.5;
+}
+
+/* Datasets take their colours from the custom properties set per group. */
+.ds-shape {
+	fill: var(--ds-fill);
+	stroke: var(--ds-stroke);
+	stroke-linejoin: round;
+}
+
+.ds-point {
+	fill: var(--ds-stroke);
+}
+
+:global([data-variant="b"]) .ds-point {
+	fill: var(--color-surface);
+	stroke: var(--ds-stroke);
+	stroke-width: 2.5;
+}
+
+.axis-label {
+	fill: var(--color-ink);
+	font-family: var(--font-label);
+	font-weight: var(--label-weight);
+	font-size: 18px;
+	text-transform: var(--label-case);
+	letter-spacing: var(--label-tracking);
+}
+
+.axis-label.clickable {
+	cursor: pointer;
+}
+
+.axis-label.clickable:hover,
+.axis-label.clickable:focus-visible {
+	fill: var(--color-brand);
+}
+
+.axis-marker {
+	outline: none;
+}
+
+.axis-marker.clickable {
+	cursor: pointer;
+}
+
+/* Painted at zero alpha so it still catches pointer events. */
+.axis-hit {
+	fill: var(--color-surface);
+	fill-opacity: 0;
+}
+
 .axis-icon {
 	fill: none;
-	stroke: #9CA3AF;
+	stroke: var(--color-muted);
 	stroke-width: 1.8;
 	stroke-linecap: round;
 	stroke-linejoin: round;
 	transition: stroke 0.15s;
 }
+
 .axis-marker.clickable:hover .axis-icon,
 .axis-marker.clickable:focus-visible .axis-icon {
-	stroke: #E5E7EB;
+	stroke: var(--color-ink);
 }
+
 .axis-marker.clickable:focus-visible .axis-hit {
-	fill: rgba(226, 75, 74, 0.08);
-	stroke: rgba(226, 75, 74, 0.5);
+	fill: var(--color-brand);
+	fill-opacity: 0.08;
+	stroke: var(--color-brand);
 	stroke-width: 1;
 }
 </style>

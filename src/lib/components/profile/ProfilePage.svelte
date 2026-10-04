@@ -23,10 +23,14 @@ import ProfileSpiderSection from "./ProfileSpiderSection.svelte";
 import RelationsSection from "./RelationsSection.svelte";
 
 /**
- * Renders the full new-design Spielerprofil for a given playerId.
+ * Renders the Spielerprofil for a given playerId, own or foreign.
  * Pulls the V2 profile (`/v1/players/:id/profile`) for axes / bio /
  * relationships and the games window (`/v1/games`) for ELO history,
  * derived lifetime stats and the form sparkline.
+ *
+ * Layout: the hero, then the sections in one column on phones; from
+ * `lg` the sections split into two columns (character and form left,
+ * relations, career stats and awards right).
  *
  * `isOwnProfile=true` triggers the first-run onboarding tour once the
  * page has loaded — the foreign-player view (`/app/profile/[id]`)
@@ -258,6 +262,10 @@ const relations = $derived({
 		: null,
 });
 
+const hasRelations = $derived(
+	Boolean(relations.favorite || relations.nemesis || relations.topPartner),
+);
+
 // Win-rate conversion (API ratio [0, 1] → integer percent [0, 100],
 // with fallback to recomputing from wins/totalMatches when the field
 // is missing) lives in `relationCardWinRatePercent` so the math
@@ -267,10 +275,9 @@ const relations = $derived({
 // Top-3 picker for the awards section, fed by the trophy room API.
 // Sort by rarity tier first (diamond > gold > silver > bronze), break
 // ties by most-recent unlock — same intent the legacy backend
-// `loadTopBadges()` used, just over the new 64-trophy catalogue. Awards
-// section currently understands `bronze | silver | gold | spark`, so
-// `diamond` collapses to `gold` for now; a proper diamond style lands
-// when the section is rewritten on top of the trophy data model.
+// `loadTopBadges()` used, just over the new 64-trophy catalogue. The
+// section draws the trophy room's medal and rarity chip, so every tier
+// (diamond included) keeps its own look.
 const RARITY_WEIGHT = { diamond: 4, gold: 3, silver: 2, bronze: 1 };
 const awards = $derived.by(() => {
 	const trophies = trophyPayload?.trophies ?? [];
@@ -287,12 +294,9 @@ const awards = $derived.by(() => {
 			id: trophy.id,
 			name: trophy.name,
 			description: trophy.description,
-			type: trophy.rarity === "diamond" ? "gold" : trophy.rarity,
-			icon: null,
-			// `category` is the bridge to the trophy room's icon glyphs —
-			// when present, AwardsSection renders the matching
-			// TrophyCategoryIcon SVG instead of a generic emoji so the
-			// profile mirrors what the user sees in the Trophäenraum.
+			type: trophy.rarity,
+			// `category` picks the trophy room's glyph (TrophyCategoryIcon),
+			// so the profile mirrors what the user sees in the Trophäenraum.
 			category: trophy.category ?? null,
 			unlockedAt: trophy.unlockedAt ?? null,
 		}));
@@ -306,22 +310,16 @@ const totalsLosses = $derived(profile?.player?.losses ?? eloEntry?.losses ?? 0);
 
 {#if loading}
 	<div class="flex justify-center py-12">
-		<div class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"></div>
+		<span class="spinner" role="status" aria-label={$t("player_profile.loading")}></span>
 	</div>
 {:else if errorMsg}
-	<div class="bg-bg-secondary border border-error/60 rounded-2xl p-6 text-center text-error">
-		{errorMsg}
-	</div>
+	<div class="card notice text-loss" role="alert">{errorMsg}</div>
 {:else if profile}
-	<div class="flex flex-col gap-3 pb-4 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6 lg:items-start">
-		<!-- Primary column: hero, spider, form, relations. `contents` keeps
-		     the mobile single-column order untouched. -->
-		<div class="contents lg:flex lg:flex-col lg:gap-3 lg:min-w-0">
+	<div class="profile stack">
 		<div data-onboarding="profile-hero">
 			<ProfileHero
 				playerId={profile.player.id ?? playerId}
 				username={profile.player.name}
-				initials={profile.player.initials ?? (profile.player.name ?? "?").charAt(0).toUpperCase()}
 				avatarUrl={profile.player.avatarUrl}
 				archetype={archetypeLabel}
 				rank={profile.player.rank ?? null}
@@ -336,56 +334,61 @@ const totalsLosses = $derived(profile?.player?.losses ?? eloEntry?.losses ?? 0);
 			/>
 		</div>
 
-		{#if profile.axes}
-			<div data-onboarding="profile-spider">
-				<ProfileSpiderSection
-					axes={profile.axes}
-					playerName={profile.player.name}
-					onAxisClick={(key) => (activeAxis = key)}
-				/>
+		<!-- Phones: one column in this order (the wrappers dissolve).
+		     Desktop: character and form left, the rest right. -->
+		<div class="columns">
+			<div class="column">
+				{#if profile.axes}
+					<div data-onboarding="profile-spider">
+						<ProfileSpiderSection
+							axes={profile.axes}
+							playerName={profile.player.name}
+							onAxisClick={(key) => (activeAxis = key)}
+						/>
+					</div>
+				{/if}
+
+				{#if recentResults.length > 0}
+					<div data-onboarding="profile-form">
+						<FormSection
+							results={recentResults}
+							eloSeries={formEloSeries}
+							eloStart={formEloStart}
+							eloEnd={formEloEnd}
+							eloDelta={formEloDelta}
+							marcelQuote={formMarcelQuote}
+						/>
+					</div>
+				{/if}
 			</div>
-		{/if}
 
-		{#if recentResults.length > 0}
-			<div data-onboarding="profile-form">
-				<FormSection
-					results={recentResults}
-					eloSeries={formEloSeries}
-					eloStart={formEloStart}
-					eloEnd={formEloEnd}
-					eloDelta={formEloDelta}
-					marcelQuote={formMarcelQuote}
-				/>
+			<div class="column">
+				{#if hasRelations}
+					<div data-onboarding="profile-relations">
+						<RelationsSection
+							favorite={relations.favorite}
+							nemesis={relations.nemesis}
+							topPartner={relations.topPartner}
+							onSelect={onSelectRelation}
+						/>
+					</div>
+				{/if}
+
+				<LifetimeStatsSection stats={lifetimeStats} />
+
+				<div data-onboarding="profile-awards">
+					<AwardsSection
+						{awards}
+						totalCount={trophyTotalCount}
+						onViewAll={() =>
+							goto(
+								isOwnProfile
+									? "/app/profile/trophies"
+									: `/app/profile/${playerId}/trophies`,
+							)}
+					/>
+				</div>
 			</div>
-		{/if}
-
-		<div data-onboarding="profile-relations">
-			<RelationsSection
-				favorite={relations.favorite}
-				nemesis={relations.nemesis}
-				topPartner={relations.topPartner}
-				onSelect={onSelectRelation}
-			/>
-		</div>
-		</div>
-
-		<!-- Right info-rail: career totals + top awards. -->
-		<div class="contents lg:flex lg:flex-col lg:gap-3">
-		<LifetimeStatsSection stats={lifetimeStats} />
-
-		<div data-onboarding="profile-awards">
-			<AwardsSection
-				{awards}
-				totalCount={trophyTotalCount}
-				unlockedCount={awards.length}
-				onViewAll={() =>
-					goto(
-						isOwnProfile
-							? "/app/profile/trophies"
-							: `/app/profile/${playerId}/trophies`,
-					)}
-			/>
-		</div>
 		</div>
 	</div>
 
@@ -395,3 +398,34 @@ const totalsLosses = $derived(profile?.player?.losses ?? eloEntry?.losses ?? 0);
 		onClose={() => (activeAxis = null)}
 	/>
 {/if}
+
+<style>
+.profile {
+	padding-bottom: 8px;
+}
+
+.columns,
+.column {
+	display: contents;
+}
+
+@media (min-width: 1024px) {
+	.profile {
+		padding-bottom: 32px;
+	}
+
+	.columns {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		align-items: start;
+		gap: var(--stack-gap);
+	}
+
+	.column {
+		display: flex;
+		flex-direction: column;
+		gap: var(--stack-gap);
+		min-width: 0;
+	}
+}
+</style>

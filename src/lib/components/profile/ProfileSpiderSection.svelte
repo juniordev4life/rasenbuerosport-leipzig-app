@@ -2,12 +2,14 @@
 import { getTranslate } from "@tolgee/svelte";
 import SpiderChart from "$lib/components/charts/SpiderChart.svelte";
 import TargetIcon from "$lib/components/icons/TargetIcon.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 import { generatePlayerTags } from "$lib/utils/profileTags.utils.js";
 import TagsList from "./TagsList.svelte";
 
 /**
- * Spider-chart section: the SVG radar with the league overlay, a
- * legend and the auto-generated tag groups beneath it.
+ * "Spielercharakter": the six-axis radar (player in red over the dashed
+ * league average), a legend and the generated strength / weakness /
+ * playstyle tags. Tapping an axis icon calls `onAxisClick` with its key.
  *
  * @type {{
  *   axes: { finisher:number, playmaker:number, clutch:number, consistency:number, discipline:number, winner:number }|null,
@@ -95,7 +97,7 @@ const datasets = $derived([
 		id: "league",
 		label: $t("profile.league_average"),
 		values: leagueValues,
-		strokeColor: "rgba(255, 255, 255, 0.4)",
+		strokeColor: "var(--color-ink)",
 		fillColor: null,
 		dashed: true,
 		showPoints: false,
@@ -104,8 +106,8 @@ const datasets = $derived([
 		id: "player",
 		label: playerName,
 		values: playerValues,
-		strokeColor: "#E24B4A",
-		fillColor: "rgba(226, 75, 74, 0.22)",
+		strokeColor: "var(--color-brand)",
+		fillColor: "color-mix(in srgb, var(--color-brand) 14%, transparent)",
 	},
 ]);
 
@@ -116,86 +118,85 @@ const tags = $derived(
 );
 </script>
 
-<div class="section-card">
-	<div class="section-header">
-		<div class="section-label">
-			<TargetIcon size={12} strokeWidth={1.8} />
-			<span>{$t("profile.character_section")}</span>
+<Section title={$t("profile.character_section")}>
+	{#snippet icon()}<TargetIcon size={22} strokeWidth={2} />{/snippet}
+	<div class="card body">
+		<div class="chart">
+			<SpiderChart
+				axes={labels}
+				axisKeys={axisOrder}
+				axisIcons={AXIS_ICONS}
+				{datasets}
+				{onAxisClick}
+			/>
 		</div>
-	</div>
 
-	<div class="spider-wrap">
-		<SpiderChart
-			axes={labels}
-			axisKeys={axisOrder}
-			axisIcons={AXIS_ICONS}
-			{datasets}
-			{onAxisClick}
+		<div class="legend">
+			<span class="legend-item">
+				<span class="swatch player" aria-hidden="true"></span>
+				{playerName}
+			</span>
+			<span class="legend-item">
+				<span class="swatch league" aria-hidden="true"></span>
+				{$t("profile.league_average")}
+			</span>
+		</div>
+
+		<TagsList
+			strengths={tags.strengths}
+			weaknesses={tags.weaknesses}
+			character={tags.character}
 		/>
 	</div>
-
-	<div class="spider-legend">
-		<div class="legend-item">
-			<div class="legend-swatch player"></div>
-			<span>{playerName}</span>
-		</div>
-		<div class="legend-item">
-			<div class="legend-swatch league"></div>
-			<span>{$t("profile.league_average")}</span>
-		</div>
-	</div>
-
-	<TagsList
-		strengths={tags.strengths}
-		weaknesses={tags.weaknesses}
-		character={tags.character}
-	/>
-</div>
+</Section>
 
 <style>
-.section-card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 14px;
+.body {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding: 16px;
 }
-.section-header {
-	display: flex; align-items: center; justify-content: space-between;
-	margin-bottom: 14px;
-}
-.section-label {
-	font-size: 10px;
-	text-transform: uppercase; letter-spacing: 0.1em;
-	color: #6B7280;
-	font-weight: 700;
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-}
-.spider-wrap {
+
+.chart {
 	position: relative;
 	width: 100%;
-	aspect-ratio: 1;
 	max-width: 320px;
+	aspect-ratio: 1;
 	margin: 0 auto;
 }
-.spider-legend {
-	display: flex; justify-content: center; gap: 18px;
-	margin-top: 10px;
-	padding-top: 10px;
-	border-top: 1px solid #1F2937;
+
+.legend {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 8px 20px;
+	font-size: 13px;
 }
+
 .legend-item {
-	display: flex; align-items: center; gap: 6px;
-	font-size: 11px;
-	color: #9CA3AF;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
 }
-.legend-swatch {
-	width: 16px; height: 4px; border-radius: 2px;
+
+.swatch {
+	width: 18px;
+	flex-shrink: 0;
 }
-.legend-swatch.player { background: #E24B4A; }
-.legend-swatch.league {
-	background: transparent;
-	border-top: 1.5px dashed rgba(255, 255, 255, 0.4);
+
+.swatch.player {
+	height: 3px;
+	border-radius: var(--radius-bar);
+	background: var(--color-brand);
+}
+
+.swatch.league {
+	height: 0;
+	border-top: 2px dashed var(--color-ink);
+}
+
+:global([data-variant="b"]) .swatch.player {
+	height: 4px;
 }
 </style>

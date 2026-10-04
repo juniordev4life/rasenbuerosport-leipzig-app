@@ -1,96 +1,1026 @@
 @import "tailwindcss";
 
+/*
+ * Self-hosted, OFL-licensed stand-ins for the RB Leipzig house fonts. The
+ * originals are licensed for RB Leipzig assets only and this app is a
+ * private project, so it never ships them: Anton ≈ RBL Display, Barlow
+ * Condensed ≈ Bull Condensed, Barlow ≈ Bull Text. Bundled by Vite, no
+ * third-party requests.
+ */
+@import "@fontsource/anton/400.css";
+@import "@fontsource/barlow/400.css";
+@import "@fontsource/barlow/500.css";
+@import "@fontsource/barlow/700.css";
+@import "@fontsource/barlow-condensed/600.css";
+@import "@fontsource/barlow-condensed/700.css";
+@import "@fontsource/barlow-condensed/800.css";
+
+/*
+ * ─── Design tokens ───────────────────────────────────────────────────────
+ *
+ * The app has two looks, picked in Settings and stored per device:
+ *   A "RB Leipzig"   — default: white cards on light grey, red hero bands,
+ *                      square shapes, condensed caps.
+ *   B "Fußballplatz" — white sticker cards on a mown pitch, round shapes,
+ *                      sentence-case headings.
+ * Neither follows the OS light/dark setting; both always look the same.
+ *
+ * Every colour in the app is one of the roles below. Components use the
+ * Tailwind utilities they generate (`bg-surface`, `text-muted`,
+ * `border-line`, `bg-brand`, …) or `var(--color-…)` in <style> blocks —
+ * never a literal hex or rgb value. The values here are variant A;
+ * `:root[data-variant="b"]` further down overrides them. To change a
+ * colour, change it here and nowhere else (see docs/DESIGN.md).
+ */
 @theme {
-	/* Light theme defaults (registered as Tailwind utilities) */
+	--color-*: initial;
+	--font-sans: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+	--font-cond: "Barlow Condensed", "Arial Narrow", sans-serif;
+	--font-display: "Anton", "Barlow Condensed", Impact, sans-serif;
 
-	/* Background colors */
-	--color-bg-primary: #f5f7fa;
-	--color-bg-secondary: #ffffff;
-	--color-bg-input: #edf0f5;
-	--color-bg-card: #ffffff;
+	--color-white: #ffffff;
+	--color-black: #000000;
 
-	/* Accent colors */
-	--color-accent-red: #c41e3a;
-	--color-accent-red-hover: #a01830;
-	--color-accent-red-light: #e8354f;
+	/* Surfaces and text */
+	--color-page: #f6f6f6; /* page background behind cards */
+	--color-surface: #ffffff; /* cards, sheets, nav bars */
+	--color-sunken: #f6f6f6; /* inputs, inner tiles, inactive controls */
+	--color-ink: #001f47; /* primary text */
+	--color-muted: #606a7a; /* secondary text, captions (≥ 4.5:1 on page and sunken) */
+	--color-line: #dadada; /* hairlines, dividers, input borders */
+	--color-on-page: #001f47; /* text placed straight on the page background */
 
-	/* Text colors */
-	--color-text-primary: #1a1d26;
-	--color-text-secondary: #5a6578;
-	--color-text-muted: #8c95a4;
+	/* Accents */
+	--color-brand: #d2003c; /* primary actions, active state */
+	--color-brand-strong: #b4143c; /* hover / pressed */
+	--color-on-brand: #ffffff;
+	--color-navy: #001f47; /* strong secondary surface */
+	--color-on-navy: #ffffff;
+	--color-gold: #ffcc00; /* highlights: leader, "neu", streaks */
+	--color-on-gold: #001f47;
+	--color-gold-soft: #fff7d6; /* pale gold: speech bubbles, gentle highlights */
+	--color-aqua: #3698ca; /* info, second data colour; graphics only, too light for small text */
 
-	/* Border colors */
-	--color-border: #d8dde6;
-	--color-border-light: #e5e9f0;
+	/* Teams: home and away sides on the pitch, timeline, stats */
+	--color-home: #d2003c;
+	--color-on-home: #ffffff;
+	--color-away: #001f47;
+	--color-on-away: #ffffff;
 
-	/* Misc */
-	--color-silver: #94a3b8;
-	--color-success: #16a34a;
-	--color-warning: #ca8a04;
-	--color-error: #dc2626;
+	/* Drawn pitches (live match, poster, B page background) */
+	--color-pitch: #ffffff; /* surface of a drawn pitch */
+	--color-chalk: #dadada; /* its markings */
+
+	/* Results and deltas (always paired with S/U/N or +/− text) */
+	--color-win: #001f47;
+	--color-win-soft: #e8ecf3;
+	--color-on-win: #ffffff;
+	--color-loss: #d2003c;
+	--color-loss-soft: #fdecec;
+	--color-on-loss: #ffffff;
+	--color-draw: #dadada;
+	--color-on-draw: #001f47;
+
+	/* Data */
+	--color-score: #001f47; /* score chips */
+	--color-on-score: #ffffff;
+	--color-progress: #d2003c; /* progress fill */
+	--color-track: #dadada; /* progress track */
+	--color-chart-1: #001f47;
+	--color-chart-2: #4a6a94;
+	--color-chart-3: #a9bdd4;
+	--color-chart-4: #d2003c;
+
+	/* Trophy tiers, with the text colour that reads on each */
+	--color-tier-bronze: #811d39;
+	--color-tier-silver: #dadada;
+	--color-tier-gold: #ffcc00;
+	--color-tier-diamond: #3698ca;
+	--color-on-tier-bronze: #ffffff;
+	--color-on-tier-silver: #001f47;
+	--color-on-tier-gold: #001f47;
+	--color-on-tier-diamond: #001f47;
+
+	/* Initials avatars (picked per player, see avatarColor.utils.js) */
+	--color-avatar-0: #001f47;
+	--color-avatar-1: #001f47;
+	--color-avatar-2: #001f47;
+	--color-avatar-3: #001f47;
+	--color-avatar-4: #001f47;
+	--color-avatar-5: #001f47;
+	--color-on-avatar-0: #ffffff;
+	--color-on-avatar-1: #ffffff;
+	--color-on-avatar-2: #ffffff;
+	--color-on-avatar-3: #ffffff;
+	--color-on-avatar-4: #ffffff;
+	--color-on-avatar-5: #ffffff;
 }
 
-/* Dark theme overrides */
-.dark {
-	--color-bg-primary: #0f1219;
-	--color-bg-secondary: #1a1f2e;
-	--color-bg-input: #242b3d;
-	--color-bg-card: #1e2433;
+/* Shape, depth and type of variant A. */
+:root {
+	color-scheme: light;
 
-	--color-accent-red: #e63950;
-	--color-accent-red-hover: #c41e3a;
-	--color-accent-red-light: #ff5068;
+	/* Browser chrome colour, read by designVariant.stores.js. */
+	--theme-color: var(--color-surface);
+	--page-bg: var(--color-page);
+	--hero-bg: var(--color-brand);
+	--hero-ink: var(--color-on-brand);
+	--header-bg: var(--color-surface);
+	--on-page-shadow: none;
 
-	--color-text-primary: #f0f2f5;
-	--color-text-secondary: #9ba8bc;
-	--color-text-muted: #6b7a8d;
+	--radius-card: 8px;
+	--radius-tile: 0px;
+	--radius-avatar: 0px;
+	--radius-badge: 0px;
+	--radius-result: 0px;
+	--radius-bar: 0px;
+	--radius-control: 999px;
+	--radius-sheet: 8px;
 
-	--color-border: #2e3a50;
-	--color-border-light: #3d4a60;
+	--shadow-card: 0 1px 2px rgb(0 31 71 / 0.06), 0 4px 16px rgb(0 31 71 / 0.06);
+	--shadow-raised: 0 8px 32px rgb(0 31 71 / 0.12);
+	--shadow-control: none;
+	--shadow-nav: none;
+	--shadow-fab: none;
+	--avatar-ring-width: 0px;
+	--bar-height: 6px;
 
-	--color-silver: #c0c0c0;
-	--color-success: #22c55e;
-	--color-warning: #eab308;
-	--color-error: #ef4444;
+	/* Vertical rhythm between page sections: airy in A, tight in B. */
+	--stack-gap: 1.75rem;
+
+	--font-title: var(--font-display);
+	--title-weight: 400;
+	--title-case: uppercase;
+	--title-leading: 0.95;
+	--title-tracking: 0.01em;
+
+	--font-section: var(--font-cond);
+	--section-weight: 700;
+	--section-case: uppercase;
+	--section-size: 17px;
+	--section-tracking: 0.02em;
+	--section-color: var(--color-brand);
+	--section-icon-display: none;
+
+	--font-num: var(--font-display);
+	--num-weight: 400;
+
+	--font-label: var(--font-cond);
+	--label-weight: 700;
+	--label-case: uppercase;
+	--label-tracking: 0.03em;
 }
 
-/* Base styles */
-html,
-body {
-	height: 100%;
-	margin: 0;
-	padding: 0;
+/* Variant B "Fußballplatz": only the values that differ from A. */
+:root[data-variant="b"] {
+	--color-page: #3a9441;
+	--color-sunken: #eef1f4;
+	--color-muted: #5a6675;
+	--color-line: #e3e7ec;
+	--color-on-page: #ffffff;
+
+	--color-win: #1d6b2a;
+	--color-win-soft: #e8f5e9;
+	--color-loss: #b4143c;
+	--color-loss-soft: #fde8ee;
+	--color-draw: #5a6675;
+	--color-on-draw: #ffffff;
+
+	--color-score: #0f3d1f;
+	--color-pitch: #31813a; /* grass a shade darker than the page */
+	--color-chalk: #ffffff8c; /* white chalk at 55 % */
+	--color-progress: #41a048;
+	--color-track: #e8f5e9;
+	--color-chart-1: #1d6b2a;
+	--color-chart-2: #41a048;
+	--color-chart-3: #c9e6cb;
+	--color-chart-4: #d2003c;
+
+	--color-tier-bronze: #cd8a4f;
+	--color-tier-silver: #b5bec9;
+	--color-tier-gold: #e0a800;
+	--color-tier-diamond: #7cc8ee;
+	--color-on-tier-bronze: #001f47;
+
+	--color-avatar-0: #3698ca;
+	--color-avatar-1: #ff8a3d;
+	--color-avatar-2: #8e44ad;
+	--color-avatar-3: #001f47;
+	--color-avatar-4: #d2003c;
+	--color-avatar-5: #ffcc00;
+	--color-on-avatar-0: #001f47;
+	--color-on-avatar-1: #001f47;
+	--color-on-avatar-2: #ffffff;
+	--color-on-avatar-3: #ffffff;
+	--color-on-avatar-4: #ffffff;
+	--color-on-avatar-5: #001f47;
+
+	--theme-color: var(--color-page);
+	--page-bg: repeating-linear-gradient(
+		180deg,
+		#41a048 0 80px,
+		#3a9441 80px 160px
+	);
+	--hero-bg: transparent;
+	--hero-ink: var(--color-on-page);
+	--header-bg: transparent;
+	--on-page-shadow: 0 1px 2px rgb(0 40 10 / 0.35);
+
+	--radius-card: 20px;
+	--radius-tile: 14px;
+	--radius-avatar: 999px;
+	--radius-badge: 999px;
+	--radius-result: 4px;
+	--radius-bar: 999px;
+	--radius-sheet: 24px;
+
+	--shadow-card: 0 3px 0 rgb(0 0 0 / 0.1), 0 10px 24px rgb(10 50 15 / 0.22);
+	--shadow-raised: 0 6px 14px rgb(10 50 15 / 0.3);
+	--shadow-control: 0 3px 0 rgb(0 0 0 / 0.1);
+	--shadow-nav: 0 -6px 20px rgb(10 50 15 / 0.18);
+	--shadow-fab: 0 6px 14px rgb(210 0 60 / 0.35);
+	--avatar-ring-width: 3px;
+	--bar-height: 12px;
+
+	--stack-gap: 0.875rem;
+
+	--font-title: var(--font-cond);
+	--title-weight: 800;
+	--title-case: none;
+	--title-leading: 1.05;
+	--title-tracking: 0;
+
+	--section-weight: 800;
+	--section-case: none;
+	--section-size: 21px;
+	--section-tracking: 0;
+	--section-color: var(--color-ink);
+	--section-icon-display: inline-flex;
+
+	--font-num: var(--font-cond);
+	--num-weight: 800;
+
+	--font-label: var(--font-sans);
+	--label-weight: 700;
+	--label-case: none;
+	--label-tracking: 0;
 }
 
-body {
-	font-family:
-		-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
-		Arial, sans-serif;
-	background-color: var(--color-bg-primary);
-	color: var(--color-text-primary);
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+@layer base {
+	html,
+	body {
+		min-height: 100%;
+		margin: 0;
+		padding: 0;
+	}
+
+	/* The page colour sits on html only. A body background would paint over
+	 * the pitch, the fixed z-index −1 layer of PitchBackground.svelte (B). */
+	html {
+		background: var(--color-page);
+	}
+
+	body {
+		font-family: var(--font-sans);
+		color: var(--color-ink);
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	/* Navy reads on white, grey and the pitch. Dark surfaces (the red hero,
+	 * navy blocks) switch the ring to white via --focus-ring. */
+	:focus-visible {
+		outline: 2px solid var(--focus-ring, var(--color-navy));
+		outline-offset: 2px;
+	}
 }
 
-/* intro.js — dark theme override applied via `tooltipClass: "rbl-introjs"`
- * in runOnboardingTour. Brings the tour tooltips in line with the app's
- * dark surfaces and accent palette. */
+/*
+ * ─── Building blocks ─────────────────────────────────────────────────────
+ * Shared by every page. Each one reads the variant tokens above, so the
+ * same markup renders as A or B.
+ */
+@layer components {
+	/* Cards and surfaces */
+	.card {
+		background: var(--color-surface);
+		color: var(--color-ink);
+		border-radius: var(--radius-card);
+		box-shadow: var(--shadow-card);
+	}
+
+	.tile {
+		background: var(--color-sunken);
+		border-radius: var(--radius-tile);
+	}
+
+	[data-variant="b"] .tile-win {
+		background: var(--color-win-soft);
+	}
+
+	/* Page hero: red band in A (bleeds to the screen edges), plain text on
+	 * the pitch in B. */
+	.hero {
+		--focus-ring: var(--hero-ink);
+		background: var(--hero-bg);
+		color: var(--hero-ink);
+	}
+
+	.bg-navy,
+	.bg-brand {
+		--focus-ring: var(--color-white);
+	}
+
+	.bleed {
+		margin-inline: calc(var(--page-gutter, 1rem) * -1);
+		padding-inline: var(--page-gutter, 1rem);
+	}
+
+	[data-variant="b"] .bleed {
+		margin-inline: 0;
+		padding-inline: 0;
+	}
+
+	/* A's hero band sits flush under the header: it cancels the main
+	 * column's top padding on phones (py-2 in app/+layout.svelte). */
+	.hero.bleed {
+		margin-top: -0.5rem;
+	}
+	[data-variant="b"] .hero.bleed {
+		margin-top: 0;
+	}
+	@media (min-width: 1024px) {
+		.hero.bleed {
+			margin-top: 0;
+		}
+	}
+
+	/* Hero of a list page (Historie, Statistiken, Teams, …): a red band
+	 * with a big title in A, the title straight on the pitch in B.
+	 * <header class="hero bleed page-hero">
+	 *   <h1 class="page-title page-hero-title">…</h1> */
+	.page-hero {
+		padding-top: 22px;
+		padding-bottom: 24px;
+	}
+	.page-hero-title {
+		margin: 0;
+		font-size: clamp(34px, 11vw, 44px);
+		text-wrap: balance;
+		text-shadow: var(--on-page-shadow);
+	}
+	[data-variant="b"] .page-hero {
+		padding-top: 4px;
+		padding-bottom: 0;
+	}
+	[data-variant="b"] .page-hero-title {
+		font-size: 40px;
+	}
+
+	/* Text placed straight on the page background (B: white on the pitch).
+	 * A section title keeps its red in A and turns white on B's pitch. */
+	.on-page {
+		color: var(--color-on-page);
+		text-shadow: var(--on-page-shadow);
+	}
+	.section-title.on-page {
+		color: var(--section-color);
+	}
+	[data-variant="b"] .section-title.on-page {
+		color: var(--color-on-page);
+	}
+
+	/* Type */
+	.page-title {
+		font-family: var(--font-title);
+		font-weight: var(--title-weight);
+		text-transform: var(--title-case);
+		line-height: var(--title-leading);
+		letter-spacing: var(--title-tracking);
+	}
+
+	.section-title {
+		font-family: var(--font-section);
+		font-weight: var(--section-weight);
+		font-size: var(--section-size);
+		text-transform: var(--section-case);
+		letter-spacing: var(--section-tracking);
+		color: var(--section-color);
+		line-height: 1.1;
+	}
+
+	.section-icon {
+		display: var(--section-icon-display);
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		color: var(--color-brand);
+	}
+
+	.num {
+		font-family: var(--font-num);
+		font-weight: var(--num-weight);
+		font-variant-numeric: tabular-nums;
+		line-height: 0.9;
+	}
+
+	.label {
+		font-family: var(--font-label);
+		font-weight: var(--label-weight);
+		text-transform: var(--label-case);
+		letter-spacing: var(--label-tracking);
+		font-size: 12px;
+		line-height: 1.2;
+	}
+
+	.cond {
+		font-family: var(--font-cond);
+		font-weight: 700;
+		letter-spacing: 0.02em;
+	}
+
+	/* Avatars: square in A, round with a white ring in B. */
+	.avatar {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		overflow: hidden;
+		border-radius: var(--radius-avatar);
+		background: var(--avatar-bg, var(--color-navy));
+		color: var(--avatar-fg, var(--color-on-navy));
+		font-family: var(--font-cond);
+		font-weight: 800;
+		line-height: 1;
+	}
+
+	.avatar img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.avatar-ring {
+		box-shadow: 0 0 0 var(--avatar-ring-width) var(--color-surface);
+	}
+
+	.avatar-self {
+		--avatar-bg: var(--color-brand);
+		--avatar-fg: var(--color-on-brand);
+	}
+
+	.avatar-c0 {
+		--avatar-bg: var(--color-avatar-0);
+		--avatar-fg: var(--color-on-avatar-0);
+	}
+	.avatar-c1 {
+		--avatar-bg: var(--color-avatar-1);
+		--avatar-fg: var(--color-on-avatar-1);
+	}
+	.avatar-c2 {
+		--avatar-bg: var(--color-avatar-2);
+		--avatar-fg: var(--color-on-avatar-2);
+	}
+	.avatar-c3 {
+		--avatar-bg: var(--color-avatar-3);
+		--avatar-fg: var(--color-on-avatar-3);
+	}
+	.avatar-c4 {
+		--avatar-bg: var(--color-avatar-4);
+		--avatar-fg: var(--color-on-avatar-4);
+	}
+	.avatar-c5 {
+		--avatar-bg: var(--color-avatar-5);
+		--avatar-fg: var(--color-on-avatar-5);
+	}
+
+	/* Chips: small labels such as "Serie 3", "Neu", "Ich", "−4". */
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 2px 7px;
+		border-radius: var(--radius-badge);
+		font-family: var(--font-label);
+		font-weight: 700;
+		font-size: 11px;
+		line-height: 1.3;
+		text-transform: var(--label-case);
+		letter-spacing: var(--label-tracking);
+		white-space: nowrap;
+	}
+	.chip-gold {
+		background: var(--color-gold);
+		color: var(--color-on-gold);
+	}
+	.chip-brand {
+		background: var(--color-brand);
+		color: var(--color-on-brand);
+	}
+	.chip-navy {
+		background: var(--color-navy);
+		color: var(--color-on-navy);
+	}
+	.chip-muted {
+		background: var(--color-sunken);
+		color: var(--color-muted);
+	}
+	.chip-win {
+		background: var(--color-win-soft);
+		color: var(--color-win);
+	}
+	.chip-loss {
+		background: var(--color-loss-soft);
+		color: var(--color-loss);
+	}
+	.chip-aqua {
+		background: var(--color-aqua);
+		color: var(--color-ink);
+	}
+	.chip-outline {
+		background: transparent;
+		color: inherit;
+		box-shadow: inset 0 0 0 1px currentColor;
+	}
+
+	/* Win / draw / loss markers (S / U / N). */
+	.result {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 26px;
+		height: 26px;
+		border-radius: var(--radius-result);
+		font-family: var(--font-cond);
+		font-weight: 700;
+		font-size: 14px;
+		line-height: 1;
+	}
+	[data-variant="b"] .result {
+		width: 22px;
+		height: 30px;
+		font-size: 13px;
+	}
+	.result-w {
+		background: var(--color-win);
+		color: var(--color-on-win);
+	}
+	.result-d {
+		background: var(--color-draw);
+		color: var(--color-on-draw);
+	}
+	.result-l {
+		background: var(--color-loss);
+		color: var(--color-on-loss);
+	}
+
+	/* ELO change with its sign (+12, −4, ±0): coloured text in A, a soft
+	 * pill in B. */
+	.delta {
+		font-family: var(--font-cond);
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+	.delta-win {
+		color: var(--color-win);
+	}
+	.delta-loss {
+		color: var(--color-loss);
+	}
+	.delta-draw {
+		color: var(--color-muted);
+	}
+	[data-variant="b"] .delta {
+		padding: 4px 10px;
+		border-radius: 999px;
+	}
+	[data-variant="b"] .delta-win {
+		background: var(--color-win-soft);
+	}
+	[data-variant="b"] .delta-loss {
+		background: var(--color-loss-soft);
+	}
+	[data-variant="b"] .delta-draw {
+		background: var(--color-sunken);
+	}
+
+	/* Score chip ("2:3"). */
+	.score {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 3.5rem;
+		padding: 5px 10px;
+		border-radius: var(--radius-badge);
+		background: var(--color-score);
+		color: var(--color-on-score);
+		font-family: var(--font-num);
+		font-weight: var(--num-weight);
+		font-size: 19px;
+		font-variant-numeric: tabular-nums;
+		line-height: 1;
+	}
+	[data-variant="b"] .score {
+		border-radius: 10px;
+	}
+
+	/* Progress bar: <div class="progress"><span style="width: 40%"></span></div> */
+	.progress {
+		position: relative;
+		height: var(--bar-height);
+		background: var(--color-track);
+		border-radius: var(--radius-bar);
+		overflow: hidden;
+	}
+	.progress > span {
+		display: block;
+		height: 100%;
+		background: var(--color-progress);
+		border-radius: var(--radius-bar);
+	}
+
+	/* Buttons: pill-shaped in both variants. */
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		min-height: 44px;
+		padding: 0 20px;
+		border: 0;
+		border-radius: var(--radius-control);
+		font-family: var(--font-sans);
+		font-weight: 700;
+		font-size: 15px;
+		line-height: 1.1;
+		text-decoration: none;
+		cursor: pointer;
+		transition:
+			background-color 120ms,
+			color 120ms,
+			box-shadow 120ms,
+			transform 120ms;
+	}
+	.btn:active:not(:disabled) {
+		transform: scale(0.98);
+	}
+	.btn:disabled {
+		cursor: not-allowed;
+		background: var(--color-line);
+		color: var(--color-muted);
+		box-shadow: none;
+	}
+	.btn-sm {
+		min-height: 36px;
+		padding: 0 14px;
+		font-size: 14px;
+	}
+	.btn-lg {
+		min-height: 52px;
+		font-size: 16px;
+	}
+	.btn-primary {
+		background: var(--color-brand);
+		color: var(--color-on-brand);
+	}
+	.btn-primary:hover:not(:disabled) {
+		background: var(--color-brand-strong);
+	}
+	/* Secondary: navy outline on grey in A, white sticker pill in B. */
+	.btn-secondary {
+		background: var(--color-sunken);
+		color: var(--color-ink);
+		box-shadow: inset 0 0 0 1px var(--color-navy);
+	}
+	.btn-secondary:hover:not(:disabled) {
+		background: var(--color-surface);
+	}
+	[data-variant="b"] .btn-secondary {
+		background: var(--color-surface);
+		box-shadow: var(--shadow-control);
+	}
+	[data-variant="b"] .btn-secondary:hover:not(:disabled) {
+		background: var(--color-sunken);
+	}
+	/* Accent: white outline on the red hero in A, gold pill in B. */
+	.btn-accent {
+		background: transparent;
+		color: var(--hero-ink);
+		box-shadow: inset 0 0 0 1px currentColor;
+	}
+	.btn-accent:hover:not(:disabled) {
+		background: var(--color-brand-strong);
+	}
+	[data-variant="b"] .btn-accent {
+		background: var(--color-gold);
+		color: var(--color-on-gold);
+		box-shadow: var(--shadow-control);
+	}
+	[data-variant="b"] .btn-accent:hover:not(:disabled) {
+		background: var(--color-gold);
+		filter: brightness(1.05);
+	}
+	/* Confirm / finish a step in a flow (save event, end match): red in A,
+	 * "done" green in B. */
+	.btn-confirm {
+		background: var(--color-brand);
+		color: var(--color-on-brand);
+	}
+	.btn-confirm:hover:not(:disabled) {
+		background: var(--color-brand-strong);
+	}
+	[data-variant="b"] .btn-confirm:not(:disabled) {
+		background: var(--color-win);
+		color: var(--color-on-win);
+		box-shadow: var(--shadow-control);
+	}
+	[data-variant="b"] .btn-confirm:hover:not(:disabled) {
+		filter: brightness(1.1);
+	}
+	.btn-ghost {
+		background: transparent;
+		color: var(--color-ink);
+		min-height: 40px;
+		padding: 0 12px;
+	}
+	.btn-ghost:hover:not(:disabled) {
+		background: var(--color-sunken);
+	}
+	.btn-icon {
+		min-height: 0;
+		width: 40px;
+		height: 40px;
+		padding: 0;
+	}
+
+	/* Links inside cards */
+	.link {
+		color: var(--color-brand);
+		font-weight: 700;
+		font-size: 13px;
+		text-decoration: none;
+	}
+	.link:hover {
+		color: var(--color-brand-strong);
+		text-decoration: underline;
+	}
+
+	/* Form fields */
+	.field {
+		width: 100%;
+		min-height: 44px;
+		padding: 0 14px;
+		border: 1px solid var(--color-line);
+		border-radius: var(--radius-tile);
+		background: var(--color-surface);
+		color: var(--color-ink);
+		font-family: var(--font-sans);
+		font-size: 15px;
+	}
+	.field::placeholder {
+		color: var(--color-muted);
+	}
+	.field:focus {
+		outline: none;
+		border-color: var(--color-navy);
+		box-shadow: 0 0 0 1px var(--color-navy);
+	}
+	[data-variant="b"] .field {
+		border-radius: 12px;
+		border-color: var(--color-line);
+	}
+
+	/* Segmented control: underline tabs in A, pill track in B.
+	 * <div class="seg" role="tablist"><button class="seg-option" aria-selected="true">…</button></div> */
+	.seg {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px 24px;
+		border-bottom: 1px solid currentColor;
+	}
+	.seg-option {
+		margin-bottom: -1px;
+		padding: 8px 0;
+		border: 0;
+		border-bottom: 3px solid transparent;
+		background: transparent;
+		color: inherit;
+		font-family: var(--font-cond);
+		font-weight: 700;
+		font-size: 15px;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+		opacity: 0.75;
+		cursor: pointer;
+	}
+	.seg-option[aria-selected="true"],
+	.seg-option[aria-pressed="true"] {
+		border-bottom-color: currentColor;
+		opacity: 1;
+	}
+	.seg-option:hover {
+		opacity: 1;
+	}
+	/* Dimmed white on the red band drops below 4.5:1; there the underline
+	 * alone marks the active tab. */
+	.hero .seg-option {
+		opacity: 1;
+	}
+	/* Two-line option: a title with a small caption ("FC27" / "läuft").
+	 * <button class="seg-option seg-option-2"><span class="seg-title">…</span>
+	 * <span class="seg-sub">…</span></button> */
+	.seg-option-2 {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 3px;
+		padding: 0 0 10px;
+		opacity: 1;
+	}
+	.seg-title {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 17px;
+		line-height: 1;
+	}
+	.seg-sub {
+		font-family: var(--font-sans);
+		font-weight: 400;
+		font-size: 12px;
+		letter-spacing: 0;
+		text-transform: none;
+	}
+	[data-variant="b"] .seg {
+		display: grid;
+		grid-auto-columns: minmax(0, 1fr);
+		grid-auto-flow: column;
+		gap: 4px;
+		padding: 4px;
+		border: 0;
+		border-radius: 999px;
+		background: var(--color-surface);
+		box-shadow: var(--shadow-control);
+		color: var(--color-ink);
+	}
+	[data-variant="b"] .seg-option {
+		min-height: 36px;
+		margin: 0;
+		padding: 0 12px;
+		border: 0;
+		border-radius: 999px;
+		font-family: var(--font-sans);
+		font-size: 14px;
+		letter-spacing: 0;
+		text-transform: none;
+		opacity: 1;
+	}
+	[data-variant="b"] .seg-option[aria-selected="true"],
+	[data-variant="b"] .seg-option[aria-pressed="true"] {
+		background: var(--color-navy);
+		color: var(--color-on-navy);
+	}
+	[data-variant="b"] .seg-option-2 {
+		align-items: center;
+		justify-content: center;
+		gap: 1px;
+		min-height: 48px;
+		padding: 0 12px;
+	}
+	[data-variant="b"] .seg-title {
+		gap: 6px;
+		font-size: 15px;
+	}
+	[data-variant="b"] .seg-sub {
+		font-size: 11px;
+	}
+	[data-variant="b"] .seg-option-2[aria-selected="false"] .seg-sub {
+		color: var(--color-muted);
+	}
+	[data-variant="b"] .seg-brand .seg-option[aria-selected="true"],
+	[data-variant="b"] .seg-brand .seg-option[aria-pressed="true"] {
+		background: var(--color-brand);
+		color: var(--color-on-brand);
+	}
+
+	/* Page body: a column of sections with the variant's rhythm. */
+	.stack {
+		display: flex;
+		flex-direction: column;
+		gap: var(--stack-gap);
+	}
+
+	/* A reporter's words: plain text in A, a pale gold speech bubble with
+	 * a pointer at its top left in B. */
+	.bubble {
+		position: relative;
+	}
+	[data-variant="b"] .bubble {
+		padding: 14px 16px;
+		border-radius: 16px;
+		background: var(--color-gold-soft);
+		color: var(--color-ink);
+	}
+	[data-variant="b"] .bubble::before {
+		content: "";
+		position: absolute;
+		left: 22px;
+		top: -7px;
+		width: 14px;
+		height: 14px;
+		background: var(--color-gold-soft);
+		transform: rotate(45deg);
+	}
+
+	/* Loading, empty and error states: <div class="card notice">, with an
+	 * optional .notice-title. Inside a B Section the card frame drops away. */
+	.notice {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+		padding: 24px 16px;
+		text-align: center;
+		font-size: 14px;
+		line-height: 1.45;
+		color: var(--color-muted);
+	}
+	.notice-title {
+		font-weight: 700;
+		font-size: 15px;
+		color: var(--color-ink);
+	}
+
+	/* Rows inside a card, separated by hairlines. */
+	.rows > * + * {
+		border-top: 1px solid var(--color-line);
+	}
+
+	/* Overlays */
+	.scrim {
+		background: color-mix(in srgb, var(--color-navy) 60%, transparent);
+	}
+	.sheet {
+		background: var(--color-surface);
+		color: var(--color-ink);
+		border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+		box-shadow: var(--shadow-raised);
+	}
+	@media (min-width: 640px) {
+		.sheet {
+			border-radius: var(--radius-sheet);
+		}
+	}
+
+	/* Loading ring: red on surfaces, white straight on the B pitch. */
+	.spinner {
+		display: inline-block;
+		width: 2rem;
+		height: 2rem;
+		border: 2px solid var(--spinner-color, var(--color-brand));
+		border-top-color: transparent;
+		border-radius: 999px;
+		animation: spin 1s linear infinite;
+	}
+	.spinner-sm {
+		width: 1.25rem;
+		height: 1.25rem;
+	}
+	[data-variant="b"] .spinner {
+		--spinner-color: var(--color-on-page);
+	}
+	[data-variant="b"] :is(.card, .ui-section, .sheet, .tile) .spinner {
+		--spinner-color: var(--color-brand);
+	}
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/*
+ * intro.js onboarding tour (tooltipClass "rbl-introjs" in runOnboardingTour).
+ * intro.js writes the overlay styles inline, hence the !important pair.
+ */
 .introjs-tooltip.rbl-introjs {
-	background: #131822;
-	color: #f0f2f5;
-	border: 1px solid #1f2937;
-	border-radius: 14px;
-	box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
-	/* Clamp to viewport so tooltips anchored to right-edge elements
-	 * (e.g. the guest avatar tile) can't spill outside the screen on
-	 * narrow mobile viewports. The 24px gutter leaves room on both
-	 * sides regardless of which way intro.js flips the arrow. */
+	background: var(--color-surface);
+	color: var(--color-ink);
+	border: 0;
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-raised);
+	/* Clamp to the viewport so tooltips anchored to right-edge elements
+	 * cannot spill outside the screen on narrow phones. */
 	max-width: min(320px, calc(100vw - 24px));
 	padding: 4px 4px 8px;
+	font-family: var(--font-sans);
 }
 .introjs-tooltip.rbl-introjs .introjs-tooltiptext {
-	color: #d1d5db;
-	font-size: 13px;
+	color: var(--color-ink);
+	font-size: 14px;
 	line-height: 1.45;
 	padding: 12px 16px 4px;
 }
@@ -98,94 +1028,83 @@ body {
 	padding: 12px 16px 0;
 }
 .introjs-tooltip.rbl-introjs .introjs-tooltip-title {
-	color: #ffffff;
-	font-size: 15px;
-	font-weight: 800;
-	letter-spacing: -0.01em;
+	font-family: var(--font-section);
+	font-weight: var(--section-weight);
+	text-transform: var(--section-case);
+	letter-spacing: var(--section-tracking);
+	color: var(--section-color);
+	font-size: 17px;
 }
 .introjs-tooltip.rbl-introjs .introjs-skipbutton {
-	color: #6b7280;
+	color: var(--color-muted);
 	font-size: 18px;
 }
 .introjs-tooltip.rbl-introjs .introjs-skipbutton:hover {
-	color: #f0f2f5;
+	color: var(--color-ink);
 }
 .introjs-tooltip.rbl-introjs .introjs-tooltipbuttons {
-	border-top: 1px solid rgba(255, 255, 255, 0.06);
+	border-top: 1px solid var(--color-line);
 	padding: 10px 12px;
 }
 .introjs-tooltip.rbl-introjs .introjs-button {
-	background: #1a1f2a;
-	color: #d1d5db;
-	border: 1px solid #2a3142;
-	border-radius: 10px;
-	padding: 7px 14px;
-	font-size: 12px;
+	background: var(--color-sunken);
+	color: var(--color-ink);
+	border: 0;
+	border-radius: var(--radius-control);
+	padding: 8px 16px;
+	font-family: var(--font-sans);
+	font-size: 13px;
 	font-weight: 700;
 	text-shadow: none;
+	box-shadow: none;
 }
 .introjs-tooltip.rbl-introjs .introjs-button:hover,
 .introjs-tooltip.rbl-introjs .introjs-button:focus {
-	background: #232938;
-	color: #ffffff;
-	border-color: #3a4255;
+	background: var(--color-line);
+	color: var(--color-ink);
 }
 .introjs-tooltip.rbl-introjs .introjs-nextbutton {
-	background: linear-gradient(135deg, #e24b4a, #c73e3d);
-	border-color: rgba(226, 75, 74, 0.4);
-	color: #ffffff;
-	box-shadow: 0 6px 18px rgba(226, 75, 74, 0.4);
+	background: var(--color-brand);
+	color: var(--color-on-brand);
 }
 .introjs-tooltip.rbl-introjs .introjs-nextbutton:hover,
 .introjs-tooltip.rbl-introjs .introjs-nextbutton:focus {
-	background: linear-gradient(135deg, #ef5e5d, #d04b4a);
-	border-color: rgba(226, 75, 74, 0.55);
+	background: var(--color-brand-strong);
+	color: var(--color-on-brand);
 }
 .introjs-tooltip.rbl-introjs .introjs-disabled,
 .introjs-tooltip.rbl-introjs .introjs-disabled:hover {
-	background: #1a1f2a;
-	color: #4b5563;
-	border-color: #1f2937;
-	box-shadow: none;
+	background: var(--color-sunken);
+	color: var(--color-muted);
 }
 .introjs-tooltip.rbl-introjs .introjs-progress {
-	background: rgba(255, 255, 255, 0.06);
+	background: var(--color-track);
 }
 .introjs-tooltip.rbl-introjs .introjs-progressbar {
-	background: linear-gradient(90deg, #84cc16, #65a30d);
+	background: var(--color-progress);
 }
 .introjs-tooltip.rbl-introjs .introjs-arrow.top,
 .introjs-tooltip.rbl-introjs .introjs-arrow.top-right,
 .introjs-tooltip.rbl-introjs .introjs-arrow.top-middle {
-	border-bottom-color: #131822;
+	border-bottom-color: var(--color-surface);
 }
 .introjs-tooltip.rbl-introjs .introjs-arrow.bottom,
 .introjs-tooltip.rbl-introjs .introjs-arrow.bottom-right,
 .introjs-tooltip.rbl-introjs .introjs-arrow.bottom-middle {
-	border-top-color: #131822;
+	border-top-color: var(--color-surface);
 }
 .introjs-tooltip.rbl-introjs .introjs-arrow.left {
-	border-right-color: #131822;
+	border-right-color: var(--color-surface);
 }
 .introjs-tooltip.rbl-introjs .introjs-arrow.right {
-	border-left-color: #131822;
+	border-left-color: var(--color-surface);
 }
-/* Overlay dim — pushed close to opaque so the highlighted element pops
- * clearly on top of the app's already-dark surfaces (the dark theme
- * was eating the 0.65 backdrop). The huge outer box-shadow on the
- * helperLayer is what actually paints the "rest of the screen is
- * dimmed" area around the focused element; .introjs-overlay catches
- * the brief moment before helperLayer mounts.
- *
- * `!important` is required because intro.js writes the shadow + the
- * overlay background as inline styles from JS, which would otherwise
- * win against our class rules. */
 .introjs-overlay {
-	background: rgba(0, 0, 0, 0.88) !important;
+	background: rgb(0 31 71 / 0.85) !important;
 }
 .introjs-helperLayer {
-	border-radius: 16px;
+	border-radius: var(--radius-card);
 	box-shadow:
-		rgba(0, 0, 0, 0.7) 0 0 1px 2px,
-		rgba(0, 0, 0, 0.88) 0 0 0 5000px !important;
+		rgb(0 31 71 / 0.7) 0 0 1px 2px,
+		rgb(0 31 71 / 0.85) 0 0 0 5000px !important;
 }

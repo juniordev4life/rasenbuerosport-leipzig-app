@@ -1,20 +1,22 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import Sparkline from "$lib/components/leaderboard/Sparkline.svelte";
-import TrendPill from "$lib/components/leaderboard/TrendPill.svelte";
 import InfoTip from "$lib/components/ui/InfoTip.svelte";
-import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
+import { designVariant } from "$lib/stores/designVariant.stores.js";
 import MarcelCard from "./MarcelCard.svelte";
 
 /**
- * Profile hero: red-glow card with title bar, big avatar, archetype
- * line, ELO + sparkline + week trend, Marcel character verdict and
- * the W/D/L/Win-Rate stats row.
+ * Profile hero: who the player is (picture, name, archetype, rank and
+ * games), their ELO with this week's change and the rating curve,
+ * Marcel's character verdict and the win / draw / loss record.
+ * Design A: the red hero band under the header. Design B: a white card
+ * with a jersey carrying the name and rank number, the picture pinned
+ * to it. From `lg` the blocks sit in two columns.
  *
  * @type {{
  *   playerId: string|null,
  *   username: string,
- *   initials: string,
  *   avatarUrl: string|null,
  *   archetype: string|null,
  *   rank: number|null,
@@ -31,7 +33,6 @@ import MarcelCard from "./MarcelCard.svelte";
 let {
 	playerId,
 	username,
-	initials,
 	avatarUrl,
 	archetype,
 	rank,
@@ -47,174 +48,547 @@ let {
 
 const { t } = getTranslate();
 
-const gradient = $derived(avatarGradient(playerId ?? username));
+const uid = $props.id();
+const nameId = `profile-name-${uid}`;
+
+const player = $derived({ id: playerId, name: username, avatarUrl });
+
+/** Long names step down a size so they don't break mid-word. */
+const nameSize = $derived(
+	(username ?? "").length > 12
+		? "long"
+		: (username ?? "").length > 8
+			? "mid"
+			: "short",
+);
+
+const jerseyName = $derived((username ?? "").toUpperCase().slice(0, 12));
 
 const decided = $derived(wins + losses);
 const winRate = $derived(decided > 0 ? Math.round((wins / decided) * 100) : 0);
+
+const roundedDelta = $derived(Math.round(weekDelta ?? 0));
+const deltaTone = $derived(
+	roundedDelta > 0 ? "win" : roundedDelta < 0 ? "loss" : "draw",
+);
+const deltaText = $derived(
+	roundedDelta > 0
+		? `+${roundedDelta}`
+		: roundedDelta < 0
+			? `−${Math.abs(roundedDelta)}`
+			: "±0",
+);
+
+const stats = $derived([
+	{ key: "wins", label: $t("profile.wins"), value: wins, tone: "win" },
+	{ key: "draws", label: $t("profile.draws"), value: draws, tone: "plain" },
+	{ key: "losses", label: $t("profile.losses"), value: losses, tone: "loss" },
+	{
+		key: "rate",
+		label: $t("profile.win_rate"),
+		value: `${winRate}%`,
+		tone: "plain",
+	},
+]);
 </script>
 
-<div class="hero-profile">
-	<div class="hero-title-bar">
-		<div class="hero-title-tag">★ {$t("profile.hero_tag")}</div>
-		{#if rank != null}
-			<div class="rank-pill">{$t("profile.rank_short")} #{rank} · {matchCount} {$t("profile.games_short")}</div>
-		{:else}
-			<div class="rank-pill">{matchCount} {$t("profile.games_short")}</div>
-		{/if}
-	</div>
+{#snippet archetypeLine()}
+	<span class="archetype">
+		{archetype ?? $t("profile.archetype_placeholder")}
+		<InfoTip titleKey="info_tips.archetype.title" bodyKey="info_tips.archetype.body" />
+	</span>
+{/snippet}
 
-	<div class="hero-top">
-		<div
-			class="hero-avatar"
-			style="background: {gradient.gradient}; border-color: {gradient.from}66;"
-		>
-			{#if avatarUrl}
-				<img referrerpolicy="no-referrer" src={avatarUrl} alt={username} />
-			{:else}
-				<span>{initials}</span>
+<section class="ph hero bleed" aria-labelledby={nameId}>
+	{#if $designVariant === "b"}
+		<div class="id id-b">
+			<div class="jersey">
+				<svg class="jersey-svg" viewBox="0 0 120 120" aria-hidden="true">
+					<path
+						class="shirt"
+						d="M40 10L20 20L4 44l18 12 8-8v64h60V48l8 8 18-12-16-24-20-10c-4 8-12 12-20 12S44 18 40 10z"
+					/>
+					<path class="trim" d="M40 10c4 8 12 12 20 12s16-4 20-12" />
+					<path class="trim" d="M6 45.5l15.5 10.3M114 45.5l-15.5 10.3" />
+					<text
+						class="jersey-name"
+						x="60"
+						y="44"
+						text-anchor="middle"
+						textLength={jerseyName.length > 7 ? 58 : undefined}
+						lengthAdjust="spacingAndGlyphs"
+					>{jerseyName}</text>
+					{#if rank != null}
+						<text class="jersey-number" x="60" y="96" text-anchor="middle">{rank}</text>
+					{/if}
+				</svg>
+				<PlayerAvatar {player} size={44} ring class="jersey-avatar" />
+			</div>
+			<div class="id-text">
+				<span class="tag">{$t("profile.hero_tag")}</span>
+				<h1 id={nameId} class="page-title name {nameSize}">{username}</h1>
+				{@render archetypeLine()}
+				<span class="chip chip-gold games-pill">
+					{#if rank != null}{$t("profile.rank_short")} #{rank} ·{/if}
+					{matchCount}
+					{$t("profile.games_short")}
+				</span>
+			</div>
+		</div>
+	{:else}
+		<div class="head">
+			<span class="tag">{$t("profile.hero_tag")}</span>
+			{#if rank != null}
+				<span class="rank">
+					<span class="rank-label">{$t("profile.rank_short")}</span>
+					<span class="rank-num">{rank}</span>
+				</span>
 			{/if}
 		</div>
-		<div class="hero-identity">
-			<div class="hero-name">{username}</div>
-			<div class="hero-archetype-row">
-				{#if archetype}
-					<span class="hero-archetype">{archetype}</span>
-				{:else}
-					<span class="hero-archetype">{$t("profile.archetype_placeholder")}</span>
-				{/if}
-				<InfoTip titleKey="info_tips.archetype.title" bodyKey="info_tips.archetype.body" />
+		<div class="id">
+			<PlayerAvatar {player} size={76} class="hero-avatar" />
+			<div class="id-text">
+				<h1 id={nameId} class="page-title name {nameSize}">{username}</h1>
+				{@render archetypeLine()}
+				<span class="games">{matchCount} {$t("profile.games_short")}</span>
 			</div>
 		</div>
-	</div>
+	{/if}
 
-	<div class="elo-row">
-		<div class="elo-left">
-			<div class="elo-value-row">
-				<div class="elo-value">{currentRating ?? "—"}</div>
+	<div class="elo">
+		<div class="elo-main">
+			<span class="elo-row">
+				<span class="num elo-value">{currentRating ?? "—"}</span>
 				<InfoTip titleKey="info_tips.elo.title" bodyKey="info_tips.elo.body" />
-			</div>
-			<TrendPill delta={weekDelta} variant="pill" suffix={$t("profile.this_week")} />
+			</span>
+			<span class="delta delta-{deltaTone}">{deltaText} {$t("profile.this_week")}</span>
 		</div>
-		<div class="hero-sparkline">
+		<div class="spark">
 			<Sparkline
 				points={ratings}
-				width={220}
+				width={150}
 				height={56}
-				stroke="#E24B4A"
-				fillId="profileHeroSpark"
-				strokeWidth={2}
+				stroke="var(--hero-spark)"
+				area={$designVariant === "b"}
+				strokeWidth={2.5}
 				opacity={1}
 				fluid
 			/>
 		</div>
 	</div>
 
-	<div class="marcel-wrap">
+	<div class="quote">
 		<MarcelCard quote={marcelQuote} />
 	</div>
 
-	<div class="hero-stats-row">
-		<span class="hero-stat"><strong>{wins}</strong>{$t("profile.w_short")}</span>
-		<span class="hero-stat-divider">·</span>
-		<span class="hero-stat"><strong>{draws}</strong>{$t("profile.d_short")}</span>
-		<span class="hero-stat-divider">·</span>
-		<span class="hero-stat"><strong>{losses}</strong>{$t("profile.l_short")}</span>
-		<span class="hero-stat-divider">·</span>
-		<span class="hero-stat"><strong>{winRate}%</strong> {$t("profile.win_rate")}</span>
-	</div>
-</div>
+	<dl class="stats">
+		{#each stats as stat (stat.key)}
+			<div class="stat">
+				<dt class="stat-label">{stat.label}</dt>
+				<dd class="num stat-value tone-{stat.tone}">{stat.value}</dd>
+			</div>
+		{/each}
+	</dl>
+</section>
 
 <style>
-.hero-profile {
-	background: radial-gradient(ellipse at top right, rgba(226, 75, 74, 0.15) 0%, transparent 55%),
-		linear-gradient(180deg, #1A1F2A 0%, #131822 100%);
-	border: 1px solid rgba(226, 75, 74, 0.25);
-	border-radius: 18px;
-	padding: 20px 16px 16px;
-	position: relative;
-	overflow: hidden;
+/* ── Design A: the red hero band ────────────────────────────────────── */
+.ph {
+	--hero-spark: var(--color-on-brand);
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-areas:
+		"head"
+		"id"
+		"elo"
+		"quote"
+		"stats";
+	row-gap: 22px;
+	padding-top: 20px;
+	padding-bottom: 28px;
 }
-.hero-profile::before {
-	content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-	background: linear-gradient(90deg, transparent, #E24B4A 50%, transparent);
-	opacity: 0.5;
+
+.head {
+	grid-area: head;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: -14px;
 }
-.hero-title-bar {
-	display: flex; justify-content: space-between; align-items: center;
-	margin-bottom: 14px;
+
+.tag {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 14px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
 }
-.hero-title-tag {
-	font-size: 10px; font-weight: 800;
-	color: #E24B4A;
-	text-transform: uppercase; letter-spacing: 0.12em;
-}
-.rank-pill {
-	background: rgba(226, 75, 74, 0.15);
-	border: 1px solid rgba(226, 75, 74, 0.3);
-	color: #E24B4A;
-	font-size: 10px; font-weight: 800;
-	padding: 3px 9px; border-radius: 999px;
-	letter-spacing: 0.04em;
-	white-space: nowrap;
-}
-.hero-top {
-	display: flex; align-items: center; gap: 14px;
-	margin-bottom: 14px;
-}
-.hero-avatar {
-	width: 72px; height: 72px;
-	border-radius: 50%;
-	border: 3px solid;
+
+.rank {
+	width: 64px;
+	height: 64px;
 	flex-shrink: 0;
-	box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-	display: flex; align-items: center; justify-content: center;
-	font-size: 28px; font-weight: 800; color: white;
-	overflow: hidden;
-}
-.hero-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.hero-identity { flex: 1; min-width: 0; }
-.hero-name {
-	font-size: 22px; font-weight: 800;
-	margin: 0 0 3px;
-	letter-spacing: -0.01em;
-	color: #FFFFFF;
-}
-.hero-archetype {
-	font-size: 13px;
-	color: #E24B4A;
-	font-weight: 600;
-	font-style: italic;
-}
-.elo-row {
-	display: flex; justify-content: space-between; align-items: center;
-	gap: 14px;
-	position: relative; z-index: 1;
-}
-.elo-left { display: flex; flex-direction: column; gap: 8px; }
-.elo-value-row { display: flex; align-items: baseline; gap: 6px; }
-.hero-archetype-row { display: flex; align-items: center; gap: 4px; }
-.elo-value {
-	font-size: 42px; font-weight: 800;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	border-radius: 999px;
+	box-shadow: inset 0 0 0 1px currentColor;
+	font-family: var(--font-cond);
+	font-weight: 700;
 	line-height: 1;
-	color: #FFFFFF;
+}
+
+.rank-label {
+	font-size: 11px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
+.rank-num {
+	font-size: 26px;
 	font-variant-numeric: tabular-nums;
-	letter-spacing: -0.02em;
 }
-/* Sparkline fills the space between the ELO block and the card edge
- * instead of clinging to a fixed 110 px. flex:1 lets it grow, the
- * min/max bounds keep it sensible on very narrow or very wide screens.
- * Trend graph reads better with more horizontal real-estate. */
-.hero-sparkline { flex: 1 1 auto; min-width: 110px; max-width: 240px; height: 56px; }
-.marcel-wrap { margin-top: 14px; }
-.hero-stats-row {
-	display: flex; gap: 8px;
-	margin-top: 12px;
-	padding-top: 12px;
-	border-top: 1px solid rgba(255,255,255,0.06);
-	position: relative; z-index: 1;
-	flex-wrap: wrap;
+
+.id {
+	grid-area: id;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	min-width: 0;
 }
-.hero-stat { font-size: 11px; color: #9CA3AF; font-variant-numeric: tabular-nums; }
-.hero-stat strong { color: #E5E7EB; font-weight: 700; }
-.hero-stat-divider { color: #4B5563; }
+
+/* A: the picture (or initials) on a white tile, initials in red. */
+.id :global(.hero-avatar) {
+	--avatar-bg: var(--color-surface);
+	--avatar-fg: var(--color-brand);
+}
+
+.id-text {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 8px;
+	min-width: 0;
+}
+
+.name {
+	margin: 0;
+	font-size: 48px;
+	line-height: 0.85;
+	overflow-wrap: anywhere;
+}
+
+.name.mid {
+	font-size: 38px;
+}
+
+.name.long {
+	font-size: 30px;
+}
+
+.archetype {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 15px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
+.games {
+	font-size: 13px;
+}
+
+.elo {
+	grid-area: elo;
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 12px;
+	min-width: 0;
+}
+
+.elo-main {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 8px;
+}
+
+.elo-row {
+	display: flex;
+	align-items: flex-start;
+	gap: 6px;
+}
+
+.elo-value {
+	font-size: 84px;
+	line-height: 0.8;
+}
+
+/* This week's change is the shared `.delta`: a tinted pill in B. On A's
+ * red band it stays a caption in the band's white, not a coloured figure. */
+.delta {
+	font-size: 13px;
+}
+
+:global(:root:not([data-variant="b"])) .delta {
+	color: inherit;
+}
+
+.spark {
+	flex: 1 1 auto;
+	min-width: 96px;
+	max-width: 220px;
+	height: 56px;
+	margin-right: 8px;
+}
+
+.quote {
+	grid-area: quote;
+	min-width: 0;
+}
+
+.stats {
+	grid-area: stats;
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 8px;
+	margin: 0;
+}
+
+/* Value above its label; the label stays first for screen readers. */
+.stat {
+	display: flex;
+	flex-direction: column-reverse;
+	justify-content: flex-end;
+	gap: 6px;
+	min-width: 0;
+}
+
+.stat-value {
+	margin: 0;
+	font-size: 26px;
+	line-height: 0.85;
+}
+
+.stat-label {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 12px;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	overflow-wrap: anywhere;
+}
+
+@media (min-width: 1024px) {
+	.ph {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		grid-template-areas:
+			"head head"
+			"id quote"
+			"elo stats";
+		align-items: center;
+		column-gap: 40px;
+		row-gap: 26px;
+		margin: 0;
+		padding: 28px;
+		border-radius: var(--radius-card);
+	}
+}
+
+/* ── Design B: a white card with the jersey ─────────────────────────── */
+:global([data-variant="b"]) .ph {
+	--hero-spark: var(--color-brand);
+	grid-template-areas:
+		"id"
+		"elo"
+		"quote"
+		"stats";
+	row-gap: 14px;
+	padding: 18px;
+	border-radius: var(--radius-card);
+	background: var(--color-surface);
+	color: var(--color-ink);
+	box-shadow: var(--shadow-card);
+}
+
+@media (min-width: 1024px) {
+	:global([data-variant="b"]) .ph {
+		grid-template-areas:
+			"id quote"
+			"elo stats";
+		row-gap: 20px;
+		padding: 24px;
+	}
+}
+
+.id-b {
+	gap: 14px;
+}
+
+.jersey {
+	position: relative;
+	width: 130px;
+	height: 140px;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 16px;
+	background: var(--color-win-soft);
+}
+
+.jersey-svg {
+	width: 116px;
+	height: 116px;
+	overflow: visible;
+}
+
+.shirt {
+	fill: var(--color-surface);
+	stroke: var(--color-ink);
+	stroke-width: 2.5;
+	stroke-linejoin: round;
+}
+
+.trim {
+	fill: none;
+	stroke: var(--color-brand);
+	stroke-width: 5;
+	stroke-linecap: round;
+}
+
+.jersey-name,
+.jersey-number {
+	font-family: var(--font-cond);
+	font-weight: 800;
+	fill: var(--color-brand);
+}
+
+.jersey-name {
+	font-size: 13px;
+	letter-spacing: 1px;
+}
+
+.jersey-number {
+	font-size: 50px;
+}
+
+.jersey :global(.jersey-avatar) {
+	position: absolute;
+	right: -6px;
+	bottom: -6px;
+}
+
+.id-b .id-text {
+	gap: 6px;
+}
+
+.id-b .tag {
+	font-family: var(--font-sans);
+	font-size: 12px;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--color-muted);
+}
+
+.id-b .name {
+	font-size: 34px;
+	line-height: 1;
+}
+
+.id-b .name.mid {
+	font-size: 30px;
+}
+
+.id-b .name.long {
+	font-size: 26px;
+}
+
+.id-b .archetype {
+	font-family: var(--font-sans);
+	font-weight: 500;
+	font-size: 14px;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--color-brand-strong);
+}
+
+.games-pill {
+	padding: 3px 10px;
+	font-family: var(--font-cond);
+	font-size: 13px;
+	white-space: normal;
+}
+
+/* Small phones: a smaller jersey leaves the name room. */
+@media (max-width: 359px) {
+	.jersey {
+		width: 104px;
+		height: 116px;
+	}
+
+	.jersey-svg {
+		width: 92px;
+		height: 92px;
+	}
+}
+
+:global([data-variant="b"]) .elo-value {
+	font-size: 60px;
+	line-height: 1;
+}
+
+:global([data-variant="b"]) .elo-main {
+	gap: 6px;
+}
+
+:global([data-variant="b"]) .delta {
+	font-size: 12px;
+}
+
+:global([data-variant="b"]) .spark {
+	margin-right: 0;
+}
+
+:global([data-variant="b"]) .stats {
+	gap: 6px;
+}
+
+:global([data-variant="b"]) .stat {
+	align-items: center;
+	gap: 2px;
+	padding: 8px 4px;
+	border-radius: 12px;
+	background: var(--color-win-soft);
+}
+
+:global([data-variant="b"]) .stat-value {
+	font-size: 22px;
+	line-height: 1.1;
+}
+
+:global([data-variant="b"]) .stat-value.tone-win {
+	color: var(--color-win);
+}
+
+:global([data-variant="b"]) .stat-value.tone-loss {
+	color: var(--color-loss);
+}
+
+:global([data-variant="b"]) .stat-label {
+	font-family: var(--font-sans);
+	font-weight: 400;
+	font-size: 11px;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--color-muted);
+	text-align: center;
+}
 </style>

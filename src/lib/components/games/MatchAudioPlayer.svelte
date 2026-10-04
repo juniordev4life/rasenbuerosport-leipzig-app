@@ -2,39 +2,17 @@
 import { getTranslate } from "@tolgee/svelte";
 
 /**
- * Custom audio player matching the Spielbericht design language —
- * 38px play button in the reporter's accent gradient, 4px progress
- * bar with the reporter's lighter gradient, current/total time line
- * underneath and a speed toggle on the right that cycles 1× → 1.25×
- * → 1.5× → 2×.
+ * Audio player for match reports and talk shows: red play button,
+ * progress bar, elapsed/total time and a speed toggle (1× → 1.25× →
+ * 1.5× → 2×). It takes the text colour of its surroundings (white on
+ * the navy talk-show card in design A, navy on white cards); in design B
+ * it sits in its own pale green panel.
  *
- * @type {{
- *   audioUrl: string|null,
- *   reporterId?: "klassiker"|"analyst"|"euphoriker"|string,
- * }}
+ * @type {{ audioUrl: string|null }}
  */
-let { audioUrl = null, reporterId = "analyst" } = $props();
+let { audioUrl = null } = $props();
 
 const { t } = getTranslate();
-
-const PALETTE = {
-	klassiker: {
-		btn: "linear-gradient(135deg, #E24B4A, #C73E3D)",
-		fill: "linear-gradient(90deg, #E24B4A, #F87171)",
-		shadow: "rgba(226, 75, 74, 0.4)",
-	},
-	analyst: {
-		btn: "linear-gradient(135deg, #1E3A8A, #1E40AF)",
-		fill: "linear-gradient(90deg, #93C5FD, #60A5FA)",
-		shadow: "rgba(30, 58, 138, 0.4)",
-	},
-	euphoriker: {
-		btn: "linear-gradient(135deg, #F59E0B, #D97706)",
-		fill: "linear-gradient(90deg, #F59E0B, #FBBF24)",
-		shadow: "rgba(245, 158, 11, 0.4)",
-	},
-};
-const skin = $derived(PALETTE[reporterId] ?? PALETTE.analyst);
 
 const SPEEDS = [1, 1.25, 1.5, 2];
 
@@ -82,30 +60,26 @@ const progress = $derived(duration > 0 ? (currentTime / duration) * 100 : 0);
 		<button
 			type="button"
 			class="play-btn"
-			style="background: {skin.btn}; box-shadow: 0 4px 12px {skin.shadow};"
 			onclick={togglePlay}
 			aria-label={isPlaying ? $t("audio_player.pause") : $t("audio_player.play")}
 		>
 			{#if isPlaying}
-				<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
+				<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
 					<rect x="6" y="4" width="4" height="16" />
 					<rect x="14" y="4" width="4" height="16" />
 				</svg>
 			{:else}
-				<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="margin-left: 2px;" aria-hidden="true">
+				<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" style="margin-left: 3px;" aria-hidden="true">
 					<polygon points="6 4 20 12 6 20" />
 				</svg>
 			{/if}
 		</button>
 
-		<div class="progress-wrap">
-			<div class="progress-bar">
-				<div
-					class="progress-fill"
-					style="background: {skin.fill}; width: {progress}%;"
-				></div>
+		<div class="track-wrap">
+			<div class="track">
+				<div class="fill" style="width: {progress}%;"></div>
 			</div>
-			<div class="meta">
+			<div class="times">
 				<span>{formatTime(currentTime)}</span>
 				<span>{formatTime(duration)}</span>
 			</div>
@@ -113,7 +87,7 @@ const progress = $derived(duration > 0 ? (currentTime / duration) * 100 : 0);
 
 		<button
 			type="button"
-			class="speed-btn"
+			class="speed"
 			onclick={cycleSpeed}
 			aria-label={$t("audio_player.speed")}
 		>{speed}×</button>
@@ -134,51 +108,96 @@ const progress = $derived(duration > 0 ? (currentTime / duration) * 100 : 0);
 
 <style>
 .player {
-	background: rgba(0, 0, 0, 0.25);
-	border-radius: 12px;
-	padding: 10px 12px;
 	display: flex;
 	align-items: center;
 	gap: 12px;
 }
+
 .play-btn {
-	width: 38px; height: 38px;
-	border-radius: 50%;
-	border: 0;
-	color: white;
-	display: flex; align-items: center; justify-content: center;
-	cursor: pointer;
+	width: 48px;
+	height: 48px;
 	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 0;
+	border-radius: 999px;
+	background: var(--color-brand);
+	color: var(--color-on-brand);
+	box-shadow: var(--shadow-fab);
+	cursor: pointer;
 }
-.progress-wrap { flex: 1; min-width: 0; }
-.progress-bar {
+
+.play-btn:hover {
+	background: var(--color-brand-strong);
+}
+
+.track-wrap {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.track {
 	height: 4px;
-	background: rgba(255, 255, 255, 0.08);
-	border-radius: 2px;
+	background: color-mix(in srgb, currentColor 22%, transparent);
+	border-radius: var(--radius-bar);
 	overflow: hidden;
 }
-.progress-fill {
+
+.fill {
 	height: 100%;
-	border-radius: 2px;
+	background: var(--color-brand);
+	border-radius: var(--radius-bar);
 	transition: width 0.2s linear;
 }
-.meta {
-	display: flex; justify-content: space-between;
-	font-size: 10px;
-	color: #6B7280;
-	margin-top: 4px;
+
+.times {
+	display: flex;
+	justify-content: space-between;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 12px;
 	font-variant-numeric: tabular-nums;
 }
-.speed-btn {
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	color: #9CA3AF;
-	font-size: 10px;
-	font-weight: 700;
-	padding: 4px 7px;
-	border-radius: 6px;
-	cursor: pointer;
+
+.speed {
+	height: 32px;
 	flex-shrink: 0;
+	padding: 0 12px;
+	border: 0;
+	border-radius: 999px;
+	background: transparent;
+	color: inherit;
+	box-shadow: inset 0 0 0 1px currentColor;
+	font-size: 13px;
+	cursor: pointer;
 }
-.speed-btn:hover { background: rgba(255, 255, 255, 0.08); color: #E5E7EB; }
+
+/* Design B: a pale green panel with a chunkier track. */
+:global([data-variant="b"]) .player {
+	padding: 10px 12px;
+	border-radius: 18px;
+	background: var(--color-win-soft);
+	color: var(--color-ink);
+}
+
+:global([data-variant="b"]) .track {
+	height: 6px;
+	background: var(--color-chart-3);
+}
+
+:global([data-variant="b"]) .times {
+	font-family: var(--font-sans);
+	font-weight: 400;
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .speed {
+	background: var(--color-surface);
+	box-shadow: none;
+	font-weight: 700;
+}
 </style>

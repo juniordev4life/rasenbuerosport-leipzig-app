@@ -1,5 +1,9 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import MatchHeader from "$lib/components/liveMatch/MatchHeader.svelte";
+import ConfirmDialog from "$lib/components/ui/ConfirmDialog.svelte";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
+import { getTeamByName } from "$lib/services/teams.services.js";
 import {
 	computeRunningScore,
 	getCurrentRound,
@@ -21,6 +25,10 @@ import SequenceBoard from "./SequenceBoard.svelte";
  * Inner state machine for the active shot:
  *   pickShooter → pickResult → (if missed) pickKeeper → next shot
  *                            → (if goal)                next shot
+ *
+ * Layout: the live scoreboard (MatchHeader) with the shootout score,
+ * the sequence board, then one card for the active shot (or the end
+ * card once decided). Abort asks first via ConfirmDialog.
  *
  * @type {{
  *   homeTeam: string,
@@ -103,26 +111,38 @@ const pendingShooter = $derived.by(() => {
 	return pool.find((p) => p.id === pendingShooterId) ?? null;
 });
 
-/** Visual gradient generator — same palette as LiveMatchStep. */
-function gradientFor(id) {
-	if (!id) return null;
-	const palette = [
-		["#84CC16", "#65A30D"],
-		["#E24B4A", "#C73E3D"],
-		["#6366F1", "#4338CA"],
-		["#F59E0B", "#D97706"],
-		["#06B6D4", "#0891B2"],
-		["#A78BFA", "#7C3AED"],
-		["#EC4899", "#BE185D"],
-		["#14B8A6", "#0F766E"],
-	];
-	let hash = 0;
-	for (let i = 0; i < id.length; i += 1) {
-		hash = (hash * 31 + id.charCodeAt(i)) | 0;
+/** @type {import('$lib/services/teams.services.js').TeamData|null} */
+let homeTeamData = $state(null);
+/** @type {import('$lib/services/teams.services.js').TeamData|null} */
+let awayTeamData = $state(null);
+
+// Crests for the scoreboard; the live step already filled the cache.
+// They are decoration only, so a failed lookup keeps the plain names.
+$effect(() => {
+	if (homeTeam) {
+		getTeamByName(homeTeam)
+			.then((td) => {
+				homeTeamData = td || null;
+			})
+			.catch(() => {});
 	}
-	const [a, b] = palette[Math.abs(hash) % palette.length];
-	return `linear-gradient(135deg, ${a}, ${b})`;
-}
+});
+$effect(() => {
+	if (awayTeam) {
+		getTeamByName(awayTeam)
+			.then((td) => {
+				awayTeamData = td || null;
+			})
+			.catch(() => {});
+	}
+});
+
+const homeTeamView = $derived(
+	homeTeamData ?? { name: homeTeam, logo_url: null },
+);
+const awayTeamView = $derived(
+	awayTeamData ?? { name: awayTeam, logo_url: null },
+);
 
 function pickShooter(id) {
 	pendingShooterId = id;
@@ -201,38 +221,49 @@ function confirmAbortNo() {
 }
 </script>
 
+{#snippet playerPicker(players, onPick, keeper)}
+	<div class="picker-grid">
+		{#each players as player (player.id)}
+			<button
+				type="button"
+				class="picker-button"
+				class:keeper
+				onclick={() => onPick(player.id)}
+			>
+				<PlayerAvatar {player} size={36} />
+				<span class="picker-name">{player.username}</span>
+			</button>
+		{/each}
+	</div>
+{/snippet}
+
+{#snippet shootoutBadge()}
+	{#if decided}
+		<span class="chip shootout-chip decided">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
+			{$t("penalty_shootout.hero.decided")}
+		</span>
+	{:else}
+		<span class="chip shootout-chip">
+			<svg viewBox="0 0 24 24" fill="currentColor" width="11" height="11" aria-hidden="true"><path d="M12 2.8l2.8 5.7 6.3.9-4.55 4.43 1.07 6.27L12 17.1l-5.62 2.96 1.07-6.27L2.9 9.4l6.3-.9z" /></svg>
+			{$t("penalty_shootout.hero.title")}
+		</span>
+	{/if}
+{/snippet}
+
 <div class="penalty-step">
-	<div class="hero" class:decided>
-		<div class="hero-pill-row">
-			<span class="hero-pill">
-				{#if decided}
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="10" height="10" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
-					{$t("penalty_shootout.hero.decided")}
-				{:else}
-					<span class="hero-pill-star" aria-hidden="true">★</span>
-					{$t("penalty_shootout.hero.title")}
-				{/if}
-			</span>
-		</div>
-		<div class="hero-score-row">
-			<div class="hero-team home">
-				<span class="hero-team-name">{homeTeam}</span>
-			</div>
-			<div class="hero-score">
-				<span>{runningScore.home}</span>
-				<span class="sep">:</span>
-				<span>{runningScore.away}</span>
-			</div>
-			<div class="hero-team away">
-				<span class="hero-team-name">{awayTeam}</span>
-			</div>
-		</div>
-		<p class="hero-subtitle">
-			{$t("penalty_shootout.hero.subtitle_after_extra", {
+	<div class="penalty-head">
+		<MatchHeader
+			homeTeam={homeTeamView}
+			awayTeam={awayTeamView}
+			scoreHome={runningScore.home}
+			scoreAway={runningScore.away}
+			badge={shootoutBadge}
+			subtitle={$t("penalty_shootout.hero.subtitle_after_extra", {
 				scoreHome,
 				scoreAway,
 			})}
-		</p>
+		/>
 	</div>
 
 	<SequenceBoard
@@ -243,11 +274,10 @@ function confirmAbortNo() {
 		{awayPlayers}
 		pendingShooter={pendingShooter}
 		{decided}
-		{gradientFor}
 	/>
 
 	{#if decided}
-		<div class="end-card">
+		<div class="card end-card">
 			<p class="end-title">{$t("penalty_shootout.end.title")}</p>
 			<p class="end-subtitle">
 				{$t("penalty_shootout.end.subtitle", {
@@ -258,20 +288,20 @@ function confirmAbortNo() {
 			</p>
 			<button
 				type="button"
-				class="primary-btn success"
+				class="btn btn-lg btn-confirm w-full finish"
 				disabled={ending}
 				onclick={handleFinish}
 			>
 				{#if ending}
-					<span class="spinner" aria-hidden="true"></span>
+					<span class="spinner spinner-sm finish-spinner" aria-hidden="true"></span>
 				{:else}
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
 				{/if}
 				<span>{$t("penalty_shootout.end.cta")}</span>
 			</button>
 		</div>
 	{:else}
-		<div class="active-card">
+		<div class="card active-card">
 			{#if activePhase === "pickShooter"}
 				<div class="active-header">
 					<span class="active-title">
@@ -284,27 +314,7 @@ function confirmAbortNo() {
 						{$t("penalty_shootout.active.who_shoots")}
 					</span>
 				</div>
-				<div class="picker-grid">
-					{#each nextTeamPlayers as player (player.id)}
-						<button
-							type="button"
-							class="picker-button"
-							onclick={() => pickShooter(player.id)}
-						>
-							<span
-								class="picker-avatar"
-								style:--cell-gradient={gradientFor(player.id)}
-							>
-								{#if player.avatar_url}
-									<img referrerpolicy="no-referrer" src={player.avatar_url} alt="" />
-								{:else}
-									{player.username?.charAt(0).toUpperCase() ?? "?"}
-								{/if}
-							</span>
-							<span class="picker-name">{player.username}</span>
-						</button>
-					{/each}
-				</div>
+				{@render playerPicker(nextTeamPlayers, pickShooter, false)}
 			{:else if activePhase === "pickResult"}
 				<div class="active-header">
 					<span class="active-title">
@@ -319,19 +329,20 @@ function confirmAbortNo() {
 				</div>
 				<div class="result-row">
 					<button type="button" class="result-button goal" onclick={chooseGoal}>
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
 						{$t("penalty_shootout.active.goal")}
 					</button>
 					<button type="button" class="result-button miss" onclick={chooseMissed}>
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
 						{$t("penalty_shootout.active.missed")}
 					</button>
 				</div>
-				<button type="button" class="link-back" onclick={resetActiveShot}>
-					← {$t("penalty_shootout.active.change_shooter")}
+				<button type="button" class="text-action" onclick={resetActiveShot}>
+					<span aria-hidden="true">←</span>
+					{$t("penalty_shootout.active.change_shooter")}
 				</button>
 			{:else if activePhase === "pickKeeper"}
-				<div class="active-header keeper">
+				<div class="active-header">
 					<span class="active-title">
 						{$t("penalty_shootout.keeper.title")}
 					</span>
@@ -341,36 +352,13 @@ function confirmAbortNo() {
 						})}
 					</span>
 				</div>
-				<div class="picker-grid">
-					{#each keeperTeamPlayers as keeper (keeper.id)}
-						<button
-							type="button"
-							class="picker-button keeper"
-							onclick={() => chooseKeeper(keeper.id)}
-						>
-							<span
-								class="picker-avatar"
-								style:--cell-gradient={gradientFor(keeper.id)}
-							>
-								{#if keeper.avatar_url}
-									<img referrerpolicy="no-referrer" src={keeper.avatar_url} alt="" />
-								{:else}
-									{keeper.username?.charAt(0).toUpperCase() ?? "?"}
-								{/if}
-							</span>
-							<span class="picker-name">{keeper.username}</span>
-						</button>
-					{/each}
-				</div>
-				<button
-					type="button"
-					class="no-keeper-button"
-					onclick={chooseNoKeeper}
-				>
+				{@render playerPicker(keeperTeamPlayers, chooseKeeper, true)}
+				<button type="button" class="no-keeper-button" onclick={chooseNoKeeper}>
 					{$t("penalty_shootout.keeper.no_keeper")}
 				</button>
-				<button type="button" class="link-back" onclick={() => (activePhase = "pickResult")}>
-					← {$t("penalty_shootout.keeper.back_to_result")}
+				<button type="button" class="text-action" onclick={() => (activePhase = "pickResult")}>
+					<span aria-hidden="true">←</span>
+					{$t("penalty_shootout.keeper.back_to_result")}
 				</button>
 			{/if}
 		</div>
@@ -378,206 +366,137 @@ function confirmAbortNo() {
 
 	<div class="footer-actions">
 		{#if canCorrectLast}
-			<button type="button" class="link-back" onclick={correctLastShot}>
-				← {$t("penalty_shootout.footer.correct_last")}
+			<button type="button" class="page-action" onclick={correctLastShot}>
+				<span aria-hidden="true">←</span>
+				{$t("penalty_shootout.footer.correct_last")}
 			</button>
 		{/if}
-		<button type="button" class="link-back danger" onclick={handleAbort}>
-			← {$t("penalty_shootout.footer.abort")}
+		<button type="button" class="page-action" onclick={handleAbort}>
+			<span aria-hidden="true">←</span>
+			{$t("penalty_shootout.footer.abort")}
 		</button>
 	</div>
 </div>
 
-{#if confirmAbort}
-	<div class="abort-overlay" role="dialog" aria-modal="true">
-		<div class="abort-card">
-			<h3>{$t("penalty_shootout.abort.title")}</h3>
-			<p>{$t("penalty_shootout.abort.body", { scoreHome, scoreAway })}</p>
-			<div class="abort-buttons">
-				<button type="button" class="abort-secondary" onclick={confirmAbortNo}>
-					{$t("penalty_shootout.abort.cancel")}
-				</button>
-				<button type="button" class="abort-danger" onclick={confirmAbortYes}>
-					{$t("penalty_shootout.abort.confirm")}
-				</button>
-			</div>
-		</div>
-	</div>
-{/if}
+<ConfirmDialog
+	open={confirmAbort}
+	title={$t("penalty_shootout.abort.title")}
+	message={$t("penalty_shootout.abort.body", { scoreHome, scoreAway })}
+	actions={[
+		{ label: $t("penalty_shootout.abort.cancel"), variant: "primary", onClick: confirmAbortNo },
+		{ label: $t("penalty_shootout.abort.confirm"), variant: "ghost", onClick: confirmAbortYes },
+	]}
+	onDismiss={confirmAbortNo}
+/>
 
 <style>
 .penalty-step {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
-	padding-bottom: env(safe-area-inset-bottom, 12px);
+	gap: 14px;
 }
 
-/* HERO -------------------------------------------------------------- */
-.hero {
-	background:
-		radial-gradient(ellipse at top, rgba(245, 158, 11, 0.22) 0%, transparent 60%),
-		linear-gradient(180deg, #1A1F2A 0%, #131822 100%);
-	border: 1px solid rgba(245, 158, 11, 0.32);
-	border-radius: 16px;
-	padding: 14px 16px 12px;
-	position: relative;
-	overflow: hidden;
-}
-.hero::before {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 2px;
-	background: linear-gradient(90deg, transparent, #F59E0B 50%, transparent);
-}
-.hero.decided {
-	background:
-		radial-gradient(ellipse at top, rgba(132, 204, 22, 0.22) 0%, transparent 60%),
-		linear-gradient(180deg, #1A1F2A 0%, #131822 100%);
-	border-color: rgba(132, 204, 22, 0.4);
-}
-.hero.decided::before {
-	background: linear-gradient(90deg, transparent, #84CC16 50%, transparent);
+/* The scoreboard is the first block of the page here (the wizard shows
+ * no step bar in the shootout): in A its red band runs up to the top
+ * edge on phones, in B the card keeps clear of the notch. */
+@media (max-width: 1023px) {
+	:global(:root:not([data-variant="b"])) .penalty-head {
+		margin-top: -0.5rem;
+	}
+
+	:global(:root:not([data-variant="b"])) .penalty-head :global(.live-hero) {
+		padding-top: calc(env(safe-area-inset-top, 0px) + 18px);
+	}
+
+	:global([data-variant="b"]) .penalty-head {
+		padding-top: env(safe-area-inset-top, 0px);
+	}
 }
 
-.hero-pill-row {
-	text-align: center;
-	margin-bottom: 8px;
-}
-.hero-pill {
-	display: inline-flex;
-	align-items: center;
+/* Badge in the scoreboard: gold while shooting, white once decided. */
+.shootout-chip {
 	gap: 6px;
-	font-size: 10px;
-	font-weight: 800;
-	color: #FBBF24;
-	background: rgba(245, 158, 11, 0.16);
-	border: 1px solid rgba(245, 158, 11, 0.38);
-	padding: 4px 12px;
-	border-radius: 999px;
-	text-transform: uppercase;
-	letter-spacing: 0.12em;
-}
-.hero.decided .hero-pill {
-	color: #84CC16;
-	background: rgba(132, 204, 22, 0.16);
-	border-color: rgba(132, 204, 22, 0.4);
-}
-.hero-pill-star { font-size: 11px; }
-
-.hero-score-row {
-	display: grid;
-	grid-template-columns: 1fr auto 1fr;
-	align-items: center;
-	gap: 10px;
-	margin-bottom: 4px;
-}
-.hero-team {
-	display: flex;
-	align-items: center;
-	min-width: 0;
-}
-.hero-team.away { justify-content: flex-end; }
-.hero-team-name {
-	font-size: 12px;
-	font-weight: 700;
-	color: #E5E7EB;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-.hero-score {
-	font-size: 26px;
-	font-weight: 800;
-	line-height: 1;
-	font-variant-numeric: tabular-nums;
-	letter-spacing: -0.02em;
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	color: #F0F2F5;
-}
-.hero-score .sep { color: #4B5563; font-size: 20px; }
-.hero-subtitle {
-	margin: 4px 0 0;
-	font-size: 10px;
-	color: #9CA3AF;
-	text-align: center;
+	padding: 3px 10px;
+	background: var(--color-gold);
+	color: var(--color-on-gold);
+	font-family: var(--font-cond);
+	font-size: 13px;
+	letter-spacing: 0.03em;
 }
 
-/* ACTIVE CARD ------------------------------------------------------- */
-.active-card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 14px;
+.shootout-chip.decided {
+	background: var(--color-surface);
+	color: var(--color-win);
 }
+
+/* ── Active shot ────────────────────────────────────────────────────── */
+.active-card,
+.end-card {
+	padding: 16px;
+}
+
 .active-header {
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
 	margin-bottom: 12px;
 }
+
 .active-title {
-	font-size: 12px;
-	font-weight: 800;
-	color: #F0F2F5;
-	letter-spacing: 0.02em;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 18px;
+	line-height: 1.15;
+	letter-spacing: var(--section-tracking);
+	text-transform: var(--section-case);
 }
+
 .active-prompt {
-	font-size: 11px;
-	color: #9CA3AF;
-}
-.active-header.keeper .active-title {
-	color: #A5B4FC;
+	color: var(--color-muted);
+	font-size: 14px;
 }
 
 .picker-grid {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 8px;
 }
+
 .picker-button {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	background: rgba(0, 0, 0, 0.3);
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	border-radius: 12px;
-	padding: 10px 12px;
-	color: #F0F2F5;
-	font-size: 12px;
+	min-height: 56px;
+	padding: 8px 12px 8px 10px;
+	border: 1px solid transparent;
+	border-radius: var(--radius-tile);
+	background: var(--color-sunken);
+	color: var(--color-ink);
+	font-size: 14px;
 	font-weight: 700;
+	text-align: left;
 	cursor: pointer;
-	transition: transform 0.12s, border-color 0.15s, background-color 0.15s;
+	transition:
+		border-color 120ms,
+		background-color 120ms,
+		transform 120ms;
 }
+
 .picker-button:hover {
-	background: rgba(255, 255, 255, 0.04);
-	border-color: rgba(245, 158, 11, 0.4);
+	border-color: var(--color-gold);
+	background: var(--color-surface);
 }
-.picker-button:active { transform: scale(0.98); }
+
 .picker-button.keeper:hover {
-	border-color: rgba(129, 140, 248, 0.5);
+	border-color: var(--color-aqua);
 }
-.picker-avatar {
-	width: 32px;
-	height: 32px;
-	border-radius: 50%;
-	background: var(--cell-gradient);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: white;
-	font-size: 12px;
-	font-weight: 800;
-	overflow: hidden;
-	flex-shrink: 0;
+
+.picker-button:active {
+	transform: scale(0.98);
 }
-.picker-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
 .picker-name {
+	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -585,187 +504,146 @@ function confirmAbortNo() {
 
 .result-row {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 10px;
 }
+
+/* Goal / missed: colour plus a ✓ / ✕ icon and the word. */
 .result-button {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 6px;
-	padding: 14px 8px;
-	border-radius: 12px;
+	gap: 8px;
+	min-height: 56px;
+	padding: 0 8px;
 	border: 0;
-	font-size: 13px;
-	font-weight: 800;
-	cursor: pointer;
-	color: white;
+	border-radius: var(--radius-control);
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 17px;
+	letter-spacing: 0.03em;
 	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	transition: transform 0.12s;
+	cursor: pointer;
+	transition: transform 120ms;
 }
+
+.result-button:active {
+	transform: scale(0.98);
+}
+
 .result-button.goal {
-	background: linear-gradient(135deg, #84CC16, #65A30D);
-	box-shadow: 0 4px 14px rgba(132, 204, 22, 0.35);
+	background: var(--color-win);
+	color: var(--color-on-win);
 }
+
 .result-button.miss {
-	background: linear-gradient(135deg, #E24B4A, #C73E3D);
-	box-shadow: 0 4px 14px rgba(226, 75, 74, 0.35);
+	background: var(--color-loss);
+	color: var(--color-on-loss);
 }
-.result-button:active { transform: scale(0.98); }
+
+:global([data-variant="b"]) .result-button {
+	box-shadow: var(--shadow-control);
+}
 
 .no-keeper-button {
 	width: 100%;
+	min-height: 44px;
 	margin-top: 10px;
-	background: rgba(0, 0, 0, 0.35);
-	border: 1px dashed rgba(255, 255, 255, 0.12);
-	color: #9CA3AF;
-	font-size: 11px;
+	padding: 0 12px;
+	border: 1.5px dashed var(--color-line);
+	border-radius: var(--radius-control);
+	background: transparent;
+	color: var(--color-muted);
+	font-size: 14px;
 	font-weight: 700;
-	padding: 10px;
-	border-radius: 10px;
 	cursor: pointer;
-	transition: color 0.15s, border-color 0.15s;
-}
-.no-keeper-button:hover {
-	color: #E5E7EB;
-	border-color: rgba(255, 255, 255, 0.25);
 }
 
-/* END CARD ---------------------------------------------------------- */
+.no-keeper-button:hover {
+	border-color: var(--color-muted);
+	color: var(--color-ink);
+}
+
+.text-action {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 40px;
+	margin-top: 8px;
+	padding: 0 4px;
+	border: 0;
+	background: none;
+	color: var(--color-muted);
+	font-size: 14px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.text-action:hover {
+	color: var(--color-ink);
+	text-decoration: underline;
+}
+
+/* ── End card ───────────────────────────────────────────────────────── */
 .end-card {
-	background:
-		radial-gradient(ellipse at top, rgba(132, 204, 22, 0.18) 0%, transparent 70%),
-		#131822;
-	border: 1px solid rgba(132, 204, 22, 0.35);
-	border-radius: 14px;
-	padding: 14px;
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
 	text-align: center;
 }
+
 .end-title {
-	font-size: 11px;
-	font-weight: 800;
-	color: #84CC16;
-	letter-spacing: 0.12em;
-	text-transform: uppercase;
 	margin: 0;
+	font-family: var(--font-section);
+	font-weight: var(--section-weight);
+	font-size: var(--section-size);
+	letter-spacing: var(--section-tracking);
+	text-transform: var(--section-case);
+	color: var(--section-color);
 }
+
 .end-subtitle {
-	font-size: 12px;
-	color: #D1D5DB;
-	margin: 0;
+	margin: 0 0 4px;
+	font-size: 15px;
 	line-height: 1.4;
 }
 
-.primary-btn {
-	width: 100%;
-	border: 0;
-	border-radius: 12px;
-	padding: 14px;
-	font-size: 14px;
-	font-weight: 800;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 8px;
-	color: white;
-	transition: transform 0.15s, opacity 0.15s;
+/* "Spiel beenden" uses .btn-confirm (red in A, green in B). */
+.finish:disabled {
+	cursor: wait;
 }
-.primary-btn.success {
-	background: linear-gradient(135deg, #84CC16, #65A30D);
-	box-shadow: 0 6px 18px rgba(132, 204, 22, 0.4);
-}
-.primary-btn:disabled { opacity: 0.6; cursor: wait; }
-.primary-btn:not(:disabled):hover { transform: translateY(-1px); }
-.spinner {
-	width: 14px;
-	height: 14px;
-	border: 2px solid currentColor;
-	border-right-color: transparent;
-	border-radius: 50%;
-	animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
 
-/* FOOTER ACTIONS ---------------------------------------------------- */
+.finish-spinner {
+	--spinner-color: currentColor;
+}
+
+/* ── Footer actions on the page background ──────────────────────────── */
 .footer-actions {
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
 	align-items: center;
-	margin-top: 6px;
+	gap: 2px;
 }
-.link-back {
-	background: none;
-	border: 0;
-	color: #6B7280;
-	font-size: 11px;
-	font-weight: 600;
-	padding: 8px 12px;
-	cursor: pointer;
-	transition: color 0.15s;
-}
-.link-back:hover { color: #E5E7EB; }
-.link-back.danger:hover { color: #E24B4A; }
 
-/* ABORT CONFIRMATION ------------------------------------------------ */
-.abort-overlay {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.65);
-	display: flex;
+.page-action {
+	display: inline-flex;
 	align-items: center;
-	justify-content: center;
-	padding: 16px;
-	z-index: 80;
-}
-.abort-card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 16px;
-	padding: 18px;
-	max-width: 360px;
-	width: 100%;
-}
-.abort-card h3 {
-	margin: 0 0 6px;
-	font-size: 14px;
-	font-weight: 800;
-	color: #F0F2F5;
-}
-.abort-card p {
-	margin: 0 0 12px;
-	font-size: 12px;
-	color: #9CA3AF;
-	line-height: 1.5;
-}
-.abort-buttons {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 8px;
-}
-.abort-secondary,
-.abort-danger {
+	gap: 6px;
+	min-height: 40px;
+	padding: 0 12px;
 	border: 0;
-	border-radius: 10px;
-	padding: 10px;
-	font-size: 12px;
-	font-weight: 700;
+	background: none;
+	color: var(--color-on-page);
+	text-shadow: var(--on-page-shadow);
+	font-size: 14px;
 	cursor: pointer;
-	transition: transform 0.12s, opacity 0.15s;
 }
-.abort-secondary {
-	background: rgba(255, 255, 255, 0.06);
-	color: #E5E7EB;
+
+.page-action:hover {
+	text-decoration: underline;
 }
-.abort-danger {
-	background: linear-gradient(135deg, #E24B4A, #C73E3D);
-	color: white;
+
+:global([data-variant="b"]) .page-action {
+	font-weight: 700;
 }
-.abort-secondary:active,
-.abort-danger:active { transform: scale(0.98); }
 </style>

@@ -2,10 +2,15 @@
 import { getTranslate } from "@tolgee/svelte";
 import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
 import InfoTip from "$lib/components/ui/InfoTip.svelte";
-import { avatarGradient } from "$lib/utils/avatarColor.utils.js";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 
 /**
- * "Lieblingsgegner & Co" — three optional relation rows.
+ * "Lieblingsgegner & Co" — up to three relation rows (favourite
+ * opponent, nemesis, top duo partner), each a button that hands the
+ * relation to `onSelect`. The role is always named in a chip. Design A:
+ * the chip leads the row (navy / red / gold). Design B: a soft pill at
+ * the row's end. Renders nothing without any relation.
  *
  * All three card objects are expected to come pre-converted: the
  * `winRate` field is an integer **percent** in `[0, 100]`, not the
@@ -39,10 +44,6 @@ const items = $derived(
 	].filter(Boolean),
 );
 
-function initial(name) {
-	return (name ?? "?").charAt(0).toUpperCase();
-}
-
 function tagLabel(type) {
 	if (type === "favorite") return $t("profile.relation_favorite");
 	if (type === "nemesis") return $t("profile.relation_nemesis");
@@ -58,118 +59,160 @@ function metaLabel(r) {
 </script>
 
 {#if items.length > 0}
-	<div class="section-card">
-		<div class="section-header">
-			<div class="section-label">
-				<UsersIcon size={12} strokeWidth={1.8} />
-				<span>{$t("profile.relations_section")}</span>
-				<InfoTip
-					titleKey="info_tips.relations.title"
-					bodyKey="info_tips.relations.body"
-					size={13}
-				/>
-			</div>
-		</div>
-		<div class="relations-list">
-			{#each items as r (r.type)}
-				{@const g = avatarGradient(r.playerId)}
-				<button
-					type="button"
-					class="relation-row"
-					onclick={() => onSelect?.({ type: r.type, playerId: r.playerId })}
-				>
-					<div class="relation-tag {r.type}">{tagLabel(r.type)}</div>
-					<div class="relation-avatar" style="background: {g.gradient};">
-						{#if r.avatarUrl}
-							<img referrerpolicy="no-referrer" src={r.avatarUrl} alt={r.name} />
-						{:else}
-							<span>{initial(r.name)}</span>
-						{/if}
-					</div>
-					<div class="relation-info">
-						<div class="relation-name">{r.name}</div>
-						<div class="relation-meta">{metaLabel(r)}</div>
-					</div>
-					<div class="relation-arrow">›</div>
-				</button>
-			{/each}
-		</div>
+	<div class="relations">
+		<Section title={$t("profile.relations_section")}>
+			{#snippet icon()}<UsersIcon size={22} strokeWidth={2} />{/snippet}
+			{#snippet aside()}
+				<InfoTip titleKey="info_tips.relations.title" bodyKey="info_tips.relations.body" />
+			{/snippet}
+			<ul class="card rows list">
+				{#each items as r (r.type)}
+					<li>
+						<button
+							type="button"
+							class="row"
+							onclick={() => onSelect?.({ type: r.type, playerId: r.playerId })}
+						>
+							<span class="chip tag tag-{r.type}">{tagLabel(r.type)}</span>
+							<PlayerAvatar
+								player={{ id: r.playerId, name: r.name, avatarUrl: r.avatarUrl }}
+								size={40}
+							/>
+							<span class="info">
+								<span class="name">{r.name}</span>
+								<span class="meta">{metaLabel(r)}</span>
+							</span>
+							<svg
+								class="chevron"
+								viewBox="0 0 24 24"
+								width="18"
+								height="18"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2.2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								aria-hidden="true"
+							>
+								<path d="M9 5l7 7-7 7" />
+							</svg>
+						</button>
+					</li>
+				{/each}
+			</ul>
+		</Section>
 	</div>
 {/if}
 
 <style>
-.section-card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 14px;
+/* ── Design A: chip first ───────────────────────────────────────────── */
+.list {
+	margin: 0;
+	padding: 0 12px;
+	list-style: none;
 }
-.section-header { margin-bottom: 14px; }
-.section-label {
-	font-size: 10px;
-	text-transform: uppercase; letter-spacing: 0.1em;
-	color: #6B7280;
-	font-weight: 700;
-	display: inline-flex;
+
+.row {
+	display: flex;
 	align-items: center;
-	gap: 6px;
-}
-.relations-list { display: flex; flex-direction: column; gap: 8px; }
-.relation-row {
-	background: rgba(0,0,0,0.2);
-	border: 1px solid #1F2937;
-	border-radius: 12px;
-	padding: 10px 12px;
-	display: flex; align-items: center; gap: 11px;
-	cursor: pointer;
-	transition: background-color .15s;
-	text-align: left;
+	gap: 10px;
 	width: 100%;
+	min-height: 72px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
 }
-.relation-row:hover { background: rgba(255,255,255,0.04); }
-.relation-tag {
-	font-size: 9px; font-weight: 800;
-	text-transform: uppercase; letter-spacing: 0.08em;
-	padding: 2px 8px; border-radius: 999px;
+
+.row:hover .name {
+	text-decoration: underline;
+}
+
+.tag {
+	box-sizing: border-box;
+	justify-content: center;
+	width: 96px;
 	flex-shrink: 0;
+	padding: 4px 6px;
+	font-size: 12px;
 }
-.relation-tag.favorite {
-	background: rgba(132, 204, 22, 0.15);
-	color: #84CC16;
-	border: 1px solid rgba(132, 204, 22, 0.3);
+
+.tag-favorite {
+	background: var(--color-navy);
+	color: var(--color-on-navy);
 }
-.relation-tag.nemesis {
-	background: rgba(226, 75, 74, 0.15);
-	color: #E24B4A;
-	border: 1px solid rgba(226, 75, 74, 0.3);
+
+.tag-nemesis {
+	background: var(--color-brand);
+	color: var(--color-on-brand);
 }
-.relation-tag.partner {
-	background: rgba(132, 204, 22, 0.15);
-	color: #84CC16;
-	border: 1px solid rgba(132, 204, 22, 0.3);
+
+.tag-partner {
+	background: var(--color-gold);
+	color: var(--color-on-gold);
 }
-.relation-avatar {
-	width: 36px; height: 36px; border-radius: 50%;
-	display: flex; align-items: center; justify-content: center;
-	font-size: 13px; font-weight: 700; color: white;
-	flex-shrink: 0;
+
+.info {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	flex: 1;
+	min-width: 0;
+}
+
+.name {
+	font-weight: 700;
+	font-size: 15px;
 	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
-.relation-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.relation-info { flex: 1; min-width: 0; }
-.relation-name {
-	font-size: 13px; font-weight: 700;
-	color: #E5E7EB;
-	margin-bottom: 1px;
-}
-.relation-meta {
-	font-size: 10px;
-	color: #6B7280;
+
+.meta {
+	font-size: 12px;
+	color: var(--color-muted);
 	font-variant-numeric: tabular-nums;
 }
-.relation-arrow {
-	color: #4B5563;
-	font-size: 16px;
+
+.chevron {
 	flex-shrink: 0;
+	color: var(--color-muted);
+}
+
+/* ── Design B: avatar first, the role as a soft pill at the end ─────── */
+:global([data-variant="b"]) .list {
+	padding: 0;
+}
+
+:global([data-variant="b"]) .row {
+	gap: 12px;
+}
+
+:global([data-variant="b"]) .tag {
+	order: 3;
+	width: auto;
+	padding: 4px 10px;
+}
+
+:global([data-variant="b"]) .chevron {
+	order: 4;
+}
+
+:global([data-variant="b"]) .tag-favorite {
+	background: var(--color-win-soft);
+	color: var(--color-win);
+}
+
+:global([data-variant="b"]) .tag-nemesis {
+	background: var(--color-loss-soft);
+	color: var(--color-loss);
+}
+
+:global([data-variant="b"]) .tag-partner {
+	background: var(--color-gold-soft);
+	color: var(--color-ink);
 }
 </style>

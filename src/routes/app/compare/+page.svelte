@@ -19,7 +19,6 @@ let opponentId = $state(initialOpponentId());
 let toast = $state(null);
 
 const userId = $derived($user?.uid ?? null);
-const userName = $derived($user?.user_metadata?.username ?? "?");
 const userAvatar = $derived($user?.user_metadata?.avatar_url ?? null);
 
 function initialOpponentId() {
@@ -80,8 +79,11 @@ const selectedOpponent = $derived(
 	opponentId ? (playerList.find((p) => p.id === opponentId) ?? null) : null,
 );
 
-const pageTitle = $t("compare.ready_title");
-const pageSub = $t("compare.pick_sub_empty");
+const pageTitle = $derived($t("compare.ready_title"));
+const pageSub = $derived($t("compare.pick_sub_empty"));
+const startLabel = $derived(
+	opponentId ? $t("compare.start_btn") : $t("compare.start_btn_disabled"),
+);
 
 function pickOpponent(id) {
 	opponentId = id === opponentId ? null : id;
@@ -108,151 +110,240 @@ function startCompare() {
 	<title>RasenBürosport - {$t("compare.title")}</title>
 </svelte:head>
 
-<div class="mx-auto max-w-3xl lg:max-w-none xl:max-w-[1100px] px-3 lg:px-0 pb-48 lg:pb-8 pt-0 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-x-6 lg:items-start">
-	<header class="mb-2 lg:hidden">
-		<h1 class="text-2xl font-extrabold tracking-tight text-text-primary whitespace-nowrap">{pageTitle}</h1>
-		<p class="text-xs text-text-secondary mt-1">{pageSub}</p>
+<!-- Phone: the pairing in the hero band, the picker below, the start
+     button pinned above the bottom nav. Desktop: the picker fills the
+     main column, the pairing and the start button form a sticky rail. -->
+<div class="cmp stack">
+	<header class="hero bleed cmp-hero">
+		<div class="cmp-intro">
+			<h1 class="page-title cmp-title">{pageTitle}</h1>
+			<p class="cmp-sub">{pageSub}</p>
+		</div>
+
+		<ModeTabs value={mode} onSelect={(v) => (mode = v)} onDuoTap={showSoonToast} />
+
+		<div class="slots">
+			<PlayerSlot
+				state="locked"
+				accent="self"
+				player={me
+					? {
+							id: me.id,
+							username: me.username,
+							avatarUrl: userAvatar ?? me.avatarUrl,
+							initials: (me.username ?? "?").charAt(0).toUpperCase(),
+							elo: me.elo,
+						}
+					: null}
+			/>
+			<span class="vs">VS</span>
+			<PlayerSlot
+				state={selectedOpponent ? "filled" : "empty"}
+				accent="opponent"
+				player={selectedOpponent
+					? {
+							id: selectedOpponent.id,
+							username: selectedOpponent.username,
+							avatarUrl: selectedOpponent.avatarUrl,
+							initials: (selectedOpponent.username ?? "?").charAt(0).toUpperCase(),
+							elo: selectedOpponent.elo,
+						}
+					: null}
+				onClear={clearOpponent}
+			/>
+		</div>
+
+		<button type="button" class="btn btn-lg btn-accent start-rail" disabled={!opponentId} onclick={startCompare}>
+			{startLabel}
+		</button>
 	</header>
 
-	<div class="mb-3 lg:mb-0 lg:col-start-1 lg:row-start-1">
-		<ModeTabs value={mode} onSelect={(v) => (mode = v)} onDuoTap={showSoonToast} />
-	</div>
-
-	<!-- Rail (desktop): VS pairing + start CTA, sticky beside the picker. -->
-	<div class="lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-20 lg:flex lg:flex-col lg:gap-3">
-	<div class="slots">
-		<PlayerSlot
-			state="locked"
-			accent="self"
-			player={me
-				? {
-						id: me.id,
-						username: me.username,
-						avatarUrl: userAvatar ?? me.avatarUrl,
-						initials: (me.username ?? "?").charAt(0).toUpperCase(),
-						elo: me.elo,
-					}
-				: null}
-		/>
-		<div class="vs">VS</div>
-		<PlayerSlot
-			state={selectedOpponent ? "filled" : "empty"}
-			accent="opponent"
-			player={selectedOpponent
-				? {
-						id: selectedOpponent.id,
-						username: selectedOpponent.username,
-						avatarUrl: selectedOpponent.avatarUrl,
-						initials: (selectedOpponent.username ?? "?").charAt(0).toUpperCase(),
-						elo: selectedOpponent.elo,
-					}
-				: null}
-			onClear={clearOpponent}
-		/>
-	</div>
-		<button type="button" class="cta hidden lg:block" disabled={!opponentId} onclick={startCompare}>
-			{#if opponentId}
-				⚔ {$t("compare.start_btn")}
-			{:else}
-				{$t("compare.start_btn_disabled")}
-			{/if}
-		</button>
-	</div>
-
-	<div class="lg:col-start-1 lg:row-start-2">
-	{#if loading}
-		<div class="flex justify-center py-12">
-			<div class="animate-spin h-8 w-8 border-2 border-warning border-t-transparent rounded-full"></div>
-		</div>
-	{:else}
-		<SelectionGrid
-			players={playerList}
-			currentUserId={userId}
-			selectedId={opponentId}
-			onSelect={pickOpponent}
-		/>
-	{/if}
+	<div class="cmp-picker">
+		{#if loading}
+			<div class="flex justify-center py-12">
+				<span class="spinner" role="status" aria-label={$t("common.loading")}></span>
+			</div>
+		{:else}
+			<SelectionGrid
+				players={playerList}
+				currentUserId={userId}
+				selectedId={opponentId}
+				onSelect={pickOpponent}
+			/>
+		{/if}
 	</div>
 </div>
 
-<div class="cta-bar lg:hidden">
-	<button
-		type="button"
-		class="cta"
-		disabled={!opponentId}
-		onclick={startCompare}
-	>
-		{#if opponentId}
-			⚔ {$t("compare.start_btn")}
-		{:else}
-			{$t("compare.start_btn_disabled")}
-		{/if}
+<div class="cta-bar">
+	<button type="button" class="btn btn-lg btn-primary cta" disabled={!opponentId} onclick={startCompare}>
+		{startLabel}
 	</button>
 </div>
 
-{#if toast}
-	<div class="toast">{toast}</div>
-{/if}
+<!-- The live region stays mounted so screen readers announce the toast. -->
+<div role="status" aria-live="polite">
+	{#if toast}
+		<div class="toast">{toast}</div>
+	{/if}
+</div>
 
 <style>
+/* Room for the pinned start button above the bottom nav. */
+.cmp {
+	padding-bottom: 6rem;
+}
+
+/* ── Hero: red band in A, text on the pitch in B ────────────────────── */
+.cmp-hero {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	padding-top: 22px;
+	padding-bottom: 24px;
+}
+
+.cmp-intro {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.cmp-title {
+	margin: 0;
+	font-size: 36px;
+	text-shadow: var(--on-page-shadow);
+}
+
+.cmp-sub {
+	margin: 0;
+	font-size: 15px;
+	text-shadow: var(--on-page-shadow);
+}
+
 .slots {
 	display: flex;
-	align-items: stretch;
+	align-items: center;
 	gap: 8px;
-	margin-bottom: 18px;
 }
+
 .vs {
-	align-self: center;
-	background: rgba(255,255,255,0.05);
-	color: #9CA3AF;
-	font-size: 11px;
-	font-weight: 800;
-	letter-spacing: 0.12em;
-	padding: 4px 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	flex-shrink: 0;
 	border-radius: 999px;
+	box-shadow: inset 0 0 0 1px currentColor;
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 14px;
+	letter-spacing: 0.04em;
 }
+
+/* Desktop-only start button in the rail; phones use the pinned bar. */
+.start-rail {
+	display: none;
+}
+
 .cta-bar {
 	position: fixed;
+	left: 0;
+	right: 0;
 	bottom: calc(env(safe-area-inset-bottom) + 130px);
-	left: 0; right: 0;
+	z-index: 30;
 	display: flex;
 	justify-content: center;
+	padding: 0 var(--page-gutter, 1rem);
 	pointer-events: none;
-	z-index: 30;
 }
+
 .cta {
-	pointer-events: auto;
 	min-width: 260px;
-	padding: 14px 22px;
-	border-radius: 999px;
-	border: 0;
-	font-size: 14px;
-	font-weight: 800;
-	letter-spacing: 0.04em;
-	cursor: pointer;
-	background: linear-gradient(135deg, #F59E0B, #D97706);
-	color: #1A1F2A;
-	box-shadow: 0 8px 24px rgba(245, 158, 11, 0.35);
-	transition: transform .15s, opacity .15s;
+	box-shadow: var(--shadow-raised);
+	pointer-events: auto;
 }
-.cta:disabled {
-	background: rgba(255,255,255,0.06);
-	color: #6B7280;
-	box-shadow: none;
-	cursor: not-allowed;
-}
-.cta:not(:disabled):hover { transform: translateY(-1px); }
+
 .toast {
 	position: fixed;
+	left: 50%;
 	bottom: calc(env(safe-area-inset-bottom) + 200px);
-	left: 50%; transform: translateX(-50%);
-	background: rgba(0,0,0,0.85);
-	color: #FFFFFF;
-	font-size: 12px;
-	font-weight: 600;
-	padding: 8px 16px;
-	border-radius: 999px;
-	border: 1px solid rgba(255,255,255,0.1);
 	z-index: 40;
+	max-width: calc(100vw - 32px);
+	padding: 10px 16px;
+	transform: translateX(-50%);
+	border-radius: var(--radius-control);
+	background: var(--color-navy);
+	color: var(--color-on-navy);
+	box-shadow: var(--shadow-raised);
+	font-weight: 700;
+	font-size: 13px;
+	text-align: center;
+}
+
+:global([data-variant="b"]) .cmp-hero {
+	gap: 12px;
+	padding: 0;
+}
+
+:global([data-variant="b"]) .cmp-title {
+	font-size: 34px;
+	line-height: 1.1;
+}
+
+:global([data-variant="b"]) .cmp-sub {
+	font-weight: 700;
+	font-size: 16px;
+}
+
+:global([data-variant="b"]) .vs {
+	background: var(--color-navy);
+	color: var(--color-on-navy);
+	box-shadow: var(--shadow-control);
+	text-shadow: none;
+}
+
+/* ── Desktop: picker left, sticky pairing rail right ────────────────── */
+@media (min-width: 1024px) {
+	.cmp {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 320px;
+		column-gap: 32px;
+		align-items: start;
+		padding-bottom: 2rem;
+	}
+
+	.cmp-hero {
+		grid-column: 2;
+		grid-row: 1;
+		position: sticky;
+		top: 92px;
+		margin: 0;
+		padding: 24px;
+		border-radius: var(--radius-card);
+	}
+
+	/* The top bar carries the page title on desktop. */
+	.cmp-title {
+		display: none;
+	}
+
+	.cmp-picker {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.start-rail {
+		display: inline-flex;
+		width: 100%;
+	}
+
+	.cta-bar {
+		display: none;
+	}
+
+	.toast {
+		bottom: 32px;
+	}
 }
 </style>

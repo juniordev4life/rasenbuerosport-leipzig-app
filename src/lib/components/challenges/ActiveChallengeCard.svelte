@@ -1,15 +1,24 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import BallIcon from "$lib/components/icons/BallIcon.svelte";
+import CheckIcon from "$lib/components/icons/CheckIcon.svelte";
+import FootballIcon from "$lib/components/icons/FootballIcon.svelte";
+import HistoryIcon from "$lib/components/icons/HistoryIcon.svelte";
+import LightningIcon from "$lib/components/icons/LightningIcon.svelte";
+import ShieldIcon from "$lib/components/icons/ShieldIcon.svelte";
+import TargetIcon from "$lib/components/icons/TargetIcon.svelte";
+import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
+import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
 import {
 	difficultyBucket,
 	progressState,
 } from "$lib/utils/challengeStatus.utils.js";
 
 /**
- * Single active challenge tile. Border-left signals the difficulty
- * bucket (leicht/mittel/schwer), the progress bar switches between
- * done / in-progress / behind, and a contextual meta line on the
- * right tells the user how far off the target they are.
+ * One active challenge: a line icon for its metric, name, description
+ * and difficulty, a progress bar and the state underneath ("2 to go",
+ * "close call" or "done" with a check). Design B adds the ball riding
+ * the bar and the trophy at its end, like the home card.
  *
  * @type {{
  *   challenge: {
@@ -28,6 +37,24 @@ let { challenge, hoursRemaining = 7 * 24, locale = "de" } = $props();
 
 const { t } = getTranslate();
 
+/** Line icon per challenge metric (the API's emoji are not UI icons). */
+const METRIC_ICONS = {
+	goals_scored: TargetIcon,
+	clean_sheets: ShieldIcon,
+	wins: TrophyIcon,
+	games_played: BallIcon,
+	hattricks: LightningIcon,
+	comeback_wins: HistoryIcon,
+	duo_wins: UsersIcon,
+};
+
+const DIFFICULTY_CHIP = {
+	leicht: "chip-win",
+	mittel: "chip-gold",
+	schwer: "chip-loss",
+};
+
+const MetricIcon = $derived(METRIC_ICONS[challenge.metric] ?? TargetIcon);
 const bucket = $derived(difficultyBucket(challenge.difficulty));
 const state = $derived(progressState(challenge.progress, hoursRemaining));
 
@@ -61,123 +88,160 @@ const metaRight = $derived.by(() => {
 });
 </script>
 
-<div class="card {bucket}" class:completed>
+<article class="card challenge" class:completed>
 	<div class="head">
-		<div class="icon">{challenge.emoji ?? "🎯"}</div>
-		<div class="head-text">
-			<div class="name">{label}</div>
+		<span class="tile icon" aria-hidden="true"><MetricIcon size={20} strokeWidth={2} /></span>
+		<div class="flex-1 min-w-0">
+			<h2 class="name">{label}</h2>
 			{#if description}
-				<div class="desc">{description}</div>
+				<p class="desc">{description}</p>
 			{/if}
 		</div>
-		<div class="difficulty-pill {bucket}">{$t(`challenges.difficulty.${bucket}`)}</div>
+		<span class="chip difficulty {DIFFICULTY_CHIP[bucket]}">
+			{$t(`challenges.difficulty.${bucket}`)}
+		</span>
 	</div>
 
-	<div class="bar-track">
-		<div class="bar-fill {state}" style="width: {pct}%;"></div>
+	<div class="bar-row">
+		<div class="bar">
+			<div class="progress {state}"><span style="width: {pct}%"></span></div>
+			<span class="ball" style="left: calc((100% - 20px) * {pct / 100})" aria-hidden="true">
+				<FootballIcon size={20} />
+			</span>
+		</div>
+		<span class="goal" aria-hidden="true"><TrophyIcon size={18} strokeWidth={2} /></span>
 	</div>
 
 	<div class="meta">
-		<span class="current {completed ? 'done' : ''}">{metaLeft}</span>
+		<span class="fraction">{metaLeft}</span>
 		<span class="status {metaRight.tone}">
-			{#if completed}✓ {/if}{metaRight.text}
+			{#if completed}<CheckIcon size={13} strokeWidth={3} />{/if}
+			{metaRight.text}
 		</span>
 	</div>
-</div>
+</article>
 
 <style>
-.card {
-	background: #131822;
-	border: 1px solid #1F2937;
-	border-radius: 14px;
-	padding: 12px 14px;
-	transition: background-color .15s;
+.challenge {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding: 16px;
 }
-.card.leicht { border-left: 3px solid #84CC16; }
-.card.mittel { border-left: 3px solid #F59E0B; }
-.card.schwer { border-left: 3px solid #E24B4A; }
-.card.completed {
-	background: linear-gradient(180deg, rgba(132, 204, 22, 0.05), #131822);
-}
+
 .head {
-	display: flex; align-items: flex-start; gap: 10px;
-	margin-bottom: 10px;
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
 }
+
 .icon {
-	width: 32px; height: 32px;
-	border-radius: 10px;
-	background: rgba(255,255,255,0.04);
-	display: flex; align-items: center; justify-content: center;
-	font-size: 18px;
+	width: 40px;
+	height: 40px;
 	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--color-ink);
 }
-.head-text { flex: 1; min-width: 0; }
+
+.completed .icon {
+	background: var(--color-win);
+	color: var(--color-on-win);
+}
+
 .name {
-	font-size: 13px;
-	font-weight: 800;
-	color: #E5E7EB;
-	margin-bottom: 2px;
-}
-.desc {
-	font-size: 11px;
-	color: #9CA3AF;
-	line-height: 1.35;
-}
-.difficulty-pill {
-	font-size: 9px;
-	font-weight: 800;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	padding: 3px 8px;
-	border-radius: 999px;
-	white-space: nowrap;
-	flex-shrink: 0;
-}
-.difficulty-pill.leicht {
-	background: rgba(132, 204, 22, 0.12);
-	color: #84CC16;
-	border: 1px solid rgba(132, 204, 22, 0.3);
-}
-.difficulty-pill.mittel {
-	background: rgba(245, 158, 11, 0.12);
-	color: #F59E0B;
-	border: 1px solid rgba(245, 158, 11, 0.3);
-}
-.difficulty-pill.schwer {
-	background: rgba(226, 75, 74, 0.12);
-	color: #E24B4A;
-	border: 1px solid rgba(226, 75, 74, 0.3);
-}
-.bar-track {
-	height: 6px;
-	background: rgba(255,255,255,0.05);
-	border-radius: 3px;
-	overflow: hidden;
-	margin-bottom: 6px;
-}
-.bar-fill {
-	height: 100%;
-	border-radius: 3px;
-	transition: width 0.4s ease;
-}
-.bar-fill.done {
-	background: linear-gradient(90deg, #84CC16, #65A30D);
-}
-.bar-fill.in-progress {
-	background: linear-gradient(90deg, #F59E0B, #D97706);
-}
-.bar-fill.behind {
-	background: linear-gradient(90deg, #E24B4A, #C73E3D);
-}
-.meta {
-	display: flex; justify-content: space-between;
-	font-size: 11px;
+	margin: 0;
 	font-weight: 700;
+	font-size: 15px;
+	line-height: 1.25;
+}
+
+.desc {
+	margin: 3px 0 0;
+	font-size: 13px;
+	line-height: 1.35;
+	color: var(--color-muted);
+}
+
+.difficulty {
+	flex-shrink: 0;
+	margin-top: 2px;
+}
+
+.bar-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.bar {
+	position: relative;
+	flex: 1;
+	min-width: 0;
+}
+
+.progress.done > span {
+	background: var(--color-win);
+}
+
+.meta {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: -4px;
+}
+
+.fraction {
+	font-family: var(--font-cond);
+	font-weight: 700;
+	font-size: 15px;
 	font-variant-numeric: tabular-nums;
 }
-.current { color: #9CA3AF; }
-.current.done { color: #84CC16; }
-.status.done { color: #84CC16; }
-.status.in-progress { color: #F59E0B; }
-.status.behind { color: #E24B4A; }
+
+.status {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-weight: 700;
+	font-size: 13px;
+	color: var(--color-muted);
+}
+
+.status.done {
+	color: var(--color-win);
+}
+
+.status.behind {
+	color: var(--color-loss);
+}
+
+.ball,
+.goal {
+	display: none;
+}
+
+/* Design B: ball on the bar, trophy at the end, green figures. */
+:global([data-variant="b"]) .fraction {
+	font-weight: 800;
+	font-size: 16px;
+	color: var(--color-win);
+}
+
+:global([data-variant="b"]) .ball {
+	position: absolute;
+	top: 50%;
+	display: flex;
+	transform: translateY(-50%);
+}
+
+:global([data-variant="b"]) .goal {
+	display: flex;
+	color: var(--color-muted);
+}
+
+:global([data-variant="b"]) .completed .goal {
+	color: var(--color-win);
+}
 </style>

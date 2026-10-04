@@ -40,6 +40,9 @@
 		"vitest": "^4.0.18"
 	},
 	"dependencies": {
+		"@fontsource/anton": "^5.3.0",
+		"@fontsource/barlow": "^5.3.0",
+		"@fontsource/barlow-condensed": "^5.3.0",
 		"@tailwindcss/vite": "^4.2.1",
 		"@tolgee/format-icu": "^6.3.0",
 		"@tolgee/svelte": "^6.3.0",

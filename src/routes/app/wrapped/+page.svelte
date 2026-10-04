@@ -1,9 +1,16 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
+import BallIcon from "$lib/components/icons/BallIcon.svelte";
+import GiftIcon from "$lib/components/icons/GiftIcon.svelte";
+import LightningIcon from "$lib/components/icons/LightningIcon.svelte";
+import MicIcon from "$lib/components/icons/MicIcon.svelte";
+import TrophyIcon from "$lib/components/icons/TrophyIcon.svelte";
+import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
+import PlayerAvatar from "$lib/components/ui/PlayerAvatar.svelte";
+import Section from "$lib/components/ui/Section.svelte";
 import MatchOfTheWeekCard from "$lib/components/wrapped/MatchOfTheWeekCard.svelte";
 import TalkrundePending from "$lib/components/wrapped/TalkrundePending.svelte";
 import TalkrundePlayer from "$lib/components/wrapped/TalkrundePlayer.svelte";
-import WrappedAvatar from "$lib/components/wrapped/WrappedAvatar.svelte";
 import WrappedCompactCard from "$lib/components/wrapped/WrappedCompactCard.svelte";
 import WrappedHighlightCard from "$lib/components/wrapped/WrappedHighlightCard.svelte";
 import WrappedStatsHero from "$lib/components/wrapped/WrappedStatsHero.svelte";
@@ -49,6 +56,12 @@ const isCurrentWeek = $derived.by(() => {
 	const todayMonday = isoWeekStart(new Date());
 	return wrappedMonday === todayMonday;
 });
+
+const talkReady = $derived(
+	talkrunde?.status === "ready" && Boolean(talkrunde.audio_url),
+);
+/** Pending fallback only for the current week — see `isCurrentWeek`. */
+const showTalk = $derived(talkReady || isCurrentWeek);
 
 /**
  * Resolve any wrapped-row date input ("YYYY-MM-DD" string, full ISO
@@ -123,387 +136,402 @@ function formatDate(value) {
 		year: "numeric",
 	});
 }
+
+/** Signed ELO change with a real minus sign ("+12", "−8"). */
+function formatDelta(delta) {
+	return `${delta >= 0 ? "+" : "−"}${Math.abs(delta)}`;
+}
 </script>
 
 <svelte:head>
 	<title>RasenBürosport - {$t("wrapped.nav.title")}</title>
 </svelte:head>
 
-<div class="mx-auto max-w-3xl lg:max-w-none pb-4">
+{#snippet riseIcon()}
+	<svg
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		width="14"
+		height="14"
+		aria-hidden="true"
+	>
+		<polyline points="3 17 9 11 13 15 21 7" />
+		<polyline points="14 7 21 7 21 14" />
+	</svg>
+{/snippet}
+
+{#snippet fallIcon()}
+	<svg
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		width="14"
+		height="14"
+		aria-hidden="true"
+	>
+		<polyline points="3 7 9 13 13 9 21 17" />
+		<polyline points="14 17 21 17 21 10" />
+	</svg>
+{/snippet}
+
+{#snippet runnerIcon()}
+	<svg
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		width="14"
+		height="14"
+		aria-hidden="true"
+	>
+		<circle cx="12" cy="5" r="2" />
+		<path d="M12 7v6l-3 8M12 13l3 8M6 11l6-2 6 2" />
+	</svg>
+{/snippet}
+
+<div class="stack pb-4 lg:pb-8">
 	{#if loading}
 		<div class="flex justify-center py-16">
-			<div
-				class="animate-spin h-8 w-8 border-2 border-accent-red border-t-transparent rounded-full"
-			></div>
+			<span class="spinner" role="status" aria-label={$t("common.loading")}></span>
 		</div>
 	{:else if error}
-		<div
-			class="bg-bg-secondary border border-error/60 rounded-2xl p-6 text-center text-error"
-		>
-			{$t("wrapped.error.load_failed")}
-		</div>
-	{:else if !current}
-		<WrappedWeekNav
-			weekLabel=""
-			canGoOlder={false}
-			canGoNewer={false}
-			onOlder={() => {}}
-			onNewer={() => {}}
-		/>
-		<div class="empty">
-			<p>{$t("wrapped.empty.title")}</p>
-			<p class="empty-detail">{$t("wrapped.empty.body")}</p>
-		</div>
+		<div class="card notice text-loss font-bold">{$t("wrapped.error.load_failed")}</div>
 	{:else}
-		<WrappedWeekNav
-			{weekLabel}
-			{canGoOlder}
-			{canGoNewer}
-			onOlder={goOlder}
-			onNewer={goNewer}
-		/>
-
-		<WrappedStatsHero
-			totals={{
-				total_games: payload.total_games,
-				total_goals: payload.total_goals,
-			}}
-		/>
-
-		{#if talkrunde?.status === "ready" && talkrunde.audio_url}
-			<TalkrundePlayer audioUrl={talkrunde.audio_url} />
-		{:else if isCurrentWeek}
-			<!--
-				Pending fallback only renders for the current week — older
-				weeks where the talkrunde never existed get the slot empty
-				instead of a stale "Wird Freitag generiert" line.
-			-->
-			<TalkrundePending status={talkrunde?.status ?? "pending"} />
-		{/if}
-
-		<div class="section-label">{$t("wrapped.section.details")}</div>
-
-		<!-- Feature recap tiles: MVP + Match of the Week side by side on desktop. -->
-		<div class="contents lg:grid lg:grid-cols-2 lg:gap-4 lg:auto-rows-min lg:items-start">
-		<!-- MVP block -->
-		{#if payload.mvp}
-			<WrappedHighlightCard
-				variant="mvp"
-				categoryLabel={$t("wrapped.mvp.category")}
-				title={payload.mvp.username}
-				detail={$t("wrapped.mvp.detail", { wins: payload.mvp.wins })}
-				href={`/app/profile/${payload.mvp.id}`}
-			>
-				{#snippet visual()}
-					<WrappedAvatar
-						playerId={payload.mvp.id}
-						name={payload.mvp.username}
-						avatarUrl={payload.mvp.avatar_url}
-						size={64}
+		<!-- On phones the wrapper dissolves (`display: contents`) and every
+		     block joins the page stack; at lg it becomes a 12-column grid. -->
+		<div class="bento">
+			<section class="hero bleed wrapped-hero {current && showTalk ? 'span-7' : 'span-12'}">
+				{#if current}
+					<WrappedWeekNav
+						{weekLabel}
+						{canGoOlder}
+						{canGoNewer}
+						onOlder={goOlder}
+						onNewer={goNewer}
 					/>
-				{/snippet}
-			</WrappedHighlightCard>
-		{/if}
-
-		<!-- Match of the Week — dedicated hero card with lineups + link to full report -->
-		{#if payload.match_of_the_week}
-			<MatchOfTheWeekCard match={payload.match_of_the_week} />
-		{/if}
-		</div>
-
-		<!-- Stat tiles: 2–3 column bento of the weekly superlatives on desktop. -->
-		<div class="contents lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-4 lg:auto-rows-min lg:items-start">
-		<!-- Topscorer -->
-		{#if payload.topscorer}
-			<WrappedCompactCard
-				categoryLabel={$t("wrapped.topscorer.category")}
-				name={payload.topscorer.username}
-				value={String(payload.topscorer.goals ?? "")}
-				valueTone="neutral"
-				href={`/app/profile/${payload.topscorer.id}`}
-			>
-				{#snippet icon()}
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						width="14"
-						height="14"
-						aria-hidden="true"
-					>
-						<circle cx="12" cy="12" r="9" />
-						<path d="M12 3v18M3 12h18" />
-					</svg>
-				{/snippet}
-				{#snippet avatar()}
-					<WrappedAvatar
-						playerId={payload.topscorer.id}
-						name={payload.topscorer.username}
-						avatarUrl={payload.topscorer.avatar_url}
-						size={36}
+					<WrappedStatsHero
+						totals={{
+							total_games: payload.total_games,
+							total_goals: payload.total_goals,
+						}}
 					/>
-				{/snippet}
-			</WrappedCompactCard>
-		{/if}
-
-		<!-- Most active -->
-		{#if payload.most_active}
-			<WrappedCompactCard
-				categoryLabel={$t("wrapped.most_active.category")}
-				name={payload.most_active.username}
-				value={String(payload.most_active.games_played ?? "")}
-				valueTone="neutral"
-				href={`/app/profile/${payload.most_active.id}`}
-			>
-				{#snippet icon()}
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						width="14"
-						height="14"
-						aria-hidden="true"
-					>
-						<circle cx="12" cy="5" r="2" />
-						<path d="M12 7v6l-3 8M12 13l3 8M6 11l6-2 6 2" />
-					</svg>
-				{/snippet}
-				{#snippet avatar()}
-					<WrappedAvatar
-						playerId={payload.most_active.id}
-						name={payload.most_active.username}
-						avatarUrl={payload.most_active.avatar_url}
-						size={36}
+				{:else}
+					<WrappedWeekNav
+						weekLabel=""
+						canGoOlder={false}
+						canGoNewer={false}
+						onOlder={() => {}}
+						onNewer={() => {}}
 					/>
-				{/snippet}
-			</WrappedCompactCard>
-		{/if}
+				{/if}
+			</section>
 
-		<!-- Biggest ELO Riser -->
-		{#if payload.biggest_riser}
-			<WrappedCompactCard
-				categoryLabel={$t("wrapped.biggest_riser.category")}
-				name={payload.biggest_riser.username}
-				detail={`${payload.biggest_riser.elo_from} → ${payload.biggest_riser.elo_to} ELO`}
-				value={`+${payload.biggest_riser.elo_delta}`}
-				valueTone="up"
-				href={`/app/profile/${payload.biggest_riser.id}`}
-			>
-				{#snippet icon()}
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						width="14"
-						height="14"
-						aria-hidden="true"
-					>
-						<polyline points="3 17 9 11 13 15 21 7" />
-						<polyline points="14 7 21 7 21 14" />
-					</svg>
-				{/snippet}
-				{#snippet avatar()}
-					<WrappedAvatar
-						playerId={payload.biggest_riser.id}
-						name={payload.biggest_riser.username}
-						avatarUrl={payload.biggest_riser.avatar_url}
-						size={36}
-					/>
-				{/snippet}
-			</WrappedCompactCard>
-		{/if}
+			{#if !current}
+				<div class="card notice span-12">
+					<span class="state-icon" aria-hidden="true">
+						<GiftIcon size={28} />
+					</span>
+					<p class="notice-title state-title">{$t("wrapped.empty.title")}</p>
+					<p>{$t("wrapped.empty.body")}</p>
+				</div>
+			{:else}
+				{#if showTalk}
+					<Section title={$t("wrapped.talkrunde.tag")} class="span-5">
+						{#snippet icon()}<MicIcon size={22} strokeWidth={2} />{/snippet}
+						{#if talkReady}
+							<TalkrundePlayer audioUrl={talkrunde.audio_url} />
+						{:else}
+							<TalkrundePending status={talkrunde?.status ?? "pending"} />
+						{/if}
+					</Section>
+				{/if}
 
-		<!-- Pechvogel — grey, augenzwinkernd -->
-		{#if payload.biggest_loser}
-			<WrappedCompactCard
-				categoryLabel={$t("wrapped.biggest_loser.category")}
-				name={payload.biggest_loser.username}
-				detail={`${payload.biggest_loser.elo_from} → ${payload.biggest_loser.elo_to} ELO`}
-				value={`${payload.biggest_loser.elo_delta >= 0 ? "+" : "−"}${Math.abs(payload.biggest_loser.elo_delta)}`}
-				valueTone="down"
-				href={`/app/profile/${payload.biggest_loser.id}`}
-			>
-				{#snippet icon()}
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						width="14"
-						height="14"
-						aria-hidden="true"
-					>
-						<polyline points="3 7 9 13 13 9 21 17" />
-						<polyline points="14 17 21 17 21 10" />
-					</svg>
-				{/snippet}
-				{#snippet avatar()}
-					<WrappedAvatar
-						playerId={payload.biggest_loser.id}
-						name={payload.biggest_loser.username}
-						avatarUrl={payload.biggest_loser.avatar_url}
-						size={36}
-					/>
-				{/snippet}
-			</WrappedCompactCard>
-		{/if}
+				<section class="details span-12" aria-labelledby="wrapped-details-title">
+					<h2 id="wrapped-details-title" class="section-title details-title">
+						{$t("wrapped.section.details")}
+					</h2>
 
-		<!-- Hottest Streak -->
-		{#if payload.hottest_streak}
-			<WrappedCompactCard
-				categoryLabel={$t("wrapped.hottest_streak.category")}
-				name={payload.hottest_streak.username}
-				detail={$t("wrapped.hottest_streak.detail", {
-					count: payload.hottest_streak.wins_in_a_row,
-				})}
-				value={String(payload.hottest_streak.wins_in_a_row)}
-				valueTone="neutral"
-				href={`/app/profile/${payload.hottest_streak.id}`}
-			>
-				{#snippet icon()}
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						width="14"
-						height="14"
-						aria-hidden="true"
-					>
-						<path d="M13 2L4.5 13h6L11 22l8.5-11h-6L13 2z" />
-					</svg>
-				{/snippet}
-				{#snippet avatar()}
-					<WrappedAvatar
-						playerId={payload.hottest_streak.id}
-						name={payload.hottest_streak.username}
-						avatarUrl={payload.hottest_streak.avatar_url}
-						size={36}
-					/>
-				{/snippet}
-			</WrappedCompactCard>
-		{/if}
+					<!-- MVP + Match of the Week side by side on desktop. -->
+					{#if payload.mvp}
+						<div class={payload.match_of_the_week ? "slot-mvp" : "slot-full"}>
+							<WrappedHighlightCard
+								variant="mvp"
+								categoryLabel={$t("wrapped.mvp.category")}
+								title={payload.mvp.username}
+								detail={$t("wrapped.mvp.detail", { wins: payload.mvp.wins })}
+								href={`/app/profile/${payload.mvp.id}`}
+							>
+								{#snippet visual()}
+									<PlayerAvatar player={payload.mvp} size={72} />
+								{/snippet}
+							</WrappedHighlightCard>
+						</div>
+					{/if}
 
-		<!-- Top Duo -->
-		{#if payload.top_duo?.players?.length === 2}
-			<WrappedCompactCard
-				categoryLabel={$t("wrapped.top_duo.category")}
-				name={`${payload.top_duo.players[0].username} & ${payload.top_duo.players[1].username}`}
-				detail={$t("wrapped.top_duo.detail", {
-					wins: payload.top_duo.wins,
-					games: payload.top_duo.games,
-					percent: Math.round((payload.top_duo.win_rate ?? 0) * 100),
-				})}
-			>
-				{#snippet icon()}
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						width="14"
-						height="14"
-						aria-hidden="true"
-					>
-						<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-						<circle cx="9" cy="7" r="4" />
-						<path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-					</svg>
-				{/snippet}
-				{#snippet avatar()}
-					<div class="duo-pair">
-						<WrappedAvatar
-							playerId={payload.top_duo.players[0].id}
-							name={payload.top_duo.players[0].username}
-							avatarUrl={payload.top_duo.players[0].avatar_url}
-							size={32}
-						/>
-						<WrappedAvatar
-							playerId={payload.top_duo.players[1].id}
-							name={payload.top_duo.players[1].username}
-							avatarUrl={payload.top_duo.players[1].avatar_url}
-							size={32}
-						/>
+					{#if payload.match_of_the_week}
+						<div class={payload.mvp ? "slot-motw" : "slot-full"}>
+							<MatchOfTheWeekCard match={payload.match_of_the_week} />
+						</div>
+					{/if}
+
+					<!-- The week's superlatives: a list on phones, a 2–3 column
+					     grid of cards on desktop. -->
+					<div class="compact-grid">
+						{#if payload.topscorer}
+							<WrappedCompactCard
+								categoryLabel={$t("wrapped.topscorer.category")}
+								name={payload.topscorer.username}
+								value={String(payload.topscorer.goals ?? "")}
+								valueTone="neutral"
+								href={`/app/profile/${payload.topscorer.id}`}
+							>
+								{#snippet icon()}<BallIcon size={14} />{/snippet}
+								{#snippet avatar()}
+									<PlayerAvatar player={payload.topscorer} size={40} />
+								{/snippet}
+							</WrappedCompactCard>
+						{/if}
+
+						{#if payload.most_active}
+							<WrappedCompactCard
+								categoryLabel={$t("wrapped.most_active.category")}
+								name={payload.most_active.username}
+								value={String(payload.most_active.games_played ?? "")}
+								valueTone="neutral"
+								href={`/app/profile/${payload.most_active.id}`}
+							>
+								{#snippet icon()}{@render runnerIcon()}{/snippet}
+								{#snippet avatar()}
+									<PlayerAvatar player={payload.most_active} size={40} />
+								{/snippet}
+							</WrappedCompactCard>
+						{/if}
+
+						{#if payload.biggest_riser}
+							<WrappedCompactCard
+								categoryLabel={$t("wrapped.biggest_riser.category")}
+								name={payload.biggest_riser.username}
+								detail={`${payload.biggest_riser.elo_from} → ${payload.biggest_riser.elo_to} ELO`}
+								value={`+${payload.biggest_riser.elo_delta}`}
+								valueTone="up"
+								href={`/app/profile/${payload.biggest_riser.id}`}
+							>
+								{#snippet icon()}{@render riseIcon()}{/snippet}
+								{#snippet avatar()}
+									<PlayerAvatar player={payload.biggest_riser} size={40} />
+								{/snippet}
+							</WrappedCompactCard>
+						{/if}
+
+						<!-- Pechvogel — muted, augenzwinkernd -->
+						{#if payload.biggest_loser}
+							<WrappedCompactCard
+								categoryLabel={$t("wrapped.biggest_loser.category")}
+								name={payload.biggest_loser.username}
+								detail={`${payload.biggest_loser.elo_from} → ${payload.biggest_loser.elo_to} ELO`}
+								value={formatDelta(payload.biggest_loser.elo_delta)}
+								valueTone="down"
+								href={`/app/profile/${payload.biggest_loser.id}`}
+							>
+								{#snippet icon()}{@render fallIcon()}{/snippet}
+								{#snippet avatar()}
+									<PlayerAvatar player={payload.biggest_loser} size={40} />
+								{/snippet}
+							</WrappedCompactCard>
+						{/if}
+
+						{#if payload.hottest_streak}
+							<WrappedCompactCard
+								categoryLabel={$t("wrapped.hottest_streak.category")}
+								name={payload.hottest_streak.username}
+								detail={$t("wrapped.hottest_streak.detail", {
+									count: payload.hottest_streak.wins_in_a_row,
+								})}
+								value={String(payload.hottest_streak.wins_in_a_row)}
+								valueTone="neutral"
+								href={`/app/profile/${payload.hottest_streak.id}`}
+							>
+								{#snippet icon()}<LightningIcon size={14} />{/snippet}
+								{#snippet avatar()}
+									<PlayerAvatar player={payload.hottest_streak} size={40} />
+								{/snippet}
+							</WrappedCompactCard>
+						{/if}
+
+						{#if payload.top_duo?.players?.length === 2}
+							<WrappedCompactCard
+								categoryLabel={$t("wrapped.top_duo.category")}
+								name={`${payload.top_duo.players[0].username} & ${payload.top_duo.players[1].username}`}
+								detail={$t("wrapped.top_duo.detail", {
+									wins: payload.top_duo.wins,
+									games: payload.top_duo.games,
+									percent: Math.round((payload.top_duo.win_rate ?? 0) * 100),
+								})}
+							>
+								{#snippet icon()}<UsersIcon size={14} strokeWidth={2} />{/snippet}
+								{#snippet avatar()}
+									<span class="duo-pair">
+										<PlayerAvatar player={payload.top_duo.players[0]} size={34} ring />
+										<PlayerAvatar player={payload.top_duo.players[1]} size={34} ring />
+									</span>
+								{/snippet}
+							</WrappedCompactCard>
+						{/if}
+
+						{#if payload.trophies_this_week?.count > 0}
+							<WrappedCompactCard
+								categoryLabel={$t("wrapped.trophies.category")}
+								name={$t("wrapped.trophies.count", {
+									count: payload.trophies_this_week.count,
+								})}
+								detail={payload.trophies_this_week.breakdown
+									.map((b) => (b.count > 1 ? `${b.username} ×${b.count}` : b.username))
+									.join(" · ")}
+								value={String(payload.trophies_this_week.count)}
+								valueTone="neutral"
+							>
+								{#snippet icon()}<TrophyIcon size={18} strokeWidth={2} />{/snippet}
+							</WrappedCompactCard>
+						{/if}
 					</div>
-				{/snippet}
-			</WrappedCompactCard>
-		{/if}
-
-		<!-- Trophies this week -->
-		{#if payload.trophies_this_week?.count > 0}
-			<WrappedCompactCard
-				categoryLabel={$t("wrapped.trophies.category")}
-				name={$t("wrapped.trophies.count", {
-					count: payload.trophies_this_week.count,
-				})}
-				detail={payload.trophies_this_week.breakdown
-					.map((b) => (b.count > 1 ? `${b.username} ×${b.count}` : b.username))
-					.join(" · ")}
-				value={String(payload.trophies_this_week.count)}
-				valueTone="neutral"
-			>
-				{#snippet icon()}
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						width="14"
-						height="14"
-						aria-hidden="true"
-					>
-						<path d="M8 21h8M12 17v4M7 4h10v3a5 5 0 01-10 0V4z" />
-					</svg>
-				{/snippet}
-			</WrappedCompactCard>
-		{/if}
+				</section>
+			{/if}
 		</div>
 	{/if}
 </div>
 
 <style>
-	.section-label {
-		font-size: 10px;
-		font-weight: 800;
-		color: #6b7280;
-		text-transform: uppercase;
-		letter-spacing: 0.12em;
-		padding: 4px 4px 10px;
-		margin-top: 8px;
+.bento {
+	display: contents;
+}
+
+/* ── Hero: red band in A (flush under the header), text on the pitch in B */
+.wrapped-hero {
+	display: flex;
+	flex-direction: column;
+	gap: 22px;
+	padding-top: 22px;
+	padding-bottom: 26px;
+}
+
+:global([data-variant="b"]) .wrapped-hero {
+	gap: 14px;
+	padding-top: 4px;
+	padding-bottom: 0;
+}
+
+/* ── Details: the MVP, the match of the week and the superlatives ──── */
+.details {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	min-width: 0;
+}
+
+/* B: the heading stands straight on the pitch. */
+:global([data-variant="b"]) .details-title {
+	color: var(--color-on-page);
+	text-shadow: var(--on-page-shadow);
+}
+
+.compact-grid {
+	display: grid;
+	gap: 10px;
+}
+
+.duo-pair {
+	display: flex;
+	gap: 3px;
+}
+
+:global([data-variant="b"]) .duo-pair {
+	gap: 0;
+}
+
+:global([data-variant="b"]) .duo-pair > :global(* + *) {
+	margin-left: -10px;
+}
+
+/* ── Empty state (.notice): a red gift and a condensed heading ──────── */
+.state-icon {
+	display: inline-flex;
+	margin-bottom: 4px;
+	color: var(--color-brand);
+}
+
+.state-title {
+	font-family: var(--font-cond);
+	font-size: 20px;
+	letter-spacing: 0.02em;
+	text-transform: var(--title-case);
+}
+
+/* ── Desktop: hero + talk show, then a grid of cards ────────────────── */
+@media (min-width: 1024px) {
+	.bento {
+		display: grid;
+		grid-template-columns: repeat(12, minmax(0, 1fr));
+		gap: var(--stack-gap);
 	}
-	.duo-pair {
-		display: flex;
+
+	.bento > :global(.span-5) {
+		grid-column: span 5;
 	}
-	.duo-pair :global(.avatar-photo:nth-child(2)),
-	.duo-pair :global(.avatar-fallback:nth-child(2)) {
-		margin-left: -8px;
-		border: 2px solid #131822;
+
+	.bento > :global(.span-7) {
+		grid-column: span 7;
 	}
-	.empty {
-		text-align: center;
-		padding: 32px 16px;
-		color: #9ca3af;
+
+	.bento > :global(.span-12) {
+		grid-column: span 12;
 	}
-	.empty-detail {
-		font-size: 12px;
-		margin-top: 8px;
-		color: #6b7280;
+
+	.wrapped-hero {
+		margin: 0;
+		padding: 28px 32px 32px;
+		border-radius: var(--radius-card);
 	}
+
+	:global([data-variant="b"]) .wrapped-hero {
+		padding: 0;
+	}
+
+	.details {
+		display: grid;
+		grid-template-columns: repeat(12, minmax(0, 1fr));
+		gap: 16px;
+	}
+
+	.details > * {
+		grid-column: span 12;
+	}
+
+	.details > .slot-mvp {
+		grid-column: span 5;
+	}
+
+	.details > .slot-motw {
+		grid-column: span 7;
+	}
+
+	.compact-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px;
+	}
+}
+
+@media (min-width: 1280px) {
+	.compact-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
 </style>
