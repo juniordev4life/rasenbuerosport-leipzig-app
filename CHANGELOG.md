@@ -6,6 +6,31 @@ Releases are cut with `npm run release`, which bumps the version, writes this fi
 
 <!-- changelogen entries appear below -->
 
+## v2.3.0
+
+[compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v2.2.0...v2.3.0)
+
+### 🚀 Enhancements
+
+- **design:** Designs "RB Leipzig" and "Fußballplatz" replace the light/dark theme ([#106](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/106))
+
+### 🩹 Fixes
+
+- **i18n:** Follow the UI language in dates, charts, awards and role labels ([#105](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/105))
+- Keep match screens working without the team catalogue; honest history counts ([#107](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/107))
+
+### 💅 Refactors
+
+- **design:** Clean up leftovers from the design-variant rebuild ([#108](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/pull/108))
+
+### 🏡 Chore
+
+- Update version badge and changelog date for v2.2.0 ([439d4ee](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/commit/439d4ee))
+
+### ❤️ Contributors
+
+- Marco Slusalek ([@juniordev4life](http://github.com/juniordev4life))
+
 ## v2.2.0 (2026-10-02)
 
 [compare changes](https://github.com/juniordev4life/rasenbuerosport-leipzig-app/compare/v2.1.0...v2.2.0)
