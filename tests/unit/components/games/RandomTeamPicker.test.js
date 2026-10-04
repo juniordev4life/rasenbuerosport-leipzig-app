@@ -1,10 +1,13 @@
 /**
- * Component test for the star-range sliders in RandomTeamPicker: each
- * slider is named by the text above it and announces its value in stars.
+ * Component test for RandomTeamPicker:
+ *   - each star-range slider is named by the text above it and
+ *     announces its value in stars;
+ *   - a search that cannot reach the team catalogue shows the load
+ *     error instead of ending in an unhandled rejection.
  */
 
-import { render, screen } from "@testing-library/svelte";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/svelte";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 vi.mock("@tolgee/svelte", async () => {
 	const { readable } = await import("svelte/store");
@@ -61,6 +64,58 @@ describe("RandomTeamPicker — star-range sliders", () => {
 		expect(screen.getByRole("slider", { name })).toHaveAttribute(
 			"aria-valuetext",
 			`new_game.random_stars_value:${stars}`,
+		);
+	});
+});
+
+describe("RandomTeamPicker — search", () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it("shows the load error when the team catalogue is unreachable", async () => {
+		// Arrange
+		vi.mocked(getAllTeams).mockRejectedValueOnce(new Error("offline"));
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		render(RandomTeamPicker, { onClose: vi.fn(), onConfirm: vi.fn() });
+
+		// Act
+		await fireEvent.click(
+			screen.getByRole("button", { name: "new_game.random_search" }),
+		);
+
+		// Assert
+		expect(await screen.findByText("teams.error_loading")).toBeInTheDocument();
+	});
+
+	it("confirms with the range the pair was rolled in, not the sliders' latest", async () => {
+		// Arrange: a 4–5★ search, then the min slider moved down to 3★
+		vi.mocked(getAllTeams).mockResolvedValue([
+			{ name: "Arsenal", star_rating: 4.5, overall_rating: 80 },
+			{ name: "Chelsea", star_rating: 4.5, overall_rating: 79 },
+		]);
+		const onConfirm = vi.fn();
+		render(RandomTeamPicker, { onClose: vi.fn(), onConfirm });
+		await fireEvent.click(
+			screen.getByRole("button", { name: "new_game.random_search" }),
+		);
+		const minSlider = screen.getByRole("slider", {
+			name: "new_game.random_min_stars",
+		});
+		await fireEvent.keyDown(minSlider, { key: "ArrowLeft" });
+		await fireEvent.keyDown(minSlider, { key: "ArrowLeft" });
+		expect(minSlider).toHaveAttribute("aria-valuenow", "3");
+
+		// Act
+		await fireEvent.click(
+			await screen.findByRole("button", { name: "new_game.random_confirm" }),
+		);
+
+		// Assert
+		expect(onConfirm).toHaveBeenCalledWith(
+			expect.any(String),
+			expect.any(String),
+			{ minStars: 4, maxStars: 5 },
 		);
 	});
 });

@@ -58,6 +58,14 @@ let homeTeamData = $state(null);
 /** @type {import('$lib/services/teams.services.js').TeamData|null} */
 let awayTeamData = $state(null);
 
+/**
+ * Star range the shown pair was rolled in (auto-roll, "Würfeln" or
+ * "Anpassen"); null once the teams were typed in by hand, or when the
+ * step opens with teams already set.
+ * @type {{ minStars: number, maxStars: number }|null}
+ */
+let rolledRange = $state(null);
+
 let rolling = $state(false);
 let rollError = $state("");
 let showAnpassen = $state(false);
@@ -78,12 +86,35 @@ function saveManuell() {
 	awayTeam = manualAwayDraft;
 	homeTeamData = null;
 	awayTeamData = null;
+	rolledRange = null;
 	showManuell = false;
 }
 
-const hasTeams = $derived(!!homeTeamData && !!awayTeamData);
-const sameStars = $derived(
-	homeTeamData?.star_rating === awayTeamData?.star_rating,
+/**
+ * "balanced" | "uneven" once both teams' star ratings are known. Rolled
+ * pairs always share their rating, so "uneven" only comes from a
+ * manual pick.
+ */
+const starBalance = $derived.by(() => {
+	const home = homeTeamData?.star_rating;
+	const away = awayTeamData?.star_rating;
+	if (home == null || away == null) return null;
+	return home === away ? "balanced" : "uneven";
+});
+
+/** Line under the poster: how the pair was picked and its star balance. */
+const pairInfo = $derived(
+	[
+		rolledRange &&
+			$t("new_game.poster.generation_info", {
+				min: rolledRange.minStars,
+				max: rolledRange.maxStars,
+			}),
+		starBalance === "balanced" && $t("new_game.poster.balanced"),
+		starBalance === "uneven" && $t("new_game.poster.imbalanced"),
+	]
+		.filter(Boolean)
+		.join(" · "),
 );
 
 const playerCount = $derived.by(() => {
@@ -124,16 +155,27 @@ async function roll() {
 		awayTeam = pair.away.name;
 		homeTeamData = pair.home;
 		awayTeamData = pair.away;
+		rolledRange = { minStars, maxStars };
+	} catch (err) {
+		// Catalogue unreachable: say so; "Manuell" still works without it.
+		console.error("Failed to roll teams:", err);
+		rollError = $t("teams.error_loading");
 	} finally {
 		rolling = false;
 	}
 }
 
-function onAnpassenConfirm(home, away) {
+/**
+ * @param {string} home
+ * @param {string} away
+ * @param {{ minStars: number, maxStars: number }} range - the picker's star range
+ */
+function onAnpassenConfirm(home, away, range) {
 	homeTeam = home;
 	awayTeam = away;
 	homeTeamData = null;
 	awayTeamData = null;
+	rolledRange = range;
 	showAnpassen = false;
 }
 
@@ -212,15 +254,12 @@ const versus = $derived($t("new_game.random_vs").replace(/\.$/, ""));
 		{@render teamBlock(awayTeamData, awayTeam, awayPlayers, "away")}
 	</div>
 
-	<p class="gen-info">
-		<span class="gen-dot" aria-hidden="true"></span>
-		<span>
-			{$t("new_game.poster.generation_info", { min: minStars, max: maxStars })}
-			{#if sameStars && homeTeamData}
-				· {$t("new_game.poster.balanced")}
-			{/if}
-		</span>
-	</p>
+	{#if pairInfo}
+		<p class="gen-info">
+			<span class="gen-dot" aria-hidden="true"></span>
+			<span>{pairInfo}</span>
+		</p>
+	{/if}
 
 	<div class="cta-block">
 		<button
