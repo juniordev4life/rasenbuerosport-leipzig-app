@@ -1,20 +1,19 @@
 <script>
 import { getTranslate } from "@tolgee/svelte";
 import { getBaseChartOptions, getChartTheme } from "$lib/utils/chart.utils.js";
+import { weekdayShortLabels } from "$lib/utils/dateLabels.utils.js";
 import ChartCanvas from "./ChartCanvas.svelte";
 import ChartCard from "./ChartCard.svelte";
 
 /**
  * Games per weekday (Sunday first, as the API counts them); the busiest
- * day is drawn in the emphasis colour.
+ * day is drawn in the emphasis colour. Weekday names follow `locale`.
  *
- * @type {{ data?: Array<{weekday: number, count: number}> }}
+ * @type {{ data?: Array<{weekday: number, count: number}>, locale?: string }}
  */
-let { data = [] } = $props();
+let { data = [], locale = "de-DE" } = $props();
 
 const { t } = getTranslate();
-
-const WEEKDAYS = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
 
 const chartConfig = $derived.by(() => {
 	if (!data || data.length === 0) return null;
@@ -23,8 +22,8 @@ const chartConfig = $derived.by(() => {
 
 	// Fill missing weekdays with 0
 	const weekdayMap = new Map(data.map((d) => [d.weekday, d.count]));
-	const labels = WEEKDAYS;
-	const values = WEEKDAYS.map((_, i) => weekdayMap.get(i) || 0);
+	const labels = weekdayShortLabels(locale);
+	const values = labels.map((_, i) => weekdayMap.get(i) || 0);
 
 	const maxVal = Math.max(...values);
 	const colors = values.map((v) =>

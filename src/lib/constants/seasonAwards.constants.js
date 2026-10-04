@@ -64,21 +64,28 @@ export function orderAwards(awards) {
 
 /**
  * Format an award's numeric `value` for display, based on its `unit`.
- * Per-game ratios render with two decimals; everything else (ELO,
- * goals, assists, points, games) is a whole number.
+ * Per-game ratios render with two decimals and the locale's decimal
+ * separator; everything else (ELO, goals, assists, points, games) is a
+ * whole number without a thousands separator, as the app shows ELO
+ * everywhere else.
  *
  * @param {number|null|undefined} value
  * @param {string} unit - One of the API's award `unit` values.
+ * @param {string} [locale] - BCP 47 tag, e.g. `"de-DE"` or `"en-US"`.
  * @returns {string}
  * @example
- *   formatAwardValue(1624, "elo");            // → "1624"
- *   formatAwardValue(0.12, "cards_per_game");  // → "0.12"
- *   formatAwardValue(null, "elo");             // → "—"
+ *   formatAwardValue(1624, "elo", "de-DE");            // → "1624"
+ *   formatAwardValue(0.12, "cards_per_game", "de-DE");  // → "0,12"
+ *   formatAwardValue(0.12, "cards_per_game", "en-US");  // → "0.12"
+ *   formatAwardValue(null, "elo");                      // → "—"
  */
-export function formatAwardValue(value, unit) {
+export function formatAwardValue(value, unit, locale = "de-DE") {
 	if (typeof value !== "number" || !Number.isFinite(value)) return "—";
 	if (unit === "cards_per_game" || unit === "goals_per_game") {
-		return value.toFixed(2);
+		return new Intl.NumberFormat(locale, {
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		}).format(value);
 	}
 	return String(Math.round(value));
 }

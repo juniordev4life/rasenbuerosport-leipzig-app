@@ -2,6 +2,7 @@
 import { getTranslate } from "@tolgee/svelte";
 import { goto } from "$app/navigation";
 import AxisInfoModal from "$lib/components/playerProfile/AxisInfoModal.svelte";
+import { tolgee } from "$lib/config/i18n.config.js";
 import { get } from "$lib/services/api.services.js";
 import {
 	getPlayerCareerStats,
@@ -41,6 +42,15 @@ import RelationsSection from "./RelationsSection.svelte";
 let { playerId, isOwnProfile = false, onSelectRelation = null } = $props();
 
 const { t } = getTranslate();
+
+let currentLanguage = $state(tolgee.getLanguage());
+
+$effect(() => {
+	const update = () => {
+		currentLanguage = tolgee.getLanguage();
+	};
+	tolgee.on("language", update);
+});
 
 let profile = $state(null);
 let games = $state([]);
@@ -343,6 +353,7 @@ const totalsLosses = $derived(profile?.player?.losses ?? eloEntry?.losses ?? 0);
 						<ProfileSpiderSection
 							axes={profile.axes}
 							playerName={profile.player.name}
+							locale={currentLanguage}
 							onAxisClick={(key) => (activeAxis = key)}
 						/>
 					</div>
